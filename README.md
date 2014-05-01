@@ -5,7 +5,7 @@ configurable-locator
 The Configurable Locator application is a configuration of ArcGIS for Server and a JavaScript application
 that allows the public to find information about activities,events,facilities et al.
 
-![Image of configurable-locator application](https://github.com/ArcGIS/configurable-locator/blob/master/congifurable-locator.png "Configurable Locator application")
+![Image of configurable-locator application](configurable-locator.png "Configurable Locator application")
 
 ## Features
 
