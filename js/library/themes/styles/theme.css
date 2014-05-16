@@ -1,0 +1,1538 @@
+﻿/*global define */
+/** @license
+| Version 10.2
+| Copyright 2013 Esri
+|
+| Licensed under the Apache License, Version 2.0 (the "License");
+| you may not use this file except in compliance with the License.
+| You may obtain a copy of the License at
+|
+|    http://www.apache.org/licenses/LICENSE-2.0
+|
+| Unless required by applicable law or agreed to in writing, software
+| distributed under the License is distributed on an "AS IS" BASIS,
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+| See the License for the specific language governing permissions and
+| limitations under the License.
+*/
+html, body {
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    overflow: hidden;
+    font-size: 11px !important;
+    font-family: Verdana !important;
+    visibility: visible !important;
+}
+
+.esriCTFullHeight {
+    height: 100%;
+}
+
+.esriCTFullWidth {
+    width: 100% !important;
+}
+
+.esriCTFullHeightWidth {
+    height: 100%;
+    width: 100%;
+}
+
+.esriCTZeroHeight {
+    height: 0px !important;
+}
+
+/* Application Header */
+
+.esriCTApplicationHeader {
+    vertical-align: middle;
+    top: 0px;
+    height: 48px;
+    width: 100%;
+    position: absolute;
+    z-index: 999;
+    overflow: hidden;
+}
+
+.esriCTApplicationHeaderText {
+    float: left;
+    font-size: 22px;
+    padding: 10px 0 10px 15px;
+}
+
+.esriCTRightTab {
+    float: right;
+}
+
+.esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTHelpImg, .esriCTGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImg-select, .esriCTActivitesImg, .esriCTActivitesImgSelected {
+    margin: 12px 24px;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    height: 24px;
+    width: 24px;
+    float: left;
+    cursor: pointer;
+}
+
+.esriCTApplicationHeaderIcon {
+    height: 48px;
+    padding: 2px 0 2px 5px;
+    float: left;
+}
+
+/* End of Application Header */
+
+/* Address container Styles */
+
+.esriCTAddressContent {
+    min-height: 110px;
+    cursor: default !important;
+}
+
+.esriCTAddressResultHeight {
+    min-height: 146px;
+}
+
+.esriCTAddressContainerHeight {
+    height: 99%;
+}
+
+.esriCTAddressScrollContent {
+    overflow: hidden;
+    width: 94%;
+    float: right !important;
+    height: 228px !important;
+    position: relative;
+}
+
+.esriCTAddressContentHeight {
+    height: 312px !important;
+}
+
+.esriCTAddressPlaceHolder {
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    position: relative;
+    cursor: default !important;
+}
+
+.esriCTAddressHolder {
+    z-index: 998;
+    position: absolute;
+    top: 48px;
+    right: 0px;
+    width: 287px;
+    border-top: none;
+}
+
+.esriCTTxtAddress {
+    outline: medium none;
+    padding: 5px 10px !important;
+    vertical-align: middle !important;
+    width: 180px;
+    overflow: hidden;
+    vertical-align: middle !important;
+    height: 18px;
+}
+
+input {
+    -webkit-appearance: none;
+    border-radius: 0;
+    font-size: 11px !important;
+    font-family: Verdana !important;
+}
+
+.esriCTTxtAddress::-ms-clear {
+    display: none;
+}
+
+.esriCTAddressList {
+    margin-top: 5px;
+    z-index: 101;
+    border: none;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+}
+
+.esriCTContentBottomBorder {
+    padding: 5px 20px 5px 2px;
+    margin-right: 4px;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.esriCTrowTable {
+    display: table;
+    width: 100%;
+    min-height: 35px;
+}
+
+.esriCTAddressScrollContainer {
+    width: 290px;
+    margin: 0 auto;
+}
+
+.esriCTCursorPointer {
+    cursor: pointer;
+}
+
+.esriCTCursorDefault {
+    cursor: default;
+}
+
+.esriCTHideContainerHeight {
+    overflow: hidden;
+    -webkit-transition: height 0.5s ease-in;
+    -moz-transition: height 0.5s ease-in;
+    -o-transition: height 0.5s ease-in;
+    transition: height 0.5s ease-in;
+    height: 0px !important;
+}
+
+.esriCTShowContainerHeight {
+    overflow: hidden;
+    -webkit-transition: height 0.5s ease-in;
+    -moz-transition: height 0.5s ease-in;
+    -o-transition: height 0.5s ease-in;
+    transition: height 0.5s ease-in;
+}
+
+.esriCTShowRouteContainerHeight {
+    overflow: hidden;
+    -webkit-transition: height 0.5s ease-in;
+    -moz-transition: height 0.5s ease-in;
+    -o-transition: height 0.5s ease-in;
+    transition: height 0.5s ease-in;
+}
+
+.esriCTSearchLoader {
+    vertical-align: middle;
+    display: none;
+    cursor: default;
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    height: 20px !important;
+    width: 20px;
+    position: absolute;
+    background: #fff;
+}
+
+.esriCTSearch {
+    cursor: pointer;
+    float: left;
+    margin-left: 2px;
+}
+
+.esriCTSearchIcon {
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    height: 30px !important;
+    width: 30px;
+    float: left;
+    cursor: pointer;
+    background-size: 30px;
+}
+
+.esriCTSearchClose {
+    cursor: pointer;
+    float: left;
+    padding: 4px;
+    height: 20px !important;
+    width: 20px;
+}
+
+.esriCTClearInput {
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    height: 20px !important;
+    width: 20px;
+    float: left;
+    cursor: pointer;
+}
+
+.esriCTAddressResultContainer {
+    margin: 0 auto;
+    width: 100%;
+}
+
+.esriCTAddressCounty {
+    cursor: default;
+    font-weight: 600;
+}
+
+.esriCTResultColor {
+    cursor: pointer;
+}
+
+.esiCTdivheadertapcointainer {
+    height: 50px;
+}
+
+
+.esriCTActivityPanel {
+    font-weight: normal;
+    line-height: 34px;
+    text-align: center;
+    cursor: pointer;
+    float: left;
+    width: 49% !important;
+    left: 50%;
+    border-left: none;
+}
+
+.esriCTActivityPanelSelected {
+    font-weight: normal;
+    line-height: 34px;
+    text-align: center;
+    cursor: default;
+    float: left;
+    width: 49% !important;
+    left: 50%;
+    border-left: none;
+    border-bottom: none;
+}
+
+.esriCTSearchPanel {
+    font-weight: normal;
+    line-height: 34px;
+    text-align: center;
+    position: absolute !important;
+    cursor: default;
+    float: right;
+    width: 50% !important;
+    left: 50%;
+}
+
+.esriCTSearchPanelSelected {
+    font-weight: normal;
+    line-height: 34px;
+    text-align: center;
+    position: absolute !important;
+    cursor: pointer;
+    float: right;
+    width: 50% !important;
+    left: 50%;
+    border-top: none !important;
+}
+
+.esriCTsearchTextCointainer {
+    padding-left: 15px;
+    width: 290px;
+    margin: auto;
+}
+
+
+
+/* End of Address container Styles */
+
+/*Activity Container Styles */
+.esriCTDivActivityContainer {
+    float: left;
+    width: 99.2%;
+    height: 250px;
+}
+
+.esriCTDivActivityAppHolder {
+    float: left;
+    width: 285px;
+}
+
+.esriCTDivActivityAppContainer {
+    position: absolute;
+    z-index: 996;
+    top: 48px;
+    right: 0px;
+    width: 287px;
+}
+/*End of Activity Container Styles */
+
+/* Share Container Styles */
+
+.esriCTDivAppContainer {
+    position: absolute;
+    z-index: 996;
+    top: 48px;
+    right: 0px;
+    width: 287px;
+}
+
+.esriCTDivAppHolder {
+    float: left;
+    width: 285px;
+}
+
+.esriCTDivShareContainer {
+    float: left;
+    width: 99.2%;
+}
+
+.esriCTTxtShare {
+    outline: medium none;
+    cursor: default !important;
+    height: 65px;
+    margin: 10px !important;
+    position: relative;
+    width: 91%;
+    resize: none !important;
+}
+
+.esriCTDivShareCodeContainer {
+    margin-top: 10px;
+    margin-left: 12px;
+}
+
+.esriCTShareContainer {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.esriCTShare {
+    float: left;
+    padding: 3% 0;
+    width: 25%;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding {
+    background-repeat: no-repeat;
+    background-position: center;
+    height: 24px !important;
+    width: 24px;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+.esriCTShareBorder {
+    border-bottom: none !important;
+}
+/* End of Share Container Styles */
+
+/* Slider */
+
+.esriSimpleSliderDecrementButton, .esriSimpleSliderIncrementButton {
+    margin-bottom: 2px;
+    margin-top: 2px;
+}
+
+.esriSimpleSliderTL {
+    top: 70px !important;
+}
+
+.esriSimpleSlider {
+    background-color: transparent !important;
+    top: 74px !important;
+    left: 15px;
+    border-radius: 0 !important;
+}
+
+.esriSimpleSliderVertical .esriSimpleSliderIncrementButton, .esriSimpleSliderVertical .esriSimpleSliderDecrementButton {
+    border-radius: 0px !important;
+}
+
+.esriSimpleSlider div {
+    font-weight: normal !important;
+    width: 32px;
+    height: 31px;
+}
+
+.HomeButton .home, .HomeButton .home:hover {
+    background-repeat: no-repeat;
+    background-position: center;
+    border-top: 0 !important;
+    border-radius: 0px !important;
+    margin-bottom: 2px;
+    background-position: center;
+}
+
+.HomeButton .home {
+    height: 31px !important;
+    width: 32px !important;
+    padding: 0 !important;
+}
+
+/* End of Slider */
+
+/* Basemap */
+
+.esriCTlayerList {
+    width: 113px;
+    height: 109px;
+    overflow: hidden;
+}
+
+.BasemapToggle {
+    position: absolute;
+    top: 77px;
+    left: 60px;
+    z-index: 100;
+}
+
+    .BasemapToggle .toggleButton {
+        border-radius: 0px !important;
+    }
+
+
+    .BasemapToggle .basemapImage {
+        height: 68px;
+        width: 72px;
+    }
+
+/* End of Basemap */
+
+/* Route*/
+
+.esriCTSearchContent {
+    overflow: hidden;
+    position: relative;
+    color: Black;
+    clear: both;
+    width: 100%;
+}
+
+.esriCTDirectionContainerSelected {
+    font-weight: 100;
+    line-height: 34px;
+    text-align: center;
+    cursor: default;
+    float: left;
+    width: 49% !important;
+    left: 50%;
+    border-left: none;
+    border-bottom: none;
+}
+
+.esriCTDirectionContainer {
+    font-weight: 100;
+    line-height: 34px;
+    text-align: center;
+    cursor: pointer;
+    float: left;
+    width: 49% !important;
+    left: 50%;
+}
+
+.esriCTHeaderRouteContainer {
+    width: 286px;
+    position: absolute;
+    top: 49px;
+    right: 0px;
+    border-bottom: none;
+    overflow: hidden !important;
+    border-top: none !important;
+    z-index: 999;
+    height: 99%;
+}
+
+.esriCTRouteInformationContainer-select {
+    font-weight: 100;
+    line-height: 34px;
+    text-align: center;
+    position: absolute !important;
+    cursor: pointer;
+    float: right;
+    width: 50% !important;
+    left: 50%;
+    border-top: none !important;
+}
+
+.esriCTRouteInformationContainer {
+    font-weight: 100;
+    line-height: 34px;
+    text-align: center;
+    position: absolute !important;
+    cursor: default;
+    float: right;
+    width: 50% !important;
+    left: 50%;
+}
+
+.esriCTMapLogo {
+    position: relative !important;
+    right: 287px;
+    margin-bottom: 30px;
+}
+
+.esriCTMapLogoURL {
+    position: relative !important;
+    margin-bottom: 270px;
+}
+
+.esriCTMapLogoPositionChange {
+    position: relative !important;
+    margin-bottom: 30px;
+}
+
+.dijitContentPane {
+    overflow: auto;
+}
+
+.esriCTActivityContainer {
+    position: absolute;
+    right: 0;
+    top: 32px;
+    width: 286px;
+    border-right: none !important;
+    overflow: hidden;
+}
+
+/* End of Route */
+
+/*splash Screen*/
+.esriCTSplashScreenScrollBarContainer {
+    width: 100% !important;
+    position: relative !important;
+}
+
+.esriCTSplashScreenDialog {
+    text-align: left;
+    z-index: 10007;
+    padding: 5px;
+    width: 350px;
+    height: 290px;
+    color: #000;
+}
+
+.esriCTSplashScreenContent {
+    overflow: hidden;
+    width: 90% !important;
+    margin-top: 10px;
+    padding-left: 15px;
+    position: relative;
+    text-align: justify;
+}
+
+.applicationHeaderSplashscreenContainer {
+    top: 0px;
+    left: 0px;
+    position: absolute;
+    z-index: 10009;
+    width: 100%;
+    height: 100%;
+}
+
+.esriCTdivSplashScreenContent {
+    z-index: 10003;
+    text-align: left;
+    height: 290px;
+    width: 350px;
+    position: absolute;
+    top: 25%;
+    right: 40%;
+}
+
+.esriCTdivSplashScreenDialogContent {
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.esriCTSplashScreenContainer {
+    overflow: hidden;
+    position: relative;
+    margin-top: 10px;
+    height: 100%;
+}
+
+.esriCTdivSplashContent {
+    padding-left: 10px;
+    overflow: hidden;
+    width: 90%;
+    margin-top: 10px;
+    height: 224px;
+}
+
+.customButtonContainer {
+    width: 100%;
+    position: absolute;
+    bottom: 5px;
+}
+
+.customButton {
+    border: none;
+    cursor: pointer;
+    width: 75px;
+    height: 25px !important;
+    margin: 10PX AUTO;
+}
+
+.customButtonInner {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    padding-top: 5px;
+}
+
+.esriCTSplashTblDisplay {
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+
+.esriCTSplashTblDisplayRow {
+    display: table-row;
+}
+
+.esriCTSplashTblDisplayCell {
+    display: table-cell;
+    vertical-align: middle;
+    height: 100%;
+}
+
+/* End of splash Screen */
+
+
+/* CSS for shadow effect*/
+
+/* End of CSS for styling corners*/
+
+/* CSS for Scroll Bar */
+
+.scrollbar_track {
+    position: absolute;
+    background-color: transparent;
+    right: -2px;
+    top: 0px;
+    cursor: pointer;
+}
+
+.scroll_container {
+    overflow: hidden;
+    position: relative;
+    height: 200px !important;
+}
+
+.scrollbar_content {
+    overflow: hidden;
+    border: none;
+}
+
+.splashScreenscrollBarheight {
+    height: 226px !important;
+}
+
+.scrollbar_handle {
+    position: relative;
+    width: 10px;
+    cursor: default;
+    opacity: 0.89999997615814208984375;
+}
+
+.esriScrollBarPosition {
+    position: relative;
+}
+
+/* CSS for styling corners*/
+.esriCTRoundedCorner
+{
+    behavior: url("esri_template/core_library/PIE.htc");
+}
+
+/* End of CSS for Scroll Bar */
+
+/*Styles for base-map container*/
+
+.esriCTDivLayerContainer {
+    position: absolute;
+    top: 65px;
+    left: 50px;
+    z-index: 1000;
+}
+
+.esriCTBasemapThumbnail {
+    height: 90px;
+    margin: 1px;
+    width: 90px;
+    cursor: pointer;
+}
+
+.esriCTbaseMapContainerNode {
+    float: left;
+    margin: 10px 10px 0 10px;
+    width: 100px;
+}
+
+/* End of base-map container */
+
+/*legends */
+
+.esriCTDivLegendContainer {
+    height: 32px;
+    position: absolute;
+    z-index: 998;
+    width: 352px;
+    bottom: 4px;
+    margin-left: 10px;
+    transition: height 0.1s ease-in;
+}
+
+.esriCTLegendBox {
+    float: none; /* not needed, just for clarification */
+    width: auto;
+    overflow: hidden;
+}
+
+.esriCTLegend {
+    padding: 8px 0 0 0;
+    margin: 0;
+    display: table-cell;
+    vertical-align: middle;
+    margin-right: 5px;
+    margin-left:15px;
+}
+
+    .esriCTLegend img {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+.esriCTLegendLabel {
+    line-height: 30px;
+    display: table-cell;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.esriCTLegendBoxInner div {
+    float: left;
+}
+
+.esriCTLegendRightBox {
+    /*width: 286px;*/
+    float: right;
+    background: transparent;
+}
+
+.esriCTLegendRightBoxShift {
+    width: 0px;
+}
+
+.divlegendContent {
+    width: 4000px;
+    position: relative;
+}
+
+.esriCTdivlegendlist {
+    height: 30px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+.esriCTLegendListContent {
+    display: table;
+}
+
+.esriCTLegendList {
+    height: 100%;
+    width: 100%;
+}
+
+.esriCTRightArrow {
+    position: absolute;
+    height: 30px;
+    width: 30px;
+    right: 0px;
+    overflow: hidden;
+    padding-bottom: 1px;
+    background-image: url('../images/right.png');
+    background-repeat: no-repeat;
+background-position: center;
+}
+
+.esriCTRightArrowShift {
+    position: absolute;
+    height: 30px;
+    width: 30px;
+    right: 0px;
+    overflow: hidden;
+    padding-bottom: 1px;
+}
+
+.esriCTLeftArrow {
+    overflow: hidden;
+    position: absolute;
+    left: 0px;
+    padding-bottom: 1px;
+    height: 30px;
+    width: 30px;
+     background-image: url("../images/left.png");
+     background-repeat: no-repeat;
+background-position: center;
+}
+
+.esriCTArrow {
+    height: 30px;
+    width: 30px;
+}
+
+.esriCTlegend {
+    bottom: 240px;
+}
+
+.esriCTLegendPositionChange {
+    bottom: 240px;
+    margin-bottom: 4px;
+    transition: height 0.1s ease-in;
+}
+
+.esriCTLegendContainer
+{
+    height: 30px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+.esriCTLegendContent
+{
+    padding-left: 10px;
+    position: relative;
+}
+
+/* End of legends */
+
+/*Start of Infowindow style*/
+
+.esriCTInfoWindow {
+    z-index: 1000;
+    visibility: visible !important;
+    height: 300px;
+    width: 350px;
+    position: absolute;
+}
+
+.esriCTDisplayRow {
+    clear: both;
+    width: 90%;
+    float: left;
+    padding: 5px 0;
+}
+
+.esriCTDisplayField {
+    width: 50%;
+    vertical-align: top;
+    font-size: 11px !important;
+    float: left;
+}
+
+.esriCTValueField {
+    width: 50%;
+    font-size: 11px !important;
+    vertical-align: top;
+    float: right;
+}
+
+.esriCTInfoDetailsTab {
+    width: 100%;
+    display: table;
+}
+
+.esriCTInfoDetailsContainer {
+    padding-left: 5px;
+    font-size: 11px;
+    width: 100%;
+    height: 190px !important;
+}
+
+.esriCTInfoContainer {
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0 0 0 15px;
+}
+
+.esriCTClose {
+    background: url("../images/close.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    margin: 6px 5px 0 0;
+    float: right;
+    height: 18px;
+    width: 18px;
+}
+
+.esriCTHeaderPanelContent {
+    line-height: 30px;
+    width: 65%;
+    overflow: hidden;
+    white-space: nowrap;
+    font-weight: bold;
+    float: left;
+    text-overflow: ellipsis;
+    margin-left: 5px;
+}
+
+.esriCTInfoPanel {
+    clear: both;
+    width: 100%;
+    height: 87% !important;
+    bottom: 0px;
+    color: #fff;
+}
+
+.esriCTInfoContent {
+    height: 250px;
+    width: 300px;
+}
+
+.esriCTDivTriangle {
+    overflow: hidden;
+    display: block;
+    position: relative;
+    margin: auto;
+    bottom: 0;
+    height: 18px;
+    top: 250px;
+    width: 25px;
+    background-repeat: no-repeat;
+}
+
+.esriCTLink {
+    text-decoration: underline;
+    cursor: pointer;
+    color: blue;
+}
+
+/* Loading indicator Styles */
+
+.esriCTLoadingIndicator {
+    top: 0px;
+    left: 0px;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10001;
+    cursor: default;
+}
+
+.esriCTFullContainer {
+    width: 100%;
+    height: 100%;
+}
+
+.esriCTMainLoader {
+    background-position: 0 center;
+    background-repeat: no-repeat;
+    position: absolute;
+    top: 50%;
+    left: 49%;
+    height: 25px;
+    width: 25px;
+}
+
+.displayNoneAll {
+    display: none;
+}
+
+.displayBlockAll {
+    display: block;
+}
+
+/* End of loading indicator Styles */
+
+.esriCTMapLogo {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+}
+
+.esriCTInfoScrollContainer {
+    overflow: hidden;
+}
+
+.esriCTInfoScrollContent {
+    overflow: hidden;
+    width: 100%;
+    margin-right: 5px;
+    height: 200px;
+    position: relative;
+}
+
+.esriCTHeaderPanelContainer {
+    height: 30px;
+    width: 100%;
+}
+
+.esriCTInfoWindowRightArrow {
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    float: right;
+    height: 18px;
+    width: 18px;
+    display: none;
+}
+
+.esriCTInfoWindowArrows {
+    float: left;
+    width: 70px;
+    padding-top: 7px;
+    margin-left: 5px;
+}
+
+.esriCTInfoWindowFeatureCount {
+    float: right;
+    padding-top: 2px;
+}
+
+.esriCTShowInfoRightArrow {
+    display: block;
+}
+
+.esriCTInfoWindowLeftArrow {
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    height: 18px;
+    width: 18px;
+    display: none;
+    float: right;
+}
+
+.esriCTShowInfoLeftArrow {
+    display: block;
+}
+
+.esriCTdivInfoTotalFeatureCount {
+    float: left;
+}
+
+.esriCTdivInfoFeatureCount {
+    float: left;
+}
+
+/*grouped address*/
+
+.esriCTHideAddressList {
+    display: none;
+}
+
+.esriCTShowAddressList {
+    display: block;
+    margin-left: 15px;
+}
+
+.esriCTPlusMinus {
+    width: 15px;
+    display: table-cell;
+}
+
+.esriCTSearchGroupRow {
+    display: table;
+    width: 100%;
+    height: 30px;
+}
+
+.esriCTBottomBorder {
+    padding: 5px 2px;
+}
+
+.esriCTGroupList {
+    display: table-cell;
+    vertical-align: middle;
+    padding-right: 5px;
+}
+
+.esriCTSearchGroupCell {
+    display: table-cell;
+    vertical-align: middle;
+    font-weight:bold;
+}
+
+
+.esriCTSelectionIcon {
+    background-repeat: no-repeat;
+    background-position: center center;
+    width: 25px;
+    height: 25px;
+}
+
+.claro .dijitContentPane {
+    padding: 0px !important;
+}
+
+/*seach Result*/
+
+.esriCTdivToggle {
+    position: absolute;
+    z-index: 1008;
+    transition: bottom 0.1s ease-in;
+    bottom: 0px;
+    right: 0; 
+}
+
+.esriCTdivImageBackground {
+    overflow: hidden;
+    z-index: 1005;
+    text-align: center;
+    float: right;
+    margin: 0 10px;
+}
+
+.esriCTUpAndDownarrow {
+    height: 33px !important;
+    width: 131px !important;
+    margin-top: 16px;
+    bottom: 0px;
+}
+
+.esriCTspanResult {
+    top: 25px;
+    color: #fff;
+    cursor: pointer;
+    text-transform: uppercase;
+    position: absolute;
+    right: 65px;
+}
+
+.esriCTdivCarouselContent {
+      bottom: 0;
+    position: absolute;
+    width: 100%;
+    z-index: 10005;
+}
+
+.esriCTdivCarouselContentInfo {
+    /*overflow-x: auto;
+    overflow-y: hidden;*/
+    height: 240px;
+}
+
+.esriCTresultboxPanel {
+    width: 100%;
+    overflow-y: hidden;
+}
+
+.esriCTResultImageBlock {
+    display: block !important;
+}
+
+.esriCTResultImageNone {
+    display: none !important;
+}
+
+.esriCThideBottomContainerHeight {
+    transition: height 0.1s ease-in;
+    height: 0;
+}
+
+.esriCTshowBottomContainerHeight {
+    overflow: hidden;
+    transition: height 0.1s ease-in;
+    height: 200px;
+}
+
+.esriCTzeroHeight {
+    height: 0px !important;
+}
+
+.esriCTbottomPanelHeight {
+    height: 240px !important;
+    bottom: 0px;
+}
+
+.esriCTbottomPanelPosition {
+    bottom: 240px !important;
+}
+
+.esriCTzeroBottom {
+    bottom: 0px !important;
+}
+/*CarouselboxContainer*/
+
+.esriCTBoxContainer {
+     display: inline-block;
+    float: left;
+    height: 192px;
+    margin: 15px 15px 13px 0;
+    overflow: hidden;
+    /*overflow-y: auto;*/
+    width: 350px;
+    
+}
+
+.esriCTresultboxPanelContent {
+    width: 1835px;
+    margin: 0 15px;
+    float: left;
+}
+
+.esriCTDivHeadercontainer {
+    position: relative;
+    width: 335px;
+}
+
+.esriCTSpanHeader {
+    font-weight: bolder;
+    margin-left: 15px !important;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin: 15px 0 0 0;
+    margin-bottom: 8px;
+}
+
+.esriCTSearchContent {
+    overflow: hidden;
+    position: relative;
+    color: Black;
+    clear: both;
+    width: 100%;
+}
+
+.esriCTActivityContainer {
+    position: absolute;
+    right: 0;
+    top: 32px;
+    width: 286px;
+    border-right: none !important;
+    overflow: hidden;
+}
+
+.esriCTHideContainerHeight {
+    overflow: hidden;
+    -webkit-transition: height 0.5s ease-in;
+    -moz-transition: height 0.5s ease-in;
+    -o-transition: height 0.5s ease-in;
+    transition: height 0.5s ease-in;
+    height: 0px !important;
+}
+
+.esriCTShowContainerHeight {
+    overflow: hidden;
+    -webkit-transition: height 0.5s ease-in;
+    -moz-transition: height 0.5s ease-in;
+    -o-transition: height 0.5s ease-in;
+    transition: height 0.5s ease-in;
+}
+
+.esriCTSearchContent-select {
+    font-weight: 100;
+    line-height: 30px;
+    text-align: center;
+    position: absolute !important;
+    cursor: pointer;
+    float: right;
+    width: 50% !important;
+    left: 50%;
+    border-top: none !important;
+}
+
+.esriCTdivFeatureListContentStyle {
+    margin-top: 15px;
+}
+
+.esriCTdivContentStyle {
+    height: 10px;
+    position: relative;
+}
+
+.esriCTInfoinnerContainer {
+    width: 25px;
+    height: 25px;
+    margin: 1px;
+    margin: 5px 0 0 0;
+}
+
+.esriCTSpanFeatureListContainer {
+    font-weight: bold;
+    /*padding-left :5px;*/
+    padding-top: 5px;
+}
+
+.esriCTdivFeatureList {
+    height: 125px;
+    position: relative;
+    overflow: hidden;
+}
+
+.esriCTdivDirectionHeader {
+    position: absolute;
+}
+
+.esriCTdivHeader {
+    position: relative;
+}
+
+.spnheaderLeft {
+    float: left;
+    width: 80%;
+}
+
+.esriCTPrintOption {
+    float: right;
+    padding: 10px;
+}
+
+.esriCTimgOptions {
+    height: 24px !important;
+    width: 24px !important;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.esriCTtblAddressContentDirections {
+    width: 95%;
+    height: 15%;
+    padding-top: 5px;
+    padding-left: 0px;
+    border-bottom-style: dotted;
+    border-bottom-color: white;
+}
+
+.esriCTdivclear {
+    clear: both;
+}
+
+.esriCTdirectionLeft {
+    float: left;
+    padding: 0 0 5px 0;
+}
+
+.esriCTdirectionRight {
+    float: right;
+    padding: 0 0 5px 0;
+}
+
+.esriCTdivDirectionContainer {
+    position: relative;
+    overflow: hidden;
+    width: 95%;
+    clear: both;
+}
+
+.esriCTdivDirection {
+    width: 95%;
+    overflow: hidden;
+    padding-left: 5px;
+    clear: both;
+    height: 120px;
+}
+
+.esriCTtdPodAddressSearch {
+    padding-left: 5px;
+}
+
+.esriCTdivAddressPodPlaceHolder {
+    border-radius: 3px;
+    position: relative;
+    margin-left: 15px;
+}
+
+.esriCTtxtPodAddress {
+    outline: medium none;
+    padding: 5px 28px !important;
+    vertical-align: middle !important;
+    width: 163px;
+    vertical-align: middle !important;
+    height: 18px;
+}
+
+.esriCTimgPodSearchLocate {
+    vertical-align: middle;
+    cursor: pointer;
+    top: 47px;
+    right: -18px;
+    position: absolute;
+    height: 30px;
+    width: 30px;
+}
+
+.esriCTtblPodAddressResults {
+    width: 87%;
+    margin: 5px 0 0 48px;
+}
+
+.esriCTdivCommentHolder {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 149px;
+}
+
+.esriCTdivCommentContainer {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 149px;
+}
+
+.esriCTimgPodSearchLoader {
+    vertical-align: middle;
+    display: none;
+    cursor: default;
+    position: absolute;
+    top: 51px;
+    left: 3px;
+}
+
+.esriCTInfotext {
+    padding: 5px 25px 5px 0px;
+    margin: 5px 0 0 0;
+    text-align: justify;
+    clear: both;
+}
+
+.esriCTlocateSearchicon {
+    background-repeat: no-repeat;
+    background-position: center;
+    float: left;
+    height: 30px !important;
+    width: 30px;
+    float: left;
+    cursor: pointer;
+    background-size: 30px;
+}
+
+.esriCTRatingStar {
+    display: inline-block;
+    background-image: url("../images/rating_empty.png");
+    background-position: left center;
+    height: 22px;
+    width: 23px;
+    float: left;
+    background-repeat: no-repeat;
+    border-left: none !important;
+}
+
+
+.esriCTRatingStarChecked {
+    background-image: url("../images/rating_full.png") !important;
+}
+
+.esriControlsBR {
+    cursor: pointer;
+}
+
+.esriCTGalleryBox {
+    margin: 5px;
+    width: 330px;
+    color: #6e6e6e;
+}
+
+.esriCTDivAttchment {
+    height: 140px;
+    width: 290px;
+}
+
+.esriCTResultContent {
+    overflow: hidden;
+    padding-left: 15px;
+    position: relative;
+    text-align: justify;
+}
+
+.esriCTCarouselContentHeight {
+    height:160px;
+}
+
+.esriCTDivResultContentHeight {
+    height:150px;
+}
