@@ -1,5 +1,5 @@
 ﻿/*global define,dojo,esri,console */
-/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true */
+/*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
  |
@@ -66,7 +66,7 @@ define([
             } else {
                 thumbnailSrc = dojo.configData.BaseMapLayers[baseMapURL + 1].ThumbnailSource;
             }
-            imgThumbnail = domConstruct.create("img", { "class": "esriCTBasemapThumbnail", "src": thumbnailSrc }, null);
+            imgThumbnail = domConstruct.create("img", { "class": "basemapThumbnail", "src": thumbnailSrc }, null);
             presentBaseMap = baseMapURL + 1;
             presentThumbNail = baseMapURL + 2;
             on(imgThumbnail, "click", lang.hitch(this, function () {
@@ -92,26 +92,23 @@ define([
         },
 
         _changeBaseMap: function (spanControl) {
-            var basemap, prevIndex, basemapType, basemapId;
+            var basemap, prevIndex, basemapType;
+            basemapType = "defaultBasemap";
             if (spanControl === 0) {
                 prevIndex = dojo.configData.BaseMapLayers.length - 1;
             } else {
                 prevIndex = spanControl - 1;
             }
-            if (dojo.configData.WebMapId && lang.trim(dojo.configData.WebMapId).length !== 0) {
-                basemapId = lang.clone(this.map.layerIds);
-                array.forEach(basemapId, lang.hitch(this, function (layerId) {
-                    this.map.removeLayer(this.map.getLayer(layerId));
-                }));
-            }
-            basemapType = "defaultBasemap";
-            if (!dojo.configData.WebMapId) {
-                if (dojo.configData.BaseMapLayers[prevIndex].length) {
-                    array.forEach(dojo.configData.BaseMapLayers[prevIndex], lang.hitch(this, function (layer, index) {
+
+            if (dojo.configData.BaseMapLayers[prevIndex].length) {
+                array.forEach(dojo.configData.BaseMapLayers[prevIndex], lang.hitch(this, function (layer, index) {
+                    if (this.map.getLayer(basemapType + index)) {
                         this.map.removeLayer(this.map.getLayer(basemapType + index));
-                    }));
-                } else {
-                    basemap = this.map.getLayer(basemapType);
+                    }
+                }));
+            } else {
+                basemap = this.map.getLayer(basemapType);
+                if (basemap) {
                     this.map.removeLayer(basemap);
                 }
             }

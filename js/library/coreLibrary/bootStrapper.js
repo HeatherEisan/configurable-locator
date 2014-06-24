@@ -1,6 +1,6 @@
 ﻿/*global require,dojo,dojoConfig,esri,esriConfig,alert */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
-/** @license
+/*
 | Copyright 2013 Esri
 |
 | Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,16 +22,15 @@ require([
     "application/js/config",
     "esri/config",
     "dojo/domReady!"
-], function (WidgetLoader, config, Config) {
+], function (WidgetLoader, config, esriConfig) {
     //========================================================================================================================//
 
     try {
         dojo.configData = config;
-        Config.defaults.io.proxyUrl = dojoConfig.baseURL + dojo.configData.ProxyUrl;
-        Config.defaults.io.alwaysUseProxy = false;
-        Config.defaults.io.timeout = 180000;
+        esriConfig.defaults.io.proxyUrl = dojoConfig.baseURL + dojo.configData.ProxyUrl;
+        esriConfig.defaults.io.timeout = 180000;
         /**
-        * bgcbcload application configuration settings from configuration file
+        * load application configuration settings from configuration file
         * create an object of widget loader class
         */
         var applicationWidgetLoader = new WidgetLoader();

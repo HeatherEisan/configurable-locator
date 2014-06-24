@@ -50,6 +50,8 @@ define([
         */
         postCreate: function () {
 
+            var applicationHeaderDiv;
+
             /**
             * close share panel if any other widget is opened
             * @param {string} widget Key of the newly opened widget
@@ -68,9 +70,15 @@ define([
                         domClass.replace(this.divAppContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
                         domClass.replace(this.divAppContainer, "esriCTZeroHeight", "esriCTFullHeight");
                     }
+                } else {
+                    if (domClass.contains(this.divAppContainer, "esriCTHideContainerHeight")) {
+                        this._setShareContainerHeight();
+                    }
                 }
             }));
             this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.share, "class": "esriCTImgSocialMedia" }, null);
+            applicationHeaderDiv = domConstruct.create("div", { "class": "esriCTApplicationShareicon" }, dom.byId("esriCTParentDivContainer"));
+            applicationHeaderDiv.appendChild(this.divAppContainer);
             this.own(on(this.domNode, "click", lang.hitch(this, function () {
 
                 /**
@@ -78,6 +86,7 @@ define([
                 */
                 topic.publish("toggleWidget", "share");
                 this._shareLink();
+                this._showHideShareContainer();
             })));
 
             on(this.imgEmbedding, "click", lang.hitch(this, function () {
@@ -85,19 +94,36 @@ define([
             }));
         },
 
+        /**
+        * set embedding container
+        * @memberOf widgets/share/share
+        */
         _showEmbeddingContainer: function () {
             var height;
             if (domGeom.getMarginBox(this.divShareContainer).h > 1) {
                 domClass.add(this.divShareContainer, "esriCTShareBorder");
                 domClass.replace(this.divShareContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
             } else {
-                height = domGeom.getMarginBox(this.divShareCodeContainer).h + domGeom.getMarginBox(this.divShareCodeContent).h + "px";
+                height = domGeom.getMarginBox(this.divShareCodeContainer).h + domGeom.getMarginBox(this.divShareCodeContent).h;
                 domClass.remove(this.divShareContainer, "esriCTShareBorder");
                 domClass.replace(this.divShareContainer, "esriCTShowContainerHeight", "esriCTHideContainerHeight");
-                domStyle.set(this.divShareContainer, "height", height);
+                domStyle.set(this.divShareContainer, "height", height + "px");
             }
+            this._setShareContainerHeight(height);
         },
 
+        _setShareContainerHeight: function (embContainerHeight) {
+            var contHeight = domStyle.get(this.divAppHolder, "height");
+            if (domClass.contains(this.divShareContainer, "esriCTShowContainerHeight")) {
+                if (embContainerHeight) {
+                    contHeight += embContainerHeight;
+                } else {
+                    contHeight += domStyle.get(this.divShareContainer, "height");
+                }
+            }
+            //adding 2px in height of share container to display border
+            domStyle.set(this.divAppContainer, "height", contHeight + 2 + "px");
+        },
         /**
         * display sharing panel
         * @param {array} dojo.configData.MapSharingOptions Sharing option settings specified in configuration file
@@ -144,29 +170,33 @@ define([
 
         },
 
-        /**
-        * share container
+        /* show and hide share container
         * @memberOf widgets/share/share
         */
-        _displayShareContainer: function (tinyUrl, urlStr) {
-            var applicationHeaderDiv;
-            applicationHeaderDiv = domConstruct.create("div", { "class": "esriCTApplicationShareicon" }, dom.byId("esriCTParentDivContainer"));
-            applicationHeaderDiv.appendChild(this.divAppContainer);
+        _showHideShareContainer: function (tinyUrl, urlStr) {
             if (html.coords(this.divAppContainer).h > 0) {
                 /**
                 * when user clicks on share icon in header panel, close the sharing panel if it is open
                 */
-                domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMedia-select");
+                domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMediaSelected");
                 domClass.replace(this.divAppContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
                 domClass.replace(this.divAppContainer, "esriCTZeroHeight", "esriCTFullHeight");
             } else {
                 /**
                 * when user clicks on share icon in header panel, open the sharing panel if it is closed
                 */
-                domClass.replace(this.domNode, "esriCTImgSocialMedia-select", "esriCTImgSocialMedia");
+                domClass.replace(this.domNode, "esriCTImgSocialMediaSelected", "esriCTImgSocialMedia");
                 domClass.replace(this.divAppContainer, "esriCTShowContainerHeight", "esriCTHideContainerHeight");
                 domClass.replace(this.divAppContainer, "esriCTFullHeight", "esriCTZeroHeight");
             }
+        },
+
+        /**
+        * share container
+        * @memberOf widgets/share/share
+        */
+        _displayShareContainer: function (tinyUrl, urlStr) {
+
             /**
             * remove event handlers from sharing options
             */
@@ -185,7 +215,7 @@ define([
         },
 
         /**
-        * return current map exten
+        * return current map extent
         * @return {string} Current map extent
         * @memberOf widgets/share/share
         */
@@ -208,7 +238,6 @@ define([
             * hide share panel once any of the sharing options is selected
             */
             if (html.coords(this.divAppContainer).h > 0) {
-                domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMediaSelected");
                 domClass.replace(this.divAppContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
                 domClass.add(this.divAppContainer, "esriCTZeroHeight");
             }
@@ -216,7 +245,6 @@ define([
                 if (tinyUrl) {
                     this._shareOptions(site, tinyUrl);
                 } else {
-                    domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMediaSelected");
                     this._shareOptions(site, urlStr);
                 }
             } catch (err) {

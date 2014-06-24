@@ -46,7 +46,16 @@ define({
         facitilyPanelHoursOpenForText: "@it@ Hours Open For:",
         facitilyPanelManagementUnitText: "@it@ Management Unit:",
         facitilyPanelMarinaText: "@it@ Marina:",
-        directionCurrentLocationText: "@it@ My Location"
+        directionCurrentLocationText: "@it@ My Location",
+        directionTextDistance: "@it@ Distance:",
+        directionTextTime: "@it@ Duration:",
+        activityTabName: "@it@ Activities",
+        activityListTabName: "@it@ My List",
+        fromDateText: "@it@ From Date",
+        toDateText: "@it@ To Date",
+        gobuttonText: "@it@ Go",
+        noLegendAvailable: "@it@ No Legend Available.",
+        loadingText: "@it@ Loading..."
     },
     errorMessages: {
         invalidSearch: "Nessun risultato trovato.",

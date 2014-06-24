@@ -32,7 +32,7 @@ define({
             locate: "Locate",
             share: "Share",
             help: "Help",
-            activites: "Activites",
+            activities: "Activities",
             clearEntry: "Clear"
         },
         titles: {
@@ -49,8 +49,16 @@ define({
             facitilyPanelHoursOpenForText: "Hours Open For:",
             facitilyPanelManagementUnitText: "Management Unit:",
             facitilyPanelMarinaText: "Marina:",
-            directionCurrentLocationText: "My Location"
-
+            directionCurrentLocationText: "My Location",
+            directionTextDistance: "Distance:",
+            directionTextTime: "Duration:",
+            activityTabName: "Activities",
+            activityListTabName: "My List",
+            fromDateText: "From Date",
+            toDateText: "To Date",
+            gobuttonText: "Go",
+            noLegendAvailable: "No Legend Available.",
+            loadingText: "Loading..."
         },
         errorMessages: {
             invalidSearch: "No results found",
@@ -60,9 +68,9 @@ define({
             widgetNotLoaded: "Unable to load widgets.",
             shareLoadingFailed: "Unable to shorten URL, Bit.ly failed to load.",
             shareFailed: "Unable to share.",
-            imageDoesNotFound: "There are no photo available.",
+            imageDoesNotFound: "No photos available.",
             facilitydoestfound: "No facilities found in buffer area.",
-            noCommentAvaiable: "No Comment available"
+            noCommentAvaiable: "No Comment available."
         }
     },
     es: true,

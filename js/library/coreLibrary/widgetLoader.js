@@ -1,6 +1,6 @@
-﻿/*global define,dojo,require,alert */
+﻿/*global define,dojo,require,alert,console */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
-/** @license
+/*
 | Copyright 2013 Esri
 |
 | Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,25 +23,24 @@ define([
     "widgets/appHeader/appHeader",
     "widgets/splashScreen/splashScreen",
     "dojo/_base/array",
-    "dojo/_base/lang",
-    "dojo/dom",
     "dojo/dom-attr",
+    "dojo/dom",
+    "dojo/_base/lang",
+    "dojo/Deferred",
     "dojo/DeferredList",
     "esri/request",
     "esri/arcgis/utils",
-    "dojo/Deferred",
     "dojo/promise/all",
     "dojo/i18n!application/js/library/nls/localizedStrings",
-    "esri/dijit/BasemapGallery",
     "dojo/topic",
+    "esri/dijit/BasemapGallery",
     "dojo/domReady!"
-], function (declare, _WidgetBase, Map, AppHeader, SplashScreen, array, lang, dom, domAttr, DeferredList, esriRequest, esriUtils, Deferred, all, sharedNls, BasemapGallery, topic) {
+], function (declare, _WidgetBase, Map, AppHeader, SplashScreen, array, domAttr, dom, lang, Deferred, DeferredList, esriRequest, esriUtils, all, sharedNls, topic, BasemapGallery) {
 
     //========================================================================================================================//
 
     return declare([_WidgetBase], {
         sharedNls: sharedNls,
-
 
         /**
         * load widgets specified in Header Widget Settings of configuration file
@@ -88,7 +87,6 @@ define([
             var map = new Map(),
                 mapInstance = map.getMapInstance();
             return mapInstance;
-
         },
 
         _initializeWidget: function (mapInstance) {
@@ -112,6 +110,7 @@ define([
                     * create application header
                     */
                     this._createApplicationHeader(widgets);
+                    topic.publish("update511InfoOnLoad", mapInstance.extent);
                 } catch (ex) {
                     alert(sharedNls.errorMessages.widgetNotLoaded);
                 }
@@ -141,7 +140,7 @@ define([
             var dListResult, groupUrl, searchUrl, webmapRequest, groupRequest, deferred, agolBasemapsCollection, thumbnailSrc, baseMapArray = [], deferredArray = [], self = this;
             //If group owner & title are configured, create request to fetch the group id
             if (dojo.configData.BasemapGroupTitle && dojo.configData.BasemapGroupOwner) {
-                groupUrl = dojo.configData.GroupURL + "community/groups?q=title:\"" + dojo.configData.BasemapGroupTitle + "\" AND owner:" + dojo.configData.BasemapGroupOwner + "&f=json";
+                groupUrl = dojo.configData.PortalAPIURL + "community/groups?q=title:\"" + dojo.configData.BasemapGroupTitle + "\" AND owner:" + dojo.configData.BasemapGroupOwner + "&f=json";
                 groupRequest = esriRequest({
                     url: groupUrl,
                     callbackParamName: "callback"
@@ -162,7 +161,7 @@ define([
                         array.forEach(groupInfo.results, lang.hitch(this, function (info, index) {
                             //If type is "Map Service", create the object and push it into "baseMapArray"
                             if (info.type === "Map Service") {
-                                thumbnailSrc = (groupInfo.results[index].thumbnail === null) ? dojo.configData.webmapThumbnail : dojo.configData.GroupURL + "content/items/" + info.id + "/info/" + info.thumbnail;
+                                thumbnailSrc = (groupInfo.results[index].thumbnail === null) ? dojo.configData.NoThumbnail : dojo.configData.PortalAPIURL + "content/items/" + info.id + "/info/" + info.thumbnail;
                                 baseMapArray.push({
                                     ThumbnailSource: thumbnailSrc,
                                     Name: info.title,
@@ -190,10 +189,10 @@ define([
                                 if (innerIdx === 0) {
                                     self._storeUniqueBasemap(data[1], baseMapArray);
                                 } else {
-                                    /*From second item onwards, first check if that item is already present in the "baseMapArray",
-                                    then escape it, else push it into "baseMapArray" */
                                     self._filterRedundantBasemap(data[1], baseMapArray);
                                 }
+                                /*From second item onwards, first check if that item is already present in the "baseMapArray",
+                                then escape it, else push it into "baseMapArray" */
 
                             });
                             basemapDeferred.resolve(baseMapArray);
@@ -242,7 +241,7 @@ define([
             //If array contains only single layer object, push it into "baseMapArray"
             if (bmLayers.itemData.baseMap.baseMapLayers.length === 1) {
                 if (bmLayers.itemData.baseMap.baseMapLayers[0].url) {
-                    thumbnailSrc = (bmLayers.item.thumbnail === null) ? dojo.configData.WebmapThumbnail : dojo.configData.GroupURL + "content/items/" + bmLayers.item.id + "/info/" + bmLayers.item.thumbnail;
+                    thumbnailSrc = (bmLayers.item.thumbnail === null) ? dojo.configData.NoThumbnail : dojo.configData.PortalAPIURL + "content/items/" + bmLayers.item.id + "/info/" + bmLayers.item.thumbnail;
                     baseMapArray.push({
                         ThumbnailSource: thumbnailSrc,
                         Name: bmLayers.itemData.baseMap.title,
@@ -250,10 +249,8 @@ define([
                     });
                 }
             } else {
-                /*If array contains more than one layer object, loop through each layer, create object for each one of them
-               and push it into "basemapLayersArray", finally push "basemapLayersArray" into "baseMapArray" */
                 array.forEach(bmLayers.itemData.baseMap.baseMapLayers, lang.hitch(this, function (basemapLayers) {
-                    thumbnailSrc = (bmLayers.item.thumbnail === null) ? dojo.configData.WebmapThumbnail : dojo.configData.GroupURL + "content/items/" + bmLayers.item.id + "/info/" + bmLayers.item.thumbnail;
+                    thumbnailSrc = (bmLayers.item.thumbnail === null) ? dojo.configData.NoThumbnail : dojo.configData.PortalAPIURL + "content/items/" + bmLayers.item.id + "/info/" + bmLayers.item.thumbnail;
                     basemapLayersArray.push({
                         ThumbnailSource: thumbnailSrc,
                         Name: bmLayers.itemData.baseMap.title,
@@ -262,6 +259,8 @@ define([
                 }));
                 baseMapArray.push(basemapLayersArray);
             }
+            /*If array contains more than one layer object, loop through each layer, create object for each one of them
+            and push it into "basemapLayersArray", finally push "basemapLayersArray" into "baseMapArray" */
 
         },
 
@@ -279,8 +278,6 @@ define([
                             MapURL: basemap.layers[0].url
                         });
                     } else {
-                        /*If array contains more than one layer object, loop through each layer, create object for each one of them
-                      and push it into "basemapLayersArray", finally push "basemapLayersArray" into "baseMapArray" */
                         array.forEach(basemap.layers, lang.hitch(this, function (basemapLayers) {
                             basemapLayersArray.push({
                                 ThumbnailSource: basemap.thumbnailUrl,
@@ -290,6 +287,9 @@ define([
                         }));
                         baseMapArray.push(basemapLayersArray);
                     }
+                    /*If array contains more than one layer object, loop through each layer, create object for each one of them
+                    and push it into "basemapLayersArray", finally push "basemapLayersArray" into "baseMapArray" */
+
                     deferred = new Deferred();
                     deferred.resolve();
                 });

@@ -45,7 +45,7 @@ define([], function () {
         ApplicationIcon: "/js/library/themes/images/logo.png",
 
         // Set application Favicon path
-        ApplicationFavicon: "/js/library/themes/images/favicon1.ico",
+        ApplicationFavicon: "/js/library/themes/images/favicon.ico",
 
         // Set URL of help page/portal
         HelpURL: "help.htm",
@@ -58,11 +58,11 @@ define([], function () {
 
         // Set splash window content - Message that appears when the application starts
         SplashScreen: {
-            // splash screen Message is set in locale file in nls directory
+            SplashScreenContent: "Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
             IsVisible: true
         },
 
-        ThemeColor: "js/library/themes/styles/bluetheme.css",
+        ThemeColor: "js/library/themes/styles/blueTheme.css",
         //------------------------------------------------------------------------------------------------------------------------
         // Header Widget Settings
         //------------------------------------------------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ define([], function () {
             WidgetPath: "widgets/locator/locator",
             MapInstanceRequired: true
         }, {
-            WidgetPath: "widgets/activites/activites",
+            WidgetPath: "widgets/activities/activities",
             MapInstanceRequired: true
         }, {
             WidgetPath: "widgets/geoLocation/geoLocation",
@@ -91,14 +91,19 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
-        GroupURL: "http://www.arcgis.com/sharing/rest/",
+        // Set options for basemap
+        // Please note: All base-maps need to use the same spatial reference.
+
+        // Specify URL to ArcGIS Portal REST API
+        PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
+        // Specify URL to Search
         SearchURL: "http://www.arcgis.com/sharing/rest/search?q=group:",
-
-        BasemapGroupTitle: "Basemaps",
-
-        BasemapGroupOwner: "GISITAdmin",
-
-        WebmapThumbnail: "js/library/themes/images/not-available.png",
+        // Specify the title of group that contains basemaps
+        BasemapGroupTitle: "Basemaps", //CyberTech Systems and Software Limited
+        // Specify the user name of owner of the group that contains basemaps
+        BasemapGroupOwner: "GISITAdmin", //cybertechagol
+        // Specify path to image used to display the thumbnail for a basemap when portal does not provide it
+        NoThumbnail: "js/library/themes/images/not-available.png",
 
 
         // Initial map extent. Use comma (,) to separate values and dont delete the last comma
@@ -110,8 +115,6 @@ define([], function () {
 
         // Set sequence for info pods in the bottom panel
         Order: ["search", "facility", "directions", "photogallery", "comments"],
-
-        InfoBoxWidth: 422,
 
         //Distance in configured in "miles"
         BufferDistance: "2",
@@ -142,6 +145,7 @@ define([], function () {
             URL: "http://50.18.115.76:6080/arcgis/rest/services/WaterAccess/FeatureServer/1"
         },
         //Set the primary key attribute for features
+
         PrimaryKeyForFeatures: "${OBJECTID}",
 
 
@@ -184,7 +188,7 @@ define([], function () {
         InfoPopupHeight: 250,
 
         // Minimum width should be 330 for the info-popup in pixels
-        InfoPopupWidth: 300,
+        InfoPopupWidth: 422,
 
 
         // ------------------------------------------------------------------------------------------------------------------------
@@ -203,38 +207,33 @@ define([], function () {
         // DisplayText: Caption to be displayed instead of field alias names. Set this to empty string ("") if you wish to display field alias names as captions.
         // FieldName: Field used for displaying the value
         InfoWindowSettings: [{
-            Title: "Envimpact",
+            Title: "WaterAccess",
             QueryLayerId: "0",
-            InfoWindowHeaderField: "${PROPERNAME}",
+            InfoWindowHeaderField: "Ulrich Landing Park",
             InfoWindowData: [{
-                DisplayText: "Feature ID:",
-                FieldName: "${FEATURE_ID}"
-            }, {
-                DisplayText: "Feature Class:",
-                FieldName: "${FEAT_CLASS}"
-            }, {
-                DisplayText: "Variants:",
-                FieldName: "${VARIANTS}"
-            }, {
-                DisplayText: "Sequence:",
-                FieldName: "${SEQUENCE}"
-            }]
-        }, {
-            Title: "Envimpact",
-            QueryLayerId: "1",
-            InfoWindowHeaderField: "${FID}",
-            InfoWindowData: [{
-                DisplayText: "Name:",
-                FieldName: "${PNAME}"
-            }, {
-                DisplayText: "PNMAE_LCAS:",
-                FieldName: "${PNMAE_LCAS}"
-            }, {
-                DisplayText: "Length:",
-                FieldName: "${LENGTH}"
+                DisplayText: "NAME :",
+                FieldName: "${NAME}"
             }]
         }],
 
+        // Define the database field names
+        // Note: DateFieldName refers to a date database field.
+        // All other attributes refer to text database fields.
+        DatabaseFields: {
+            FeatureIdFieldName: "id",
+            CommentsFieldName: "COMMENTS",
+            DateFieldName: "SUBMITDT",
+            RankFieldName: "RANK"
+        },
+
+        // Set info-pop fields for adding and displaying comment
+        CommentsInfoPopupFieldsCollection: {
+            Rank: "${RANK}",
+            SubmitDate: "${SUBMITDT}",
+            Comments: "${COMMENTS}"
+        },
+
+        DateFormat: "MMM dd, yyyy",
         // ------------------------------------------------------------------------------------------------------------------------
         // ADDRESS SEARCH SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
@@ -281,7 +280,7 @@ define([], function () {
         // Set URL for routing service
         RouteServiceURL: "http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World",
 
-        RouteColor: "#00000FF",
+        RouteColor: "#0000FF",
 
         // Set width(in pixels) of the route
         RouteWidth: 6,

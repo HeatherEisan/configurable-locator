@@ -1,6 +1,6 @@
-﻿/*global define,dojo,document,dojoConfig */
+﻿/*global define,dojo,dojoConfig */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
-/** @license
+/*
 | Copyright 2013 Esri
 |
 | Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +36,6 @@ define([
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
         sharedNls: sharedNls,
-
 
         /**
         * create header panel
@@ -83,7 +82,6 @@ define([
 
         loadHeaderWidgets: function (widgets) {
             var i;
-
             /**
             * applicationHeaderWidgetsContainer container for header panel widgets
             * @member {div} applicationHeaderWidgetsContainer
@@ -125,6 +123,9 @@ define([
 
         showProgressIndicator: function () {
             domClass.replace(this.divLoadingIndicator, "displayBlockAll", "displayNoneAll");
+            this.divLoadingIndicator.onclick = function (evt) {
+                evt.stopPropagation();
+            };
         },
 
         hideProgressIndicator: function () {

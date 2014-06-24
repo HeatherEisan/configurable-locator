@@ -29,6 +29,7 @@ define([
     //========================================================================================================================//
 
     return declare([_WidgetBase], {
+        sharedNls: sharedNls,
 
         /**
         * create help widget
@@ -44,6 +45,7 @@ define([
                 * minimize other open header panel widgets and show help
                 */
                 topic.publish("toggleWidget", "help");
+                topic.publish("setMaxLegendLength");
                 this._showHelpPage();
             })));
         },

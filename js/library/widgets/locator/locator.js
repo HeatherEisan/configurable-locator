@@ -65,12 +65,11 @@ define([
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
         sharedNls: sharedNls,
-
         lastSearchString: null,
         stagedSearch: null,
         locatorScrollbar: null,
         screenPoint: null,
-
+        isResultFound: false,
         /**
         * display locator widget
         *
@@ -78,11 +77,12 @@ define([
         * @name widgets/locator/locator
         */
         postCreate: function () {
+            var contHeight, searchResult;
             /**
             * close locator widget if any other widget is opened
             * @param {string} widget Key of the newly opened widget
             */
-            var searchResult = new SearchResult({ map: this.map });
+            searchResult = new SearchResult({ map: this.map });
             searchResult.startup();
             topic.subscribe("toggleWidget", lang.hitch(this, function (widget) {
                 if (widget !== "locator") {
@@ -92,11 +92,18 @@ define([
                         domClass.replace(this.divAddressHolder, "esriCTZeroHeight", "esriCTAddressContentHeight");
                         this.txtAddress.blur();
                     }
+                } else {
+                    if (domClass.contains(this.divAddressHolder, "esriCTHideContainerHeight")) {
+                        contHeight = domStyle.get(this.divAddressContent, "height");
+                        domStyle.set(this.divAddressHolder, "height", contHeight + 2 + "px");
+                    }
                 }
             }));
-
             topic.subscribe("doBufferHandler", lang.hitch(this, function (feature) {
                 this._doBuffer(feature.graphic);
+            }));
+            topic.subscribe("showRoute", lang.hitch(this, function (features, RouteParameters, featureSet, SpatialReference, units, mapPoint) {
+                this._displayRouteOfNearestFeature(features, RouteParameters, featureSet, SpatialReference, units, mapPoint);
             }));
             topic.subscribe("createInfoWindowContent", lang.hitch(this, function (mapPoint, attributes, fields, infoIndex, featureArray, count, zoomToFeature) {
                 this._createInfoWindowContent(mapPoint, attributes, fields, infoIndex, featureArray, count, zoomToFeature);
@@ -140,6 +147,10 @@ define([
 
         },
 
+        /**
+        * positioning the infoWindow on extent change
+        * @memberOf widgets/locator/locator
+        */
         _onSetMapTipPosition: function (selectedPoint, map, infoWindow) {
             if (selectedPoint) {
                 var screenPoint = map.toScreen(selectedPoint);
@@ -197,6 +208,10 @@ define([
             })));
         },
 
+        /**
+        * hide the text when address container is blank
+        * @memberOf widgets/locator/locator
+        */
         _hideText: function () {
             this.txtAddress.value = "";
             domConstruct.empty(this.divAddressResults, this.divAddressScrollContent);
@@ -456,6 +471,10 @@ define([
             }
         },
 
+        /**
+        * query on feature layer
+        * @memberOf widgets/locator/locator
+        */
         _locateLayersearchResult: function (deferredArray, layerobject) {
             var queryTask, queryLayer, queryTaskResult, deferred, currentTime;
 
@@ -512,6 +531,7 @@ define([
             this.locatorScrollbar.setContent(this.divAddressResults);
             this.locatorScrollbar.createScrollBar();
             if (resultLength > 0) {
+                domClass.add(this.divAddressHolder, "esriCTAddressContentHeight");
                 for (candidateArray in candidates) {
                     if (candidates.hasOwnProperty(candidateArray)) {
                         if (candidates[candidateArray].length > 0) {
@@ -540,6 +560,10 @@ define([
             }
         },
 
+        /**
+        * show and hide the address list
+        * @memberOf widgets/locator/locator
+        */
         _toggleAddressList: function (addressList, idx) {
             var listStatusSymbol;
             on(addressList[idx], "click", lang.hitch(this, function () {
@@ -586,6 +610,7 @@ define([
                 alert(sharedNls.errorMessages.falseConfigParams);
             }
             candidateDate.onclick = function () {
+                topic.publish("createPod");
                 var layer, infoIndex, geoLocationPushpin, symbol, lineColor, locatorMarkupSymbol, fillColor;
                 if (_this.map.infoWindow) {
                     _this.map.infoWindow.hide();
@@ -594,6 +619,7 @@ define([
                 domAttr.set(_this.txtAddress, "defaultAddress", _this.txtAddress.value);
 
                 _this._hideAddressContainer();
+                topic.publish("carouselPodDisplayBlock");
                 if (candidate.geometry) {
                     if (candidate.geometry.type) {
                         if (candidate.geometry.type === "point") {
@@ -654,9 +680,9 @@ define([
         },
 
         /**
-       * locate road on map
-       * @memberOf widgets/locator/locator
-       */
+        * locate road on map
+        * @memberOf widgets/locator/locator
+        */
         _showRoadResultsOnMap: function (candidate) {
             var candidatePoint;
             this.map.setLevel(dojo.configData.ZoomLevel);
@@ -672,7 +698,6 @@ define([
         */
         _showFeatureResultsOnMap: function (candidateArray, candidate, infoIndex, index) {
             var queryTask, queryLayer, featurePoint;
-
             domStyle.set(this.imgSearchLoader, "display", "block");
             domStyle.set(this.close, "display", "none");
             this.txtAddress.value = (candidate.name);
@@ -727,8 +752,8 @@ define([
                 domAttr.set(query(".esriCTdivInfoFeatureCount")[0], "innerHTML", "");
                 domAttr.set(query(".esriCTdivInfoTotalFeatureCount")[0], "innerHTML", "");
             }
-            if (dojo.configData.SearchSettings[infoIndex].InfoWindowData) {
-                infoPopupFieldsCollection = dojo.configData.SearchSettings[infoIndex].InfoWindowData;
+            if (dojo.configData.InfoWindowSettings[0].InfoWindowData) {
+                infoPopupFieldsCollection = dojo.configData.InfoWindowSettings[0].InfoWindowData;
                 divInfoDetailsTab = domConstruct.create("div", { "class": "esriCTInfoDetailsTab" }, null);
                 this.divInfoDetailsContainer = domConstruct.create("div", { "class": "esriCTInfoDetailsContainer" }, divInfoDetailsTab);
             } else {
@@ -750,18 +775,21 @@ define([
                             }
                         }
                     }
-                    for (j = 0; j < fields.length; j++) {
-                        if (fields[j].type === "esriFieldTypeDate") {
-                            if (attributes[fields[j].name]) {
-                                if (Number(attributes[fields[j].name])) {
-                                    utcMilliseconds = Number(attributes[fields[j].name]);
-                                    attributes[fields[j].name] = dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), {
-                                        datePattern: dojo.configData.DatePattern,
-                                        selector: "date"
-                                    });
+                    if (fields !== 0) {
+                        for (j = 0; j < fields.length; j++) {
+                            if (fields[j].type === "esriFieldTypeDate") {
+                                if (attributes[fields[j].name]) {
+                                    if (Number(attributes[fields[j].name])) {
+                                        utcMilliseconds = Number(attributes[fields[j].name]);
+                                        attributes[fields[j].name] = dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), {
+                                            datePattern: dojo.configData.DatePattern,
+                                            selector: "date"
+                                        });
+                                    }
                                 }
                             }
                         }
+
                     }
                     fieldNames = string.substitute(infoPopupFieldsCollection[key].FieldName, attributes);
                     if (string.substitute(infoPopupFieldsCollection[key].FieldName, attributes).match("http:") || string.substitute(infoPopupFieldsCollection[key].FieldName, attributes).match("https:")) {
@@ -773,9 +801,10 @@ define([
                         this.divInfoFieldValue.innerHTML = fieldNames;
                     }
                 }
-                infoTitle = string.substitute(dojo.configData.SearchSettings[infoIndex].InfoWindowHeaderField, attributes);
+                infoTitle = string.substitute(dojo.configData.InfoWindowSettings[0].InfoWindowHeaderField, attributes);
                 dojo.selectedMapPoint = mapPoint;
                 this._setInfoWindowZoomLevel(mapPoint, infoTitle, divInfoDetailsTab, infoPopupWidth, infoPopupHeight, count, zoomToFeature);
+                topic.publish("hideProgressIndicator");
             } else {
                 infoTitle = sharedNls.errorMessages.emptyInfoWindowTitle;
                 dojo.selectedMapPoint = mapPoint;
@@ -900,7 +929,6 @@ define([
             domClass.replace(this.domNode, "esriCTHeaderSearch", "esriCTHeaderSearchSelected");
             this.txtAddress.blur();
             domClass.replace(this.divAddressHolder, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
-            domClass.replace(this.divAddressHolder, "esriCTZeroHeight", "esriCTAddressContentHeight");
         },
 
         /**
@@ -908,16 +936,14 @@ define([
         * @memberOf widgets/locator/locator
         */
         _setHeightAddressResults: function () {
-
-            var height;
             /**
             * divAddressContent Container for search results
             * @member {div} divAddressContent
             * @private
             * @memberOf widgets/locator/locator
             */
-            height = domGeom.getMarginBox(this.divAddressContent).h;
-            if (height > 0) {
+            var contentHeight, addressContentHeight = domGeom.getMarginBox(this.divAddressContent).h;
+            if (addressContentHeight > 0) {
 
                 /**
                 * divAddressScrollContent Scrollbar container for search results
@@ -925,7 +951,8 @@ define([
                 * @private
                 * @memberOf widgets/locator/locator
                 */
-                domStyle.set(this.divAddressScrollContent, "height", (height - 120) + "px");
+                contentHeight = { height: addressContentHeight - 120 + 'px' };
+                domStyle.set(this.divAddressScrollContent, "style", contentHeight + "px");
             }
         },
 
@@ -1078,10 +1105,10 @@ define([
         },
 
         /**
-       * add graphic layer on map of buffer and set expand
-       * create an object of graphic
-       * @memberOf widgets/locator/locator
-       */
+        * add graphic layer on map of buffer and set expand
+        * create an object of graphic
+        * @memberOf widgets/locator/locator
+        */
         _addGraphic: function (layer, symbol, point, attr) {
             var graphic;
             if (attr) {
@@ -1094,9 +1121,9 @@ define([
         },
 
         /**
-      * clear buffer on map
-      * @memberOf widgets/locator/locator
-      */
+        * clear buffer on map
+        * @memberOf widgets/locator/locator
+        */
         _clearBuffer: function () {
             var layer, graphic, i, count;
             layer = this.map.getLayer("tempBufferLayer");
@@ -1125,6 +1152,7 @@ define([
             queryLayer.where = "1=1";
             queryTask.execute(queryLayer, lang.hitch(this, function (relatedRecords) {
                 if (relatedRecords.features.length !== 0) {
+                    this.isResultFound = true;
                     var i;
                     featureSet = new esri.tasks.FeatureSet();
                     features = [];
@@ -1141,6 +1169,7 @@ define([
                 } else {
                     topic.publish("ShowHideResult", false);
                     alert(sharedNls.errorMessages.facilitydoestfound);
+                    this.isResultFound = false;
                 }
             }));
 
@@ -1176,11 +1205,11 @@ define([
         */
         _showRoute: function (solveResult, features, mapPoint) {
             var directions, symbols, address;
+            this._clearRoute();
             directions = solveResult.routeResults[0].directions;
             symbols = new SimpleLineSymbol().setColor(dojo.configData.RouteColor).setWidth(dojo.configData.RouteWidth);
             this.map.getLayer("routeLayerId").add(new esri.Graphic(directions.mergedGeometry, symbols, null, null));
             this.map.getLayer("routeLayerId").show();
-            topic.publish("ShowHideResult", true);
             features.features.sort(function (a, b) {
                 return parseFloat(a.distance) - parseFloat(b.distance);
             });
@@ -1189,8 +1218,7 @@ define([
             } else {
                 address = sharedNls.titles.directionCurrentLocationText;
             }
-            topic.publish("setSearchInfo", { "directionResult": solveResult.routeResults, "searchResult": features, "addressResult": address });
-            this._queryCommentLayer(features.features[0]);
+            this._queryCommentLayer(features.features, solveResult.routeResults, features, address, mapPoint);
         },
 
         /**
@@ -1246,15 +1274,26 @@ define([
             return (dist * 10) / 10;
         },
 
+        /**
+        * Convert the  degrees  to radians
+        * @memberOf widgets/locator/locator
+        */
         _deg2Rad: function (deg) {
             return (deg * Math.PI) / 180.0;
         },
 
-        //Convert the radians to degrees
+        /**
+        * Convert the radians to degrees
+        * @memberOf widgets/locator/locator
+        */
         _rad2Deg: function (rad) {
             return (rad / Math.PI) * 180.0;
         },
 
+        /**
+        * clear the route graphic on the map
+        * @memberOf widgets/locator/locator
+        */
         _clearRoute: function () {
             var layer, graphic, i, count;
             layer = this.map.getLayer("routeLayerId").clear();
@@ -1270,30 +1309,52 @@ define([
         },
 
         /**
-        * qurey on Comment Layer
+        * query on Comment Layer
         * @memberOf widgets/locator/locator
         */
-        _queryCommentLayer: function (feature) {
-            var queryTask, esriQuery, featureSet, features;
+        _queryCommentLayer: function (feature, solveResult, featuresResult, address, mapPoint) {
+            var queryTask, esriQuery, i, deferredArray = [], featuresData, deferredListResult, commentArray, j, k;
             queryTask = new esri.tasks.QueryTask(dojo.configData.CommentsLayer.URL);
             esriQuery = new esri.tasks.Query();
             esriQuery.outFields = ["*"];
             esriQuery.returnGeometry = true;
-            esriQuery.where = "ID=" + feature.attributes.OBJECTID;
-            queryTask.execute(esriQuery, lang.hitch(this, function (relatedRecords) {
-                featureSet = new esri.tasks.FeatureSet();
-                features = [];
-                if (relatedRecords.features.length > 0) {
-                    var i;
-                    for (i in relatedRecords.features) {
-                        if (relatedRecords.features.hasOwnProperty(i)) {
-                            features.push(relatedRecords.features[i]);
+            for (i = 0; i < feature.length; i++) {
+                esriQuery.where = "ID=" + feature[i].attributes.OBJECTID;
+                deferredArray.push(queryTask.execute(esriQuery, lang.hitch(this, this._executeQueryTask)));
+            }
+            deferredListResult = new DeferredList(deferredArray);
+            deferredListResult.then(lang.hitch(this, function (result) {
+                commentArray = [];
+                if (result.length > 0) {
+                    for (j = 0; j < result.length; j++) {
+                        if (result[j][0] && result[j][1].features) {
+                            featuresData = result[0][1].features;
+                            for (k = 0; k < result[j][1].features.length; k++) {
+                                commentArray.push(result[j][1].features[k]);
+                            }
                         }
                     }
-                    featureSet.features = features;
+                    topic.publish("setSearchInfo", { "directionResult": solveResult, "searchResult": featuresResult, "addressResult": address, "mapPoint": mapPoint, "CommentResult": commentArray });
+                    topic.publish("setFacilityCarouselPod", { "directionResult": solveResult, "searchResult": featuresResult, "addressResult": address, "mapPoint": mapPoint });
+                    topic.publish("getFeatures", featuresData);
+                    topic.publish("ShowHideResult", true);
                 }
-                topic.publish("getFeatures", relatedRecords);
             }));
+        },
+
+        _executeQueryTask: function (relatedRecords) {
+            var featureSet, i, deferred, features = [];
+            deferred = new Deferred();
+            featureSet = new esri.tasks.FeatureSet();
+            if (relatedRecords.features.length > 0) {
+                for (i = 0; i < relatedRecords.features.length; i++) {
+                    if (relatedRecords.features.hasOwnProperty(i)) {
+                        features.push(relatedRecords.features[i]);
+                    }
+                }
+                featureSet.features = features;
+            }
+            deferred.resolve(relatedRecords);
         }
     });
 });

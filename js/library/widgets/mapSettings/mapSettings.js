@@ -77,14 +77,15 @@ define([
         postCreate: function () {
             var mapDeferred, layer;
             topic.subscribe("setInfoWindowOnMap", lang.hitch(this, function (infoTitle, mobTitle, divInfoDetailsTab, screenPoint, infoPopupWidth, infoPopupHeight, count) {
+
                 this._onSetInfoWindowPosition(infoTitle, mobTitle, divInfoDetailsTab, screenPoint, infoPopupWidth, infoPopupHeight, count);
             }));
-
             /**
             * load map
             * @param {string} dojo.configData.BaseMapLayers Basemap settings specified in configuration file
             */
-            this.infoWindowPanel = new InfoWindow({ infoWindowWidth: dojo.configData.InfoPopupWidth, infoWindowHeight: dojo.configData.InfoPopupHeight });
+            dojo.selectedBasemapIndex = 0;
+            this.infoWindowPanel = new InfoWindow({ infoWindowWidth: dojo.configData.InfoPopupWidth, infoWindowHeight: dojo.configData.infoPopupHeight });
 
             if (dojo.configData.WebMapId && lang.trim(dojo.configData.WebMapId).length !== 0) {
                 mapDeferred = esriUtils.createMap(dojo.configData.WebMapId, "esriCTParentDivContainer", {
@@ -95,6 +96,7 @@ define([
                 });
                 mapDeferred.then(lang.hitch(this, function (response) {
                     this.map = response.map;
+                    dojo.selectedBasemapIndex = 0;
                     if (response.itemInfo.itemData.baseMap.baseMapLayers && response.itemInfo.itemData.baseMap.baseMapLayers[0].id) {
                         if (response.itemInfo.itemData.baseMap.baseMapLayers[0].id !== "defaultBasemap") {
                             this.map.getLayer(response.itemInfo.itemData.baseMap.baseMapLayers[0].id).id = "defaultBasemap";
@@ -112,12 +114,10 @@ define([
                     this.stagedSearch = setTimeout(lang.hitch(this, function () {
                         this._addLayerLegendWebmap(response);
                     }), 3000);
-
                 }));
             } else {
                 this._generateLayerURL(dojo.configData.OperationalLayers);
-                this.map = esriMap("esriCTParentDivContainer", {
-                });
+                this.map = esriMap("esriCTParentDivContainer", {});
                 if (dojo.configData.BaseMapLayers[0].length > 1) {
                     array.forEach(dojo.configData.BaseMapLayers[0], lang.hitch(this, function (basemapLayer, index) {
                         layer = new esri.layers.ArcGISTiledMapServiceLayer(basemapLayer.MapURL, { id: "defaultBasemap" + index, visible: true });
@@ -125,9 +125,8 @@ define([
                     }));
                 } else {
                     layer = new esri.layers.ArcGISTiledMapServiceLayer(dojo.configData.BaseMapLayers[0].MapURL, { id: "defaultBasemap", visible: true });
-                    this.map.addLayer(layer, 0);
+                    this.map.addLayer(layer);
                 }
-
                 this.map.on("load", lang.hitch(this, function () {
 
                     this._mapOnLoad();
@@ -136,6 +135,10 @@ define([
             }
         },
 
+        /**
+        * map onclick event
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _mapEvents: function () {
             this.map.on("extent-change", lang.hitch(this, function () {
                 topic.publish("setMapTipPosition", dojo.selectedMapPoint, this.map, this.infoWindowPanel);
@@ -152,12 +155,12 @@ define([
             extent = this._getQueryString('extent');
             if (extent === "") {
                 if (!dojo.configData.WebMapId) {
-                    mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(extentPoints[0]), "ymin": parseFloat(extentPoints[1]), "xmax": parseFloat(extentPoints[2]), "ymax": parseFloat(extentPoints[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid } });
+                    mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(extentPoints[0]), "ymin": parseFloat(extentPoints[1]), "xmax": parseFloat(extentPoints[2]), "ymax": parseFloat(extentPoints[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
                     this.map.setExtent(mapDefaultExtent);
                 }
             } else {
                 mapDefaultExtent = extent.split(',');
-                mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(mapDefaultExtent[0]), "ymin": parseFloat(mapDefaultExtent[1]), "xmax": parseFloat(mapDefaultExtent[2]), "ymax": parseFloat(mapDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid } });
+                mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(mapDefaultExtent[0]), "ymin": parseFloat(mapDefaultExtent[1]), "xmax": parseFloat(mapDefaultExtent[2]), "ymax": parseFloat(mapDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
                 this.map.setExtent(mapDefaultExtent);
             }
             /**
@@ -167,7 +170,6 @@ define([
             home.extent = mapDefaultExtent;
             domConstruct.place(home.domNode, query(".esriSimpleSliderIncrementButton")[0], "after");
             home.startup();
-
             if (dojo.configData.CustomLogoUrl && lang.trim(dojo.configData.CustomLogoUrl).length !== 0) {
                 domConstruct.create("img", { "src": dojoConfig.baseURL + dojo.configData.CustomLogoUrl, "class": "esriCTMapLogo" }, dom.byId("esriCTParentDivContainer"));
             }
@@ -177,7 +179,6 @@ define([
                         this._addOperationalLayerToMap(i, dojo.configData.OperationalLayers[i]);
                     }
                 }
-
                 if (dojo.configData.BaseMapLayers.length > 1) {
                     this._showBasMapGallery();
                 }
@@ -193,7 +194,6 @@ define([
             routegraphicsLayer.id = this.routeLayerId;
             this.map.addLayer(routegraphicsLayer);
             this._showBasMapGallery();
-
             graphicsLayer.on("graphic-add", lang.hitch(this, function (feature) {
                 topic.publish("doBufferHandler", feature);
             }));
@@ -203,18 +203,21 @@ define([
         * set infowindow position
         * @memberOf widgets/mapSettings/mapSettings
         */
-        _onSetInfoWindowPosition: function (infoTitle, mobTitle, divInfoDetailsTab, screenPoint, infoPopupWidth, infoPopupHeight) {
-            this.infoWindowPanel.resize(infoPopupWidth, infoPopupHeight);
+        _onSetInfoWindowPosition: function (infoTitle, mobTitle, divInfoDetailsTab, infoPopupHeight, infoPopupWidth, screenPoint) {
+            this.infoWindowPanel.resize(infoPopupHeight, infoPopupWidth);
             this.infoWindowPanel.hide();
             this.infoWindowPanel.setTitle(infoTitle);
             this.infoWindowPanel.show(divInfoDetailsTab, screenPoint);
         },
 
+        /**
+        * show infoWindow on Map
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _showInfoWindowOnMap: function (mapPoint) {
             var index, deferredListResult,
                 onMapFeaturArray = [],
                 featureArray = [];
-
             this.counter = 0;
             for (index = 0; index < dojo.configData.SearchSettings.length; index++) {
                 this._executeQueryTask(index, mapPoint, onMapFeaturArray);
@@ -267,9 +270,13 @@ define([
             onMapFeaturArray.push(queryOnRouteTask);
         },
 
+        /**
+        * get extent from mappoint
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _extentFromPoint: function (point) {
             var tolerance, screenPoint, pnt1, pnt2, mapPoint1, mapPoint2;
-            tolerance = 3;
+            tolerance = 15;
             screenPoint = this.map.toScreen(point);
             pnt1 = new esri.geometry.Point(screenPoint.x - tolerance, screenPoint.y + tolerance);
             pnt2 = new esri.geometry.Point(screenPoint.x + tolerance, screenPoint.y - tolerance);
@@ -278,30 +285,50 @@ define([
             return new esri.geometry.Extent(mapPoint1.x, mapPoint1.y, mapPoint2.x, mapPoint2.y, this.map.spatialReference);
         },
 
-        _fetchQueryResults: function (featureArray) {
-            var _this = this;
-
+        /**
+        * featch infowindow data from query task result
+        * @memberOf widgets/mapSettings/mapSettings
+        */
+        _fetchQueryResults: function (featureArray, mapPoint, map) {
+            var _this = this, point;
             if (featureArray.length > 0) {
                 if (featureArray.length === 1) {
+                    dojo.showInfo = true;
                     domClass.remove(query(".esriCTInfoWindowRightArrow")[0], "esriCTShowInfoRightArrow");
-                    topic.publish("createInfoWindowContent", featureArray[0].attr.geometry, featureArray[0].attr.attributes, featureArray[0].fields, featureArray[0].layerId, null, null, false);
+                    topic.publish("createInfoWindowContent", featureArray[0].attr.geometry, featureArray[0].attr.attributes, featureArray[0].layerId, null, null);
                 } else {
                     this.count = 0;
+                    dojo.showInfo = true;
                     domAttr.set(query(".esriCTdivInfoTotalFeatureCount")[0], "innerHTML", '/' + featureArray.length);
-                    topic.publish("createInfoWindowContent", featureArray[0].attr.geometry, featureArray[0].attr.attributes, featureArray[0].fields, featureArray[0].layerId, featureArray, this.count, false);
+                    if (featureArray[this.count].attr.geometry.type === "polyline") {
+                        point = featureArray[this.count].attr.geometry.getPoint(0, 0);
+                        topic.publish("createInfoWindowContent", point, featureArray[0].attr.attributes, featureArray[0].layerId, featureArray, this.count);
+                    } else {
+                        topic.publish("createInfoWindowContent", featureArray[0].attr.geometry, featureArray[0].attr.attributes, featureArray[0].layerId, featureArray, this.count);
+                    }
                     topic.publish("hideProgressIndicator");
                     query(".esriCTInfoWindowRightArrow")[0].onclick = function () {
-                        _this._nextInfoContent(featureArray);
+                        dojo.showInfo = true;
+                        topic.publish("showProgressIndicator");
+                        _this._nextInfoContent(featureArray, map);
                     };
                     query(".esriCTInfoWindowLeftArrow")[0].onclick = function () {
-                        _this._previousInfoContent(featureArray);
+                        dojo.showInfo = true;
+                        topic.publish("showProgressIndicator");
+                        _this._previousInfoContent(featureArray, map);
                     };
+                    topic.publish("hideProgressIndicator");
                 }
             } else {
+                alert(sharedNls.errorMessages.invalidSearch);
                 topic.publish("hideProgressIndicator");
             }
         },
 
+        /**
+        * display next page of infowindow on clicking of next arrow
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _nextInfoContent: function (featureArray) {
             if (this.count < featureArray.length) {
                 this.count++;
@@ -311,6 +338,10 @@ define([
             }
         },
 
+        /**
+        * display previous page of infowindow on clicking of previous arrow
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _previousInfoContent: function (featureArray) {
             if (this.count !== 0 && this.count < featureArray.length) {
                 this.count--;
@@ -330,6 +361,10 @@ define([
             return extentValue;
         },
 
+        /**
+        * generate layer URL for infoWindow
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _generateLayerURL: function (operationalLayers) {
             var infoWindowSettings, searchSettings, i, str, layerTitle, layerId, index, infoIndex;
 
@@ -391,6 +426,11 @@ define([
             return home;
         },
 
+        /**
+        * Initialize the object of baseMapGallery
+        * @return {object} basMapGallery widget
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _showBasMapGallery: function () {
             var basMapGallery = new BaseMapGallery({
                 map: this.map
@@ -408,7 +448,6 @@ define([
             var layerMode, featureLayer;
             layerMode = null;
             if (layerInfo.LoadAsServiceType.toLowerCase() === "feature") {
-
                 /**
                 * set layerMode of the operational layer if it's type is feature
                 */
@@ -423,7 +462,6 @@ define([
                     layerMode = FeatureLayer.MODE_SNAPSHOT;
                     break;
                 }
-
                 /**
                 * load operational layer if it's type is feature along with its layer mode
                 */
@@ -463,6 +501,10 @@ define([
             }), 500);
         },
 
+        /**
+        * add service layer as dynamic service type
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _addServiceLayers: function (layerId, layerURL) {
             var dynamicLayer, imageParams, lastIndex, dynamicLayerId;
             imageParams = new ImageParameters();
@@ -482,6 +524,10 @@ define([
             }
         },
 
+        /**
+        * create dynamic service layer as dynamic service type
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _createDynamicServiceLayer: function (dynamicLayer, imageParams, layerId) {
             var dynamicMapService;
             dynamicMapService = new ArcGISDynamicMapServiceLayer(dynamicLayer, {
@@ -492,6 +538,10 @@ define([
             this.map.addLayer(dynamicMapService);
         },
 
+        /**
+        * initialize the object of legend box
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _addLegendBox: function () {
             var mmap = this.map;
             this.legendObject = new Legends({
@@ -501,6 +551,10 @@ define([
             return this.legendObject;
         },
 
+        /**
+        * create collection for map /feature server for legend
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _addLayerLegend: function () {
             var mapServerArray, legendObject;
             mapServerArray = [];
@@ -514,11 +568,15 @@ define([
             legendObject.startup(mapServerArray);
         },
 
+        /**
+        * add legend for the web map
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _addLayerLegendWebmap: function (response) {
             var mapServerArray = [], i, j, legendObject, webMapDetails, layer;
             webMapDetails = response.itemInfo.itemData;
             for (j = 0; j < webMapDetails.operationalLayers.length; j++) {
-                if (webMapDetails.operationalLayers[j].layerObject.layerInfos) {
+                if (webMapDetails.operationalLayers[j].layerObject && webMapDetails.operationalLayers[j].layerObject.layerInfos) {
                     for (i = 0; i < webMapDetails.operationalLayers[j].layerObject.layerInfos.length; i++) {
                         layer = webMapDetails.operationalLayers[j].url + "/" + webMapDetails.operationalLayers[j].layerObject.layerInfos[i].id;
                         mapServerArray.push(layer);
@@ -530,11 +588,11 @@ define([
             legendObject = this._addLegendBox();
             legendObject.startup(mapServerArray);
         },
+
         /**
         * return current map instance
         * @return {object} Current map instance
-        * @memberOf wid
-        s/mapSettings/mapSettings
+        * @memberOf widgets/mapSettings/mapSettings
         */
         getMapInstance: function () {
             return this.map;
