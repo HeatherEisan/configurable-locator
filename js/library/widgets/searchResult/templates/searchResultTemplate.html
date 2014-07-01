@@ -1,0 +1,70 @@
+﻿<div data-dojo-attach-point="esriCTInformationpanel">
+    <div data-dojo-attach-point="divToggle" class="esriCTdivToggle">
+        <div data-dojo-attach-point="divImageBackground" class="esriCTdivImageBackground " style="display: none">
+            <div data-dojo-attach-point="divImage">
+                <img data-dojo-attach-point="imgToggleResults" class="esriCTUpAndDownarrow" src="js/library/themes/images/down.png"
+                    style="cursor: pointer;" />
+                <span class="esriCTspanResult" data-dojo-attach-point="esriCTspanResult">Results
+                </span>
+            </div>
+        </div>
+
+        <div data-dojo-attach-point="divCarouselContent" class="esriCTdivCarouselContent esriCThideBottomContainerHeight esriCTzeroHeight">
+            <div class="esriCTtransparentBackground esriCTdivCarouselContentInfo" data-dojo-attach-point="divCarouselContentInfo">
+                <div class="esriCTresultboxPanel" data-dojo-attach-point="resultboxPanel">
+                    <div data-dojo-attach-point="resultboxPanelContent" class="esriCTresultboxPanelContent">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div data-dojo-attach-point="divPodContentStyle" class="esriCTdivContentStyle esriCTInfoinnerContainer">
+        <div class="esriCTdivFeatureListContentStyle">
+            <span data-dojo-attach-point="spanFeatureListContainer" class="esriCTSpanFeatureListContainer"></span>
+            <div data-dojo-attach-point="divFeatureListContainer" class="esriCTdivFeatureList">
+                <div data-dojo-attach-point="divFeatureList" class="esriCTdivFeatureList">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div data-dojo-attach-point="divDirectionMain" class="esriCTdivDirectionHeader">
+        <div data-dojo-attach-point="divDirectionContentHolder" class="esriCTdivContentStyle">
+            <div data-dojo-attach-point="divDirectionContent" class="esriCTdivContentStyle">
+                <div data-dojo-attach-point="divAddressContentDirections">
+                    
+                        <div class="esriCTdivclear">
+                            <div data-dojo-attach-point="tdTotalDistance" class="esriCTdirectionLeft">
+                            </div>
+                            <div data-dojo-attach-point="tdTotalTime" class="esriCTdirectionRight">
+                            </div>
+                        </div>
+                    
+                    <div data-dojo-attach-point="divDirectionContainer" class="esriCTdivDirectionContainer">
+                        <div data-dojo-attach-point="divDirection" class="esriCTdivDirection">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div data-dojo-attach-point="divDirectionSearchContent" class="esriCTdivContentStyle" style="display: none;">
+                <div class="esriCTtdPodAddressSearch">
+                    <div data-dojo-attach-point="divAddressPodPlaceHolder" class="esriCTdivAddressPodPlaceHolder">
+                        <input type="text" data-dojo-attach-point="txtPodAddress" class="esriCTtxtPodAddress" onfocus="if(this.setSelectionRange)this.setSelectionRange(this.value.length, this.value.length);" />
+                        <div class="esriCTimgPodSearchLocate">
+                            <span class="esriCTlocateSearchicon" title="Locate" data-dojo-attach-point="imgPodSearchLocate"></span>
+                        </div>
+                    </div>
+                </div>
+                <div data-dojo-attach-point="tblPodAddressResults" class="esriCTtblPodAddressResults">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div data-dojo-attach-point="divCommentContentHolder" class="esriCTdivContentStyle">
+        <div data-dojo-attach-point="divCommentContent" class="esriCTdivContentStyle">
+            <div data-dojo-attach-point="divCommentContainer" class="esriCTdivCommentContainer">
+                <div data-dojo-attach-point="divCommentHolder" class="esriCTdivCommentHolder">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
