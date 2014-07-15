@@ -64,7 +64,7 @@
     {
         height: 61px;
     }
-    .esriCTDivActivityAppContainer
+    .esriCTDivActivityAppContainer, .esriCTDivAppContainer
     {
         top: 61px;
     }
@@ -104,6 +104,12 @@
     .customButtonInner
     {
         padding-top: 4px;
+    }
+    .esriCTInfotext
+    {
+        padding: 5px 25px 5px 0px;
+        text-align: justify;
+        clear: both;
     }
 }
 
@@ -186,6 +192,13 @@
     {
         padding-top: 4px;
     }
+    .esriCTInfotext
+    {
+        padding: 8px 25px 5px 0px;
+        text-align: justify;
+        clear: both;
+    }
+     .esriCTtabs ul li a{padding: 8px 3px;}
 }
 
 @media screen and (min-width: 321px) and (max-width: 767px)
@@ -293,9 +306,10 @@
         height: 61px;
         z-index: 997;
     }
-    .esriCTDivActivityAppContainer
+    .esriCTDivActivityAppContainer, .esriCTDivAppContainer
     {
         top: 61px;
+        width: 100% !important;
     }
     .esriCTAddressHolder, .esriCTAddressContentHeight
     {
@@ -325,7 +339,7 @@
 
     .esriCTAddressContent
     {
-        min-height: 110px;
+        min-height: 311px;
         border-right: 1px solid #007ac2;
         border-left: 1px solid #007ac2;
         border-bottom: 1px solid #007ac2;
@@ -338,27 +352,6 @@
 
     /* End of Address container Styles */
     /* Splash Screen */
-
-    .esriCTSplashScreenDialog
-    {
-        height: 90% !important;
-        width: 93% !important;
-    }
-
-    .esriCTdivSplashScreenContent
-    {
-        width: 95% !important;
-    }
-
-    .esriCTFullWidth
-    {
-        width: 100% !important;
-    }
-
-    .splashScreenScrollBarContainer
-    {
-        width: 100% !important;
-    }
 
     .scrollbar_content
     {
@@ -436,7 +429,7 @@
         padding-top: 4px;
     }
 
-    .esriCTdivTriangle
+    .esriCTDivTriangle
     {
         top: 30px;
     }
@@ -534,29 +527,16 @@
         margin-left: 3px;
     }
 
-    .esriCTdivSplashContent
-    {
-        display: none;
-    }
-
     .esriCTdivHeadercontaine, .esriCTdivToggle, .esriCTdivCarouselContent
     {
         display: none !important;
     }
 
-    .esriCTLegendPositionChange
-    {
-        bottom: 0px;
-    }
 
-    .esriCTMapLogoURL
-    {
-        margin-bottom: 0px !important;
-    }
 
     .esriControlsBR
     {
-        bottom: 35px;
+        bottom: 35px !important;
     }
 
     .esriCTLegendBox
@@ -579,10 +559,6 @@
         margin-left: 0px !important;
     }
 
-    .esriCTMapLogoURL
-    {
-        bottom: 0px !important;
-    }
 
     .esriCTActivityList, .esriCTActivityPlannerListTable, .esriCTActivityPlaner
     {
@@ -617,6 +593,11 @@
     .esriCTDivFromDate, .esriCTDivToDate
     {
         width: 135px !important;
+    }
+    .esriCTTickMark{ background-position: 94%;}
+    .esriCTLoadingIndicator
+    {
+        display: none !important;
     }
 }
 
@@ -670,9 +651,10 @@
         height: 61px !important;
         z-index: 997;
     }
-    .esriCTDivActivityAppContainer, .esriCTAddressHolder
+    .esriCTDivActivityAppContainer, .esriCTAddressHolder, .esriCTDivAppContainer
     {
         top: 61px;
+        width: 100% !important;
     }
     .esriCTDivAppContainer, .esriCTShowContainerHeight
     {
@@ -734,10 +716,7 @@
         width: 100% !important;
     }
 
-    .splashScreenScrollBarContainer
-    {
-        width: 100% !important;
-    }
+
 
     .scrollbar_content
     {
@@ -854,7 +833,7 @@
         left: 0px;
     }
 
-    .esriCTdivTriangle
+    .esriCTDivTriangle
     {
         top: 30px;
     }
@@ -934,20 +913,15 @@
     {
         display: none;
     }
-
-    .esriCTLegendPositionChange
+    .esriCTLoadingIndicator
     {
-        bottom: 0px;
+        display: none !important;
     }
 
-    .esriCTMapLogoURL
-    {
-        margin-bottom: 0px !important;
-    }
 
     .esriControlsBR
     {
-        bottom: 35px;
+        bottom: 35px !important;
     }
 
     .esriCTLegendBox
@@ -969,10 +943,7 @@
         margin-left: 0px !important;
     }
 
-    .esriCTMapLogoURL
-    {
-        bottom: 0px !important;
-    }
+
 
     .esriCTActivityList, .esriCTActivityPlannerListTable
     {
@@ -1019,6 +990,6 @@
     {
         width: 220px;
     }
+      .esriCTTickMark{ background-position: 88%;}
 }
-
 /* Landscape */

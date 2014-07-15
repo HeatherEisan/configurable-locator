@@ -184,12 +184,17 @@ define([], function () {
         // Following zoom level will be set for the map upon searching an address
         ZoomLevel: 12,
 
-        //minimum height should be 310 for the info-popup in pixels
-        InfoPopupHeight: 250,
+        //Minimum height should be 270 for the info-popup in pixels
+        InfoPopupHeight: 270,
 
         // Minimum width should be 330 for the info-popup in pixels
-        InfoPopupWidth: 422,
+        InfoPopupWidth: 330,
 
+        //Set the ripple color
+        RippleColor: "#23238E",
+
+        //Set the locator ripple size(in pixels)
+        locatorRippleSize: 40,
 
         // ------------------------------------------------------------------------------------------------------------------------
         // INFO-WINDOW SETTINGS
@@ -206,15 +211,7 @@ define([], function () {
         //                    These fields should be present in the layer referenced by 'QueryLayerId' specified under section 'SearchSettings'
         // DisplayText: Caption to be displayed instead of field alias names. Set this to empty string ("") if you wish to display field alias names as captions.
         // FieldName: Field used for displaying the value
-        InfoWindowSettings: [{
-            Title: "WaterAccess",
-            QueryLayerId: "0",
-            InfoWindowHeaderField: "Ulrich Landing Park",
-            InfoWindowData: [{
-                DisplayText: "NAME :",
-                FieldName: "${NAME}"
-            }]
-        }],
+        InfoWindowSettings: [],
 
         // Define the database field names
         // Note: DateFieldName refers to a date database field.
@@ -233,7 +230,75 @@ define([], function () {
             Comments: "${COMMENTS}"
         },
 
+        // set the date format
         DateFormat: "MMM dd, yyyy",
+
+        //Set the name attribute for features
+        FeatureName: "NAME",
+
+        //Activities to be displayed in info window for a feature
+        Activities: [{
+            FieldName: "FOURWHEEL",
+            Alias: "FourWheel",
+            Image: "js/library/themes/images/activity/fourwheel.png",
+            IsSelected: false
+        }, {
+            FieldName: "ELEHOOKUP",
+            Alias: "Electric Hookup",
+            Image: "js/library/themes/images/activity/electric-hookup.png",
+            IsSelected: false
+        }, {
+            FieldName: "WTRHOOKUP",
+            Alias: "Water Hookup",
+            Image: "js/library/themes/images/activity/water-hookup.png",
+            IsSelected: false
+        }, {
+            FieldName: "RESTROOM",
+            Alias: "Restrooms Available",
+            Image: "js/library/themes/images/activity/restrooms-avail.png",
+            IsSelected: true
+        }, {
+            FieldName: "FISHPIER",
+            Alias: "Fishing Pier",
+            Image: "js/library/themes/images/activity/fishing-pier.png",
+            IsSelected: false
+        }, {
+            FieldName: "CANOELAND",
+            Alias: "Canoe Landing",
+            Image: "js/library/themes/images/activity/canoe-landing.png",
+            IsSelected: false
+        }, {
+            FieldName: "WINTERPOOL",
+            Alias: "Winter Pool",
+            Image: "js/library/themes/images/activity/winter-pool.png",
+            IsSelected: false
+        }, {
+            FieldName: "COURTDOCK",
+            Alias: "Courtesy Dock",
+            Image: "js/library/themes/images/activity/courtesy-dock.png",
+            IsSelected: false
+        }, {
+            FieldName: "BOATRENT",
+            Alias: "Rental Available",
+            Image: "js/library/themes/images/activity/for-rent.png",
+            IsSelected: false
+        }, {
+            FieldName: "BOATRAMP",
+            Alias: "Boat Ramp",
+            Image: "js/library/themes/images/activity/boat-ramp.png",
+            IsSelected: false
+        }, {
+            FieldName: "MARINA",
+            Alias: "Marina",
+            Image: "js/library/themes/images/activity/marina.png",
+            IsSelected: false
+        }, {
+            FieldName: "FISHING",
+            Alias: "Fishing",
+            Image: "js/library/themes/images/activity/fishing.png",
+            IsSelected: false
+        }],
+
         // ------------------------------------------------------------------------------------------------------------------------
         // ADDRESS SEARCH SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
@@ -270,8 +335,7 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
         // GEOMETRY SERVICE SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
-        //Set the locator ripple size(in pixels)
-        LocatorRippleSize: 40,
+
         // Set geometry service URL
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 

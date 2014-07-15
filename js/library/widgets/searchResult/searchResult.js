@@ -40,6 +40,7 @@ define([
     "esri/units",
     "widgets/print/printMap",
     "../scrollBar/scrollBar"
+
 ], function (declare, domConstruct, lang, domAttr, domStyle, dom, array, on, date, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, domClass, query, topic, string, RouteParameters, SpatialReference, units, PrintMap, ScrollBar) {
 
     //========================================================================================================================//
@@ -68,6 +69,7 @@ define([
         * @name widgets/searchResult/searchResult
         */
         startup: function () {
+            var featureArray;
             topic.subscribe("ShowHideResult", lang.hitch(this, function (isVisible) {
                 this.isResultFound = isVisible;
                 this._showHideResult(isVisible);
@@ -84,19 +86,29 @@ define([
                 }
             })));
             this._createBoxContainer();
-            topic.subscribe("carouselPodDisplayBlock", lang.hitch(this, function () {
-                this._carouselPodDisplayBlock();
+            topic.subscribe("highlightFeature", lang.hitch(this, function (features, resultcontent) {
+                if (features.features) {
+                    featureArray = features.features;
+                } else {
+                    featureArray = features;
+                }
+                this._highlightFeature(featureArray, resultcontent);
             }));
 
             topic.subscribe("createPod", lang.hitch(this, function () {
                 this.isChecked = false;
             }));
-
             topic.subscribe("setSearchInfo", lang.hitch(this, function (result) {
                 if (!this.isChecked) {
+                    this._carouselPodDisplayBlock();
                     this._setSearchContent(result);
                     this._setGallery(result);
-                    this._setDirectionCarouselPod(result);
+                    if (result.directionResult) {
+                        this._setDirectionCarouselPod(result);
+                    } else {
+                        topic.publish("getDirectionForCarouselPod", result);
+                    }
+                    topic.publish("hideProgressIndicator");
                 }
             }));
             topic.subscribe("getFeatures", lang.hitch(this, function (result) {
@@ -133,6 +145,7 @@ define([
             domClass.add(this.divImageBackground, "esriCTResultImageBlock");
             domClass.replace(this.divCarouselContent, "esriCTbottomPanelHeight", "esriCTzeroHeight");
             domAttr.set(this.imgToggleResults, "src", "js/library/themes/images/down.png");
+            domAttr.set(this.imgToggleResults, "title", sharedNls.tooltips.hidePanel);
             domClass.replace(this.divToggle, "esriCTbottomPanelPosition", "esriCTzeroBottom");
         },
 
@@ -144,12 +157,44 @@ define([
             domStyle.set(this.divCarouselContent, "display", "none");
             domClass.replace(this.divCarouselContent, "esriCTzeroHeight", "esriCTbottomPanelHeight");
             domAttr.set(this.imgToggleResults, "src", "js/library/themes/images/up.png");
+            domAttr.set(this.imgToggleResults, "title", sharedNls.tooltips.showPanel);
             domClass.replace(this.divToggle, "esriCTzeroBottom", "esriCTbottomPanelPosition");
             if (domStyle.get(this.divImageBackground, "display") === "block") {
                 topic.publish("setLegendPositionDown");
             }
         },
 
+        /**
+        * highlight the nearest feature on the amp
+        * @memberOf widgets/searchResult/searchResult
+        */
+        _highlightFeature: function (features, resultcontent) {
+            var symbol, i, featureGeometry;
+            this._clearhighlightFeature();
+            if (features.length) {
+                if (features[0].features) {
+                    featureGeometry = features[0].features;
+                } else {
+                    featureGeometry = features;
+                }
+                for (i = 0; i < featureGeometry.length; i++) {
+                    if (i === resultcontent) {
+                        symbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, dojo.configData.locatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                            new dojo.Color(dojo.configData.RippleColor), 4), new dojo.Color([0, 0, 0, 0]));
+                        this.map.getLayer("highlightLayerId").add(new esri.Graphic(featureGeometry[i].geometry, symbol, {}, null));
+                        break;
+                    }
+                }
+            }
+        },
+
+        /**
+        * clear the highlight feature graphic on the map
+        * @memberOf widgets/searchResult/searchResult
+        */
+        _clearhighlightFeature: function () {
+            this.map.getLayer("highlightLayerId").clear();
+        },
         /**
         * create carousel pod and set it content
         * @memberOf widgets/searchResult/searchResult
@@ -204,10 +249,12 @@ define([
         */
         _carouselPodDisplayBlock: function () {
             domStyle.set(this.divCarouselContent, "display", "block");
+
         },
 
         /**
         * set the content in (Search result) carousel pod
+        * @param {object} result contains route result, features in buffer area, search address,mapPoint, comment layer info
         * @memberOf widgets/searchResult/searchResult
         */
         _setSearchContent: function (result) {
@@ -231,34 +278,46 @@ define([
 
         /**
         * call all the function when click on search result data
+        * @param {object} result contains route result, features in buffer area, search address,mapPoint, comment layer info
+        * @param {object} resultcontent store the value of the click of search result
         * @memberOf widgets/searchResult/searchResult
         */
-        _callFunctionOnClick: function (result, resultcontent, divHeaderContent) {
+        _callFunctionOnClick: function (result, resultcontent) {
             this.isChecked = true;
-            this._showRouteOnClickResult(result, resultcontent);
+            this._showRouteOnClickResult(result, resultcontent.value);
             this._setFacility(result, resultcontent);
-            topic.subscribe("setSearchInfo", lang.hitch(this, function (result) {
-                this._setDirection(result, resultcontent);
-            }));
+            if (result.directionResult) {
+                topic.subscribe("setSearchInfo", lang.hitch(this, function (result) {
+                    this._setDirection(result, resultcontent);
+                }));
+            }
             this._setGallery(result, resultcontent);
             this._setComment(result, resultcontent);
         },
 
         /**
         * call show route function when click on search result data
+        * @param {object} result contains route result, features in buffer area, search address,mapPoint, comment layer info
+        * @param {object} resultcontent store the value of the click of search result
         * @memberOf widgets/searchResult/searchResult
         */
-        _showRouteOnClickResult: function (result, resultcontent) {
+        _showRouteOnClickResult: function (result, featureIndex) {
             var i;
             for (i = 0; i <= result.searchResult.features.length; i++) {
-                if (i === resultcontent.value) {
-                    topic.publish("showRoute", result.searchResult, RouteParameters, result.searchResult.features[i], SpatialReference, units, result.mapPoint);
+                if (i === featureIndex) {
+                    topic.publish("showRoute", result.searchResult, RouteParameters, result.searchResult.features[i], SpatialReference, units, result.mapPoint, featureIndex);
+                    this.map.setLevel(dojo.configData.ZoomLevel);
+                    this.map.centerAt(result.searchResult.features[i].geometry);
+                    topic.publish("highlightFeature", result.searchResult, featureIndex);
+                    break;
                 }
             }
         },
 
         /**
         * set the content in (Facility) carousel pod if user click on search result data
+        * @param {object} result contains route result, features in buffer area, search address,mapPoint, comment layer info
+        * @param {object} resultcontent store the value of the click of search result
         * @memberOf widgets/searchResult/searchResult
         */
         _setFacility: function (result, resultcontent) {
@@ -293,6 +352,7 @@ define([
 
         /**
         * set the content in (Facility) carousel pod when load at first time
+        * @param {object} result contains route result, features in buffer area, search address,mapPoint, comment layer info
         * @memberOf widgets/searchResult/searchResult
         */
         _setFacilityCarouselPod: function (result) {
@@ -320,10 +380,12 @@ define([
 
         /**
         * set the content in (Direction) carousel pod if user click on search result data
+        * @param {object} result contains route result, features in buffer area, search address,mapPoint, comment layer info
+        * @param {object} resultcontent store the value of the click of search result
         * @memberOf widgets/searchResult/searchResult
         */
         _setDirection: function (result, resultcontent) {
-            var divHeaderContent, i, divHeader, divDirectionContainer, divDrectionContent, distanceAndDuration, printButton;
+            var divHeaderContent, i, divHeader, divDirectionContainer, divDrectionContent, distanceAndDuration, printButton, j;
             divHeaderContent = query('.esriCTDivDirectioncontent');
             domConstruct.empty(divHeaderContent[0]);
             divHeader = domConstruct.create("div", {}, divHeaderContent[0]);
@@ -333,16 +395,16 @@ define([
                     for (i = 0; i < result.searchResult.features.length; i++) {
                         if (i === resultcontent.value) {
                             domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + result.searchResult.features[i].attributes.NAME }, divHeader);
-                            printButton = domConstruct.create("div", { "class": "esriCTDivPrint" }, divHeader);
+                            printButton = domConstruct.create("div", { "class": "esriCTDivPrint", "title": sharedNls.tooltips.printButton }, divHeader);
                             this.own(on(printButton, "click", lang.hitch(this, this._printMap)));
                             divDirectionContainer = domConstruct.create("div", { "class": "esriCTResultContent" }, divHeaderContent[0]);
                             distanceAndDuration = domConstruct.create("div", { "class": "esriCTDistanceAndDuration" }, divHeader);
                             domConstruct.create("div", { "class": "esriCTDivDistance", "innerHTML": sharedNls.titles.directionTextDistance + parseFloat(result.directionResult[0].directions.totalLength).toFixed(2) + "mi" }, distanceAndDuration);
                             domConstruct.create("div", { "class": "esriCTDivTime", "innerHTML": sharedNls.titles.directionTextTime + parseFloat(result.directionResult[0].directions.totalDriveTime).toFixed(2) + "min" }, distanceAndDuration);
                             divDrectionContent = domConstruct.create("div", {}, divDirectionContainer);
-                            domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": ("1") + "." + result.directionResult[0].directions.features[i].attributes.text.replace('Location 1', result.addressResult) }, divDrectionContent);
-                            for (i = 1; i < result.directionResult[0].directions.features.length; i++) {
-                                domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": (i + 1) + "." + result.directionResult[0].directions.features[i].attributes.text + "(" + parseFloat(result.directionResult[0].directions.features[i].attributes.length).toFixed(2) + "miles" + ")" }, divDrectionContent);
+                            domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": ("1") + "." + result.directionResult[0].directions.features[0].attributes.text.replace('Location 1', result.addressResult) }, divDrectionContent);
+                            for (j = 1; j < result.directionResult[0].directions.features.length; j++) {
+                                domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": (j + 1) + "." + result.directionResult[0].directions.features[j].attributes.text + "(" + parseFloat(result.directionResult[0].directions.features[j].attributes.length).toFixed(2) + "miles" + ")" }, divDrectionContent);
                             }
                             domClass.add(divDirectionContainer, "esriCTCarouselContentHeight");
                             if (this.directionScrollBar) {
@@ -367,6 +429,7 @@ define([
 
         /**
         * set the content in (Direction) carousel pod when load at first time
+        * @param {object} result contains route result, features in buffer area, search address,mapPoint, comment layer info
         * @memberOf widgets/searchResult/searchResult
         */
         _setDirectionCarouselPod: function (result) {
@@ -376,7 +439,7 @@ define([
             divHeader = domConstruct.create("div", {}, divHeaderContent[0]);
             this.divPodInfoContainer.appendChild(this.divDirectionMain);
             domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + result.searchResult.features[0].attributes.NAME }, divHeader);
-            printButton = domConstruct.create("div", { "class": "esriCTDivPrint" }, divHeader);
+            printButton = domConstruct.create("div", { "class": "esriCTDivPrint", "title": sharedNls.tooltips.printButton }, divHeader);
             this.own(on(printButton, "click", lang.hitch(this, function () {
                 this.printMap = new PrintMap({ map: this.map });
             })));
@@ -384,7 +447,7 @@ define([
             distanceAndDuration = domConstruct.create("div", { "class": "esriCTDistanceAndDuration" }, divHeader);
             domConstruct.create("div", { "class": "esriCTDivDistance", "innerHTML": sharedNls.titles.directionTextDistance + parseFloat(result.directionResult[0].directions.totalLength).toFixed(2) + "mi" }, distanceAndDuration);
             domConstruct.create("div", { "class": "esriCTDivTime", "innerHTML": sharedNls.titles.directionTextTime + parseFloat(result.directionResult[0].directions.totalDriveTime).toFixed(2) + "min" }, distanceAndDuration);
-            divDrectionContent = domConstruct.create("div", {}, divDirectionContainer);
+            divDrectionContent = domConstruct.create("div", { "class": "esriCTDirectionRow" }, divDirectionContainer);
             domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": ("1") + "." + result.directionResult[0].directions.features[0].attributes.text.replace('Location 1', result.addressResult) }, divDrectionContent);
             for (i = 1; i < result.directionResult[0].directions.features.length; i++) {
                 domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": (i + 1) + "." + result.directionResult[0].directions.features[i].attributes.text + "(" + parseFloat(result.directionResult[0].directions.features[i].attributes.length).toFixed(2) + "miles" + ")" }, divDrectionContent);
@@ -400,23 +463,40 @@ define([
 
         /**
         * set the content in (Comments) carousel pod
+        * @param {object} result contains route result, features in buffer area, search address,mapPoint, comment layer info
+        * @param {object} resultcontent store the value of the click of search result
         * @memberOf widgets/searchResult/searchResult
         */
         _setComment: function (result, resultcontent) {
-            var divHeaderContent, i, j, divHeaderStar, divStar, utcMilliseconds, k, l, isCommentFound;
+            var divHeaderContent, i, j, divHeaderStar, divStar, commentAttribute, utcMilliseconds, k, l, isCommentFound, rankFieldAttribute, esriCTCommentDateStar, divCommentRow;
+            rankFieldAttribute = dojo.configData.DatabaseFields.RankFieldName;
+            commentAttribute = dojo.configData.DatabaseFields.CommentsFieldName;
+            divHeaderContent = query('.esriCTDivCommentContent');
+            if (result.length === 0) {
+                if (this.commentScrollBar) {
+                    this.commentScrollBar.removeScrollBar();
+                }
+                if (divHeaderContent[0]) {
+                    domConstruct.empty(divHeaderContent[0]);
+                }
+                divCommentRow = domConstruct.create("div", { "class": "esriCTRowNoComment" }, divHeaderContent[0]);
+                domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
+                return;
+            }
             if (!this.isChecked) {
-                divHeaderContent = query('.esriCTDivCommentContent');
                 domConstruct.empty(divHeaderContent[0]);
-                for (i = 0; i < 10; i++) {
+                for (i = 0; i < result.length; i++) {
+                    divCommentRow = domConstruct.create("div", { "class": "divCommentRow" }, divHeaderContent[0]);
+                    esriCTCommentDateStar = domConstruct.create("div", { "class": "esriCTCommentDateStar" }, divCommentRow);
+                    divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, esriCTCommentDateStar);
                     if (result[i]) {
                         for (j = 0; j < 5; j++) {
-                            divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, divHeaderContent[0]);
-                            divStar = domConstruct.create("div", { "class": "esriCTRatingStar" }, divHeaderStar);
-                            if (j < result[i].attributes.RANK) {
+                            divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
+                            if (j < result[i].attributes[rankFieldAttribute]) {
                                 domClass.add(divStar, "esriCTRatingStarChecked");
                             }
                         }
-                        if (result[i].attributes.COMMENTS) {
+                        if (result[i].attributes[commentAttribute]) {
                             utcMilliseconds = Number(dojo.string.substitute(dojo.configData.CommentsInfoPopupFieldsCollection.SubmitDate, result[i].attributes));
                             domConstruct.create("div", {
                                 "class": "esriCTCommentDate",
@@ -424,10 +504,10 @@ define([
                                     datePattern: dojo.configData.DateFormat,
                                     selector: "date"
                                 })
-                            }, divHeaderContent[0]);
-                            domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": result[i].attributes.COMMENTS }, divHeaderContent[0]);
+                            }, esriCTCommentDateStar);
+                            domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": result[i].attributes[commentAttribute] }, divCommentRow);
                         } else {
-                            domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divHeaderContent[0]);
+                            domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
                         }
                     }
                 }
@@ -436,30 +516,26 @@ define([
                 if (result.CommentResult.length !== 0) {
                     divHeaderContent = query('.esriCTDivCommentContent');
                     domConstruct.empty(divHeaderContent[0]);
+                    divCommentRow = domConstruct.create("div", { "class": "divCommentRow" }, divHeaderContent[0]);
                     for (k = 0; k < result.searchResult.features.length; k++) {
                         if (k === resultcontent.value) {
                             for (l = 0; l < result.CommentResult.length; l++) {
                                 if (result.searchResult.features[k].attributes.OBJECTID === result.CommentResult[l].attributes.id) {
                                     isCommentFound = true;
+                                    divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, divCommentRow);
                                     for (j = 0; j < 5; j++) {
-                                        divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, divHeaderContent[0]);
-                                        divStar = domConstruct.create("div", { "class": "esriCTRatingStar" }, divHeaderStar);
-                                        if (j < result.CommentResult[l].attributes.RANK) {
+                                        divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
+                                        if (j < result.CommentResult[l].attributes[rankFieldAttribute]) {
                                             domClass.add(divStar, "esriCTRatingStarChecked");
                                         }
                                     }
-                                    if (result.CommentResult[l].attributes.COMMENTS) {
+                                    if (result.CommentResult[l].attributes[commentAttribute]) {
                                         utcMilliseconds = Number(dojo.string.substitute(dojo.configData.CommentsInfoPopupFieldsCollection.SubmitDate, result.CommentResult[l].attributes));
-                                        domConstruct.create("div", {
-                                            "class": "esriCTCommentDate",
-                                            "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), {
-                                                datePattern: dojo.configData.DateFormat,
-                                                selector: "date"
-                                            })
-                                        }, divHeaderContent[0]);
-                                        domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": result.CommentResult[l].attributes.COMMENTS }, divHeaderContent[0]);
+
+                                        domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": result.CommentResult[l].attributes[commentAttribute] }, divCommentRow);
+                                        domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), { datePattern: dojo.configData.DateFormat, selector: "date" }) }, divCommentRow);
                                     } else {
-                                        domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divHeaderContent[0]);
+                                        domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
                                     }
                                 }
                             }
@@ -467,7 +543,7 @@ define([
                     }
                 }
                 if (!isCommentFound) {
-                    domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divHeaderContent[0]);
+                    domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
                 }
             }
             domClass.add(divHeaderContent[0].parentElement, "esriCTCarouselContentHeight");
@@ -481,6 +557,7 @@ define([
 
         /**
         * convert the UTC time stamp from Millisecond
+        * @param {object} utcMilliseconds contains UTC millisecond
         * @returns Date
         * @memberOf widgets/searchResult/searchResult
         */
@@ -489,6 +566,8 @@ define([
         },
 
         /**
+        * convert the local time to UTC
+        * @param {object} localTimestamp contains Local time
         * @returns Date
         * @memberOf widgets/searchResult/searchResult
         */
@@ -498,6 +577,8 @@ define([
 
         /**
         * set the images in (Gallery) carousel pod
+        * @param {object} selectedFeature contains the information of search result
+        * @param {object} resultcontent store the value of the click of search result
         * @memberOf widgets/searchResult/searchResult
         */
         _setGallery: function (selectedFeature, resultcontent) {
@@ -528,13 +609,17 @@ outerLoop:
         },
 
         /**
-        * query on attachment and show the image on carousel pod
+        * query on attachment and show the images on carousel pod
+        * @param {object} response contain the images which are in the feature layer
         * @memberOf widgets/searchResult/searchResult
         */
-        _setAttachments: function (response, resultcontent) {
+        _setAttachments: function (response) {
             var divAttchment, divHeaderContent, divPreviousImg, divNextImg;
             this.imageCount = 0;
             divHeaderContent = query('.esriCTDivGalleryContent');
+            if (divHeaderContent) {
+                domConstruct.empty(divHeaderContent[0]);
+            }
             if (response.length > 1) {
                 divPreviousImg = domConstruct.create("div", { "class": "esriCTImgPrev" }, divHeaderContent[0]);
                 divNextImg = domConstruct.create("div", { "class": "esriCTImgNext" }, divHeaderContent[0]);
@@ -547,10 +632,17 @@ outerLoop:
                 divAttchment = domConstruct.create("img", { "class": "esriCTDivAttchment" }, divHeaderContent[0]);
                 domAttr.set(divAttchment, "src", response[0].url);
             } else {
+
                 domConstruct.create("div", { "class": "esriCTGalleryBox", "innerHTML": sharedNls.errorMessages.imageDoesNotFound }, divHeaderContent[0]);
             }
         },
 
+        /**
+        * change the image when click on previous arrow of image
+        * @param {object} response contain the images which are in the feature layer
+        * @param {node} divAttchmentInfo is domNode
+        * @memberOf widgets/searchResult/searchResult
+        */
         _previousImage: function (response, divAttchment) {
             this.imageCount--;
             if (this.imageCount < 0) {
@@ -558,6 +650,13 @@ outerLoop:
             }
             domAttr.set(divAttchment, "src", response[this.imageCount].url);
         },
+
+        /**
+        * change the image when click on next arrow of image
+        * @param {object} response contain the images which are in the feature layer
+        * @param {node} divAttchmentInfo is domNode
+        * @memberOf widgets/searchResult/searchResult
+        */
         _nextImage: function (response, divAttchment) {
             this.imageCount++;
             if (this.imageCount === response.length) {
@@ -574,3 +673,4 @@ outerLoop:
         }
     });
 });
+

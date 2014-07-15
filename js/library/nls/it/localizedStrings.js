@@ -31,7 +31,10 @@ define({
         locate: "Posizione corrente",
         share: "Condividi",
         help: "Guida",
-        clearEntry: "@it@ Clear"
+        clearEntry: "@it@ Clear",
+        hidePanel: "@it@ Hide panel",
+        showPanel: "@it@ Show panel",
+        printButton: "@it@ Print"
     },
     titles: {
         directionsDisplayText: "@it@ Area of Interest",
@@ -67,7 +70,9 @@ define({
         shareFailed: "@it@ Unable to share.",
         imageDoesNotFound: "@it@ There are no photo available.",
         facilitydoestfound: "@it@  No facilities found in buffer area.",
-        noCommentAvaiable: "@it@  No Comment available"
+        noCommentAvaiable: "@it@  No Comment available",
+        routeComment: "@it@ Route could not be calculated from current location.",
+        activityNotSelected: "@it@ Please select activity to search."
     },
     notUsed: {
         addressDisplayText: "@it@ Address",

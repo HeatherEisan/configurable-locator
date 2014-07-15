@@ -75,13 +75,14 @@ define([
                 * minimize other open header panel widgets and show activities panel
                 */
                 topic.publish("toggleWidget", "activities");
-                this._showActivityResult();
+                this._showActivityPlannerContainer();
             })));
 
+            //Temporary file and attach point have to delete in next sprint
             domStyle.set(this.activityPlannerListRowCarPooling, "display", "none");
             domStyle.set(this.activityPlannerListRowBoatRamp, "display", "none");
             this.own(on(this.bottonGo, "click", lang.hitch(this, function () {
-                this._showDate();
+                this._activityPlannerDateValidation();
             })));
             this.own(on(this.esriCTActivityPlannerBoatAddlist, "click", lang.hitch(this, function () {
                 this._addtoMyList();
@@ -92,21 +93,21 @@ define([
             this.own(on(this.esriCTActivityPlannerBoatRampAddlist, "click", lang.hitch(this, function () {
                 this._addtoMyList();
             })));
-
-            this.own(on(this.ActivityTab, "click", lang.hitch(this, function () {
+            this.own(on(this.activityTab, "click", lang.hitch(this, function () {
                 this._showActivityListTab();
             })));
 
-            this.own(on(this.ActivityListTab, "click", lang.hitch(this, function () {
+            this.own(on(this.activityListTab, "click", lang.hitch(this, function () {
                 this._showActivityTab();
             })));
+            // end of temporary file
         },
 
         /**
         * close activity panel if any other widget is opened
-        * @param {string} widget Key of the newly opened widget
+        * @memberOf widgets/activities/activities
         */
-        _showActivityResult: function () {
+        _showActivityPlannerContainer: function () {
             if (html.coords(this.esriCTdivAppContainer).h > 0) {
                 /**
                 * when user clicks on activity icon in header panel, close the activity panel if it is open
@@ -125,30 +126,34 @@ define([
         },
 
         /**
-        * show activity tab
+        * show activity tab and block the Mylist tab
         * @memberOf widgets/activities/activities
         */
         _showActivityTab: function () {
-            domStyle.set(this.ActivityList, "display", "block");
-            domStyle.set(this.ActivityPlaner, "display", "none");
-            domClass.replace(this.ActivityTab, "esriCTActivityTab", "esriCTActivityTabSelected");
-            domClass.replace(this.ActivityListTab, "esriCTActivityListTabSelected", "esriCTActivityListTab");
-            domClass.replace(this.ActivityPlaner, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
+            domStyle.set(this.activityList, "display", "block");
+            domStyle.set(this.activityPlanner, "display", "none");
+            domClass.replace(this.activityTab, "esriCTActivityTab", "esriCTActivityTabSelected");
+            domClass.replace(this.activityListTab, "esriCTActivityListTabSelected", "esriCTActivityListTab");
+            domClass.replace(this.activityPlanner, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
         },
 
         /**
-        * show ActivityMyList tap
+        * show Mylist tap and block the activity tab
         * @memberOf widgets/activities/activities
         */
         _showActivityListTab: function () {
-            domStyle.set(this.ActivityList, "display", "none");
-            domStyle.set(this.ActivityPlaner, "display", "block");
-            domClass.replace(this.ActivityTab, "esriCTActivityTabSelected", "esriCTActivityTab");
-            domClass.replace(this.ActivityPlaner, "esriCTShowContainerHeight", "esriCTHideContainerHeight");
-            domClass.replace(this.ActivityListTab, "esriCTActivityListTab", "esriCTActivityListTabSelected");
+            domStyle.set(this.activityList, "display", "none");
+            domStyle.set(this.activityPlanner, "display", "block");
+            domClass.replace(this.activityTab, "esriCTActivityTabSelected", "esriCTActivityTab");
+            domClass.replace(this.activityPlanner, "esriCTShowContainerHeight", "esriCTHideContainerHeight");
+            domClass.replace(this.activityListTab, "esriCTActivityListTab", "esriCTActivityListTabSelected");
         },
 
-        _showDate: function () {
+        /**
+        * activityPlannr Date Validation(Temporary function)
+        * @memberOf widgets/activities/activities
+        */
+        _activityPlannerDateValidation: function () {
             var todayDate, nextValue, fromDate;
             todayDate = new Date();
             domStyle.set(this.activityPlannerContainer, "display", "none");
@@ -177,7 +182,6 @@ define([
                         }
                     } else {
                         alert("Please select valid To date");
-
                     }
                 } else {
                     alert("Please select valid From date");
@@ -188,6 +192,10 @@ define([
             }
         },
 
+        /**
+        * Date validation for day, month and year
+        * @memberOf widgets/activities/activities
+        */
         _isDateValid: function (firstDate, secDate) {
             var isValid = false;
             if (firstDate.getUTCFullYear() === secDate.getUTCFullYear()) {
@@ -207,16 +215,16 @@ define([
             } else {
                 isValid = false;
             }
-
             return isValid;
         },
 
+        //Activity planner UI and set its innerHTML(temporary function)
         _addtoMyList: function () {
             domStyle.set(this.myListTable, "display", "block");
-            domStyle.set(this.ActivityPlaner, "display", "none");
-            domClass.replace(this.ActivityTab, "esriCTActivityTab", "esriCTActivityTabSelected");
-            domClass.replace(this.ActivityListTab, "esriCTActivityListTabSelected", "esriCTActivityListTab");
-            domStyle.set(this.ActivityList, "display", "block");
+            domStyle.set(this.activityPlanner, "display", "none");
+            domClass.replace(this.activityTab, "esriCTActivityTab", "esriCTActivityTabSelected");
+            domClass.replace(this.activityListTab, "esriCTActivityListTabSelected", "esriCTActivityListTab");
+            domStyle.set(this.activityList, "display", "block");
             domAttr.set(this.MyListLeftcolfirst, "innerHTML", this.myFromDate.displayedValue + "," + " " + "Lake View Hotel");
             if (this.addToMyListCarPooling) {
                 domStyle.set(this.esriCTMyListRowCarPooling, "display", "block");

@@ -514,7 +514,7 @@ input
 
 .esriCTLegendBoxInner
 {
-    border: 1px solid #5C2E6F !important; /*border-bottom: none !important;*/
+    border: 1px solid #5C2E6F !important;
 }
 
 .esriCTLegendLabel
@@ -785,3 +785,31 @@ input
     background-image: url("../images/date-arrow-purple.png");
 }
 /*End of Activity planner*/
+.esriCTtabs ul li a.esriCTImageTab{ color: #5C2E6F;}
+.esriCTtabs ul li.infoSelectedTab {
+background: #5C2E6F;
+
+}
+.esriCTtabs li {color:#5C2E6F;}
+
+.esriCTImageTab
+{
+     color: #5C2E6F;
+    background: url("../images/direction-purple.png");
+
+
+}
+.esriCTImageTabselected
+{
+    color: #5C2E6F;
+    background: url("../images/direction-select.png");
+
+}
+.esriCTActivitySerachGoButton
+{
+    background: none repeat scroll 0% 0% #5C2E6F;
+}
+.esriCTActivityHeadText
+{
+    color: #5C2E6F;
+}

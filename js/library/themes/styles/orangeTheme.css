@@ -789,3 +789,32 @@ input
 }
 
 /*End of Activity planner*/
+.esriCTtabs ul li a.esriCTImageTab{ color: #d15706;}
+.esriCTtabs ul li.infoSelectedTab {
+background: #d15706;
+
+}
+.esriCTtabs li
+{
+color:#d15706;
+}
+.esriCTImageTab
+{
+    color: #d15706;
+    background: url("../images/direction-orange.png");
+
+}
+.esriCTImageTabselected
+{
+    color: #d15706;
+    background: url("../images/direction-select.png");
+
+}
+.esriCTActivitySerachGoButton
+{
+    background: none repeat scroll 0% 0% #d15706;
+}
+.esriCTActivityHeadText
+{
+    color: #d15706;
+}

@@ -27,9 +27,10 @@ define([
     "esri/geometry/Point",
     "esri/symbols/PictureMarkerSymbol",
     "esri/SpatialReference",
+    "dojo/Deferred",
     "esri/graphic",
     "dojo/i18n!application/js/library/nls/localizedStrings"
-], function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, Point, PictureMarkerSymbol, SpatialReference, Graphic, sharedNls) {
+], function (declare, lang, domConstruct, on, topic, _WidgetBase, GeometryService, Point, PictureMarkerSymbol, SpatialReference, Deferred, Graphic, sharedNls) {
 
     //========================================================================================================================//
 
@@ -68,10 +69,10 @@ define([
         */
 
         _showCurrentLocation: function () {
-            var mapPoint, self = this, currentBaseMap, geometryServiceUrl, geometryService;
+            var mapPoint, self = this, currentBaseMap, geometryServiceUrl, geometryService, deferred;
             geometryServiceUrl = dojo.configData.GeometryService;
             geometryService = new GeometryService(geometryServiceUrl);
-
+            deferred = new Deferred();
             /**
             * get device location using geolocation service
             * @param {object} position Co-ordinates of device location in spatialReference of wkid:4326
@@ -92,18 +93,21 @@ define([
                     if (currentBaseMap.visible) {
                         if (!currentBaseMap.fullExtent.contains(newPoint[0])) {
                             alert(sharedNls.errorMessages.invalidLocation);
+                            topic.publish("hideProgressIndicator");
                             return;
                         }
                     }
                     mapPoint = newPoint[0];
                     self.map.centerAndZoom(mapPoint, dojo.configData.ZoomLevel);
-                    self._addGraphic(mapPoint);
+                    self._addGraphic(mapPoint, deferred);
                 }, function () {
                     alert(sharedNls.errorMessages.invalidProjection);
                 });
             }, function () {
                 alert(sharedNls.errorMessages.invalidLocation);
+                topic.publish("hideProgressIndicator");
             });
+            return deferred.promise;
         },
 
         /**
@@ -111,13 +115,14 @@ define([
         * @param {object} mapPoint Map point of device location in spatialReference of map
         * @memberOf widgets/geoLocation/geoLocation
         */
-        _addGraphic: function (mapPoint) {
+        _addGraphic: function (mapPoint, deferred) {
             var locatorMarkupSymbol, geoLocationPushpin, graphic;
             geoLocationPushpin = dojoConfig.baseURL + dojo.configData.LocatorSettings.DefaultLocatorSymbol;
             locatorMarkupSymbol = new PictureMarkerSymbol(geoLocationPushpin, "35", "35");
             graphic = new Graphic(mapPoint, locatorMarkupSymbol, null, null);
             this.map.getLayer("esriGraphicsLayerMapSettings").clear();
             this.map.getLayer("esriGraphicsLayerMapSettings").add(graphic);
+            deferred.resolve(graphic);
         }
 
     });

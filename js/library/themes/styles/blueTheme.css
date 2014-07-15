@@ -263,31 +263,20 @@
 }
 
 /* Application Header */
-
-.esriCTApplicationHeader
+.esriCTApplicationHeader, .esriCTAddressContent
 {
-    border-bottom: 1px solid #007ac2;
+border-color:#007ac2;
+}
+.esriCTApplicationHeader,.esriCTRightTab, .esriCTAddressContent
+{
     background: #fff;
 }
 
-.esriCTApplicationHeaderTextTD
+.esriCTApplicationHeaderTextTD,.esriCTResultColor
 {
     color: #007AC2;
-    text-shadow: 0 0 1px #AAAAAA;
-}
+ }
 
-.esriCTRightTab
-{
-    background-color: #fff;
-}
-
-.esriCTAddressContent
-{
-    border-right: 1px solid #007ac2;
-    border-left: 1px solid #007ac2;
-    border-bottom: 1px solid #007ac2;
-    background-color: #fff;
-}
 
 .esriCTTxtAddress
 {
@@ -321,11 +310,6 @@ input
     border-top: 1px solid #DFDFDF;
     border-right: 1px solid #DFDFDF;
     border-bottom: 1px solid #DFDFDF;
-}
-
-.esriCTResultColor
-{
-    color: #007ac2;
 }
 
 
@@ -462,16 +446,16 @@ input
 
 /*splash Screen*/
 
-.esriCTSplashScreenDialog
+/*.esriCTSplashScreenDialog
 {
     background-color: #fff;
     color: #000;
-}
+}*/
 
-.customButtonContainer
+/*.customButtonContainer
 {
     background: #fff;
-}
+}*/
 
 .customButton
 {
@@ -497,10 +481,10 @@ input
     background-color: #C0C0C0;
 }
 
-.esriScrollBarPosition
+/*.esriScrollBarPosition
 {
     position: relative;
-}
+}*/
 
 .basemapThumbnail
 {
@@ -545,6 +529,7 @@ input
 .esriCTClose
 {
     background: url("../images/close.png");
+    background-repeat:no-repeat;
 }
 
 .esriCTHeaderPanelContent
@@ -560,7 +545,7 @@ input
 
 .esriCTDivTriangle
 {
-    background-image: url("../images/bottomArrow.png");
+     background-image: url("../images/bottomArrow-blue.png");
 }
 
 .esriCTLink
@@ -570,12 +555,12 @@ input
 
 /* Loading indicator Styles */
 
-.esriGovtLoadSpashScreen
+/*.esriGovtLoadSpashScreen
 {
     -pie-background: rgba(0,0,0,0.6);
     background: rgba(0,0,0,0.6);
 }
-
+*/
 .esriCTdivInfoTotalFeatureCount, .esriCTdivInfoFeatureCount
 {
     color: #007AC2;
@@ -792,3 +777,32 @@ input
 }
 
 /*End of Activity planner*/
+
+
+/* Info window */
+.esriCTtabs ul li a.esriCTImageTab{ color: #007ac2;}
+.esriCTtabs ul li.infoSelectedTab {
+background: #007ac2;
+
+}
+.esriCTtabs li {color:#007ac2;}
+.esriCTImageTab
+{
+    color: #007AC2;
+    background: url("../images/direction.png");
+
+}
+.esriCTImageTabselected
+{
+    color: #007AC2;
+    background: url("../images/direction-select.png");
+
+}
+.esriCTActivitySerachGoButton
+{
+    background: none repeat scroll 0% 0% #007AC2;
+}
+.esriCTActivityHeadText
+{
+    color: #007AC2;
+}

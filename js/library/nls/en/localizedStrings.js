@@ -31,7 +31,10 @@ define({
         locate: "Locate",
         share: "Share",
         help: "Help",
-        clearEntry: "Clear"
+        clearEntry: "Clear",
+        hidePanel: "Hide panel",
+        showPanel: "Show panel",
+        printButton: "Print"
     },
     titles: {
         directionsDisplayText: "Area of Interest",
@@ -67,8 +70,9 @@ define({
         shareFailed: "Unable to share.",
         imageDoesNotFound: "There are no photo available.",
         facilitydoestfound: "No facilities found in buffer area.",
-        noCommentAvaiable: "No Comment available"
-
+        noCommentAvaiable: "No Comment available",
+        routeComment: "Route could not be calculated from current location.",
+        activityNotSelected: "Please select activity to search."
     },
     notUsed: {
         addressDisplayText: "Address",

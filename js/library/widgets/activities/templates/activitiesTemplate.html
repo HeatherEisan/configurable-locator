@@ -1,113 +1,118 @@
 ﻿<div class="esriCTFullHeightWidth" data-dojo-attach-point="applicationHeaderActivityContainer">
     <div data-dojo-attach-point="esriCTdivAppContainer" class="esriCTDivActivityAppContainer esriCTHideContainerHeight">
         <div class="esriCTDivActivityContainer">
-            <div class="esriCTActivityTabSelected" data-dojo-attach-point="ActivityTab">
+            <div class="esriCTActivityTabSelected" data-dojo-attach-point="activityTab">
                 <span>${sharedNls.titles.activityTabName}</span>
             </div>
-            <div class="esriCTActivityListTab" data-dojo-attach-point="ActivityListTab">
+            <div class="esriCTActivityListTab" data-dojo-attach-point="activityListTab">
                 <span>${sharedNls.titles.activityListTabName}</span>
             </div>
             <div data-dojo-attach-point="TabContentContainer">
-                <div class="esriCTActivityPlaner" data-dojo-attach-point="ActivityPlaner">
+                <div class="esriCTActivityPlaner" data-dojo-attach-point="activityPlanner">
                     <div class="esriCTActiviyDateContainer">
-                    <div class="esriCTActiviyDateInnerContainer">
-                        <div class="esriCTdivclear">
-                            <div class="esriCTDivFromDate">
-                                <span class="esriCTFromDateText">${sharedNls.titles.fromDateText}</span>
+                        <div class="esriCTActiviyDateInnerContainer">
+                            <div class="esriCTdivclear">
+                                <div class="esriCTDivFromDate">
+                                    <span class="esriCTFromDateText">${sharedNls.titles.fromDateText}</span>
+                                </div>
+                                <div class="esriCTDivToDate">
+                                    <span class="esriCTDivTODateText">${sharedNls.titles.toDateText}</span>
+                                </div>
                             </div>
-                            <div class="esriCTDivToDate">
-                                <span class="esriCTDivTODateText">${sharedNls.titles.toDateText}</span>
+                            <div class="esriCTdivclear">
+                                <div class="esriCTDivFromDate">
+                                    <input data-dojo-id="myFromDate" type="text" name="fromDate" data-dojo-type="dijit/form/DateTextBox"
+                                        data-dojo-attach-point="myFromDate" required="true" onchange="myFromDate.constraints.min = new Date();" />
+                                </div>
+                                <div class="esriCTDivToDate">
+                                    <input data-dojo-id="myToDate" type="text" name="toDate" data-dojo-type="dijit/form/DateTextBox"
+                                        data-dojo-attach-point="myToDate" required="true" onchange="myToDate.constraints.min = new Date();" />
+                                </div>
+                                <div class="esriCTBottonGo" data-dojo-attach-point="bottonGo">
+                                    <div class="esriCTSpanGoText">
+                                        ${sharedNls.titles.gobuttonText}</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="esriCTdivclear">
-                            <div class="esriCTDivFromDate">
-                                <input data-dojo-id="myFromDate"   type="text" name="fromDate" data-dojo-type="dijit/form/DateTextBox"
-                                   data-dojo-attach-point="myFromDate" required="true" onchange="myFromDate.constraints.min = new Date();" />
-                            </div>
-                            <div class="esriCTDivToDate">
-                                <input data-dojo-id="myToDate" type="text" name="toDate" data-dojo-type="dijit/form/DateTextBox" 
-                                     data-dojo-attach-point="myToDate" required="true" onchange="myToDate.constraints.min = new Date();" />
-                            </div>
-                            <div class="esriCTBottonGo" data-dojo-attach-point="bottonGo">
-                                <div class="esriCTSpanGoText">
-                                    ${sharedNls.titles.gobuttonText}</div>
-                            </div>
-                        </div>
-                    </div>
                     </div>
                     <div class="esriCTActivityPlannerContainer" data-dojo-attach-point="activityPlannerContainer">
                         <div class="esriCTActivityPlannerListTable">
-                            <div class="esriCTActivityPlannerListRow data-dojo-attach-point="activityPlannerListRowBoat">
+                            <div class="esriCTActivityPlannerListRow" data-dojo-attach-point="activityPlannerListRowBoat">
                                 <div class="esriCTActivityPlannerLeft">
                                     <div class="esriCTActivityPlannerText">
                                         Boat Ramp</div>
                                     <div class="esriCTActivityPlannerDates" data-dojo-attach-point="activityPlannerDates">
-                                        
                                     </div>
                                 </div>
                                 <div class="esriCTActivityPlannerRight">
                                     <div class="esriCTActivityPlannerAddlist" data-dojo-attach-point="esriCTActivityPlannerBoatAddlist">
-                                          <div class="esriCTActivityPlannerAddlistText">Add to list</div>
-                                        <div class="esriCTplusRound"></div>
-                                     
-                                      </div>
+                                        <div class="esriCTActivityPlannerAddlistText">
+                                            Add to list</div>
+                                        <div class="esriCTplusRound">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div data-dojo-attach-point="activityPlannerListRowCarPooling">
-                            <div class="esriCTActivityPlannerListRow" >
-                                <div class="esriCTActivityPlannerLeft">
-                                    <div class="esriCTActivityPlannerText">
-                                        Car Pooling</div>
-                                    <div class="esriCTActivityPlannerDates" data-dojo-attach-point="activityPlannerCarPoolingDates">
-                                   
+                                <div class="esriCTActivityPlannerListRow">
+                                    <div class="esriCTActivityPlannerLeft">
+                                        <div class="esriCTActivityPlannerText">
+                                            Car Pooling</div>
+                                        <div class="esriCTActivityPlannerDates" data-dojo-attach-point="activityPlannerCarPoolingDates">
+                                        </div>
+                                    </div>
+                                    <div class="esriCTActivityPlannerRight">
+                                        <div class="esriCTActivityPlannerAddlist" data-dojo-attach-point="esriCTActivityPlannerCarAddlist">
+                                            <div class="esriCTActivityPlannerAddlistText">
+                                                Add to list</div>
+                                            <div class="esriCTplusRound">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                 <div class="esriCTActivityPlannerRight">
-                                    <div class="esriCTActivityPlannerAddlist"  data-dojo-attach-point="esriCTActivityPlannerCarAddlist">
-                                          <div class="esriCTActivityPlannerAddlistText">Add to list</div>
-                                        <div class="esriCTplusRound"></div>
-                                     
-                                      </div>
-                                </div>
-                            </div>
                             </div>
                             <div data-dojo-attach-point="activityPlannerListRowBoatRamp">
-                                      <div class="esriCTActivityPlannerListRow" >
-                                <div class="esriCTActivityPlannerLeft">
-                                    <div class="esriCTActivityPlannerText">
-                                        Boat Ramp</div>
-                                    <div class="esriCTActivityPlannerDates" data-dojo-attach-point="activityPlannerBoatRampDates">
+                                <div class="esriCTActivityPlannerListRow">
+                                    <div class="esriCTActivityPlannerLeft">
+                                        <div class="esriCTActivityPlannerText">
+                                            Boat Ramp</div>
+                                        <div class="esriCTActivityPlannerDates" data-dojo-attach-point="activityPlannerBoatRampDates">
+                                        </div>
+                                    </div>
+                                    <div class="esriCTActivityPlannerRight">
+                                        <div class="esriCTActivityPlannerAddlist" data-dojo-attach-point="esriCTActivityPlannerBoatRampAddlist">
+                                            <div class="esriCTActivityPlannerAddlistText">
+                                                Add to list</div>
+                                            <div class="esriCTplusRound">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                 <div class="esriCTActivityPlannerRight">
-                                    <div class="esriCTActivityPlannerAddlist"  data-dojo-attach-point="esriCTActivityPlannerBoatRampAddlist">
-                                          <div class="esriCTActivityPlannerAddlistText">Add to list</div>
-                                        <div class="esriCTplusRound"></div>
-                                     
-                                      </div>
-                                </div>
-                            </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="esriCTActivityList" data-dojo-attach-point="ActivityList">
+                <div class="esriCTActivityList" data-dojo-attach-point="activityList">
                     <div class="esriCTMyListHeaderRow">
                         <div class="esriCTMyListHeaderLeft">
-                            <div style="display:table">
-                            <div class="esriCTMyListHeaderText">
-                                Order by date
-                               </div> 
-                               <div class="esriCTimgOrderByDate"></div>
+                            <div style="display: table">
+                                <div class="esriCTMyListHeaderText">
+                                    Order by date
                                 </div>
-                             </div>
-                       
+                                <div class="esriCTimgOrderByDate">
+                                </div>
+                            </div>
+                        </div>
                         <div class="esriCTHeaderMyListRight">
                             <div>
-                                <div class="esriCTHeaderDirectionAcitivityList"></div>
-                                <div class="esriCTHeaderShareAcitivityList"></div>
-                                <div class="esriCTHeaderAddAcitivityList"></div>
-                                <div class="esriCTHeaderPrintAcitivityList"></div>
+                                <div class="esriCTHeaderDirectionAcitivityList">
+                                </div>
+                                <div class="esriCTHeaderShareAcitivityList">
+                                </div>
+                                <div class="esriCTHeaderAddAcitivityList">
+                                </div>
+                                <div class="esriCTHeaderPrintAcitivityList">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -118,51 +123,49 @@
                                     <div class="esriCTMyListText">
                                         Boat Ramp</div>
                                     <div class="esriCTMyListDates" data-dojo-attach-point="MyListLeftcolfirst">
-                                       
                                     </div>
                                 </div>
                                 <div class="esriCTMyListRight">
                                     <div class="esriCTMyListIcons">
-                                        <div class="esriCTDirectionAcitivityList"></div>
-                                         <div class="esriCTAddAcitivityList"></div>
-                                        <div class="esriCTDeleteAcitivityList"></div>
+                                        <div class="esriCTDirectionAcitivityList">
+                                        </div>
+                                        <div class="esriCTAddAcitivityList">
+                                        </div>
+                                        <div class="esriCTDeleteAcitivityList">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div data-dojo-attach-point="esriCTMyListRowCarPooling">
-                            <div class="esriCTMyListRow" >
-                                <div class="esriCTMyListLeft">
-                                    <div class="esriCTMyListText">
-                                        Car Pooling</div>
-                                    <div class="esriCTMyListDates" data-dojo-attach-point="MyListLeftcolsecond">
-                                        
+                                <div class="esriCTMyListRow">
+                                    <div class="esriCTMyListLeft">
+                                        <div class="esriCTMyListText">
+                                            Car Pooling</div>
+                                        <div class="esriCTMyListDates" data-dojo-attach-point="MyListLeftcolsecond">
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="esriCTMyListRight">
-                                    <div class="esriCTMyListIcons">
-                                        <span class="esriCTDirectionAcitivityList"></span>
-                                        <span class="esriCTAddAcitivityList"></span>
-                                        <span class="esriCTDeleteAcitivityList"></span>
-                                    </div>
-                                </div>
-                            </div>
-                            </div>
-                              <div style="clear:both;"  data-dojo-attach-point="esriCTMyListRowBoatRamp">
-                                 <div class="esriCTMyListRow">
-                                <div class="esriCTMyListLeft">
-                                    <div class="esriCTMyListText">
-                                        Boat Ramp</div>
-                                    <div class="esriCTMyListDates" data-dojo-attach-point="MyListLeftcolthird">
-                                        
-                                    </div>
-                                </div>
-                                <div class="esriCTMyListRight">
-                                    <div class="esriCTMyListIcons">
-                                        <span class="esriCTDirectionAcitivityList"></span>
-                                        <span class="esriCTAddAcitivityList"></span>
-                                        <span class="esriCTDeleteAcitivityList"></span>
+                                    <div class="esriCTMyListRight">
+                                        <div class="esriCTMyListIcons">
+                                            <span class="esriCTDirectionAcitivityList"></span><span class="esriCTAddAcitivityList">
+                                            </span><span class="esriCTDeleteAcitivityList"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            <div style="clear: both;" data-dojo-attach-point="esriCTMyListRowBoatRamp">
+                                <div class="esriCTMyListRow">
+                                    <div class="esriCTMyListLeft">
+                                        <div class="esriCTMyListText">
+                                            Boat Ramp</div>
+                                        <div class="esriCTMyListDates" data-dojo-attach-point="MyListLeftcolthird">
+                                        </div>
+                                    </div>
+                                    <div class="esriCTMyListRight">
+                                        <div class="esriCTMyListIcons">
+                                            <span class="esriCTDirectionAcitivityList"></span><span class="esriCTAddAcitivityList">
+                                            </span><span class="esriCTDeleteAcitivityList"></span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                    </div>
+                        </div>

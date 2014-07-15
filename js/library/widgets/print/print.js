@@ -26,10 +26,9 @@ require([
     "esri/layers/FeatureLayer",
     "dojo/_base/Color",
     "esri/symbols/SimpleLineSymbol",
-    "esri/symbols/SimpleFillSymbol",
-    "esri/symbols/SimpleMarkerSymbol"
+    "esri/symbols/SimpleFillSymbol"
 
-], function (esriMap, ImageServiceParameters, ArcGISImageServiceLayer, config, PictureMarkerSymbol, FeatureLayer, Color, SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol) {
+], function (esriMap, ImageServiceParameters, ArcGISImageServiceLayer, config, PictureMarkerSymbol, FeatureLayer, Color, SimpleLineSymbol, SimpleFillSymbol) {
     /**
     * create print  widget
     *
@@ -37,7 +36,7 @@ require([
     * @name widgets/printMap/print
     */
 
-    var window_opener = window.dialogArguments, tempBuffer = 'tempBuffer', params = dojo.byId("paramid"), printmap, GraphicLayer, bufferLayer, initialExtent, baseMapLayer, routeLayer, imageServiceLayer;
+    var window_opener = window.dialogArguments, tempBuffer = 'tempBuffer', printmap, params = dojo.byId("paramid"),  GraphicLayer, bufferLayer, initialExtent, baseMapLayer, routeLayer, imageServiceLayer;
     GraphicLayer = window_opener.GraphicLayer;
     bufferLayer = window_opener.Bufferlayer;
     baseMapLayer = window_opener.BaseMapLayer;

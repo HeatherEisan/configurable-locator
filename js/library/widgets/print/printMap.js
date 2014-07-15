@@ -67,7 +67,8 @@ define([
         },
 
         /**
-        * Get current map extent
+        * Get map extent in print dialog Box
+        * returns Map extent
         * @memberOf widgets/printMap/printMap
         */
         getPrintExtent: function () {

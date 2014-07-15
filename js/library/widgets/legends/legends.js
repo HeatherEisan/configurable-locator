@@ -1,6 +1,6 @@
 ﻿/*global define,dojo,console */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
-/** @license
+/*
 | Copyright 2013 Esri
 |
 | Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,6 +52,7 @@ define([
         logoContainer: null,
         _layerCollection: {},
         _rendererArray: [],
+       // legendListWidth: [],
         newLeft: 0,
         total: 0,
         /**
@@ -62,8 +63,11 @@ define([
         postCreate: function () {
             this._createLegendContainerUI();
             var currentExtentLegend, legendDefaultExtent, legendListWidth = [];
-            this.logoContainer = (query(".map .logo-sm") && query(".map .logo-sm")[0])
-                || (query(".map .logo-med") && query(".map .logo-med")[0]);
+            this.logoContainer = query(".esriControlsBR")[0];
+            if (!this.logoContainer) {
+                this.logoContainer = (query(".map .logo-sm") && query(".map .logo-sm")[0])
+                    || (query(".map .logo-med") && query(".map .logo-med")[0]);
+            }
             topic.subscribe("setLegendPositionUp", lang.hitch(this, function () {
                 this._setLegendPositionUp();
             }));
@@ -80,8 +84,15 @@ define([
             }
             if (this.isExtentBasedLegend) {
                 this.map.on("extent-change", lang.hitch(this, function (evt) {
-                    var defQueryArray = [], queryResult, layerObject, rendererObject, index, resultListArray = [],
-                        queryDefList, arryList = 0, boxWidth, i, layer;
+                    var defQueryArray = [],
+                        queryResult,
+                        layerObject,
+                        rendererObject,
+                        index,
+                        resultListArray = [],
+                        queryDefList,
+                        i,
+                        layer;
                     this._resetLegendContainer();
                     this._rendererArray.length = 0;
                     for (layer in this._layerCollection) {
@@ -113,10 +124,11 @@ define([
                             }
                         }
                     }
+                    resultListArray = [];
                     legendListWidth = [];
                     if (defQueryArray.length > 0) {
                         domConstruct.empty(this.divlegendContainer);
-                        domConstruct.create("span", { innerHTML: sharedNls.titles.loadingText, "class": "esriCTLegendText" }, this.divlegendContainer);
+                        domConstruct.create("span", { innerHTML: sharedNls.titles.loadingText, "class": "divlegendLoadingContainer" }, this.divlegendContainer);
                         queryDefList = new DeferredList(defQueryArray);
                         queryDefList.then(lang.hitch(this, function (result) {
                             domConstruct.empty(this.divlegendContainer);
@@ -127,21 +139,7 @@ define([
                                     legendListWidth.push(this.divLegendlist.offsetWidth);
                                 }
                             }
-
-                            for (i = 0; i < resultListArray.length; i++) {
-                                arryList += resultListArray[i];
-                            }
                             this._addlegendListWidth(this.legendListWidth);
-                            boxWidth = this.legendbox.offsetWidth + 200;
-                            if (query(".esriCTHeaderRouteContainer")[0]) {
-                                boxWidth -= query(".esriCTHeaderRouteContainer")[0].offsetWidth;
-                            }
-                            if (arryList <= 0 || this.divlegendContainer.offsetWidth < boxWidth) {
-                                domStyle.set(this.divRightArrow, "display", "none");
-                            } else {
-                                domStyle.set(this.divRightArrow, "display", "block");
-                            }
-
                             if (resultListArray.length === 0) {
                                 domConstruct.create("span", { innerHTML: sharedNls.titles.noLegendAvailable, "class": "esriCTLegendText" }, this.divlegendContainer);
                             }
@@ -195,7 +193,6 @@ define([
                 this._slideLeft();
             }));
             this.divRightArrow = domConstruct.create("div", { "class": "esriCTRightArrow" }, this.legendbox);
-            domStyle.set(this.divRightArrow, "display", "block");
             on(this.divRightArrow, "click", lang.hitch(this, function () {
                 this._slideRight();
             }));
@@ -344,14 +341,25 @@ define([
                         if (layerObject.drawingInfo && layerObject.drawingInfo.renderer && layerObject.drawingInfo.renderer.type === "uniqueValue") {
                             this._layerCollection[layerTempArray[i]].rendererType = "uniqueValue";
                             this._layerCollection[layerTempArray[i]].fieldName = layerObject.drawingInfo.renderer.field1 || layerObject.drawingInfo.renderer.field2 || layerObject.drawingInfo.renderer.field3;
-
+                            this._appendFieldType(this._layerCollection[layerTempArray[i]], layerObject);
                         } else if (layerObject.drawingInfo && layerObject.drawingInfo.renderer && layerObject.drawingInfo.renderer.type === "classBreaks") {
                             this._layerCollection[layerTempArray[i]].rendererType = "classBreaks";
                             this._layerCollection[layerTempArray[i]].fieldName = layerObject.drawingInfo.renderer.field;
+                            this._appendFieldType(this._layerCollection[layerTempArray[i]], layerObject);
                         }
                     }
                 }
             }));
+        },
+
+        _appendFieldType: function (layerCollection, layerObject) {
+            var i;
+            for (i = 0; i < layerObject.fields.length; i++) {
+                if (layerObject.fields[i].name === layerCollection.fieldName) {
+                    layerCollection.fieldType = layerObject.fields[i].type;
+                    break;
+                }
+            }
         },
 
         _removeDuplicate: function (mapServerArray) {
@@ -369,6 +377,7 @@ define([
             this.legendListWidth = [];
             for (i = 0; i < layerList.layers.length; i++) {
                 this._layerCollection[mapServerUrl + '/' + layerList.layers[i].layerId] = layerList.layers[i];
+
                 for (j = 0; j < layerList.layers[i].legend.length; j++) {
                     this._addLegendSymbol(layerList.layers[i].legend[j], layerList.layers[i].layerName);
                     this.legendListWidth.push(this.divLegendlist.offsetWidth);
@@ -379,11 +388,21 @@ define([
         },
 
         _addlegendListWidth: function (legendListWidth) {
-            var listWidth = legendListWidth, total = 0, j;
-            for (j = 0; j < listWidth.length - 1; j++) {
+            var listWidth = legendListWidth, total = 0, j, boxWidth;
+            for (j = 0; j < listWidth.length; j++) {
                 total += listWidth[j];
             }
-            domStyle.set(query(".divlegendContent")[0], "width", total + 100 + "px");
+            domStyle.set(query(".divlegendContent")[0], "width", total + 50 + "px");
+            if (query(".esriCTHeaderReportContainer")[0]) {
+                boxWidth = this.legendbox.offsetWidth - query(".esriCTHeaderReportContainer")[0].offsetWidth + 200;
+            } else {
+                boxWidth = this.legendbox.offsetWidth;
+            }
+            if (total <= 0 || this.divlegendContainer.offsetWidth < boxWidth) {
+                domStyle.set(this.divRightArrow, "display", "none");
+            } else {
+                domStyle.set(this.divRightArrow, "display", "block");
+            }
         },
 
         _addLegendSymbol: function (legend, layerName) {

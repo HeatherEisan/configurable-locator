@@ -788,3 +788,31 @@ input
 }
 
 /*End of Activity planner*/
+/* Info window */
+.esriCTtabs ul li a.esriCTImageTab{ color: #028D6A;}
+.esriCTtabs ul li.infoSelectedTab {
+background: #028D6A;
+
+}
+.esriCTtabs li {color:#028D6A;}
+
+.esriCTImageTab
+{
+    color: #028D6A;
+    background: url("../images/direction-green.png");
+
+}
+.esriCTImageTabselected
+{
+    color: #028D6A;
+    background: url("../images/direction-select.png");
+
+}
+.esriCTActivitySerachGoButton
+{
+    background: none repeat scroll 0% 0% #028D6A;
+}
+.esriCTActivityHeadText
+{
+    color: #028D6A;
+}

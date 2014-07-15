@@ -33,7 +33,10 @@ define({
             share: "Share",
             help: "Help",
             activities: "Activities",
-            clearEntry: "Clear"
+            clearEntry: "Clear",
+            hidePanel: "Hide panel",
+            showPanel: "Show panel",
+            printButton: "Print"
         },
         titles: {
             directionsDisplayText: "Area of Interest",
@@ -58,6 +61,12 @@ define({
             toDateText: "To Date",
             gobuttonText: "Go",
             noLegendAvailable: "No Legend Available.",
+            facilityInfo: "facility info",
+            postComment: "Post Comment",
+            rating: "rating",
+            backButton: "Back",
+            submitButton: "Submit",
+            postCommentText: "Enter comment",
             loadingText: "Loading..."
         },
         errorMessages: {
@@ -70,7 +79,9 @@ define({
             shareFailed: "Unable to share.",
             imageDoesNotFound: "No photos available.",
             facilitydoestfound: "No facilities found in buffer area.",
-            noCommentAvaiable: "No Comment available."
+            noCommentAvaiable: "No Comment available.",
+            routeComment: "Route could not be calculated from current location.",
+            activityNotSelected: "Please select activity to search."
         }
     },
     es: true,

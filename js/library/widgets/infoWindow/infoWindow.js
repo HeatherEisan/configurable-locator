@@ -31,10 +31,11 @@ define([
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dojo/query",
+    "dojo/topic",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dijit/_WidgetsInTemplateMixin"
 
-], function (declare, domConstruct, domStyle, lang, on, ScrollBar, dom, domClass, domUtils, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, query, sharedNls, _WidgetsInTemplateMixin) {
+], function (declare, domConstruct, domStyle, lang, on, ScrollBar, dom, domClass, domUtils, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, query, topic, sharedNls, _WidgetsInTemplateMixin) {
     return declare([InfoWindowBase, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
         sharedNls: sharedNls,
@@ -54,30 +55,52 @@ define([
                 }
                 domUtils.hide(this.domNode);
             })));
+
+            this.own(on(this.informationTab, "click", lang.hitch(this, function () {
+                this._showInformationTab(this.informationTab, dojo.byId("informationTabContainer"));
+                domClass.remove(this.getDirselect, "esriCTImageTabselected");
+                domClass.add(this.getDirselect, "esriCTImageTab");
+            })));
+
+            this.own(on(this.galleryTab, "click", lang.hitch(this, function () {
+                this._showInformationTab(this.galleryTab, dojo.byId("galleryTabContainer"));
+                domClass.remove(this.getDirselect, "esriCTImageTabselected");
+                domClass.add(this.getDirselect, "esriCTImageTab");
+
+            })));
+
+            this.own(on(this.commentsTab, "click", lang.hitch(this, function () {
+                this._showInformationTab(this.commentsTab, dojo.byId("commentsTabContainer"));
+                domClass.remove(this.getDirselect, "esriCTImageTabselected");
+                domClass.add(this.getDirselect, "esriCTImageTab");
+                topic.publish("setCommentScrollbar");
+            })));
+
+            this.own(on(this.getDir, "click", lang.hitch(this, function () {
+                this._showInformationTab(this.getDir, dojo.byId("getDirContainer"));
+                domClass.add(this.getDirselect, "esriCTImageTabselected");
+                domClass.remove(this.getDirselect, "esriCTImageTab");
+
+            })));
+        },
+
+        _showInformationTab: function (tabNode, containerNode) {
+            var infoContainer, infoTab;
+            infoContainer = query('.displayBlock')[0];
+            infoTab = query('.infoSelectedTab')[0];
+            if (infoContainer) {
+                domClass.remove(infoContainer, "displayBlock");
+            }
+            if (infoTab) {
+                domClass.remove(infoTab, "infoSelectedTab");
+            }
+            domClass.add(tabNode, "infoSelectedTab");
+            domClass.add(containerNode, "displayBlock");
         },
 
         show: function (detailsTab, screenPoint) {
             this.InfoShow = false;
-            if (this.divInfoDetailsScroll) {
-                while (this.divInfoDetailsScroll.hasChildNodes()) {
-                    this.divInfoDetailsScroll.removeChild(this.divInfoDetailsScroll.lastChild);
-                }
-            }
-            this.divInfoDetailsScroll.appendChild(detailsTab);
             this.setLocation(screenPoint);
-            if (dojo.window.getBox().w >= 640) {
-                if (this.infoContainerScrollbar) {
-                    domClass.add(this.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
-                    this.infoContainerScrollbar.removeScrollBar();
-                }
-                this.infoContainerScrollbar = new ScrollBar({
-                    domNode: this.divInfoScrollContent
-                });
-                this.infoContainerScrollbar.setContent(this.divInfoDetailsScroll);
-                this.infoContainerScrollbar.createScrollBar();
-            } else {
-                this._closeInfowindow();
-            }
         },
 
         resize: function (width, height) {
@@ -95,15 +118,6 @@ define([
                     width: width + "px",
                     height: height + "px"
                 });
-            }
-        },
-
-        setTitle: function (infoTitle) {
-            if (infoTitle.length > 0) {
-                this.headerPanel.innerHTML = infoTitle;
-                this.headerPanel.title = infoTitle;
-            } else {
-                this.headerPanel.innerHTML = "";
             }
         },
 
@@ -132,6 +146,5 @@ define([
                 domUtils.hide(this.domNode);
             })));
         }
-
     });
 });

@@ -3,27 +3,43 @@
         <div align="left" class="esriCTInfoContent">
             <div class="esriCTFullHeightWidth">
                 <div class="esriCTHeaderPanelContainer">
-                    <div data-dojo-attach-point="headerPanel" class="esriCTHeaderPanelContent">
-                    </div>
-                    <div class="esriCTClose" data-dojo-attach-point="divClose">
-                    </div>
-                    <div class="esriCTInfoWindowArrows">
-                        <div class="esriCTInfoWindowLeftArrow">
-                        </div>
-                        <div class="esriCTInfoWindowFeatureCount">
-                            <div class="esriCTdivInfoFeatureCount" data-dojo-attach-point="divInfoFeatureCount">
-                            </div>
-                            <div class="esriCTdivInfoTotalFeatureCount" data-dojo-attach-point="divInfoTotalFeatureCount">
-                            </div>
-                        </div>
-                        <div class="esriCTInfoWindowRightArrow">
-                        </div>
+                    <div class="esriCTtabs">
+                        <ul>
+                            <li style="border-left: none;" class="esriCTTabActive infoSelectedTab" data-dojo-attach-point="informationTab">
+                                <a>Information</a></li>
+                            <li data-dojo-attach-point="galleryTab" class=""><a>Gallery</a></li>
+                            <li data-dojo-attach-point="commentsTab"><a>Comments</a></li>
+                            <li data-dojo-attach-point="getDir"><a data-dojo-attach-point="getDirselect" class="esriCTImageTab ">
+                                &nbsp;</a></li>
+                            <li data-dojo-attach-point="divClose"><a id="close" class="esriCTClose">&nbsp;</a></li>
+                        </ul>
                     </div>
                 </div>
                 <div data-dojo-attach-point="divInfoDetails" class="esriCTInfoPanel">
                     <div class="esriCTInfoScrollContainer" align="left">
                         <div data-dojo-attach-point="divInfoScrollContent" class="esriCTInfoScrollContent">
-                            <div data-dojo-attach-point="divInfoDetailsScroll" class="esriCTFullWidth">
+                            <div data-dojo-attach-point="divInfoDetailsScroll" class="esriCTComments esriCTFullWidth">
+                                <div id="informationTabContainer" class="esriCTInfoTabContent displayBlock">
+                                </div>
+                                <div id="galleryTabContainer" class="esriCTInfoTabContent">
+                                </div>
+                                <div id="commentsTabContainer" class="esriCTInfoTabContent">
+                                </div>
+                                <div id="getDirContainer" class="esriCTInfoTabContent">
+                                    <!--      <div class="esriCTsearchTextCointainer" data-dojo-attach-point="searchTextCointainer">
+                                <div class="esriCTsearchTextInner">
+                                    <input type="text" data-dojo-attach-point="txtAddress" class="esriCTTxtAddress" onfocus="if(this.setSelectionRange)this.setSelectionRange(this.value.length, this.value.length);" />
+                                </div>
+                                <div class="esriCTSearchClose" data-dojo-attach-point="clearhide">
+                                    <span class="esriCTClearInput" title="${sharedNls.tooltips.clearEntry}" data-dojo-attach-point="close"></span><span>
+                                        <img data-dojo-attach-point="imgSearchLoader" class="esriCTSearchLoader" /></span>
+                                </div>
+
+                                <div class="esriCTSearch" data-dojo-attach-point="divSearch">
+                                    <span class="esriCTSearchIcon" title="${sharedNls.tooltips.search}" data-dojo-attach-point="esriCTimgLocate"></span>
+                                </div>
+                            </div>-->
+                                </div>
                             </div>
                         </div>
                     </div>
