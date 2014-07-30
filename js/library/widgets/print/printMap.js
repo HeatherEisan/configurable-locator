@@ -52,16 +52,21 @@ define([
         * @memberOf widgets/printMap/printMap
         */
         _showModal: function () {
-            var dataObject, _self = this;
+            var dataObject, _self = this, basemap;
+            basemap = _self.map.getLayer("defaultBasemap");
+            if (!basemap) {
+                basemap = _self.map.getLayer("defaultBasemap0");
+            }
             dataObject = {
                 "GraphicLayer": _self.map.getLayer("esriGraphicsLayerMapSettings"),
                 "Bufferlayer": _self.map.getLayer("tempBufferLayer"),
                 "Extent": _self.map.extent,
                 "RouteLayer": _self.map.getLayer("routeLayerId"),
                 "Window": window,
-                "BaseMapLayer": _self.map.getLayer("defaultBasemap"),
+                "BaseMapLayer": basemap,
                 "config": dojo.configData,
-                "dojoConfig": dojoConfig.baseURL
+                "dojoConfig": dojoConfig.baseURL,
+                "HighlightedLayer": _self.map.getLayer("highlightLayerId")
             };
             window.showModalDialog(dojoConfig.baseURL + "/js/library/widgets/print/templates/print.html", dataObject);
         },
@@ -76,4 +81,3 @@ define([
         }
     });
 });
-

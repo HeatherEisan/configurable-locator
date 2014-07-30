@@ -265,18 +265,17 @@
 /* Application Header */
 .esriCTApplicationHeader, .esriCTAddressContent
 {
-border-color:#007ac2;
+    border-color: #007ac2;
 }
-.esriCTApplicationHeader,.esriCTRightTab, .esriCTAddressContent
+.esriCTApplicationHeader, .esriCTRightTab, .esriCTAddressContent
 {
     background: #fff;
 }
 
-.esriCTApplicationHeaderTextTD,.esriCTResultColor
+.esriCTApplicationHeaderTextTD, .esriCTResultColor
 {
     color: #007AC2;
- }
-
+}
 
 .esriCTTxtAddress
 {
@@ -315,7 +314,7 @@ input
 
 .esriCTActivityPanel
 {
-     border-bottom: 1px solid #007AC2;
+    border-bottom: 1px solid #007AC2;
     color: #007AC2;
     border-left: 1px solid #FAFAFA;
     border-right: 1px solid #007AC2;
@@ -529,7 +528,7 @@ input
 .esriCTClose
 {
     background: url("../images/close.png");
-    background-repeat:no-repeat;
+    background-repeat: no-repeat;
 }
 
 .esriCTHeaderPanelContent
@@ -545,7 +544,7 @@ input
 
 .esriCTDivTriangle
 {
-     background-image: url("../images/bottomArrow-blue.png");
+    background-image: url("../images/bottomArrow-blue.png");
 }
 
 .esriCTLink
@@ -555,12 +554,7 @@ input
 
 /* Loading indicator Styles */
 
-/*.esriGovtLoadSpashScreen
-{
-    -pie-background: rgba(0,0,0,0.6);
-    background: rgba(0,0,0,0.6);
-}
-*/
+
 .esriCTdivInfoTotalFeatureCount, .esriCTdivInfoFeatureCount
 {
     color: #007AC2;
@@ -678,7 +672,7 @@ input
     color: #808080;
 }
 
-.esriCTDivDistance
+.esriCTDivDistance, .esriCTDivDistancePod
 {
     color: #007AC2;
 }
@@ -699,21 +693,35 @@ input
     color: #007AC2;
 }
 
+
 .esriCTActivityListTab
 {
+    border-bottom: 1px solid #007AC2;
     color: #007AC2;
-    border: 1px solid #007AC2;
+    border-right: 1px solid #FAFAFA;
+    border-left: 1px solid #007AC2;
 }
 
 .esriCTActivityTabSelected
 {
     color: #007AC2;
+    border-left: 1px solid #FAFAFA;
+    border-right: 1px solid #fff;
 }
 
 .esriCTActivityTab
 {
+    border-bottom: 1px solid #007AC2;
     color: #007AC2;
-    border: 1px solid #007AC2;
+    border-right: 1px solid #007AC2;
+    border-left: 1px solid #FAFAFA;
+}
+
+.esriCTActivityTabSelected
+{
+    color: #007AC2;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #FAFAFA;
 }
 
 .esriCTMyListHeaderText
@@ -748,7 +756,7 @@ input
 
 .esriCTBottonGo
 {
-     background-color: #007AC2;
+    background-image: url("../images/search-btn.png") !important;
 }
 
 .esriCTAddAcitivityList
@@ -780,23 +788,27 @@ input
 
 
 /* Info window */
-.esriCTtabs ul li a.esriCTImageTab{ color: #007ac2;}
-.esriCTtabs ul li.infoSelectedTab {
-background: #007ac2;
-
+.esriCTtabs ul li a.esriCTImageTab
+{
+    color: #007ac2;
 }
-.esriCTtabs li {color:#007ac2;}
+.esriCTtabs ul li.infoSelectedTab
+{
+    background: #007ac2;
+}
+.esriCTtabs li
+{
+    color: #007ac2;
+}
 .esriCTImageTab
 {
     color: #007AC2;
     background: url("../images/direction.png");
-
 }
 .esriCTImageTabselected
 {
     color: #007AC2;
     background: url("../images/direction-select.png");
-
 }
 .esriCTActivitySerachGoButton
 {

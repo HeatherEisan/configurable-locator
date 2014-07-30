@@ -34,7 +34,8 @@ define({
         clearEntry: "@fr@ Clear",
         hidePanel: "@fr@ Hide panel",
         showPanel: "@fr@ Show panel",
-        printButton: "@fr@ Print"
+        printButton: "@fr@ Print",
+        close: "@it@ Close"
     },
     titles: {
         directionsDisplayText: "@fr@ Directions",
@@ -59,7 +60,10 @@ define({
         toDateText: "@fr@ To Date",
         gobuttonText: "@fr@ Go",
         noLegendAvailable: "@fr@ No Legend Available.",
-        loadingText: "@fr@ Loading..."
+        loadingText: "@fr@ Loading...",
+        galleryInfoText: "@fr@ Gallery",
+        informationText: "@fr@ Information",
+        commentInfoText: "@fr@ Comments"
     },
     errorMessages: {
         invalidSearch: "Aucun résultat",
@@ -73,7 +77,13 @@ define({
         facilitydoestfound: "@fr@  No facilities found in buffer area.",
         noCommentAvaiable: "@fr@  No Comment available",
         routeComment: "@fr@ Route could not be calculated from current location.",
-        activityNotSelected: "@fr@ Please select activity to search."
+        activityNotSelected: "@fr@ Please select activity to search.",
+        activityPlannerInvalidToDate: "@fr@ Please select valid To date",
+        activityPlannerInvalidFromDate: "@fr@ Please select valid From date",
+        activityPlannerInvalidDates: "@fr@ Please select the valid date",
+        commentString: "@fr@ Please Enter comment",
+        maxLenghtCommentstring: "@fr@ Comment should not exceed 250 characters .",
+        commentError: "@fr@ Unable to add comments. Comments table is either absent or does not have write acccess ."
     },
     notUsed: {
         addressDisplayText: "@fr@ Address",

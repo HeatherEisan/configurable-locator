@@ -1,17 +1,17 @@
 ﻿<div class="esriCTInfoWindow">
-    <div data-dojo-attach-point="divInfoContainer" align="center" class="esriCTInfoContainer esriCTopacityHideAnimation">
+    <div data-dojo-attach-point="divInfoContainer" align="center" class="esriCTInfoWindowContainer esriCTopacityHideAnimation">
         <div align="left" class="esriCTInfoContent">
             <div class="esriCTFullHeightWidth">
                 <div class="esriCTHeaderPanelContainer">
                     <div class="esriCTtabs">
                         <ul>
                             <li style="border-left: none;" class="esriCTTabActive infoSelectedTab" data-dojo-attach-point="informationTab">
-                                <a>Information</a></li>
-                            <li data-dojo-attach-point="galleryTab" class=""><a>Gallery</a></li>
-                            <li data-dojo-attach-point="commentsTab"><a>Comments</a></li>
-                            <li data-dojo-attach-point="getDir"><a data-dojo-attach-point="getDirselect" class="esriCTImageTab ">
+                                <a>${sharedNls.titles.informationText}</a></li>
+                            <li data-dojo-attach-point="galleryTab" class="galleryTab"><a>${sharedNls.titles.galleryInfoText}</a></li>
+                            <li data-dojo-attach-point="commentsTab"><a>${sharedNls.titles.commentInfoText}</a></li>
+                            <li data-dojo-attach-point="getDir" class="getDir"><a data-dojo-attach-point="getDirselect" class="esriCTImageTab ">
                                 &nbsp;</a></li>
-                            <li data-dojo-attach-point="divClose"><a id="close" class="esriCTClose">&nbsp;</a></li>
+                            <li data-dojo-attach-point="divClose"><a id="close" class="esriCTClose" title="${sharedNls.tooltips.close}">&nbsp;</a></li>
                         </ul>
                     </div>
                 </div>
@@ -25,26 +25,22 @@
                                 </div>
                                 <div id="commentsTabContainer" class="esriCTInfoTabContent">
                                 </div>
-                                <div id="getDirContainer" class="esriCTInfoTabContent">
-                                    <!--      <div class="esriCTsearchTextCointainer" data-dojo-attach-point="searchTextCointainer">
-                                <div class="esriCTsearchTextInner">
-                                    <input type="text" data-dojo-attach-point="txtAddress" class="esriCTTxtAddress" onfocus="if(this.setSelectionRange)this.setSelectionRange(this.value.length, this.value.length);" />
-                                </div>
-                                <div class="esriCTSearchClose" data-dojo-attach-point="clearhide">
-                                    <span class="esriCTClearInput" title="${sharedNls.tooltips.clearEntry}" data-dojo-attach-point="close"></span><span>
-                                        <img data-dojo-attach-point="imgSearchLoader" class="esriCTSearchLoader" /></span>
-                                </div>
-
-                                <div class="esriCTSearch" data-dojo-attach-point="divSearch">
-                                    <span class="esriCTSearchIcon" title="${sharedNls.tooltips.search}" data-dojo-attach-point="esriCTimgLocate"></span>
-                                </div>
-                            </div>-->
+                                <div id="getDirContainer" class="esriCTDirectionTabContent">
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="cloasedivmobile" data-dojo-attach-point="backToMap">
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+        <div data-dojo-attach-point="divInfoMobileContent" class="divInfoMobileContent calloutpanel">
+            <div class="esriCTMobileCloseDiv esriCTclosediv" data-dojo-attach-point="esriCTMobileCloseDiv">
+            </div>
+            <div data-dojo-attach-point="spanDirection" class="calloutText">
+            </div>
+            <div class="calloutarrow" data-dojo-attach-point="esriCTMobileArrow">
+                <img src="js/library/themes/images/right-arrow-blue.png" /></div>
+        </div>
+</div> 

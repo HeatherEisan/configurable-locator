@@ -81,7 +81,6 @@ define([
                 mapPoint = new Point(position.coords.longitude, position.coords.latitude, new SpatialReference({
                     wkid: 4326
                 }));
-
                 /**
                 * projects the device location on the map
                 * @param {string} dojo.configData.ZoomLevel Zoom level specified in configuration file
@@ -90,6 +89,9 @@ define([
                 */
                 geometryService.project([mapPoint], self.map.spatialReference).then(function (newPoint) {
                     currentBaseMap = self.map.getLayer("defaultBasemap");
+                    if (!currentBaseMap) {
+                        currentBaseMap = self.map.getLayer("defaultBasemap0");
+                    }
                     if (currentBaseMap.visible) {
                         if (!currentBaseMap.fullExtent.contains(newPoint[0])) {
                             alert(sharedNls.errorMessages.invalidLocation);
@@ -100,12 +102,12 @@ define([
                     mapPoint = newPoint[0];
                     self.map.centerAndZoom(mapPoint, dojo.configData.ZoomLevel);
                     self._addGraphic(mapPoint, deferred);
-                }, function () {
+                }, function (err) {
                     alert(sharedNls.errorMessages.invalidProjection);
                 });
-            }, function () {
+            }, function (err) {
+                deferred.resolve();
                 alert(sharedNls.errorMessages.invalidLocation);
-                topic.publish("hideProgressIndicator");
             });
             return deferred.promise;
         },

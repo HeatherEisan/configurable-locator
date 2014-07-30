@@ -26,9 +26,10 @@ require([
     "esri/layers/FeatureLayer",
     "dojo/_base/Color",
     "esri/symbols/SimpleLineSymbol",
-    "esri/symbols/SimpleFillSymbol"
+    "esri/symbols/SimpleFillSymbol",
+    "esri/geometry/Polyline"
 
-], function (esriMap, ImageServiceParameters, ArcGISImageServiceLayer, config, PictureMarkerSymbol, FeatureLayer, Color, SimpleLineSymbol, SimpleFillSymbol) {
+], function (esriMap, ImageServiceParameters, ArcGISImageServiceLayer, config, PictureMarkerSymbol, FeatureLayer, Color, SimpleLineSymbol, SimpleFillSymbol, Polyline) {
     /**
     * create print  widget
     *
@@ -36,12 +37,14 @@ require([
     * @name widgets/printMap/print
     */
 
-    var window_opener = window.dialogArguments, tempBuffer = 'tempBuffer', printmap, params = dojo.byId("paramid"),  GraphicLayer, bufferLayer, initialExtent, baseMapLayer, routeLayer, imageServiceLayer;
+    var window_opener = window.dialogArguments, tempBuffer = 'tempBuffer', printmap, params = dojo.byId("paramid"), GraphicLayer, bufferLayer, initialExtent, baseMapLayer, routeLayer, imageServiceLayer, highlightedLayer, highLightsymbol,
+        gLayer, i, j, buffersymbol, polygon, geoLocationPushpin, locatorMarkupSymbol, graphic, layerMode, featureLayer, symbols, polyline;
     GraphicLayer = window_opener.GraphicLayer;
     bufferLayer = window_opener.Bufferlayer;
     baseMapLayer = window_opener.BaseMapLayer;
     initialExtent = window_opener.Extent;
     routeLayer = window_opener.RouteLayer;
+    highlightedLayer = window_opener.HighlightedLayer;
     printmap = new esri.Map("mapPrint", { extent: initialExtent, slider: false });
     baseMapLayer = new esri.layers.ArcGISTiledMapServiceLayer(baseMapLayer.url);
     printmap.addLayer(baseMapLayer);
@@ -51,11 +54,13 @@ require([
     printmap.addLayer(imageServiceLayer);
     document.title = config.ApplicationName;
     /**
+    routeLayer.graphics[0].geometry
+
     * function to add polygon and graphics in the print map window when it gets open
     * @memberOf widgets/printMap/print
     */
     dojo.connect(printmap, "onLoad", function () {
-        var gLayer, i, j, buffersymbol, polygon, geoLocationPushpin, locatorMarkupSymbol, graphic, layerMode, featureLayer, symbols;
+
         printmap.disablePan();
         printmap.disableDoubleClickZoom();
         printmap.disableKeyboardNavigation();
@@ -74,41 +79,42 @@ require([
         locatorMarkupSymbol = new PictureMarkerSymbol(geoLocationPushpin, config.LocatorSettings.MarkupSymbolSize.width, config.LocatorSettings.MarkupSymbolSize.height);
         graphic = new esri.Graphic(GraphicLayer.graphics[0].geometry, locatorMarkupSymbol, null, null);
         gLayer.add(graphic);
-        for (j in config.OperationalLayers) {
-            if (config.OperationalLayers.hasOwnProperty(j)) {
-                layerMode = null;
-                if (config.OperationalLayers[j].LoadAsServiceType.toLowerCase() === "feature") {
+        highLightsymbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, config.locatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+                            new dojo.Color(config.RippleColor), 4), new dojo.Color([0, 0, 0, 0]));
+        gLayer.add(new esri.Graphic(highlightedLayer.graphics[0].geometry, highLightsymbol, {}, null));
+        for (j = 0; j < config.OperationalLayers.length; j++) {
+            layerMode = null;
+            if (config.OperationalLayers[j].LoadAsServiceType.toLowerCase() === "feature") {
 
-                    /**
-                    * set layerMode of the operational layer if it's type is feature
-                    */
-                    switch (config.OperationalLayers[j].layermode && config.OperationalLayers[j].layermode.toLowerCase()) {
-                    case "ondemand":
-                        layerMode = FeatureLayer.MODE_ONDEMAND;
-                        break;
-                    case "selection":
-                        layerMode = FeatureLayer.MODE_SELECTION;
-                        break;
-                    default:
-                        layerMode = FeatureLayer.MODE_SNAPSHOT;
-                        break;
-                    }
-                    /**
-                    * load operational layer if it's type is feature along with its layer mode
-                    */
-                    featureLayer = new FeatureLayer(config.OperationalLayers[j].ServiceURL, {
-                        id: "index",
-                        mode: layerMode,
-                        outFields: ["*"],
-                        displayOnPan: false
-                    });
+                /**
+                * set layerMode of the operational layer if it's type is feature
+                */
+                switch (config.OperationalLayers[j].layermode && config.OperationalLayers[j].layermode.toLowerCase()) {
+                case "ondemand":
+                    layerMode = FeatureLayer.MODE_ONDEMAND;
+                    break;
+                case "selection":
+                    layerMode = FeatureLayer.MODE_SELECTION;
+                    break;
+                default:
+                    layerMode = FeatureLayer.MODE_SNAPSHOT;
+                    break;
                 }
+                /**
+                * load operational layer if it's type is feature along with its layer mode
+                */
+                featureLayer = new FeatureLayer(config.OperationalLayers[j].ServiceURL, {
+                    id: "index",
+                    mode: layerMode,
+                    outFields: ["*"],
+                    displayOnPan: false
+                });
             }
         }
         printmap.addLayer(featureLayer);
         symbols = new SimpleLineSymbol().setColor(config.RouteColor).setWidth(config.RouteWidth);
-        graphic = new esri.Graphic(routeLayer.graphics[0].geometry, symbols, null, null);
-        gLayer.add(graphic);
+        polyline = new Polyline(routeLayer.graphics[0].geometry.toJson());
+        gLayer.add(new esri.Graphic(polyline, symbols));
         printmap.addLayer(gLayer);
         window.print();
     });

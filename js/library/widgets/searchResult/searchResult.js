@@ -98,10 +98,10 @@ define([
             topic.subscribe("createPod", lang.hitch(this, function () {
                 this.isChecked = false;
             }));
-            topic.subscribe("setSearchInfo", lang.hitch(this, function (result) {
+            topic.subscribe("setSearchInfo", lang.hitch(this, function (result, isBufferNeeded) {
                 if (!this.isChecked) {
                     this._carouselPodDisplayBlock();
-                    this._setSearchContent(result);
+                    this._setSearchContent(result, isBufferNeeded);
                     this._setGallery(result);
                     if (result.directionResult) {
                         this._setDirectionCarouselPod(result);
@@ -139,14 +139,16 @@ define([
         * @memberOf widgets/searchResult/searchResult
         */
         _wipeInResults: function () {
-
-            topic.publish("setLegendPositionUp");
+            var customLogoPositionChange;
             domStyle.set(this.divCarouselContent, "display", "block");
+            topic.publish("setLegendPositionUp");
             domClass.add(this.divImageBackground, "esriCTResultImageBlock");
             domClass.replace(this.divCarouselContent, "esriCTbottomPanelHeight", "esriCTzeroHeight");
             domAttr.set(this.imgToggleResults, "src", "js/library/themes/images/down.png");
             domAttr.set(this.imgToggleResults, "title", sharedNls.tooltips.hidePanel);
             domClass.replace(this.divToggle, "esriCTbottomPanelPosition", "esriCTzeroBottom");
+            customLogoPositionChange = query('.esriCTCustomMapLogo');
+            domClass.replace(customLogoPositionChange, "esriCTCustomMapLogoPostionChange", "esriCTCustomMapLogoBottom");
         },
 
         /**
@@ -154,6 +156,7 @@ define([
         * @memberOf widgets/searchResult/searchResult
         */
         _wipeOutResults: function () {
+            var customLogoPositionChange;
             domStyle.set(this.divCarouselContent, "display", "none");
             domClass.replace(this.divCarouselContent, "esriCTzeroHeight", "esriCTbottomPanelHeight");
             domAttr.set(this.imgToggleResults, "src", "js/library/themes/images/up.png");
@@ -162,6 +165,8 @@ define([
             if (domStyle.get(this.divImageBackground, "display") === "block") {
                 topic.publish("setLegendPositionDown");
             }
+            customLogoPositionChange = query('.esriCTCustomMapLogo');
+            domClass.replace(customLogoPositionChange, "esriCTCustomMapLogoBottom", "esriCTCustomMapLogoPostionChange");
         },
 
         /**
@@ -203,8 +208,13 @@ define([
             var divCarouselPod, divGallerycontent, divcommentcontent, divHeader, divsearchcontent;
             domClass.add(this.resultboxPanelContent, "esriCTresultboxPanelContent");
             array.forEach(dojo.configData.Order, lang.hitch(this, function (carouselPod) {
-                divCarouselPod = domConstruct.create("div", { "class": "esriCTBoxContainer" }, this.resultboxPanelContent);
-                this.divPodInfoContainer = domConstruct.create("div", { "class": "esriCTInfoContainer" }, divCarouselPod);
+                if (carouselPod === "comments" && !dojo.configData.CommentsLayer.Visibility) {
+                    domClass.replace(this.resultboxPanelContent, "esriCTresultboxPanelContentNotComment");
+                    carouselPod = "default";
+                } else {
+                    divCarouselPod = domConstruct.create("div", { "class": "esriCTBoxContainer" }, this.resultboxPanelContent);
+                    this.divPodInfoContainer = domConstruct.create("div", { "class": "esriCTInfoContainer" }, divCarouselPod);
+                }
                 switch (carouselPod) {
                 case "search":
                     divHeader = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, this.divPodInfoContainer);
@@ -239,6 +249,8 @@ define([
                     domConstruct.create("div", { "class": "esriCTDivCommentContent" }, divcommentcontent);
                     domClass.add(divcommentcontent, "esriCTDivResultContentHeight");
                     break;
+                case "default":
+                    break;
                 }
             }));
         },
@@ -257,16 +269,23 @@ define([
         * @param {object} result contains route result, features in buffer area, search address,mapPoint, comment layer info
         * @memberOf widgets/searchResult/searchResult
         */
-        _setSearchContent: function (result) {
-            var divHeaderContent, i, resultcontent = [];
+        _setSearchContent: function (result, isBufferNeeded) {
+            var divHeaderContent, i, resultcontent = [], milesCalulatedData;
             divHeaderContent = query('.esriCTDivSearchContent');
             domConstruct.empty(divHeaderContent[0]);
             this.spanFeatureListContainer = domConstruct.create("div", { "class": "esriCTSpanFeatureListContainer", "innerHTML": string.substitute(sharedNls.titles.numberOfFeaturesFoundNearAddress, [result.searchResult.features.length]) }, divHeaderContent[0]);
+
             for (i = 0; i < result.searchResult.features.length; i++) {
-                resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotext", "innerHTML": result.searchResult.features[i].attributes.NAME + "(" + parseFloat(result.searchResult.features[i].distance).toFixed(2) + "miles" + ")" }, divHeaderContent[0]);
+                if (!isBufferNeeded) {
+                    milesCalulatedData = "(" + parseFloat(result.searchResult.features[i].distance).toFixed(2) + "miles" + ")";
+                } else {
+                    milesCalulatedData = "";
+                }
+                resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotext", "innerHTML": result.searchResult.features[i].attributes.NAME + milesCalulatedData }, divHeaderContent[0]);
                 domAttr.set(resultcontent[i], "value", i);
                 this.own(on(resultcontent[i], "click", lang.hitch(this, this._callFunctionOnClick, result, resultcontent[i], divHeaderContent[0])));
             }
+
             domClass.add(divHeaderContent[0].parentElement, "esriCTCarouselContentHeight");
             if (this.searchResultScrollBar) {
                 this.searchResultScrollBar.removeScrollBar();
@@ -275,6 +294,7 @@ define([
             this.searchResultScrollBar.setContent(divHeaderContent[0]);
             this.searchResultScrollBar.createScrollBar();
         },
+
 
         /**
         * call all the function when click on search result data
@@ -285,14 +305,16 @@ define([
         _callFunctionOnClick: function (result, resultcontent) {
             this.isChecked = true;
             this._showRouteOnClickResult(result, resultcontent.value);
+            topic.publish("showProgressIndicator");
             this._setFacility(result, resultcontent);
             if (result.directionResult) {
-                topic.subscribe("setSearchInfo", lang.hitch(this, function (result) {
+                topic.subscribe("setSearchInfo", lang.hitch(this, function (result, isBufferNeeded) {
                     this._setDirection(result, resultcontent);
                 }));
             }
             this._setGallery(result, resultcontent);
             this._setComment(result, resultcontent);
+            topic.publish("hideProgressIndicator");
         },
 
         /**
@@ -385,7 +407,7 @@ define([
         * @memberOf widgets/searchResult/searchResult
         */
         _setDirection: function (result, resultcontent) {
-            var divHeaderContent, i, divHeader, divDirectionContainer, divDrectionContent, distanceAndDuration, printButton, j;
+            var divHeaderContent, i, divHeader, divDirectionContainer, divDrectionContent, distanceAndDuration, printButton, j, divDrectionList;
             divHeaderContent = query('.esriCTDivDirectioncontent');
             domConstruct.empty(divHeaderContent[0]);
             divHeader = domConstruct.create("div", {}, divHeaderContent[0]);
@@ -401,10 +423,11 @@ define([
                             distanceAndDuration = domConstruct.create("div", { "class": "esriCTDistanceAndDuration" }, divHeader);
                             domConstruct.create("div", { "class": "esriCTDivDistance", "innerHTML": sharedNls.titles.directionTextDistance + parseFloat(result.directionResult[0].directions.totalLength).toFixed(2) + "mi" }, distanceAndDuration);
                             domConstruct.create("div", { "class": "esriCTDivTime", "innerHTML": sharedNls.titles.directionTextTime + parseFloat(result.directionResult[0].directions.totalDriveTime).toFixed(2) + "min" }, distanceAndDuration);
-                            divDrectionContent = domConstruct.create("div", {}, divDirectionContainer);
-                            domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": ("1") + "." + result.directionResult[0].directions.features[0].attributes.text.replace('Location 1', result.addressResult) }, divDrectionContent);
+                            divDrectionContent = domConstruct.create("div", { "class": "esriCTDirectionRow" }, divDirectionContainer);
+                            divDrectionList = domConstruct.create("ol", {}, divDrectionContent);
+                            domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": result.directionResult[0].directions.features[0].attributes.text.replace('Location 1', result.addressResult) }, divDrectionList);
                             for (j = 1; j < result.directionResult[0].directions.features.length; j++) {
-                                domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": (j + 1) + "." + result.directionResult[0].directions.features[j].attributes.text + "(" + parseFloat(result.directionResult[0].directions.features[j].attributes.length).toFixed(2) + "miles" + ")" }, divDrectionContent);
+                                domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": result.directionResult[0].directions.features[j].attributes.text + "(" + parseFloat(result.directionResult[0].directions.features[j].attributes.length).toFixed(2) + "miles" + ")" }, divDrectionList);
                             }
                             domClass.add(divDirectionContainer, "esriCTCarouselContentHeight");
                             if (this.directionScrollBar) {
@@ -433,7 +456,7 @@ define([
         * @memberOf widgets/searchResult/searchResult
         */
         _setDirectionCarouselPod: function (result) {
-            var divHeaderContent, i, divHeader, divDirectionContainer, divDrectionContent, distanceAndDuration, printButton;
+            var divHeaderContent, i, divHeader, divDirectionContainer, divDrectionContent, divDrectionList, distanceAndDuration, printButton;
             divHeaderContent = query('.esriCTDivDirectioncontent');
             domConstruct.empty(divHeaderContent[0]);
             divHeader = domConstruct.create("div", {}, divHeaderContent[0]);
@@ -445,12 +468,14 @@ define([
             })));
             divDirectionContainer = domConstruct.create("div", { "class": "esriCTResultContent" }, divHeaderContent[0]);
             distanceAndDuration = domConstruct.create("div", { "class": "esriCTDistanceAndDuration" }, divHeader);
-            domConstruct.create("div", { "class": "esriCTDivDistance", "innerHTML": sharedNls.titles.directionTextDistance + parseFloat(result.directionResult[0].directions.totalLength).toFixed(2) + "mi" }, distanceAndDuration);
+            domConstruct.create("div", { "class": "esriCTDivDistancePod", "innerHTML": sharedNls.titles.directionTextDistance + parseFloat(result.directionResult[0].directions.totalLength).toFixed(2) + "mi" }, distanceAndDuration);
             domConstruct.create("div", { "class": "esriCTDivTime", "innerHTML": sharedNls.titles.directionTextTime + parseFloat(result.directionResult[0].directions.totalDriveTime).toFixed(2) + "min" }, distanceAndDuration);
             divDrectionContent = domConstruct.create("div", { "class": "esriCTDirectionRow" }, divDirectionContainer);
-            domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": ("1") + "." + result.directionResult[0].directions.features[0].attributes.text.replace('Location 1', result.addressResult) }, divDrectionContent);
+            divDrectionList = domConstruct.create("ol", {}, divDrectionContent);
+            domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": result.directionResult[0].directions.features[0].attributes.text.replace('Location 1', result.addressResult) }, divDrectionList);
+
             for (i = 1; i < result.directionResult[0].directions.features.length; i++) {
-                domConstruct.create("div", { "class": "esriCTInfotext", "innerHTML": (i + 1) + "." + result.directionResult[0].directions.features[i].attributes.text + "(" + parseFloat(result.directionResult[0].directions.features[i].attributes.length).toFixed(2) + "miles" + ")" }, divDrectionContent);
+                domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": result.directionResult[0].directions.features[i].attributes.text + "(" + parseFloat(result.directionResult[0].directions.features[i].attributes.length).toFixed(2) + "miles" + ")" }, divDrectionList);
             }
             domClass.add(divDirectionContainer, "esriCTCarouselContentHeight");
             if (this.directionScrollBar) {
@@ -468,91 +493,96 @@ define([
         * @memberOf widgets/searchResult/searchResult
         */
         _setComment: function (result, resultcontent) {
-            var divHeaderContent, i, j, divHeaderStar, divStar, commentAttribute, utcMilliseconds, k, l, isCommentFound, rankFieldAttribute, esriCTCommentDateStar, divCommentRow;
-            rankFieldAttribute = dojo.configData.DatabaseFields.RankFieldName;
-            commentAttribute = dojo.configData.DatabaseFields.CommentsFieldName;
-            divHeaderContent = query('.esriCTDivCommentContent');
-            if (result.length === 0) {
-                if (this.commentScrollBar) {
-                    this.commentScrollBar.removeScrollBar();
+            if (dojo.configData.CommentsLayer.Visibility) {
+                var divHeaderContent, i, j, divHeaderStar, divStar, commentAttribute, utcMilliseconds, k, l, isCommentFound, rankFieldAttribute, esriCTCommentDateStar, divCommentRow;
+                rankFieldAttribute = dojo.configData.DatabaseFields.RankFieldName;
+                commentAttribute = dojo.configData.DatabaseFields.CommentsFieldName;
+                divHeaderContent = query('.esriCTDivCommentContent');
+                if (result.length === 0) {
+                    if (this.commentScrollBar) {
+                        this.commentScrollBar.removeScrollBar();
+                    }
+                    if (divHeaderContent[0]) {
+                        domConstruct.empty(divHeaderContent[0]);
+                    }
+                    divCommentRow = domConstruct.create("div", { "class": "esriCTRowNoComment" }, divHeaderContent[0]);
+                    domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
+                    return;
                 }
-                if (divHeaderContent[0]) {
+                if (!this.isChecked) {
                     domConstruct.empty(divHeaderContent[0]);
-                }
-                divCommentRow = domConstruct.create("div", { "class": "esriCTRowNoComment" }, divHeaderContent[0]);
-                domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
-                return;
-            }
-            if (!this.isChecked) {
-                domConstruct.empty(divHeaderContent[0]);
-                for (i = 0; i < result.length; i++) {
-                    divCommentRow = domConstruct.create("div", { "class": "divCommentRow" }, divHeaderContent[0]);
-                    esriCTCommentDateStar = domConstruct.create("div", { "class": "esriCTCommentDateStar" }, divCommentRow);
-                    divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, esriCTCommentDateStar);
-                    if (result[i]) {
-                        for (j = 0; j < 5; j++) {
-                            divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
-                            if (j < result[i].attributes[rankFieldAttribute]) {
-                                domClass.add(divStar, "esriCTRatingStarChecked");
+                    for (i = 0; i < result.length; i++) {
+                        divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
+                        esriCTCommentDateStar = domConstruct.create("div", { "class": "esriCTCommentDateStar" }, divCommentRow);
+                        divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, esriCTCommentDateStar);
+                        if (result[i]) {
+                            for (j = 0; j < 5; j++) {
+                                divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
+                                if (j < result[i].attributes[rankFieldAttribute]) {
+                                    domClass.add(divStar, "esriCTRatingStarChecked");
+                                }
+                            }
+                            if (result[i].attributes[commentAttribute]) {
+                                if (result[i].attributes.SUBMITDT === null) {
+                                    utcMilliseconds = 0;
+                                } else {
+                                    utcMilliseconds = Number(dojo.string.substitute(dojo.configData.CommentsInfoPopupFieldsCollection.SubmitDate, result[i].attributes));
+                                }
+                                domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), { datePattern: dojo.configData.DateFormat, selector: "date" })}, esriCTCommentDateStar);
+                                domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": result[i].attributes[commentAttribute] }, divCommentRow);
+                            } else {
+                                domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
                             }
                         }
-                        if (result[i].attributes[commentAttribute]) {
-                            utcMilliseconds = Number(dojo.string.substitute(dojo.configData.CommentsInfoPopupFieldsCollection.SubmitDate, result[i].attributes));
-                            domConstruct.create("div", {
-                                "class": "esriCTCommentDate",
-                                "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), {
-                                    datePattern: dojo.configData.DateFormat,
-                                    selector: "date"
-                                })
-                            }, esriCTCommentDateStar);
-                            domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": result[i].attributes[commentAttribute] }, divCommentRow);
-                        } else {
-                            domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
-                        }
                     }
-                }
-            } else {
-                isCommentFound = false;
-                if (result.CommentResult.length !== 0) {
-                    divHeaderContent = query('.esriCTDivCommentContent');
-                    domConstruct.empty(divHeaderContent[0]);
-                    divCommentRow = domConstruct.create("div", { "class": "divCommentRow" }, divHeaderContent[0]);
-                    for (k = 0; k < result.searchResult.features.length; k++) {
-                        if (k === resultcontent.value) {
-                            for (l = 0; l < result.CommentResult.length; l++) {
-                                if (result.searchResult.features[k].attributes.OBJECTID === result.CommentResult[l].attributes.id) {
-                                    isCommentFound = true;
-                                    divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, divCommentRow);
-                                    for (j = 0; j < 5; j++) {
-                                        divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
-                                        if (j < result.CommentResult[l].attributes[rankFieldAttribute]) {
-                                            domClass.add(divStar, "esriCTRatingStarChecked");
+                } else {
+                    isCommentFound = false;
+                    if (result.CommentResult.length !== 0) {
+                        divHeaderContent = query('.esriCTDivCommentContent');
+                        domConstruct.empty(divHeaderContent[0]);
+                        divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
+                        for (k = 0; k < result.searchResult.features.length; k++) {
+                            if (k === resultcontent.value) {
+                                for (l = 0; l < result.CommentResult.length; l++) {
+                                    if (result.searchResult.features[k].attributes.OBJECTID === result.CommentResult[l].attributes.id) {
+                                        isCommentFound = true;
+                                        divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, divCommentRow);
+                                        for (j = 0; j < 5; j++) {
+                                            divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
+                                            if (j < result.CommentResult[l].attributes[rankFieldAttribute]) {
+                                                domClass.add(divStar, "esriCTRatingStarChecked");
+                                            }
                                         }
-                                    }
-                                    if (result.CommentResult[l].attributes[commentAttribute]) {
-                                        utcMilliseconds = Number(dojo.string.substitute(dojo.configData.CommentsInfoPopupFieldsCollection.SubmitDate, result.CommentResult[l].attributes));
 
-                                        domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": result.CommentResult[l].attributes[commentAttribute] }, divCommentRow);
-                                        domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), { datePattern: dojo.configData.DateFormat, selector: "date" }) }, divCommentRow);
-                                    } else {
-                                        domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
+
+                                        if (result.CommentResult[l].attributes[commentAttribute]) {
+                                            if (result.CommentResult[l].attributes.SUBMITDT === null) {
+                                                utcMilliseconds = 0;
+                                            } else {
+                                                utcMilliseconds = Number(dojo.string.substitute(dojo.configData.CommentsInfoPopupFieldsCollection.SubmitDate, result.CommentResult[l].attributes));
+                                            }
+                                            domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": result.CommentResult[l].attributes[commentAttribute] }, divCommentRow);
+                                            domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), { datePattern: dojo.configData.DateFormat, selector: "date" }) }, divCommentRow);
+                                        } else {
+                                            domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    if (!isCommentFound) {
+                        domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
+                    }
                 }
-                if (!isCommentFound) {
-                    domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
+                domClass.add(divHeaderContent[0].parentElement, "esriCTCarouselContentHeight");
+                if (this.commentScrollBar) {
+                    this.commentScrollBar.removeScrollBar();
                 }
+                this.commentScrollBar = new ScrollBar({ domNode: divHeaderContent[0].parentElement });
+                this.commentScrollBar.setContent(divHeaderContent[0]);
+                this.commentScrollBar.createScrollBar();
             }
-            domClass.add(divHeaderContent[0].parentElement, "esriCTCarouselContentHeight");
-            if (this.commentScrollBar) {
-                this.commentScrollBar.removeScrollBar();
-            }
-            this.commentScrollBar = new ScrollBar({ domNode: divHeaderContent[0].parentElement });
-            this.commentScrollBar.setContent(divHeaderContent[0]);
-            this.commentScrollBar.createScrollBar();
         },
 
         /**
@@ -673,4 +703,3 @@ outerLoop:
         }
     });
 });
-

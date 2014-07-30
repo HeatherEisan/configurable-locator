@@ -56,6 +56,9 @@ define([], function () {
         // Set proxy url
         ProxyUrl: "/proxy/proxy.ashx",
 
+        // Show legend
+        ShowLegend: true,
+
         // Set splash window content - Message that appears when the application starts
         SplashScreen: {
             SplashScreenContent: "Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
@@ -96,12 +99,12 @@ define([], function () {
 
         // Specify URL to ArcGIS Portal REST API
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
-        // Specify URL to Search
-        SearchURL: "http://www.arcgis.com/sharing/rest/search?q=group:",
         // Specify the title of group that contains basemaps
-        BasemapGroupTitle: "Basemaps", //CyberTech Systems and Software Limited
+        BasemapGroupTitle: "Basemaps",
         // Specify the user name of owner of the group that contains basemaps
-        BasemapGroupOwner: "GISITAdmin", //cybertechagol
+        BasemapGroupOwner: "GISITAdmin",
+        // Specify spatial reference for basemaps, since all basemaps need to use the same spatial reference
+        BasemapSpatialReferenceWKID: 102100,
         // Specify path to image used to display the thumbnail for a basemap when portal does not provide it
         NoThumbnail: "js/library/themes/images/not-available.png",
 
@@ -135,7 +138,6 @@ define([], function () {
         OperationalLayers: [{
             ServiceURL: "http://50.18.115.76:6080/arcgis/rest/services/WaterAccess/FeatureServer/0",
             LoadAsServiceType: "feature"
-
         }],
 
         CommentsLayer: {
@@ -174,6 +176,7 @@ define([], function () {
         //                   If empty "", then SearchDisplayFields will be used (if configured), else displayField property of layer in mapservice will be used.
 
         SearchSettings: [{
+            UnifiedSearch: "true",
             Title: "WaterAccess",
             QueryLayerId: "0",
             SearchDisplayTitle: "Ulrich Landing Park",
@@ -211,7 +214,22 @@ define([], function () {
         //                    These fields should be present in the layer referenced by 'QueryLayerId' specified under section 'SearchSettings'
         // DisplayText: Caption to be displayed instead of field alias names. Set this to empty string ("") if you wish to display field alias names as captions.
         // FieldName: Field used for displaying the value
-        InfoWindowSettings: [],
+        InfoWindowSettings: [{
+            Title: "WaterAccess",
+            QueryLayerId: "0",
+            InfoWindowHeaderField: "Ulrich Landing Park",
+            InfoWindowData: [{
+                DisplayText: "NAME :",
+                FieldName: "${NAME}"
+            }]
+        }],
+
+        // Set content/fields for the callout window in Smartphone's
+        InfoWindowContent: [{
+            FieldName: "${MANAGEUNIT}",
+            Alias: "Manage Unit"
+        }],
+
 
         // Define the database field names
         // Note: DateFieldName refers to a date database field.

@@ -111,6 +111,7 @@
         text-align: justify;
         clear: both;
     }
+
 }
 
 @media only screen and (min-width : 768px) and (max-width : 1024px) /*if device wise  @media only screen and (min-device-width : 768px) and (max-device-width : 1024px)*/
@@ -198,7 +199,11 @@
         text-align: justify;
         clear: both;
     }
-     .esriCTtabs ul li a{padding: 8px 3px;}
+    .esriCTtabs ul li a
+    {
+        padding: 8px 7px;
+    }
+
 }
 
 @media screen and (min-width: 321px) and (max-width: 767px)
@@ -223,7 +228,7 @@
         font-size: 14px !important;
     }
 
-    .simpleDirections .esriResultsViewFullRoute
+    .simpleDirections .esriResultsViewFullRoute, .textAreaContainer
     {
         font-size: 14px !important;
     }
@@ -453,6 +458,7 @@
     {
         display: none;
         width: 100%;
+        height: 100%;
     }
 
     .divInfoMobileContent
@@ -513,7 +519,7 @@
 
     .esriCTdivLegendbox
     {
-        z-index: 997;
+        z-index: 996;
     }
 
     .esriCTInfoScrollContent
@@ -548,8 +554,7 @@
     {
         width: 100%;
         bottom: 0px !important;
-        margin-left: 0px !important;
-        position: fixed;
+        margin-left: 0px !important; /*position: fixed;*/
     }
 
     .esriCTLegendChangePositionDown
@@ -594,10 +599,91 @@
     {
         width: 135px !important;
     }
-    .esriCTTickMark{ background-position: 94%;}
+    .esriCTTickMark
+    {
+        background-position: 94%;
+    }
     .esriCTLoadingIndicator
     {
         display: none !important;
+    }
+
+    .scrollbar_footerVisible
+    {
+        display: none;
+    }
+    .esriCTShowInfoContent
+    {
+        display: block !important;
+    }
+    .divHideInfoMobileContent
+    {
+        display: none !important;
+    }
+    .esriCThidedivTriangle
+    {
+        display: none !important;
+    }
+    .esriCTinfoWindowHeightWidth
+    {
+        height: 100% !important;
+        width: 100% !important;
+        bottom: 0px !important;
+        left: 0px !important;
+    }
+
+    .divInfoMobileContent
+    {
+        color: #6e6e6e;
+        display: block;
+    }
+    .cloasedivmobile
+    {
+        display: block;
+    }
+    .esriCTtabs ul li a.esriCTClose
+    {
+        display: none;
+    }
+    .esriCTtabs ul li a
+    {
+        padding: 0;
+        line-height: 30px;
+        float: none;
+    }
+    .esriCTtabs ul li.getDir
+    {
+        width: 10%;
+    }
+    .esriCTtabs ul li
+    {
+        width: 29%;
+    }
+    .esriCTInfoSubmitButton, .esriCTInfoPostButton
+    {
+        background: none repeat scroll 0 0 #fff;
+        bottom: 0 !important;
+        color: #007ac2;
+        position: absolute !important;
+        right: 0 !important;
+        z-index: 1000;
+    }
+    .esriCTInfoBackButton
+    {
+        background: none repeat scroll 0 0 #fff;
+        bottom: 0 !important;
+        color: #007ac2;
+        position: absolute !important;
+        left: 0 !important;
+        z-index: 1000;
+    }
+    .esriCTGalleryInfoContainer
+    {
+        width: 100%;
+    }
+    .esriCTInfoContentComment
+    {
+        height: 85%;
     }
 }
 
@@ -620,7 +706,7 @@
         font-size: 14px !important;
     }
 
-    .esriCTDirectionContainer .esriCTRouteInformationContainer
+    .esriCTDirectionContainer .esriCTRouteInformationContainer, .textAreaContainer
     {
         font-size: 14px !important;
     }
@@ -716,7 +802,10 @@
         width: 100% !important;
     }
 
-
+    .esriCTShowInfoContent
+    {
+        display: block !important;
+    }
 
     .scrollbar_content
     {
@@ -739,7 +828,10 @@
     {
         right: 70px;
     }
-
+    .divHideInfoMobileContent
+    {
+        display: none !important;
+    }
     .esriCTAddressHolder
     {
         z-index: 997;
@@ -815,6 +907,7 @@
     {
         display: none;
         width: 100%;
+        height: 100%;
     }
 
     .esriCTShowInfoContent
@@ -890,7 +983,7 @@
 
     .esriCTdivLegendbox
     {
-        z-index: 997;
+        z-index: 996;
     }
 
     .esriCTInfoScrollContent
@@ -990,6 +1083,87 @@
     {
         width: 220px;
     }
-      .esriCTTickMark{ background-position: 88%;}
+    .esriCTTickMark
+    {
+        background-position: 88%;
+    }
+    .scrollbar_footerVisible
+    {
+        display: none;
+    }
+    .esriCThidedivTriangle
+    {
+        display: none !important;
+    }
+    .esriCTinfoWindowHeightWidth
+    {
+        height: 100% !important;
+        width: 100% !important;
+        bottom: 0px !important;
+        left: 0px !important;
+    }
+    .divInfoMobileContent
+    {
+        color: #6e6e6e;
+        display: block;
+    }
+    .cloasedivmobile
+    {
+        display: block;
+    }
+    .esriCTtabs ul li a.esriCTClose
+    {
+        display: none;
+    }
+    .esriCTtabs ul li a
+    {
+        padding: 0;
+        line-height: 30px;
+        float: none;
+    }
+    .esriCTtabs ul li.getDir
+    {
+        width: 12%;
+    }
+    .esriCTtabs ul li
+    {
+        width: 33%;
+    }
+    .esriCTtabs ul li.galleryTab
+    {
+        width: 20%;
+    }
+    .esriCTInfoSubmitButton, .esriCTInfoPostButton
+    {
+        background: none repeat scroll 0 0 #fff;
+        bottom: 0 !important;
+        color: #007ac2;
+        position: absolute !important;
+        right: 0 !important;
+        z-index: 1000;
+    }
+    .esriCTInfoBackButton
+    {
+        background: none repeat scroll 0 0 #fff;
+        bottom: 0 !important;
+        color: #007ac2;
+        position: absolute !important;
+        left: 0 !important;
+        z-index: 1000;
+    }
+    .esriCTGalleryInfoContainer
+    {
+        width: 100%;
+    }
+    .esriCTinfoWindow
+    {
+        z-index: 998;
+    }
+    .esriCTRightTab
+    {
+        z-index: 1000;
+    }
+
 }
+
 /* Landscape */

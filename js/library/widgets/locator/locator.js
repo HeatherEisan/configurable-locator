@@ -63,7 +63,7 @@ define([
     "../locator/locatorHelper"
 
 ], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, ScrollBar, Deferred, DeferredList, QueryTask, Geometry, BufferParameters, Graphic, Color, SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol, PictureMarkerSymbol, GraphicsLayer, GeometryService, Point, template, SearchResult, GeoLocation, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, RouteParameters, RouteTask, FeatureSet, SpatialReference, urlUtils, units, locatorHelper) {
-    //========================================================================================================================//
+   // ========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, locatorHelper], {
         templateString: template,
@@ -74,6 +74,8 @@ define([
         screenPoint: null,
         isResultFound: false,
         activitySearchFeature: null,
+        selectedStarPostComment: null,
+        showInfoWindow: true,
         /**
         * display locator widget
         *
@@ -88,6 +90,8 @@ define([
             */
             searchResult = new SearchResult({ map: this.map });
             searchResult.startup();
+            this._geolocation = new GeoLocation({ map: this.map });
+
             topic.subscribe("toggleWidget", lang.hitch(this, function (widget) {
                 if (widget !== "locator") {
                     if (domGeom.getMarginBox(this.divAddressHolder).h > 0) {
@@ -104,25 +108,34 @@ define([
             }));
             topic.subscribe("doBufferHandler", lang.hitch(this, function (feature) {
                 if (!this.searchFacility) {
-                    this.searchFacility = false;
                     this._doBuffer(feature.graphic);
                 } else {
                     if (feature.geometry) {
                         FGeometry = feature;
                     } else if (feature.graphic.geometry) {
+
                         FGeometry = feature.graphic;
                     }
-                    if (this.activitySearchFeature) {
-                        this._displayRouteOfNearestFeature(null, RouteParameters, this.activitySearchFeature, SpatialReference, units, FGeometry, null);
+                    if (this.activitySearchFeature && !this.featureLayerClick) {
+                        topic.publish("showProgressIndicator");
+                        this._displayRouteOfNearestFeature(null, this.activitySearchFeature, units, FGeometry, null, true);
+                    }
+                    if (this.featureLayerClick) {
+                        topic.publish("showProgressIndicator");
+                        this._displayRouteOfNearestFeature(null, this.featureLayerClick, units, FGeometry, 0, false);
                     }
                 }
+
             }));
             topic.subscribe("showRoute", lang.hitch(this, function (features, RouteParameters, featureSet, SpatialReference, units, mapPoint, featureIndex) {
                 this._setStartPoint(featureSet.attributes.NAME);
-                this._displayRouteOfNearestFeature(features, RouteParameters, featureSet, SpatialReference, units, mapPoint, featureIndex);
+                this._displayRouteOfNearestFeature(features, featureSet, units, mapPoint, featureIndex, true);
             }));
             topic.subscribe("createInfoWindowContent", lang.hitch(this, function (mapPoint, attributes, fields, infoIndex, featureArray, count, zoomToFeature) {
                 this._createInfoWindowContent(mapPoint, attributes, fields, infoIndex, featureArray, count, zoomToFeature);
+            }));
+            topic.subscribe("clearRoute", lang.hitch(this, function () {
+                this._clearRoute();
             }));
             topic.subscribe("setlocateAddressOnMap", lang.hitch(this, function (mapPoint) {
                 this._locateAddressOnMap(mapPoint);
@@ -147,7 +160,6 @@ define([
             domAttr.set(this.divAddressContainer, "title", "");
             domAttr.set(this.imgSearchLoader, "src", dojoConfig.baseURL + "/js/library/themes/images/loader.gif");
             this._setDefaultTextboxValue(this.txtAddress);
-
             locatorParams = {
                 divSearch: this.divSearch,
                 divAddressContent: this.divAddressContent,
@@ -171,13 +183,13 @@ define([
             })));
             urlUtils.addProxyRule({
                 urlPrefix: dojo.configData.RouteServiceURL,
-                proxyUrl: dojoConfig.baseURL + dojo.configData.ProxyUrl
+                proxyUrl: dojo.configData.ProxyUrl
             });
         },
 
         /**
         * positioning the infoWindow on extent change
-        * @param {object}map point
+        * @param {object}map point 
         * @param {object} map
         * @param {object} infoWindow
         * @memberOf widgets/locator/locator
@@ -194,13 +206,10 @@ define([
         * set default value of locator textbox as specified in configuration file
         * @memberOf widgets/locator/locator
         */
-        _setDefaultTextboxValue: function (locatorParams) {   //divSearch
+        _setDefaultTextboxValue: function (locatorParams) {
             var locatorSettings;
             locatorSettings = dojo.configData.LocatorSettings;
-
             domAttr.set(locatorParams, "defaultAddress", locatorSettings.LocatorDefaultAddress);
-
-
         },
 
         /**
@@ -211,19 +220,14 @@ define([
             this.own(on(locatorParams.divSearch, "click", lang.hitch(this, function (evt) {
                 domStyle.set(locatorParams.imgSearchLoader, "display", "block");
                 domStyle.set(locatorParams.close, "display", "none");
-
                 this._locateAddress(evt, locatorParams);
             })));
             this.own(on(locatorParams.txtAddress, "keyup", lang.hitch(this, function (evt) {
                 domStyle.set(locatorParams.close, "display", "block");
-
                 this._submitAddress(evt, locatorParams);
             })));
             this.own(on(locatorParams.txtAddress, "dblclick", lang.hitch(this, function (evt) {
                 this._clearDefaultText(evt, locatorParams);
-            })));
-            this.own(on(locatorParams.txtAddress, "blur", lang.hitch(this, function (evt) {
-                this._replaceDefaultText(evt, locatorParams);
             })));
             this.own(on(locatorParams.txtAddress, "focus", lang.hitch(this, function () {
                 domStyle.set(locatorParams.close, "display", "block");
@@ -296,7 +300,6 @@ define([
                         return;
                     }
                 }
-
                 /**
                 * do not perform auto complete search if alphabets,
                 * numbers,numpad keys,comma,ctl+v,ctrl +x,delete or
@@ -311,7 +314,6 @@ define([
                     domStyle.set(locatorParams.close, "display", "block");
                     return;
                 }
-
                 /**
                 * call locator service if search text is not empty
                 */
@@ -322,7 +324,6 @@ define([
                         if (locatorParams.lastSearchString !== lang.trim(locatorParams.txtAddress.value)) {
                             locatorParams.lastSearchString = lang.trim(locatorParams.txtAddress.value);
                             domConstruct.empty(locatorParams.divAddressResults);
-
                             /**
                             * clear any staged search
                             */
@@ -342,7 +343,9 @@ define([
                         this.lastSearchString = lang.trim(locatorParams.txtAddress.value);
                         domStyle.set(locatorParams.imgSearchLoader, "display", "none");
                         domStyle.set(locatorParams.close, "display", "block");
+                        domAttr.set(locatorParams.close, "title", "");
                         domConstruct.empty(locatorParams.divAddressResults);
+                        this._locatorErrBack(locatorParams);
                     }
                 }
             }
@@ -375,16 +378,12 @@ define([
         _searchLocation: function (locatorParams) {
             var nameArray, locatorSettings, locator, searchFieldName, addressField, baseMapExtent, options, searchFields, addressFieldValues, addressFieldName, s,
                 deferredArray, index, locatorDef, deferred, resultLength, deferredListResult, num, key, order, i, resultAttributes;
-
+            locatorSettings = dojo.configData.LocatorSettings;
+            locator = new Locator(locatorSettings.LocatorURL);
             nameArray = { Address: [] };
             domStyle.set(locatorParams.imgSearchLoader, "display", "block");
             domStyle.set(locatorParams.close, "display", "none");
             domAttr.set(locatorParams.txtAddress, "defaultAddress", locatorParams.txtAddress.value);
-            /**
-            * call locator service specified in configuration file
-            */
-            locatorSettings = dojo.configData.LocatorSettings;
-            locator = new Locator(locatorSettings.LocatorURL);
             searchFieldName = locatorSettings.LocatorParameters.SearchField;
             addressField = {};
             addressField[searchFieldName] = lang.trim(locatorParams.txtAddress.value);
@@ -413,7 +412,6 @@ define([
             * @param {object} candidates Contains results from locator service
             */
             deferredArray = [];
-
             for (index in dojo.configData.SearchSettings) {
                 if (dojo.configData.SearchSettings.hasOwnProperty(index)) {
                     this._locateLayersearchResult(deferredArray, dojo.configData.SearchSettings[index], locatorParams);
@@ -435,7 +433,7 @@ define([
                 if (result) {
                     if (result.length > 0) {
                         for (num = 0; num < result.length; num++) {
-                            if (dojo.configData.SearchSettings[num]) {
+                            if (dojo.configData.SearchSettings[num] && dojo.configData.SearchSettings[num].UnifiedSearch.toLowerCase() === "true") {
                                 key = dojo.configData.SearchSettings[num].SearchDisplayTitle;
                                 nameArray[key] = [];
                                 for (order = 0; order < result[num][1].features.length; order++) {
@@ -498,6 +496,7 @@ define([
                     }
                 }
             }
+
         },
 
         /**
@@ -536,7 +535,7 @@ define([
         * @memberOf widgets/locator/locator
         */
         _showLocatedAddress: function (candidates, resultLength, locatorParams) {
-            var addrListCount = 0, addrList = [], candidateArray, divAddressCounty, candidate, listContainer, i, divAddressSearchCell;
+            var addrListCount = 0, addrList = [], candidateArray, divAddressCounty, listContainer, i, divAddressSearchCell, isCandidate, candidateName;
             domConstruct.empty(locatorParams.divAddressResults);
             if (lang.trim(locatorParams.txtAddress.value) === "") {
                 locatorParams.txtAddress.focus();
@@ -561,16 +560,27 @@ define([
             locatorParams.locatorScrollbar = new ScrollBar({ domNode: locatorParams.divAddressScrollContent });
             locatorParams.locatorScrollbar.setContent(locatorParams.divAddressResults);
             locatorParams.locatorScrollbar.createScrollBar();
+
+            while (locatorParams.locatorScrollbar.domNode.children.length > 1) {
+                locatorParams.locatorScrollbar.domNode.removeChild(locatorParams.locatorScrollbar.domNode.firstChild);
+            }
+
             if (resultLength > 0) {
                 domClass.add(this.divAddressHolder, "esriCTAddressContentHeight");
+                isCandidate = false;
                 for (candidateArray in candidates) {
                     if (candidates.hasOwnProperty(candidateArray)) {
+                        if (!isCandidate) {
+                            candidateName = dojo.configData.LocatorSettings.DisplayText;
+                        } else {
+                            candidateName = candidateArray;
+                        }
                         if (candidates[candidateArray].length > 0) {
+                            isCandidate = true;
                             divAddressCounty = domConstruct.create("div", { "class": "esriCTSearchGroupRow esriCTBottomBorder esriCTResultColor esriCTCursorPointer esriAddressCounty" }, locatorParams.divAddressResults);
                             divAddressSearchCell = domConstruct.create("div", { "class": "esriCTSearchGroupCell" }, divAddressCounty);
-                            candidate = candidateArray + " (" + candidates[candidateArray].length + ")";
                             domConstruct.create("div", { "innerHTML": "+", "class": "esriCTPlusMinus" }, divAddressSearchCell);
-                            domConstruct.create("div", { "innerHTML": candidate, "class": "esriCTGroupList" }, divAddressSearchCell);
+                            domConstruct.create("div", { "innerHTML": candidateName + " (" + candidates[candidateArray].length + ")", "class": "esriCTGroupList" }, divAddressSearchCell);
                             domStyle.set(locatorParams.imgSearchLoader, "display", "none");
                             domStyle.set(locatorParams.close, "display", "block");
                             addrList.push(divAddressCounty);
@@ -648,22 +658,20 @@ define([
                 alert(sharedNls.errorMessages.falseConfigParams);
             }
             candidateDate.onclick = function () {
+                this.showInfoWindow = false;
                 if (locatorParams && locatorParams.showBuffer) {
                     _this.searchFacility = false;
+                    this.featureLayerClick = null;
+                    topic.publish("infowindowInstance");
+
                 } else {
                     _this.searchFacility = true;
                 }
-
                 topic.publish("createPod");
                 var layer, infoIndex, geoLocationPushpin, symbol, lineColor, locatorMarkupSymbol, fillColor;
-                if (_this.map.infoWindow) {
-                    _this.map.infoWindow.hide();
-                }
                 locatorParams.txtAddress.value = this.innerHTML;
                 domAttr.set(locatorParams.txtAddress, "defaultAddress", locatorParams.txtAddress.value);
-
                 _this._hideAddressContainer(locatorParams);
-
                 if (candidate.geometry) {
                     if (candidate.geometry.type) {
                         if (candidate.geometry.type === "point") {
@@ -695,6 +703,7 @@ define([
                         }
                     }
                 }
+                topic.publish("showProgressIndicator");
             };
         },
 

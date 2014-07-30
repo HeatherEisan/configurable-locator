@@ -557,7 +557,7 @@ input
 
 .esriCTDivTriangle
 {
-    background-image: url("../images/bottomArrow.png");
+    background-image: url("../images/bottomArrow-green.png");
 }
 
 .esriCTLink
@@ -689,7 +689,7 @@ input
     color: #808080;
 }
 
-.esriCTDivDistance
+.esriCTDivDistance, .esriCTDivDistancePod
 {
     color: #028D6A;
 }
@@ -705,27 +705,36 @@ input
 }
 
 /*Activity planner*/
-.esriCTActivityListTabSelected
-{
-    color: #028D6A;
-}
-
 .esriCTActivityListTab
 {
+    border-bottom: 1px solid #028D6A;
     color: #028D6A;
-    border: 1px solid #028D6A;
+    border-right: 1px solid #FAFAFA;
+    border-left: 1px solid #028D6A;
 }
 
 .esriCTActivityTabSelected
 {
     color: #028D6A;
+    border-left: 1px solid #FAFAFA;
+    border-right: 1px solid #fff;
 }
 
 .esriCTActivityTab
 {
+    border-bottom: 1px solid #028D6A;
     color: #028D6A;
-    border: 1px solid #028D6A;
+    border-right: 1px solid #028D6A;
+    border-left: 1px solid #FAFAFA;
 }
+
+.esriCTActivityTabSelected
+{
+    color: #028D6A;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #FAFAFA;
+}
+
 
 .esriCTMyListHeaderText
 {
@@ -759,7 +768,7 @@ input
 
 .esriCTBottonGo
 {
-    background-color: #028D6A;
+    background-image: url("../images/search-green.png") !important;
 }
 
 .esriCTAddAcitivityList
@@ -789,24 +798,28 @@ input
 
 /*End of Activity planner*/
 /* Info window */
-.esriCTtabs ul li a.esriCTImageTab{ color: #028D6A;}
-.esriCTtabs ul li.infoSelectedTab {
-background: #028D6A;
-
+.esriCTtabs ul li a.esriCTImageTab
+{
+    color: #028D6A;
 }
-.esriCTtabs li {color:#028D6A;}
+.esriCTtabs ul li.infoSelectedTab
+{
+    background: #028D6A;
+}
+.esriCTtabs li
+{
+    color: #028D6A;
+}
 
 .esriCTImageTab
 {
     color: #028D6A;
     background: url("../images/direction-green.png");
-
 }
 .esriCTImageTabselected
 {
     color: #028D6A;
     background: url("../images/direction-select.png");
-
 }
 .esriCTActivitySerachGoButton
 {

@@ -181,14 +181,13 @@ define([
                             }
                         }
                     } else {
-                        alert("Please select valid To date");
+                        alert(sharedNls.errorMessages.activityPlannerInvalidToDate);
                     }
                 } else {
-                    alert("Please select valid From date");
+                    alert(sharedNls.errorMessages.activityPlannerInvalidFromDate);
                 }
-
             } else {
-                alert("Please select the valid date");
+                alert(sharedNls.errorMessages.activityPlannerInvalidDates);
             }
         },
 
