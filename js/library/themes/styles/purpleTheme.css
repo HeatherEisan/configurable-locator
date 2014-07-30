@@ -514,7 +514,7 @@ input
 
 .esriCTLegendBoxInner
 {
-    border: 1px solid #5C2E6F !important; /*border-bottom: none !important;*/
+    border: 1px solid #5C2E6F !important;
 }
 
 .esriCTLegendLabel
@@ -690,7 +690,7 @@ input
     color: #808080;
 }
 
-.esriCTDivDistance
+.esriCTDivDistance, .esriCTDivDistancePod
 {
     color: #5C2E6F;
 }
@@ -705,24 +705,34 @@ input
 }
 
 /*Activity planner*/
-.esriCTActivityListTabSelected
-{
-    color: #5C2E6F;
-}
 .esriCTActivityListTab
 {
+    border-bottom: 1px solid #5C2E6F;
     color: #5C2E6F;
-    border: 1px solid #5C2E6F;
+    border-right: 1px solid #FAFAFA;
+    border-left: 1px solid #5C2E6F;
 }
+
 .esriCTActivityTabSelected
 {
     color: #5C2E6F;
+    border-left: 1px solid #FAFAFA;
+    border-right: 1px solid #fff;
 }
 
 .esriCTActivityTab
 {
+    border-bottom: 1px solid #5C2E6F;
     color: #5C2E6F;
-    border: 1px solid #5C2E6F;
+    border-right: 1px solid #5C2E6F;
+    border-left: 1px solid #FAFAFA;
+}
+
+.esriCTActivityTabSelected
+{
+    color: #5C2E6F;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #FAFAFA;
 }
 
 .esriCTMyListHeaderText
@@ -757,7 +767,7 @@ input
 
 .esriCTBottonGo
 {
-     background-color: #5C2E6F;
+    background-image: url("../images/search-purple.png") !important;
 }
 
 .esriCTAddAcitivityList
@@ -785,3 +795,34 @@ input
     background-image: url("../images/date-arrow-purple.png");
 }
 /*End of Activity planner*/
+.esriCTtabs ul li a.esriCTImageTab
+{
+    color: #5C2E6F;
+}
+.esriCTtabs ul li.infoSelectedTab
+{
+    background: #5C2E6F;
+}
+.esriCTtabs li
+{
+    color: #5C2E6F;
+}
+
+.esriCTImageTab
+{
+    color: #5C2E6F;
+    background: url("../images/direction-purple.png");
+}
+.esriCTImageTabselected
+{
+    color: #5C2E6F;
+    background: url("../images/direction-select.png");
+}
+.esriCTActivitySerachGoButton
+{
+    background: none repeat scroll 0% 0% #5C2E6F;
+}
+.esriCTActivityHeadText
+{
+    color: #5C2E6F;
+}

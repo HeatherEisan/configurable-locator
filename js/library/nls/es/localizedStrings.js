@@ -31,7 +31,11 @@ define({
         locate: "Ubicación actual",
         share: "Compartir",
         help: "Ayuda",
-        clearEntry: "@es@ Clear"
+        clearEntry: "@es@ Clear",
+        hidePanel: "@es@ Hide panel",
+        showPanel: "@es@ Show panel",
+        printButton: "@es@ Print",
+        close: "@es@ Close"
     },
     titles: {
         directionsDisplayText: "@es@ Area of Interest",
@@ -55,7 +59,10 @@ define({
         toDateText: "@es@ To Date",
         gobuttonText: "@es@ Go",
         noLegendAvailable: "@es@ No Legend Available.",
-        loadingText: "@es@ Loading..."
+        loadingText: "@es@ Loading...",
+        galleryInfoText: "@es@ Gallery",
+        informationText: "@es@ Information",
+        commentInfoText: "@es@ Comments"
     },
     errorMessages: {
         invalidSearch: "No hay resultados",
@@ -67,7 +74,15 @@ define({
         shareFailed: "@es@ Unable to share.",
         imageDoesNotFound: "@es@ There are no photo available.",
         facilitydoestfound: "@es@ No facilities found in buffer area.",
-        noCommentAvaiable: "@es@ No Comment available"
+        noCommentAvaiable: "@es@ No Comment available",
+        routeComment: "@es@ Route could not be calculated from current location.",
+        activityNotSelected: "@es@ Please select activity to search.",
+        activityPlannerInvalidToDate: "@es@ Please select valid To date",
+        activityPlannerInvalidFromDate: "@es@ Please select valid From date",
+        activityPlannerInvalidDates: "@es@ Please select the valid date",
+        commentString: "@es@ Please Enter comment",
+        maxLenghtCommentstring: "@es@ Comment should not exceed 250 characters .",
+        commentError: "@es@ Unable to add comments. Comments table is either absent or does not have write acccess ."
     },
     notUsed: {
         addressDisplayText: "@es@ Address",

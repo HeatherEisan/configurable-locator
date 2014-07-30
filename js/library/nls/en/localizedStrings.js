@@ -31,7 +31,10 @@ define({
         locate: "Locate",
         share: "Share",
         help: "Help",
-        clearEntry: "Clear"
+        clearEntry: "Clear",
+        hidePanel: "Hide panel",
+        showPanel: "Show panel",
+        close: "Close"
     },
     titles: {
         directionsDisplayText: "Area of Interest",
@@ -55,7 +58,10 @@ define({
         toDateText: "To Date",
         gobuttonText: "Go",
         noLegendAvailable: "No Legend Available.",
-        loadingText: "Loading..."
+        loadingText: "Loading...",
+        galleryInfoText: "Gallery",
+        informationText: "Information",
+        commentInfoText: "Comments"
     },
     errorMessages: {
         invalidSearch: "No results found",
@@ -67,7 +73,13 @@ define({
         shareFailed: "Unable to share.",
         imageDoesNotFound: "There are no photo available.",
         facilitydoestfound: "No facilities found in buffer area.",
-        noCommentAvaiable: "No Comment available"
+        noCommentAvaiable: "No Comment available",
+        activityPlannerInvalidToDate: "Please select valid To date",
+        activityPlannerInvalidFromDate: "Please select valid From date",
+        activityPlannerInvalidDates: "Please select the valid date",
+        commentString: "Please Enter comment",
+        maxLenghtCommentstring: "Comment should not exceed 250 characters .",
+        commentError: "Unable to add comments. Comments table is either absent or does not have write acccess ."
 
     },
     notUsed: {

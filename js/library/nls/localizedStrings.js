@@ -33,7 +33,11 @@ define({
             share: "Share",
             help: "Help",
             activities: "Activities",
-            clearEntry: "Clear"
+            clearEntry: "Clear",
+            hidePanel: "Hide panel",
+            showPanel: "Show panel",
+            printButton: "Print",
+            close: "Close"
         },
         titles: {
             directionsDisplayText: "Area of Interest",
@@ -58,7 +62,17 @@ define({
             toDateText: "To Date",
             gobuttonText: "Go",
             noLegendAvailable: "No Legend Available.",
-            loadingText: "Loading..."
+            facilityInfo: "facility info",
+            postComment: "Post Comment",
+            rating: "rating",
+            backButton: "Back",
+            submitButton: "Submit",
+            postCommentText: "Enter comment",
+            loadingText: "Loading...",
+            galleryInfoText: "Gallery",
+            informationText: "Information",
+            commentInfoText: "Comments"
+
         },
         errorMessages: {
             invalidSearch: "No results found",
@@ -68,9 +82,19 @@ define({
             widgetNotLoaded: "Unable to load widgets.",
             shareLoadingFailed: "Unable to shorten URL, Bit.ly failed to load.",
             shareFailed: "Unable to share.",
+	        invalidBasemapQuery: "Invalid BasemapQuery",
+            noBasemap: "No Basemap Found",
             imageDoesNotFound: "No photos available.",
             facilitydoestfound: "No facilities found in buffer area.",
-            noCommentAvaiable: "No Comment available."
+            noCommentAvaiable: "No comments available.",
+            routeComment: "Route could not be calculated from current location.",
+            activityNotSelected: "Please select activity to search.",
+            activityPlannerInvalidToDate : "Please select valid To date",
+            activityPlannerInvalidFromDate: "Please select valid From date",
+            activityPlannerInvalidDates: "Please select the valid date",
+            commentString: "Please Enter comment",
+            maxLenghtCommentstring: "Comment should not exceed 250 characters .",
+            commentError: "Unable to add comments. Comments table is either absent or does not have write acccess ."
         }
     },
     es: true,

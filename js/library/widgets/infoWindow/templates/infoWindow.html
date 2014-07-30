@@ -1,34 +1,46 @@
 ﻿<div class="esriCTInfoWindow">
-    <div data-dojo-attach-point="divInfoContainer" align="center" class="esriCTInfoContainer esriCTopacityHideAnimation">
+    <div data-dojo-attach-point="divInfoContainer" align="center" class="esriCTInfoWindowContainer esriCTopacityHideAnimation">
         <div align="left" class="esriCTInfoContent">
             <div class="esriCTFullHeightWidth">
                 <div class="esriCTHeaderPanelContainer">
-                    <div data-dojo-attach-point="headerPanel" class="esriCTHeaderPanelContent">
-                    </div>
-                    <div class="esriCTClose" data-dojo-attach-point="divClose">
-                    </div>
-                    <div class="esriCTInfoWindowArrows">
-                        <div class="esriCTInfoWindowLeftArrow">
-                        </div>
-                        <div class="esriCTInfoWindowFeatureCount">
-                            <div class="esriCTdivInfoFeatureCount" data-dojo-attach-point="divInfoFeatureCount">
-                            </div>
-                            <div class="esriCTdivInfoTotalFeatureCount" data-dojo-attach-point="divInfoTotalFeatureCount">
-                            </div>
-                        </div>
-                        <div class="esriCTInfoWindowRightArrow">
-                        </div>
+                    <div class="esriCTtabs">
+                        <ul>
+                            <li style="border-left: none;" class="esriCTTabActive infoSelectedTab" data-dojo-attach-point="informationTab">
+                                <a>${sharedNls.titles.informationText}</a></li>
+                            <li data-dojo-attach-point="galleryTab" class="galleryTab"><a>${sharedNls.titles.galleryInfoText}</a></li>
+                            <li data-dojo-attach-point="commentsTab"><a>${sharedNls.titles.commentInfoText}</a></li>
+                            <li data-dojo-attach-point="getDir" class="getDir"><a data-dojo-attach-point="getDirselect" class="esriCTImageTab ">
+                                &nbsp;</a></li>
+                            <li data-dojo-attach-point="divClose"><a id="close" class="esriCTClose" title="${sharedNls.tooltips.close}">&nbsp;</a></li>
+                        </ul>
                     </div>
                 </div>
                 <div data-dojo-attach-point="divInfoDetails" class="esriCTInfoPanel">
                     <div class="esriCTInfoScrollContainer" align="left">
                         <div data-dojo-attach-point="divInfoScrollContent" class="esriCTInfoScrollContent">
-                            <div data-dojo-attach-point="divInfoDetailsScroll" class="esriCTFullWidth">
+                            <div data-dojo-attach-point="divInfoDetailsScroll" class="esriCTComments esriCTFullWidth">
+                                <div id="informationTabContainer" class="esriCTInfoTabContent displayBlock">
+                                </div>
+                                <div id="galleryTabContainer" class="esriCTInfoTabContent">
+                                </div>
+                                <div id="commentsTabContainer" class="esriCTInfoTabContent">
+                                </div>
+                                <div id="getDirContainer" class="esriCTDirectionTabContent">
+                                </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="cloasedivmobile" data-dojo-attach-point="backToMap">
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+        <div data-dojo-attach-point="divInfoMobileContent" class="divInfoMobileContent calloutpanel">
+            <div class="esriCTMobileCloseDiv esriCTclosediv" data-dojo-attach-point="esriCTMobileCloseDiv">
+            </div>
+            <div data-dojo-attach-point="spanDirection" class="calloutText">
+            </div>
+            <div class="calloutarrow" data-dojo-attach-point="esriCTMobileArrow">
+                <img src="js/library/themes/images/right-arrow-blue.png" /></div>
+        </div>
+</div> 

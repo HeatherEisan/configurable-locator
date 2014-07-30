@@ -31,7 +31,11 @@ define({
         locate: "Posizione corrente",
         share: "Condividi",
         help: "Guida",
-        clearEntry: "@it@ Clear"
+        clearEntry: "@it@ Clear",
+        hidePanel: "@it@ Hide panel",
+        showPanel: "@it@ Show panel",
+        printButton: "@it@ Print",
+        close: "@it@ Close"
     },
     titles: {
         directionsDisplayText: "@it@ Area of Interest",
@@ -55,7 +59,10 @@ define({
         toDateText: "@it@ To Date",
         gobuttonText: "@it@ Go",
         noLegendAvailable: "@it@ No Legend Available.",
-        loadingText: "@it@ Loading..."
+        loadingText: "@it@ Loading...",
+        galleryInfoText: "@it@ Gallery",
+        informationText: "@it@ Information",
+        commentInfoText: "@it@ Comments"
     },
     errorMessages: {
         invalidSearch: "Nessun risultato trovato.",
@@ -67,7 +74,15 @@ define({
         shareFailed: "@it@ Unable to share.",
         imageDoesNotFound: "@it@ There are no photo available.",
         facilitydoestfound: "@it@  No facilities found in buffer area.",
-        noCommentAvaiable: "@it@  No Comment available"
+        noCommentAvaiable: "@it@  No Comment available",
+        routeComment: "@it@ Route could not be calculated from current location.",
+        activityNotSelected: "@it@ Please select activity to search.",
+        activityPlannerInvalidToDate: "@it@ Please select valid To date",
+        activityPlannerInvalidFromDate: "@it@ Please select valid From date",
+        activityPlannerInvalidDates: "@it@ Please select the valid date",
+        commentString: "@it@ Please Enter comment",
+        maxLenghtCommentstring: "@it@ Comment should not exceed 250 characters .",
+        commentError: "@it@ Unable to add comments. Comments table is either absent or does not have write acccess ."
     },
     notUsed: {
         addressDisplayText: "@it@ Address",
