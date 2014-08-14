@@ -4,21 +4,22 @@
             <div class="esriCTFullHeightWidth">
                 <div class="esriCTHeaderPanelContainer">
                     <div class="esriCTtabs">
-                        <ul>
-                            <li style="border-left: none;" class="esriCTTabActive infoSelectedTab" data-dojo-attach-point="informationTab">
-                                <a>${sharedNls.titles.informationText}</a></li>
-                            <li data-dojo-attach-point="galleryTab" class="galleryTab"><a>${sharedNls.titles.galleryInfoText}</a></li>
-                            <li data-dojo-attach-point="commentsTab"><a>${sharedNls.titles.commentInfoText}</a></li>
-                            <li data-dojo-attach-point="getDir" class="getDir"><a data-dojo-attach-point="getDirselect" class="esriCTImageTab ">
-                                &nbsp;</a></li>
-                            <li data-dojo-attach-point="divClose"><a id="close" class="esriCTClose" title="${sharedNls.tooltips.close}">&nbsp;</a></li>
-                        </ul>
+                       <div class="esriCTtabsRight">
+                            <div data-dojo-attach-point="divClose" class="infoClose"><a id="close" class="esriCTClose" title="${sharedNls.tooltips.close}">&nbsp;</a></div>
+                            <div data-dojo-attach-point="getDir" class="getDir"><a data-dojo-attach-point="getDirselect" class="esriCTImageTab ">&nbsp;</a></div>
+                        </div>
+                       <div class="esriCTtabsLeft">
+                            <div style="border:none;" class="esriCTTabInfo infoSelectedTab" data-dojo-attach-point="informationTab">
+                                <a>Information</a></div>
+                            <div data-dojo-attach-point="galleryTab" class="galleryTab"><a>Gallery</a></div>
+                            <div data-dojo-attach-point="commentsTab" class="commentsTab"><a>Comments</a></div>
+                        </div>
+
                     </div>
                 </div>
                 <div data-dojo-attach-point="divInfoDetails" class="esriCTInfoPanel">
-                    <div class="esriCTInfoScrollContainer" align="left">
                         <div data-dojo-attach-point="divInfoScrollContent" class="esriCTInfoScrollContent">
-                            <div data-dojo-attach-point="divInfoDetailsScroll" class="esriCTComments esriCTFullWidth">
+                            <div data-dojo-attach-point="divInfoDetailsScroll" class="esriCTFullWidth">
                                 <div id="informationTabContainer" class="esriCTInfoTabContent displayBlock">
                                 </div>
                                 <div id="galleryTabContainer" class="esriCTInfoTabContent">
@@ -29,7 +30,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
                     <div class="cloasedivmobile" data-dojo-attach-point="backToMap">
                     </div>
                 </div>
@@ -43,4 +43,4 @@
             <div class="calloutarrow" data-dojo-attach-point="esriCTMobileArrow">
                 <img src="js/library/themes/images/right-arrow-blue.png" /></div>
         </div>
-</div> 
+</div>

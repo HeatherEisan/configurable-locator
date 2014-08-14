@@ -47,7 +47,7 @@ define([
             this.infoWindowContainer.appendChild(this.domNode);
             this._anchor = domConstruct.create("div", { "class": "esriCTDivTriangle" }, this.domNode);
             domUtils.hide(this.domNode);
-            domAttr.set(this.backToMap, "innerHTML", "Back To Map");
+            domAttr.set(this.backToMap, "innerHTML", sharedNls.titles.backToMapText);
             this.own(on(this.backToMap, "click", lang.hitch(this, function () {
                 this._closeInfowindow();
             })));
@@ -77,6 +77,7 @@ define([
                 this.InfoShow = true;
                 dojo.setMapTipPosition = true;
                 domUtils.hide(this.domNode);
+                this.map.getLayer("highlightLayerId").clear();
             })));
             this.own(on(this.informationTab, "click", lang.hitch(this, function () {
                 this._showInformationTab(this.informationTab, dojo.byId("informationTabContainer"));
@@ -114,6 +115,10 @@ define([
             domClass.add(this.getDirselect, "esriCTImageTab");
             domClass.add(tabNode, "infoSelectedTab");
             domClass.add(containerNode, "displayBlock");
+
+            if (dojo.postCommentScrollBar) {
+                dojo.postCommentScrollBar.rePositionScrollBar();
+            }
         },
 
         show: function (detailsTab, screenPoint) {
@@ -140,7 +145,6 @@ define([
                     height: height + "px"
                 });
             }
-            this.resizeInfoScrollContainer();
         },
 
         /**
@@ -221,12 +225,13 @@ define([
                     esriInfoStyle = { height: divInfoContentHeight + 'px' };
                 domAttr.set(this.divInfoScrollContent, "style", esriInfoStyle);
                 if (this.infoContainerScrollbar) {
+                    if (domClass.contains(this.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight")) {
+                        domClass.remove(this.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
+                    }
                     domClass.add(this.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
                     this.infoContainerScrollbar.removeScrollBar();
                 }
-                this.infoContainerScrollbar = new ScrollBar({
-                    domNode: this.divInfoScrollContent
-                });
+                this.infoContainerScrollbar = new ScrollBar({domNode: this.divInfoScrollContent});
                 this.infoContainerScrollbar.setContent(this.divInfoDetailsScroll);
                 this.infoContainerScrollbar.createScrollBar();
                 dojo.onInfoWindowResize = true;
@@ -236,7 +241,7 @@ define([
         },
 
         resizeInfoScrollContainer: function () {
-            var divInfoContentHeight = document.documentElement.clientHeight - 60,
+            var divInfoContentHeight = document.documentElement.clientHeight - 190,
                 esriInfoStyle = { height: divInfoContentHeight + 'px' };
             domAttr.set(this.divInfoScrollContent, "style", esriInfoStyle);
             if (this.infoContainerScrollbar) {

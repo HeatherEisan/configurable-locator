@@ -17,8 +17,6 @@
 */
 @media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (-webkit-min-device-pixel-ratio: 2)
 {
-
-
     .esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTTdGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTRouteImg, .esriCTRouteImgSelected, .esriCTHelpImg, .esriCTHelpImg, .esriCTActivitiesImg, .esriCTActivitiesImgSelected
     {
         height: 44px !important;
@@ -33,9 +31,24 @@
         width: 44px !important;
         padding: 8px 0 !important;
     }
+    .esriCTtabs div.infoClose
+    {
+        padding: 7px;
+    }
+    .esriCTResultContent
+    {
+        padding-left: 17px !important;
+    }
+    .esriCTApplicationHeaderIcon img
+    {
+        float: left;
+        width: auto;
+        height: 61px;
+    }
+
 }
 
-@media only screen and (min-device-width : 1024px) and (max-device-width : 1279px) /*if device wise @media only screen and (min-device-width : 1024px) and (max-device-width : 1280px)*/
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) /*if device wise @media only screen and (min-device-width : 1024px) and (max-device-width : 1280px)*/
 {
     html, body
     {
@@ -64,14 +77,23 @@
     {
         height: 61px;
     }
+    .esriCTApplicationHeaderIcon img
+    {
+        width: 61PX;
+    }
+
+
     .esriCTDivActivityAppContainer, .esriCTDivAppContainer
     {
         top: 61px;
     }
-
+    .esriCTDivAppContainer
+    {
+        top: 61px;
+    }
     .esriCTTxtAddress
     {
-        font-size: 15px !important;
+        font-size: 14px !important;
     }
 
     .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding
@@ -79,11 +101,6 @@
         height: 44px !important;
         width: 44px !important;
         padding: 8px 0 !important;
-    }
-
-    .esriCTSearchClose
-    {
-        right: 70px;
     }
 
     .esriCTApplicationHeaderTextTD
@@ -105,13 +122,18 @@
     {
         padding-top: 4px;
     }
-    .esriCTInfotext
+    .esriCTtabs div.infoClose
     {
-        padding: 5px 25px 5px 0px;
-        text-align: justify;
-        clear: both;
+        padding: 7px;
     }
-
+    .esriCTTabInfo
+    {
+        width: 33.2%;
+    }
+    .esriCTtabs div.esriCTtabsRight
+    {
+        margin-left: -2px;
+    }
 }
 
 @media only screen and (min-width : 768px) and (max-width : 1024px) /*if device wise  @media only screen and (min-device-width : 768px) and (max-device-width : 1024px)*/
@@ -152,10 +174,17 @@
     {
         top: 61px;
     }
-
+    .esriCTDivAppContainer
+    {
+        top: 61px;
+    }
+    .esriCTApplicationHeaderIcon img
+    {
+        width: 61PX;
+    }
     .esriCTTxtAddress
     {
-        font-size: 15px !important;
+        font-size: 14px !important;
     }
 
     .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding
@@ -165,18 +194,10 @@
         padding: 8px 0 !important;
     }
 
-    .esriCTSearchClose
-    {
-        right: 70px;
-    }
 
     .esriCTApplicationHeaderTextTD
     {
         font-size: 30px;
-        width: 42%;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
     }
 
     .esriCTHeaderRouteContainer
@@ -193,17 +214,18 @@
     {
         padding-top: 4px;
     }
-    .esriCTInfotext
+    .esriCTtabs div.infoClose
     {
-        padding: 8px 25px 5px 0px;
-        text-align: justify;
-        clear: both;
+        padding: 7px;
     }
-    .esriCTtabs ul li a
+    .esriCTTabInfo
     {
-        padding: 8px 7px;
+        width: 33.2%;
     }
-
+    .esriCTtabs div.esriCTtabsRight
+    {
+        margin-left: -2px;
+    }
 }
 
 @media screen and (min-width: 321px) and (max-width: 767px)
@@ -222,7 +244,10 @@
     {
         font-size: 14px !important;
     }
-
+    .esriCTInfotext span
+    {
+        font-size: 14px !important;
+    }
     .esriCTDirectionContainer .esriCTRouteInformationContainer
     {
         font-size: 14px !important;
@@ -255,17 +280,17 @@
 
     .esriCTTxtAddress
     {
-        font-size: 15px !important;
+        font-size: 14px !important;
     }
 
     .esriCTDivAppHolder
     {
-        width: 99.6% !important;
+        width: 100% !important;
     }
 
     .esriCTDivshareContainer
     {
-        width: 99.6% !important;
+        width: 100% !important;
     }
 
     .divAppContent
@@ -311,7 +336,12 @@
         height: 61px;
         z-index: 997;
     }
-    .esriCTDivActivityAppContainer, .esriCTDivAppContainer
+    .esriCTDivActivityAppContainer
+    {
+        top: 61px;
+        width: 100% !important;
+    }
+    .esriCTDivAppContainer
     {
         top: 61px;
         width: 100% !important;
@@ -321,7 +351,7 @@
         width: 100% !important;
     }
 
-    .esriCTDivAppContainer, .esriCTShowContainerHeight
+    .esriCTDivAppContainer, .esriCTShowContainerHeight, .esriCTInfoScrollContent
     {
         width: 100% !important;
     }
@@ -495,11 +525,12 @@
         display: block;
         cursor: pointer;
         padding: 8px 16px;
-        position: absolute;
-        left: 0px;
-        bottom: 0px;
+        position: fixed;
+        left: 1px;
+        bottom: 1px;
         z-index: 1000;
         color: #007AC2;
+        background: #fff;
     }
 
     .scrollbar_footerVisible
@@ -554,7 +585,7 @@
     {
         width: 100%;
         bottom: 0px !important;
-        margin-left: 0px !important; /*position: fixed;*/
+        margin-left: 0px !important;
     }
 
     .esriCTLegendChangePositionDown
@@ -641,49 +672,51 @@
     {
         display: block;
     }
-    .esriCTtabs ul li a.esriCTClose
+    .esriCTtabs div.infoClose
     {
         display: none;
     }
-    .esriCTtabs ul li a
-    {
-        padding: 0;
-        line-height: 30px;
-        float: none;
-    }
-    .esriCTtabs ul li.getDir
-    {
-        width: 10%;
-    }
-    .esriCTtabs ul li
-    {
-        width: 29%;
-    }
+
     .esriCTInfoSubmitButton, .esriCTInfoPostButton
     {
         background: none repeat scroll 0 0 #fff;
-        bottom: 0 !important;
+        bottom: 1px !important;
         color: #007ac2;
-        position: absolute !important;
-        right: 0 !important;
+        position: fixed !important;
+        right: 1px !important;
         z-index: 1000;
+        padding: 8px 16px;
     }
     .esriCTInfoBackButton
     {
         background: none repeat scroll 0 0 #fff;
-        bottom: 0 !important;
+        bottom: 1px !important;
         color: #007ac2;
-        position: absolute !important;
-        left: 0 !important;
+        position: fixed !important;
+        left: 1px !important;
         z-index: 1000;
+        padding: 8px 16px;
     }
-    .esriCTGalleryInfoContainer
+    .esriCTGalleryInfoContainer, .esriCTDirectionTabContent, .esriCTCommentInfoOuterContainer
     {
         width: 100%;
     }
     .esriCTInfoContentComment
     {
         height: 85%;
+    }
+    .esriCTCustomMapLogoPostionChange
+    {
+        bottom: 35px;
+    }
+    .esriCTtabs div.esriCTtabsRight
+    {
+        float: right;
+        margin-left: -5px;
+    }
+    .esriCTActivityContentHeight
+    {
+        height: 100px;
     }
 }
 
@@ -705,7 +738,10 @@
     {
         font-size: 14px !important;
     }
-
+    .esriCTInfotext span
+    {
+        font-size: 14px !important;
+    }
     .esriCTDirectionContainer .esriCTRouteInformationContainer, .textAreaContainer
     {
         font-size: 14px !important;
@@ -737,12 +773,17 @@
         height: 61px !important;
         z-index: 997;
     }
-    .esriCTDivActivityAppContainer, .esriCTAddressHolder, .esriCTDivAppContainer
+    .esriCTDivActivityAppContainer, .esriCTAddressHolder
     {
         top: 61px;
         width: 100% !important;
     }
-    .esriCTDivAppContainer, .esriCTShowContainerHeight
+    .esriCTDivAppContainer
+    {
+        top: 61px;
+        width: 100% !important;
+    }
+    .esriCTDivAppContainer, .esriCTShowContainerHeight, .esriCTInfoScrollContent
     {
         width: 100% !important;
     }
@@ -965,10 +1006,11 @@
         cursor: pointer;
         padding: 8px 16px;
         position: absolute;
-        left: 0px;
-        bottom: 0px;
+        left: 1px;
+        bottom: 1px;
         z-index: 1000;
         color: #007AC2;
+        background: #fff;
     }
 
     .scrollbar_footerVisible
@@ -1111,47 +1153,32 @@
     {
         display: block;
     }
-    .esriCTtabs ul li a.esriCTClose
+    .esriCTtabs div.infoClose
     {
         display: none;
     }
-    .esriCTtabs ul li a
-    {
-        padding: 0;
-        line-height: 30px;
-        float: none;
-    }
-    .esriCTtabs ul li.getDir
-    {
-        width: 12%;
-    }
-    .esriCTtabs ul li
-    {
-        width: 33%;
-    }
-    .esriCTtabs ul li.galleryTab
-    {
-        width: 20%;
-    }
+
     .esriCTInfoSubmitButton, .esriCTInfoPostButton
     {
         background: none repeat scroll 0 0 #fff;
-        bottom: 0 !important;
+        bottom: 1px !important;
         color: #007ac2;
         position: absolute !important;
         right: 0 !important;
         z-index: 1000;
+        padding: 8px 16px;
     }
     .esriCTInfoBackButton
     {
         background: none repeat scroll 0 0 #fff;
-        bottom: 0 !important;
+        bottom: 1px !important;
         color: #007ac2;
         position: absolute !important;
         left: 0 !important;
         z-index: 1000;
+        padding: 8px 16px;
     }
-    .esriCTGalleryInfoContainer
+    .esriCTGalleryInfoContainer, .esriCTDirectionTabContent, .esriCTCommentInfoOuterContainer
     {
         width: 100%;
     }
@@ -1163,7 +1190,19 @@
     {
         z-index: 1000;
     }
+    .esriCTtabs div.infoClose
+    {
+        padding: 7px;
+    }
+    .esriCTCustomMapLogoPostionChange
+    {
+        bottom: 35px;
+    }
+
+    .esriCTActivityContentHeight
+    {
+        height: 200px;
+    }
 
 }
-
 /* Landscape */

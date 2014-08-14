@@ -122,7 +122,7 @@ define([
                 }
             }
             //adding 2px in height of share container to display border
-            domStyle.set(this.divAppContainer, "height", contHeight + 2 + "px");
+            domStyle.set(this.divAppContainer, "height", contHeight + 60 + "px");
         },
         /**
         * display sharing panel

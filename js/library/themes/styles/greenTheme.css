@@ -261,6 +261,11 @@
 {
     background: #fff url("../images/close.png") !important;
 }
+
+.esriCTInfoAddlistText
+{
+    color: #028D6A;
+}
 /* Application Header */
 
 .esriCTApplicationHeader
@@ -689,7 +694,7 @@ input
     color: #808080;
 }
 
-.esriCTDivDistance, .esriCTDivDistancePod
+.esriCTDivDistance, .esriCTDivDistancePod, .esriCTInfoDivDistance
 {
     color: #028D6A;
 }
@@ -791,9 +796,14 @@ input
     background-image: url("../images/add-to-list-green.png") !important;
 }
 
-.esriCTimgOrderByDate
+.esriCTimgOrderByDateDown
 {
     background-image: url("../images/date-arrow-green.png");
+}
+
+.esriCTimgOrderByDateUp
+{
+    background-image: url("../images/date-arrow-green-up.png");
 }
 
 /*End of Activity planner*/

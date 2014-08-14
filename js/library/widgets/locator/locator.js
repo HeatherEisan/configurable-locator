@@ -70,11 +70,7 @@ define([
         sharedNls: sharedNls,
         lastSearchString: null,
         stagedSearch: null,
-        locatorScrollbar: null,
-        screenPoint: null,
-        isResultFound: false,
         activitySearchFeature: null,
-        selectedStarPostComment: null,
         showInfoWindow: true,
         /**
         * display locator widget
@@ -120,9 +116,12 @@ define([
                         topic.publish("showProgressIndicator");
                         this._displayRouteOfNearestFeature(null, this.activitySearchFeature, units, FGeometry, null, true);
                     }
-                    if (this.featureLayerClick) {
+                    if (this.featureLayerClick && !this.activitySearchFeature) {
                         topic.publish("showProgressIndicator");
                         this._displayRouteOfNearestFeature(null, this.featureLayerClick, units, FGeometry, 0, false);
+                    } else {
+                        topic.publish("showProgressIndicator");
+                        this._displayRouteOfNearestFeature(null, this.activitySearchFeature, units, FGeometry, null, true);
                     }
                 }
 
@@ -189,7 +188,7 @@ define([
 
         /**
         * positioning the infoWindow on extent change
-        * @param {object}map point 
+        * @param {object}map point
         * @param {object} map
         * @param {object} infoWindow
         * @memberOf widgets/locator/locator
@@ -278,7 +277,7 @@ define([
                 domClass.replace(this.domNode, "esriCTHeaderSearchSelected", "esriCTHeaderSearch");
                 domClass.replace(locatorParams.txtAddress, "esriCTBlurColorChange", "esriCTColorChange");
                 domClass.replace(this.divAddressHolder, "esriCTShowContainerHeight", "esriCTHideContainerHeight");
-                domStyle.set(locatorParams.txtAddress, "verticalAlign", "middle");
+                domClass.add(locatorParams.txtAddress, "esriCTLocatorAddressTextAlignment");
                 locatorParams.txtAddress.value = domAttr.get(locatorParams.txtAddress, "defaultAddress");
                 locatorParams.lastSearchString = lang.trim(locatorParams.txtAddress.value);
             }
@@ -345,7 +344,7 @@ define([
                         domStyle.set(locatorParams.close, "display", "block");
                         domAttr.set(locatorParams.close, "title", "");
                         domConstruct.empty(locatorParams.divAddressResults);
-                        this._locatorErrBack(locatorParams);
+                        this._locatorErrorMessage(locatorParams);
                     }
                 }
             }
@@ -364,7 +363,7 @@ define([
                 if (locatorParams.locatorScrollbar) {
                     domClass.remove(locatorParams.locatorScrollbar._scrollBarContent, "esriCTZeroHeight");
                 }
-                this._locatorErrBack(locatorParams);
+                this._locatorErrorMessage(locatorParams);
                 return;
             }
 
@@ -373,6 +372,7 @@ define([
 
         /**
         * call locator service and get search results
+        * @param {object} locatorParams Contains unified search elements.
         * @memberOf widgets/locator/locator
         */
         _searchLocation: function (locatorParams) {
@@ -425,7 +425,7 @@ define([
             }), function () {
                 domStyle.set(locatorParams.imgSearchLoader, "display", "none");
                 domStyle.set(locatorParams.close, "display", "block");
-                this._locatorErrBack(locatorParams);
+                this._locatorErrorMessage(locatorParams);
             });
             deferredArray.push(locatorDef);
             deferredListResult = new DeferredList(deferredArray);
@@ -465,7 +465,7 @@ define([
                     domStyle.set(locatorParams.imgSearchLoader, "display", "none");
                     domStyle.set(locatorParams.close, "display", "block");
                     this.mapPoint = null;
-                    this._locatorErrBack(locatorParams);
+                    this._locatorErrorMessage(locatorParams);
                 }
             }));
         },
@@ -597,7 +597,7 @@ define([
                 domStyle.set(locatorParams.imgSearchLoader, "display", "none");
                 domStyle.set(locatorParams.close, "display", "block");
                 this.mapPoint = null;
-                this._locatorErrBack(locatorParams);
+                this._locatorErrorMessage(locatorParams);
             }
         },
 
@@ -633,6 +633,7 @@ define([
         * @param {number} index store the index of address result
         * @param {array} candidateArray Contains list of a address results
         * @param {object} listContainer having search result list
+        * @param {object} locatorParams Contains unified search elements.
         * @memberOf widgets/locator/locator
         */
         _displayValidLocations: function (candidate, index, candidateArray, listContainer, locatorParams) {
@@ -690,13 +691,13 @@ define([
                     }
                 } else if (candidate.attributes.location) {
                     _this.mapPoint = new Point(domAttr.get(this, "x"), domAttr.get(this, "y"), _this.map.spatialReference);
-                    _this._locateAddressOnMap(_this.mapPoint, locatorParams);
+                    _this._locateAddressOnMap(_this.mapPoint);
                 } else {
                     if (candidateArray[domAttr.get(candidateDate, "index", index)]) {
                         layer = candidateArray[domAttr.get(candidateDate, "index", index)].layer.QueryURL;
                         for (infoIndex = 0; infoIndex < dojo.configData.SearchSettings.length; infoIndex++) {
                             if (dojo.configData.InfoWindowSettings[infoIndex] && dojo.configData.InfoWindowSettings[infoIndex].InfoQueryURL === layer) {
-                                _this._showFeatureResultsOnMap(candidateArray, candidate, infoIndex, index);
+                                _this._showFeatureResultsOnMap(candidate, infoIndex, index);
                             } else if (dojo.configData.SearchSettings[infoIndex].QueryURL === layer) {
                                 _this._showRoadResultsOnMap(candidate);
                             }
@@ -727,7 +728,7 @@ define([
         * @param {map point}
         * @memberOf widgets/locator/locator
         */
-        _locateAddressOnMap: function (mapPoint, locatorParams) {
+        _locateAddressOnMap: function (mapPoint) {
             var geoLocationPushpin, locatorMarkupSymbol;
             geoLocationPushpin = dojoConfig.baseURL + dojo.configData.LocatorSettings.DefaultLocatorSymbol;
             locatorMarkupSymbol = new PictureMarkerSymbol(geoLocationPushpin, dojo.configData.LocatorSettings.MarkupSymbolSize.width, dojo.configData.LocatorSettings.MarkupSymbolSize.height);

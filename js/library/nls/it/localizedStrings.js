@@ -49,11 +49,11 @@ define({
         facitilyPanelAccessFeeText: "@it@ Access Fee:",
         facitilyPanelHoursOpenForText: "@it@ Hours Open For:",
         facitilyPanelManagementUnitText: "@it@ Management Unit:",
-        facitilyPanelMarinaText: "@it@ Marina:",
+        facitilyPanelMarinaText: "@it@ Facility Type:",
         directionCurrentLocationText: "@it@ My Location",
         directionTextDistance: "@it@ Distance:",
         directionTextTime: "@it@ Duration:",
-        activityTabName: "@it@ Activities",
+        activityTabName: "@it@ Events",
         activityListTabName: "@it@ My List",
         fromDateText: "@it@ From Date",
         toDateText: "@it@ To Date",
@@ -62,7 +62,9 @@ define({
         loadingText: "@it@ Loading...",
         galleryInfoText: "@it@ Gallery",
         informationText: "@it@ Information",
-        commentInfoText: "@it@ Comments"
+        commentInfoText: "@it@ Comments",
+        backToMapText: "@it@ BACK TO MAP",
+        orderByDate: "@it@ Order by Date"
     },
     errorMessages: {
         invalidSearch: "Nessun risultato trovato.",
@@ -78,11 +80,13 @@ define({
         routeComment: "@it@ Route could not be calculated from current location.",
         activityNotSelected: "@it@ Please select activity to search.",
         activityPlannerInvalidToDate: "@it@ Please select valid To date",
-        activityPlannerInvalidFromDate: "@it@ Please select valid From date",
-        activityPlannerInvalidDates: "@it@ Please select the valid date",
-        commentString: "@it@ Please Enter comment",
+        activityPlannerInvalidFromDate: "@it@ Please select valid From Date",
+        activityPlannerInvalidDates: "@it@ Please select the valid Date",
+        commentString: "@it@ Please enter comment",
         maxLenghtCommentstring: "@it@ Comment should not exceed 250 characters .",
-        commentError: "@it@ Unable to add comments. Comments table is either absent or does not have write acccess ."
+        commentError: "@it@ Unable to add comments. Comments table is either absent or does not have write acccess .",
+        addedActivities: "@it@ All activities within specified date range are already added to the My List.",
+        activitySerachGeolocationText: "@it@ Geolocation is not supported in selected browser."
     },
     notUsed: {
         addressDisplayText: "@it@ Address",

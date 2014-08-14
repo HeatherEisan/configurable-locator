@@ -57,7 +57,6 @@ define([
         divfacilitycontent: null,
         facilityContainer: null,
         directionContainer: null,
-        currentIndex: null,
         printMap: null,
         isChecked: false,
         imageCount: null,
@@ -148,7 +147,7 @@ define([
             domAttr.set(this.imgToggleResults, "title", sharedNls.tooltips.hidePanel);
             domClass.replace(this.divToggle, "esriCTbottomPanelPosition", "esriCTzeroBottom");
             customLogoPositionChange = query('.esriCTCustomMapLogo');
-            domClass.replace(customLogoPositionChange, "esriCTCustomMapLogoPostionChange", "esriCTCustomMapLogoBottom");
+            domClass.replace(customLogoPositionChange[0], "esriCTCustomMapLogoPostionChange", "esriCTCustomMapLogoBottom");
         },
 
         /**
@@ -166,7 +165,7 @@ define([
                 topic.publish("setLegendPositionDown");
             }
             customLogoPositionChange = query('.esriCTCustomMapLogo');
-            domClass.replace(customLogoPositionChange, "esriCTCustomMapLogoBottom", "esriCTCustomMapLogoPostionChange");
+            domClass.replace(customLogoPositionChange[0], "esriCTCustomMapLogoBottom", "esriCTCustomMapLogoPostionChange");
         },
 
         /**
@@ -477,7 +476,7 @@ define([
             for (i = 1; i < result.directionResult[0].directions.features.length; i++) {
                 domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": result.directionResult[0].directions.features[i].attributes.text + "(" + parseFloat(result.directionResult[0].directions.features[i].attributes.length).toFixed(2) + "miles" + ")" }, divDrectionList);
             }
-            domClass.add(divDirectionContainer, "esriCTCarouselContentHeight");
+            domClass.add(divDirectionContainer, "esriCTCarouselDirectionContentHeight");
             if (this.directionScrollBar) {
                 this.directionScrollBar.removeScrollBar();
             }
@@ -528,7 +527,7 @@ define([
                                 } else {
                                     utcMilliseconds = Number(dojo.string.substitute(dojo.configData.CommentsInfoPopupFieldsCollection.SubmitDate, result[i].attributes));
                                 }
-                                domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), { datePattern: dojo.configData.DateFormat, selector: "date" })}, esriCTCommentDateStar);
+                                domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), { datePattern: dojo.configData.DateFormat, selector: "date" }) }, esriCTCommentDateStar);
                                 domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": result[i].attributes[commentAttribute] }, divCommentRow);
                             } else {
                                 domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
@@ -540,13 +539,15 @@ define([
                     if (result.CommentResult.length !== 0) {
                         divHeaderContent = query('.esriCTDivCommentContent');
                         domConstruct.empty(divHeaderContent[0]);
-                        divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
+
                         for (k = 0; k < result.searchResult.features.length; k++) {
                             if (k === resultcontent.value) {
                                 for (l = 0; l < result.CommentResult.length; l++) {
-                                    if (result.searchResult.features[k].attributes.OBJECTID === result.CommentResult[l].attributes.id) {
+                                    if (result.searchResult.features[k].attributes.OBJECTID === Number(result.CommentResult[l].attributes.id)) {
                                         isCommentFound = true;
-                                        divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, divCommentRow);
+                                        divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
+                                        esriCTCommentDateStar = domConstruct.create("div", { "class": "esriCTCommentDateStar" }, divCommentRow);
+                                        divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, esriCTCommentDateStar);
                                         for (j = 0; j < 5; j++) {
                                             divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
                                             if (j < result.CommentResult[l].attributes[rankFieldAttribute]) {
@@ -562,7 +563,7 @@ define([
                                                 utcMilliseconds = Number(dojo.string.substitute(dojo.configData.CommentsInfoPopupFieldsCollection.SubmitDate, result.CommentResult[l].attributes));
                                             }
                                             domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": result.CommentResult[l].attributes[commentAttribute] }, divCommentRow);
-                                            domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), { datePattern: dojo.configData.DateFormat, selector: "date" }) }, divCommentRow);
+                                            domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), { datePattern: dojo.configData.DateFormat, selector: "date" }) }, esriCTCommentDateStar);
                                         } else {
                                             domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
                                         }
@@ -571,6 +572,7 @@ define([
                             }
                         }
                     }
+
                     if (!isCommentFound) {
                         domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
                     }
@@ -662,7 +664,6 @@ outerLoop:
                 divAttchment = domConstruct.create("img", { "class": "esriCTDivAttchment" }, divHeaderContent[0]);
                 domAttr.set(divAttchment, "src", response[0].url);
             } else {
-
                 domConstruct.create("div", { "class": "esriCTGalleryBox", "innerHTML": sharedNls.errorMessages.imageDoesNotFound }, divHeaderContent[0]);
             }
         },

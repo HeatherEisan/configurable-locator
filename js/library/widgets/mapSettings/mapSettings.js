@@ -176,7 +176,7 @@ define([
         */
         _setBasemapId: function (basmap, defaultId) {
             var layerIndex;
-            if (basmap.id !== defaultId) {
+            if (basmap.id !== "defaultBasemap") {
                 this.map.getLayer(basmap.id).id = defaultId;
                 this.map._layers[defaultId] = this.map.getLayer(basmap.id);
                 layerIndex = array.indexOf(this.map.layerIds, basmap.id);
@@ -284,7 +284,6 @@ define([
                 }
             }
         },
-
 
         /**
         * map onclick event
@@ -464,7 +463,7 @@ define([
         */
         _extentFromPoint: function (point) {
             var tolerance, screenPoint, pnt1, pnt2, mapPoint1, mapPoint2;
-            tolerance = 15;
+            tolerance = 35;
             screenPoint = this.map.toScreen(point);
             pnt1 = new esri.geometry.Point(screenPoint.x - tolerance, screenPoint.y + tolerance);
             pnt2 = new esri.geometry.Point(screenPoint.x + tolerance, screenPoint.y - tolerance);

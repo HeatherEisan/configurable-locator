@@ -261,6 +261,10 @@
 {
     background-image: url('../images/search-btn.png');
 }
+.esriCTInfoAddlistText
+{
+    color: #007ac2;
+}
 
 /* Application Header */
 .esriCTApplicationHeader, .esriCTAddressContent
@@ -672,7 +676,7 @@ input
     color: #808080;
 }
 
-.esriCTDivDistance, .esriCTDivDistancePod
+.esriCTDivDistance, .esriCTDivDistancePod, .esriCTInfoDivDistance
 {
     color: #007AC2;
 }
@@ -779,24 +783,29 @@ input
     background-image: url("../images/add-to-list.png") !important;
 }
 
-.esriCTimgOrderByDate
+.esriCTimgOrderByDateDown
 {
     background-image: url("../images/date-arrow.png");
+}
+
+.esriCTimgOrderByDateUp
+{
+    background-image: url("../images/date-arrow-up.png");
 }
 
 /*End of Activity planner*/
 
 
 /* Info window */
-.esriCTtabs ul li a.esriCTImageTab
+.esriCTtabs div.esriCTImageTab
 {
     color: #007ac2;
 }
-.esriCTtabs ul li.infoSelectedTab
+.esriCTtabs div.infoSelectedTab
 {
     background: #007ac2;
 }
-.esriCTtabs li
+.esriCTtabs div
 {
     color: #007ac2;
 }

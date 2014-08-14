@@ -85,7 +85,6 @@ require([
         for (j = 0; j < config.OperationalLayers.length; j++) {
             layerMode = null;
             if (config.OperationalLayers[j].LoadAsServiceType.toLowerCase() === "feature") {
-
                 /**
                 * set layerMode of the operational layer if it's type is feature
                 */
