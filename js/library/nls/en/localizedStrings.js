@@ -48,11 +48,11 @@ define({
         facitilyPanelAccessFeeText: "Access Fee:",
         facitilyPanelHoursOpenForText: "Hours Open For:",
         facitilyPanelManagementUnitText: "Management Unit:",
-        facitilyPanelMarinaText: "Marina:",
+        facitilyPanelMarinaText: "Facility Type:",
         directionCurrentLocationText: "My Location",
         directionTextDistance: "Distance:",
         directionTextTime: "Duration:",
-        activityTabName: "Activities",
+        activityTabName: "Events",
         activityListTabName: "My List",
         fromDateText: "From Date",
         toDateText: "To Date",
@@ -61,7 +61,9 @@ define({
         loadingText: "Loading...",
         galleryInfoText: "Gallery",
         informationText: "Information",
-        commentInfoText: "Comments"
+        commentInfoText: "Comments",
+        backToMapText: "BACK TO MAP",
+        orderByDate: "Order by Date"
     },
     errorMessages: {
         invalidSearch: "No results found",
@@ -79,8 +81,9 @@ define({
         activityPlannerInvalidDates: "Please select the valid date",
         commentString: "Please Enter comment",
         maxLenghtCommentstring: "Comment should not exceed 250 characters .",
-        commentError: "Unable to add comments. Comments table is either absent or does not have write acccess ."
-
+        commentError: "Unable to add comments. Comments table is either absent or does not have write acccess .",
+        addedActivities: "All activities within specified date range are already added to the My List.",
+        activitySerachGeolocationText: "Geolocation is not supported in selected browser."
     },
     notUsed: {
         addressDisplayText: "Address",

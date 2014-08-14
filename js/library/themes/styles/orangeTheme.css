@@ -199,9 +199,10 @@
 {
     background-image: url("../images/img24x24/activity-planner-orange-24.png");
 }
-
-
-
+.esriCTInfoAddlistText
+{
+    color: #808080;
+}
 .esriCTFacebook
 {
     background-image: url("../images/img24x24/img_facebook_orange-24.png");
@@ -692,7 +693,7 @@ input
     border-bottom: 1px solid #b4b4b4;
     color: #808080;
 }
-.esriCTDivDistance, .esriCTDivDistancePod
+.esriCTDivDistance, .esriCTDivDistancePod, .esriCTInfoDivDistance
 {
     color: #d15706;
 }
@@ -791,9 +792,14 @@ input
     background-image: url("../images/add-to-list-orange.png") !important;
 }
 
-.esriCTimgOrderByDate
+.esriCTimgOrderByDateDown
 {
     background-image: url("../images/date-arrow-orange.png");
+}
+
+.esriCTimgOrderByDateUp
+{
+    background-image: url("../images/date-arrow-orange-up.png");
 }
 
 /*End of Activity planner*/

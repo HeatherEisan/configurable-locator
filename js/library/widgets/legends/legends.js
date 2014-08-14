@@ -66,7 +66,6 @@ define([
         */
         postCreate: function () {
             this._createLegendContainerUI();
-            var currentExtentLegend, legendDefaultExtent, layerUrl;
             this.logoContainer = query(".esriControlsBR")[0];
             if (!this.logoContainer) {
                 this.logoContainer = (query(".map .logo-sm") && query(".map .logo-sm")[0])
@@ -80,101 +79,83 @@ define([
                 this._setLegendPositionDown();
             }));
 
-            if (window.location.toString().split("?extent=").length > 1) {
-                this.shareLegendExtent = true;
-                currentExtentLegend = this._getQueryString('extent');
-                legendDefaultExtent = currentExtentLegend.split(',');
-                legendDefaultExtent = new GeometryExtent({ "xmin": parseFloat(legendDefaultExtent[0]), "ymin": parseFloat(legendDefaultExtent[1]), "xmax": parseFloat(legendDefaultExtent[2]), "ymax": parseFloat(legendDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
-            }
             if (this.isExtentBasedLegend) {
                 this.map.on("extent-change", lang.hitch(this, function (evt) {
-                    var defQueryArray = [],
-                        queryResult,
-                        layerObject,
-                        rendererObject,
-                        index,
-                        resultListArray = [],
-                        queryDefList,
-                        i,
-                        layer,
-                        currentTime;
-                    currentTime = new Date();
-                    domConstruct.empty(this.divlegendContainer);
-                    this._resetLegendContainer();
-                    this._rendererArray.length = 0;
-                    for (layer in this._layerCollection) {
-                        if (this._layerCollection.hasOwnProperty(layer)) {
-                            layerUrl = layer;
-                            if (this._layerCollection[layer].featureLayerUrl) {
-                                layerUrl = this._layerCollection[layer].featureLayerUrl;
-                            }
-                            if (this._checkLayerVisibility(layerUrl)) {
-                                layerObject = this._layerCollection[layer];
-                                rendererObject = this._layerCollection[layer].legend;
-                                if (rendererObject.length) {
-                                    for (index = 0; index < rendererObject.length; index++) {
-                                        rendererObject[index].layerUrl = layer;
-                                        this._rendererArray.push(rendererObject[index]);
-                                        if (this.shareLegendExtent) {
-                                            queryResult = this._fireQueryOnExtentChange(legendDefaultExtent);
-                                        } else {
-                                            queryResult = this._fireQueryOnExtentChange(evt.extent);
-                                        }
-                                        if (layerObject.rendererType === "uniqueValue") {
-                                            if (rendererObject[index].values) {
-                                                queryResult.where = layerObject.fieldName + " = " + "'" + rendererObject[index].values[0] + "'" + " AND " + currentTime.getTime() + "=" + currentTime.getTime();
-                                            } else {
-                                                queryResult.where = currentTime.getTime() + "=" + currentTime.getTime();
-                                            }
-                                        } else if (layerObject.rendererType === "classBreaks") {
-                                            queryResult.where = rendererObject[index - 1] ? layerObject.fieldName + ">" + rendererObject[index - 1].values[0] + " AND " + layerObject.fieldName + "<=" + rendererObject[index].values[0] : layerObject.fieldName + "=" + rendererObject[index].values[0];
-                                        } else {
-                                            queryResult.where = currentTime.getTime() + "=" + currentTime.getTime();
-                                        }
-                                        this._executeQueryTask(layer, defQueryArray, queryResult);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    resultListArray = [];
-                    this.legendListWidth = [];
-
-
-                    domStyle.set(query(".esriCTRightArrow")[0], "display", "none");
-                    domStyle.set(query(".esriCTLeftArrow")[0], "display", "none");
-
-                    domConstruct.create("span", { "innerHTML": sharedNls.titles.loadingText, "class": "divlegendLoadingContainer" }, this.divlegendContainer);
-                    if (defQueryArray.length > 0) {
-                        queryDefList = new DeferredList(defQueryArray);
-                        queryDefList.then(lang.hitch(this, function (result) {
-                            domConstruct.empty(this.divlegendContainer);
-                            for (i = 0; i < result.length; i++) {
-                                if (result[i][0] && result[i][1] > 0) {
-                                    resultListArray.push(result[i][1]);
-                                    this._addLegendSymbol(this._rendererArray[i], this._layerCollection[this._rendererArray[i].layerUrl].layerName);
-
-                                }
-                            }
-                            this._addlegendListWidth(this.legendListWidth);
-                            if (this.webmapUpdatedRenderer || this.hostedLayersJSON) {
-                                this._displayWebmapRenderer();
-                                this._displayHostedLayerRenderer();
-                            } else if (resultListArray.length === 0) {
-                                domConstruct.create("span", { innerHTML: sharedNls.titles.noLegendAvailable, "class": "divNoLegendContainer" }, this.divlegendContainer);
-                            }
-
-                        }));
-                    } else {
-                        domConstruct.empty(this.divlegendContainer);
-                        if (this.webmapUpdatedRenderer || this.hostedLayersJSON) {
-                            this._displayWebmapRenderer();
-                            this._displayHostedLayerRenderer();
-                        } else {
-                            domConstruct.create("span", { "innerHTML": sharedNls.titles.noLegendAvailable, "class": "divNoLegendContainer" }, this.divlegendContainer);
-                        }
-                    }
+                    this._updateLegend(evt.extent);
                 }));
+            }
+        },
+
+        _updateLegend: function () {
+            var defQueryArray = [], queryResult, layerObject, rendererObject, index, resultListArray = [], queryDefList, i, layer, currentTime, layerUrl;
+            currentTime = new Date();
+            domConstruct.empty(this.divlegendContainer);
+            this._resetLegendContainer();
+            this._rendererArray.length = 0;
+            for (layer in this._layerCollection) {
+                if (this._layerCollection.hasOwnProperty(layer)) {
+                    layerUrl = layer;
+                    if (this._layerCollection[layer].featureLayerUrl) {
+                        layerUrl = this._layerCollection[layer].featureLayerUrl;
+                    }
+                    if (this._checkLayerVisibility(layerUrl)) {
+                        layerObject = this._layerCollection[layer];
+                        rendererObject = this._layerCollection[layer].legend;
+                        if (rendererObject.length) {
+                            for (index = 0; index < rendererObject.length; index++) {
+                                rendererObject[index].layerUrl = layer;
+                                this._rendererArray.push(rendererObject[index]);
+                                queryResult = this._fireQueryOnExtentChange(this.map.extent);
+                                if (layerObject.rendererType === "uniqueValue") {
+                                    if (rendererObject[index].values) {
+                                        queryResult.where = layerObject.fieldName + " = " + "'" + rendererObject[index].values[0] + "'" + " AND " + currentTime.getTime() + "=" + currentTime.getTime();
+                                    } else {
+                                        queryResult.where = currentTime.getTime() + "=" + currentTime.getTime();
+                                    }
+                                } else if (layerObject.rendererType === "classBreaks") {
+                                    queryResult.where = rendererObject[index - 1] ? layerObject.fieldName + ">" + rendererObject[index - 1].values[0] + " AND " + layerObject.fieldName + "<=" + rendererObject[index].values[0] : layerObject.fieldName + "=" + rendererObject[index].values[0];
+                                } else {
+                                    queryResult.where = currentTime.getTime() + "=" + currentTime.getTime();
+                                }
+                                this._executeQueryTask(layer, defQueryArray, queryResult);
+                            }
+                        }
+                    }
+                }
+            }
+            resultListArray = [];
+            this.legendListWidth = [];
+            domStyle.set(query(".esriCTRightArrow")[0], "display", "none");
+            domStyle.set(query(".esriCTLeftArrow")[0], "display", "none");
+            domConstruct.create("span", { "innerHTML": sharedNls.titles.loadingText, "class": "divlegendLoadingContainer" }, this.divlegendContainer);
+            if (defQueryArray.length > 0) {
+                queryDefList = new DeferredList(defQueryArray);
+                queryDefList.then(lang.hitch(this, function (result) {
+                    domConstruct.empty(this.divlegendContainer);
+                    for (i = 0; i < result.length; i++) {
+                        if (result[i][0] && result[i][1] > 0) {
+                            resultListArray.push(result[i][1]);
+                            this._addLegendSymbol(this._rendererArray[i], this._layerCollection[this._rendererArray[i].layerUrl].layerName);
+
+                        }
+                    }
+                    this._addlegendListWidth(this.legendListWidth);
+                    if (this.webmapUpdatedRenderer || this.hostedLayersJSON) {
+                        this._displayWebmapRenderer();
+                        this._displayHostedLayerRenderer();
+                    } else if (resultListArray.length === 0) {
+                        domConstruct.create("span", { innerHTML: sharedNls.titles.noLegendAvailable, "class": "divNoLegendContainer" }, this.divlegendContainer);
+                    }
+
+                }));
+            } else {
+                domConstruct.empty(this.divlegendContainer);
+                if (this.webmapUpdatedRenderer || this.hostedLayersJSON) {
+                    this._displayWebmapRenderer();
+                    this._displayHostedLayerRenderer();
+                } else {
+                    domConstruct.create("span", { "innerHTML": sharedNls.titles.noLegendAvailable, "class": "divNoLegendContainer" }, this.divlegendContainer);
+                }
             }
         },
 
@@ -193,12 +174,12 @@ define([
                             returnVal = true;
                             break;
                         }
-
                     }
                 }
             }
             return returnVal;
         },
+
         _getQueryString: function (key) {
             var extentValue = "", regex, qs;
             regex = new RegExp("[\\?&]" + key + "=([^&#]*)");
@@ -234,7 +215,6 @@ define([
         _createLegendContainerUI: function () {
             var divlegendContainer, divLeftArrow, legendOuterContainer;
             legendOuterContainer = query('.esriCTdivLegendbox', dom.byId("esriCTParentDivContainer"));
-
             if (query('.legendbox')[0]) {
                 domConstruct.empty(query('.legendbox')[0]);
             }
@@ -370,6 +350,7 @@ define([
                         this.hostedLayersJSON = null;
                     }
                     this._displayHostedLayerRenderer();
+                    this._updateLegend(this.map.extent);
                 }));
             }
             for (index = 0; index < layerArray.length; index++) {
@@ -406,6 +387,8 @@ define([
                 }
             }));
             this._displayWebmapRenderer();
+            this._updateLegend(this.map.extent);
+
         },
 
         /*

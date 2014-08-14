@@ -49,11 +49,11 @@ define({
         facitilyPanelAccessFeeText: "@es@ Access Fee:",
         facitilyPanelHoursOpenForText: "@es@ Hours Open For:",
         facitilyPanelManagementUnitText: "@es@ Management Unit:",
-        facitilyPanelMarinaText: "@es@ Marina:",
+        facitilyPanelMarinaText: "@es@ Facility Type:",
         directionCurrentLocationText: "@es@ My Location",
         directionTextDistance: "@es@ Distance:",
         directionTextTime: "@es@ Duration:",
-        activityTabName: "@es@ Activities",
+        activityTabName: "@es@ Events",
         activityListTabName: "@es@ My List",
         fromDateText: "@es@ From Date",
         toDateText: "@es@ To Date",
@@ -62,7 +62,9 @@ define({
         loadingText: "@es@ Loading...",
         galleryInfoText: "@es@ Gallery",
         informationText: "@es@ Information",
-        commentInfoText: "@es@ Comments"
+        commentInfoText: "@es@ Comments",
+        backToMapText: "@es@ BACK TO MAP",
+	    orderByDate: "@es@ Order by Date"
     },
     errorMessages: {
         invalidSearch: "No hay resultados",
@@ -80,9 +82,11 @@ define({
         activityPlannerInvalidToDate: "@es@ Please select valid To date",
         activityPlannerInvalidFromDate: "@es@ Please select valid From date",
         activityPlannerInvalidDates: "@es@ Please select the valid date",
-        commentString: "@es@ Please Enter comment",
+        commentString: "@es@ Please enter comment",
         maxLenghtCommentstring: "@es@ Comment should not exceed 250 characters .",
-        commentError: "@es@ Unable to add comments. Comments table is either absent or does not have write acccess ."
+        commentError: "@es@ Unable to add comments. Comments table is either absent or does not have write acccess .",
+        addedActivities: "@es@ All activities within specified date range are already added to the My List.",
+        activitySerachGeolocationText: "@es@ Geolocation is not supported in selected browser."
     },
     notUsed: {
         addressDisplayText: "@es@ Address",

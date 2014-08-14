@@ -51,7 +51,7 @@ define([], function () {
         HelpURL: "help.htm",
 
         // Set application logo url
-        CustomLogoUrl: "",
+        CustomLogoUrl: "http://nddotfargo.com/uploads/media/nddotlogo.png",
 
         // Set proxy url
         ProxyUrl: "/proxy/proxy.ashx",
@@ -136,7 +136,7 @@ define([], function () {
         //                    Supported service types are 'dynamic' or 'feature'.
 
         OperationalLayers: [{
-            ServiceURL: "http://50.18.115.76:6080/arcgis/rest/services/WaterAccess/FeatureServer/0",
+            ServiceURL: "http://54.193.222.183:6080/arcgis/rest/services/WaterAccess/FeatureServer/0",
             LoadAsServiceType: "feature"
         }],
 
@@ -144,12 +144,25 @@ define([], function () {
             //Set to true if comments need to be displayed , or false if not required
             Visibility: true,
             //URL used for doing query task on the comments layer
-            URL: "http://50.18.115.76:6080/arcgis/rest/services/WaterAccess/FeatureServer/1"
+            URL: "http://54.193.222.183:6080/arcgis/rest/services/WaterAccess/FeatureServer/1"
         },
         //Set the primary key attribute for features
 
         PrimaryKeyForFeatures: "${OBJECTID}",
 
+        //Activity Search layer
+        EventsPlannerLayer: {
+            URL: "http://54.193.222.183:6080/arcgis/rest/services/Events/MapServer/0"
+        },
+
+        //Activity Search layer field names
+        ActivitiesFields : {
+            fromDate: "STARTDATE",
+            toDate: "ENDDATE",
+            objectID: "OBJECTID",
+            address: "ADDRESS",
+            name : "CATEGORY"
+        },
 
         // ------------------------------------------------------------------------------------------------------------------------
         // SEARCH AND SETTINGS
@@ -250,6 +263,9 @@ define([], function () {
 
         // set the date format
         DateFormat: "MMM dd, yyyy",
+
+        // set the date format for event planner display
+        EventPlannerDateFormat: "MM/dd/yyyy",
 
         //Set the name attribute for features
         FeatureName: "NAME",
