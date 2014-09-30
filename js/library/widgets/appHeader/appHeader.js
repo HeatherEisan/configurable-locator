@@ -122,14 +122,11 @@ define([
         },
 
         showProgressIndicator: function () {
-            domClass.replace(this.divLoadingIndicator, "displayBlockAll", "displayNoneAll");
-            this.divLoadingIndicator.onclick = function (evt) {
-                evt.stopPropagation();
-            };
+            domClass.replace(this.divLoadingIndicator, "displayBlock", "displayNone");
         },
 
         hideProgressIndicator: function () {
-            domClass.replace(this.divLoadingIndicator, "displayNoneAll", "displayBlockAll");
+            domClass.replace(this.divLoadingIndicator, "displayNone", "displayBlock");
         }
     });
 });

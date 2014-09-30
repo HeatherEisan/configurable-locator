@@ -15,7 +15,7 @@
 
     .esriCTHeaderSearchSelected
     {
-        background-image: url("../images/img2X/search-select@2X.png") !important;
+        background-image: url("../images/img2X/searchSelect@2XPurple.png") !important;
     }
 
     .esriCTTdGeolocation
@@ -25,7 +25,7 @@
 
     .esriCTImgSocialMediaSelected
     {
-        background-image: url("../images/img2X/share-select@2X.png") !important;
+        background-image: url("../images/img2X/shareSelect@2XPurple.png") !important;
     }
 
     .esriCTImgSocialMedia
@@ -33,44 +33,34 @@
         background-image: url("../images/img2X/share@2X.png") !important;
     }
 
-    .esriCTRouteImg
+    .esriCTEventsImg
     {
-        background-image: url("../images/img2X/get-route@2x.png") !important;
+        background-image: url("../images/img2X/activityPlanner@2x.png") !important;
     }
 
-    .esriCTRouteImg-select
+    .esriCTEventsImgSelected
     {
-        background-image: url("../images/img2X/get-route-select@2x.png") !important;
-    }
-
-    .esriCTActivitiesImg
-    {
-        background-image: url("../images/img2X/activity-planner@2x.png") !important;
-    }
-
-    .esriCTActivitiesImgSelected
-    {
-        background-image: url("../images/img2X/activity-planner@2x-select-purple.png") !important;
+        background-image: url("../images/img2X/activityPlanner@2xSelectPurple.png") !important;
     }
 
     .esriCTFacebook
     {
-        background-image: url("../images/img2X/img_facebook@2x.png") !important;
+        background-image: url("../images/img2X/imgFacebook@2xPurple.png") !important;
     }
 
     .esriCTTwitter
     {
-        background-image: url("../images/img2X/img_twitter@2x.png") !important;
+        background-image: url("../images/img2X/imgTwitter@2xPurple.png") !important;
     }
 
     .esriCTEmail
     {
-        background-image: url("../images/img2X/img-email@2x.png") !important;
+        background-image: url("../images/img2X/imgEmail@2xPurple.png") !important;
     }
 
     .esriCTEmbedding
     {
-        background-image: url('../images/img2X/embedding@2x-select-purple.png') !important;
+        background-image: url('../images/img2X/embedding@2xSelectPurple.png') !important;
     }
 }
 
@@ -89,7 +79,7 @@
 
     .esriCTHeaderSearchSelected
     {
-        background-image: url("../images/img44x44/search-select-purple.png") !important;
+        background-image: url("../images/img44x44/searchSelectPurple.png") !important;
     }
 
     .esriCTTdGeolocation
@@ -99,7 +89,7 @@
 
     .esriCTImgSocialMediaSelected
     {
-        background-image: url("../images/img44x44/imgSocialMedia-select-purple.png") !important;
+        background-image: url("../images/img44x44/imgSocialMediaSelectPurple.png") !important;
     }
 
     .esriCTImgSocialMedia
@@ -107,44 +97,34 @@
         background-image: url("../images/img44x44/imgSocialMedia.png") !important;
     }
 
-    .esriCTRouteImg
+    .esriCTEventsImg
     {
-        background-image: url("../images/img44x44/get-route.png") !important;
+        background-image: url("../images/img44x44/activityPlanner.png") !important;
     }
 
-    .esriCTRouteImg-select
+    .esriCTEventsImgSelected
     {
-        background-image: url("../images/img44x44/get-route-select-purple.png") !important;
-    }
-
-    .esriCTActivitiesImg
-    {
-        background-image: url("../images/img44x44/activity-planner.png") !important;
-    }
-
-    .esriCTActivitiesImgSelected
-    {
-        background-image: url("../images/img44x44/activity-planner-select-purple.png") !important;
+        background-image: url("../images/img44x44/activityPlannerSelectPurple.png") !important;
     }
 
     .esriCTFacebook
     {
-        background-image: url("../images/img44x44/img_facebook_purple.png") !important;
+        background-image: url("../images/img44x44/imgFacebookPurple.png") !important;
     }
 
     .esriCTTwitter
     {
-        background-image: url("../images/img44x44/img_twitter_purple.png") !important;
+        background-image: url("../images/img44x44/imgTwitterPurple.png") !important;
     }
 
     .esriCTEmail
     {
-        background-image: url("../images/img44x44/img_email_purple.png") !important;
+        background-image: url("../images/img44x44/imgEmailPurple.png") !important;
     }
 
     .esriCTEmbedding
     {
-        background-image: url('../images/img44x44/embedding_purple.png') !important;
+        background-image: url('../images/img44x44/embeddingPurple.png') !important;
     }
 }
 
@@ -152,72 +132,62 @@
 
 .esriCTHeaderSearch
 {
-    background-image: url("../images/img24x24/search-24.png");
+    background-image: url("../images/img24x24/search24.png");
 }
 
 .esriCTHelpImg
 {
-    background-image: url("../images/img24x24/Help-24.png");
+    background-image: url("../images/img24x24/Help24.png");
 }
 
 .esriCTHeaderSearchSelected
 {
-    background-image: url("../images/img24x24/search-select-purple-24.png");
+    background-image: url("../images/img24x24/searchSelectPurple24.png");
 }
 
 .esriCTTdGeolocation
 {
-    background-image: url("../images/img24x24/imgGeolocation-24.png");
+    background-image: url("../images/img24x24/imgGeolocation24.png");
 }
 
 .esriCTImgSocialMediaSelected
 {
-    background-image: url("../images/img24x24/imgSocialMedia_purple-24.png");
+    background-image: url("../images/img24x24/imgSocialMediaPurple24.png");
 }
 
 .esriCTImgSocialMedia
 {
-    background-image: url("../images/img24x24/imgSocialMedia-24.png");
+    background-image: url("../images/img24x24/imgSocialMedia24.png");
 }
 
-.esriCTRouteImg
+.esriCTEventsImg
 {
-    background-image: url("../images/img24x24/get-route-24.png");
+    background-image: url("../images/img24x24/activityPlannerGray24.png");
 }
 
-.esriCTRouteImg-select
-{
-    background-image: url("../images/img24x24/get-route-select-purple-24.png");
-}
-
-.esriCTActivitiesImg
-{
-    background-image: url("../images/img24x24/activity-planner-gray-24.png");
-}
-
-.esriCTActivitiesImgSelected
+.esriCTEventsImgSelected
 {
     background-image: url("../images/img24x24/activity-planner-purple-24.png");
 }
 
 .esriCTFacebook
 {
-    background-image: url("../images/img24x24/img_facebook_purple-24.png");
+    background-image: url("../images/img24x24/imgFacebookPurple24.png");
 }
 
 .esriCTTwitter
 {
-    background-image: url("../images/img24x24/img_twitter_purple-24.png");
+    background-image: url("../images/img24x24/imgTwitterPurple24.png");
 }
 
 .esriCTEmail
 {
-    background-image: url("../images/img24x24/img_email_purple-24.png");
+    background-image: url("../images/img24x24/imgEmailPurple24.png");
 }
 
 .esriCTEmbedding
 {
-    background-image: url('../images/img24x24/embedding_purple-24.png');
+    background-image: url('../images/img24x24/embeddingPurple24.png');
 }
 
 .HomeButton .home, .HomeButton .home:hover
@@ -232,46 +202,30 @@
     background-image: url('../images/loader.gif');
 }
 
-.esriCTlocateSearchicon
+.esriCTLocateSearchIcon
 {
-    background-image: url("../images/search-purple.png") !important;
-}
-
-.esriCTInfoWindowRightArrow
-{
-    background: url("../images/right-arrow-purple.png");
-}
-
-.esriCTInfoWindowLeftArrow
-{
-    background: url("../images/blue-arrow-purple.png");
+    background-image: url("../images/searchPurple.png") !important;
 }
 
 .esriCTSelectionIcon
 {
-    background-image: url('../images/search-purple.png');
+    background-image: url('../images/searchPurple.png');
 }
 
 .esriCTSearchIcon
 {
-    background-image: url("../images/search-purple.png") !important;
+    background-image: url("../images/searchPurple.png") !important;
 }
 
-.esriCTClearInput
-{
-    background: #fff url("../images/close.png") !important;
-}
-
-.esriCTInfoAddlistText
+.esriCTInfoAddToListText
 {
     color: #5C2E6F;
 }
-/* Application Header */
 
-.esriCTApplicationHeader
+/* Application Header */
+.galleryTab, .commentsTab, .esriCTTabs div.esriCTGetDir, .esriCTTabs div.esriCTInfoClose, .esriCTApplicationHeader
 {
-    border-bottom: 1px solid #5C2E6F;
-    background: #fff;
+    border-color: #5C2E6F;
 }
 
 .esriCTApplicationHeaderTextTD
@@ -285,12 +239,8 @@
     background-color: #fff;
 }
 
-.esriCTAddressContent
+.esriCTDivSearchResultContent
 {
-    border-right: 1px solid #5C2E6F;
-    border-left: 1px solid #5C2E6F;
-    border-bottom: 1px solid #5C2E6F;
-    background-color: #fff;
 }
 
 .esriCTTxtAddress
@@ -355,14 +305,14 @@ input
     border-right: 1px solid #FAFAFA;
 }
 
-.esriCTSearchPanel
+.esriCTDivSearchPanel
 {
     color: #5C2E6F;
     border-left: 1px solid #fff;
     border-right: 1px solid #FAFAFA;
 }
 
-.esriCTDivAppHolder, .esriCTDivShareContainer, .esriCTDivActivityAppHolder, .esriCTDivActivityContainer
+.esriCTDivAppHolder, .esriCTDivShareContainer, .esriCTDivActivityAppHolder
 {
     background-color: #fff;
     border-right: 1px solid #5C2E6F;
@@ -393,76 +343,12 @@ input
     border: #fff solid 0 !important;
 }
 
-.BasemapToggle .toggleButton
-{
-    border-radius: 0px !important;
-    border: 2px solid #5C2E6F !important;
-}
-
-.BasemapToggle .basemapTitle
-{
-    color: #5C2E6F !important;
-}
-
-.BasemapToggle .basemapImage
-{
-    border: 1px solid #5C2E6F;
-}
-
-.esriCTSearchContent
+.esriCTDivSearchContent
 {
     color: Black;
 }
 
-.esriCTDirectionContainerSelected
-{
-    color: #5C2E6F;
-    border-left: none;
-    border-bottom: none;
-}
-
-.esriCTDirectionContainer
-{
-    background: none repeat scroll 0 0 #FAFAFA;
-    border-right: 1px solid #5C2E6F;
-    border-bottom: 1px solid #5C2E6F;
-    color: #5C2E6F;
-}
-
-.esriCTHeaderRouteContainer
-{
-    background-color: #FFFFFF;
-    border-left: 1px solid #5C2E6F;
-    border-right: 1px solid #5C2E6F;
-    border-top: none !important;
-}
-
-.esriCTRouteInformationContainer-select
-{
-    background: none repeat scroll 0 0 #FAFAFA;
-    border: 1px solid #5C2E6F;
-    color: #5C2E6F;
-    border-top: none !important;
-}
-
-.esriCTRouteInformationContainer
-{
-    color: #5C2E6F;
-    border-bottom: 1px solid #FFFFFF;
-    border-top: 1px solid #FFFFFF;
-    border-left: 1px solid #FFFFFF;
-    border-right: 1px solid #FFFFFF;
-}
-
-.esriCTActivityContainer
-{
-    background-color: #FFFFFF;
-    border-right: none !important;
-}
-
-/* End of Route */
-
-/*splash Screen*/
+/* Splash Screen */
 
 .esriCTSplashScreenDialog
 {
@@ -470,24 +356,14 @@ input
     color: #000;
 }
 
-.customButtonContainer
+.esriCTCustomButton
 {
-    background: #fff;
-}
-
-.customButton
-{
-    color: #fff;
     background: #5C2E6F;
 }
+
 /* End of splash Screen */
 
 /* CSS for styling corners*/
-
-.esriCTRoundedCorner
-{
-    behavior: url("esri_template/core_library/PIE.htc");
-}
 
 .esriCTBoxShadow
 {
@@ -499,22 +375,11 @@ input
     background-color: #C0C0C0;
 }
 
-.esriScrollBarPosition
-{
-    position: relative;
-}
-
-.basemapThumbnail
+.esriCTBasemapThumbnail
 {
     -moz-box-shadow: 0 0 5px #666;
     -webkit-box-shadow: 0 0 5px #666;
     box-shadow: 0 0 5px #666;
-    border: 4px solid #fff;
-}
-
-.esriCTLegendBox
-{
-    background: #FFFFFF; /* the next props are meant to keep this block independent from the other floated one */
 }
 
 .esriCTLegendBoxInner
@@ -531,17 +396,13 @@ input
 {
     color: #464646;
 }
+
 /*Start of Infowindow style*/
 
 .esriCTInfoWindow
 {
     border: #5C2E6F solid 1px;
     background: #FFF;
-}
-
-.esriCTDisplayField, .esriCTValueField, .esriCTInfoDetailsContainer
-{
-    color: #808080;
 }
 
 .esriCTClose
@@ -562,28 +423,45 @@ input
 
 .esriCTDivTriangle
 {
-    background-image: url("../images/bottomArrow.png");
+    background-image: url("../images/bottomArrowBlue.png");
 }
 
-.esriCTLink
+.esriCTImgCalloutArrow
 {
-    color: blue;
+    background: url("../images/rightArrowPurple.png");
 }
-
+.esriCTCalloutText
+{
+    color: #5C2E6F;
+}
+.esriCTInfoAddToListIcon
+{
+    background-image: url("../images/addToListPurple.png") !important;
+}
+.esriCTTabs div.esriCTInfoSelectedTab
+{
+    background: #5C2E6F;
+}
+.esriCTInfoBackButton, .esriCTInfoSubmitButton, .esriCTInfoPostButton
+{
+    background: #5C2E6F;
+    color: #fff;
+}
+@media screen and (max-width:767px)
+{
+    .esriCTInfoSubmitButton, .esriCTInfoPostButton, .esriCTInfoBackButton, .esriCTCloseDivMobile
+    {
+        color: #5C2E6F;
+    }
+}
 /* Loading indicator Styles */
 
-.esriGovtLoadSpashScreen
+.esriCTSplashScreen
 {
     -pie-background: rgba(0,0,0,0.6);
     background: rgba(0,0,0,0.6);
 }
 
-
-
-.esriCTdivInfoTotalFeatureCount, .esriCTdivInfoFeatureCount
-{
-    color: #5C2E6F;
-}
 /*grouped address*/
 
 .esriCTBottomBorder
@@ -596,7 +474,7 @@ input
     color: #808080;
 }
 
-.esriCTspanResult
+.esriCTSpanResult
 {
     color: #fff;
 }
@@ -605,7 +483,6 @@ input
 {
     background: rgba(256,256,256,0.70) !important;
     -pie-background: rgba(256,256,256,0.70) !important;
-    behavior: url("styles/PIE.htc") !important;
     border-top: 1px solid #5C2E6F !important;
 }
 
@@ -619,27 +496,16 @@ input
     border-bottom: 1px solid #5C2E6F;
 }
 
-/*legends */
+/* Legends */
 
-.legenboxInner
+.esriCTDivLegendBoxContent
 {
-    border: 1px solid #5C2E6F;
-    border-bottom: none !important;
-}
-
-.legendlbl
-{
-    color: #808080;
-}
-
-.legenboxInner div
-{
-    color: #808080;
+    border: 1px solid #5C2E6F !important;
 }
 
 /* End of legends */
 
-/*CarouselboxContainer*/
+/* Carousel Container */
 
 .esriCTBoxContainer
 {
@@ -652,35 +518,34 @@ input
     color: #5C2E6F;
 }
 
-.esriCTActivityContainer
+.esriCTDivHighlightFacility
 {
-    background-color: #FFFFFF;
+    padding: 10px 25px 10px 0px;
+    text-align: justify;
+    clear: both;
+    cursor: pointer;
+    border-bottom: 1px solid #b4b4b4;
+    color: #5C2E6F;
 }
+
 
 .esriCTSpanFeatureListContainer
 {
     color: #808080;
 }
 
-.esriCTtblAddressContentDirections
-{
-    color: #5C2E6F;
-    border-bottom-style: dotted;
-    border-bottom-color: white;
-}
-
-.esriCTtxtPodAddress
+.esriCTTxtPodAddress
 {
     border: #DFDFDF solid 1px;
 }
 
-.esriCTInfotext
+.esriCTInfoText
 {
     border-bottom: 1px solid #b4b4b4;
     color: #808080;
 }
 
-.esriCTUpAndDownarrow
+.esriCTUpAndDownArrow
 {
     background-color: #5C2E6F;
 }
@@ -689,13 +554,14 @@ input
 {
     background-color: #5C2E6F !important;
 }
+
 .esriCTSearchResultInfotext
 {
     border-bottom: 1px solid #b4b4b4;
     color: #808080;
 }
 
-.esriCTDivDistance, .esriCTDivDistancePod, .esriCTInfoDivDistance
+.esriCTDivDistance, .esriCTDivDistancePod, .esriCTDivInfoDistance
 {
     color: #5C2E6F;
 }
@@ -704,13 +570,28 @@ input
 {
     color: #5C2E6F;
 }
+
 .esriCTDivPrint
 {
-    background: url("../images/print-purple.png") no-repeat center center !important;
+    background: url("../images/printPurple.png") no-repeat center center !important;
+}
+.esriCTCarouselUtilitiesHeader
+{
+    color: #5C2E6F;
+}
+.esriCTDivHighlightFacility
+{
+    padding: 10px 25px 10px 0px;
+    text-align: justify;
+    clear: both;
+    cursor: pointer;
+    border-bottom: 1px solid #b4b4b4;
+    color: #5C2E6F;
 }
 
 /*Activity planner*/
-.esriCTActivityListTab
+
+.esriCTEventListTab
 {
     border-bottom: 1px solid #5C2E6F;
     color: #5C2E6F;
@@ -718,26 +599,19 @@ input
     border-left: 1px solid #5C2E6F;
 }
 
-.esriCTActivityTabSelected
+.esriCTEventTabSelected
 {
     color: #5C2E6F;
     border-left: 1px solid #FAFAFA;
     border-right: 1px solid #fff;
 }
 
-.esriCTActivityTab
+.esriCTEventTab
 {
     border-bottom: 1px solid #5C2E6F;
     color: #5C2E6F;
     border-right: 1px solid #5C2E6F;
     border-left: 1px solid #FAFAFA;
-}
-
-.esriCTActivityTabSelected
-{
-    color: #5C2E6F;
-    border-left: 1px solid #fff;
-    border-right: 1px solid #FAFAFA;
 }
 
 .esriCTMyListHeaderText
@@ -760,61 +634,64 @@ input
     color: #5C2E6F;
 }
 
-.esriCTActivityPlannerRight
+.esriCTEventPlannerRight
 {
     color: #5C2E6F;
 }
 
-.esriCTActivityPlannerText
+.esriCTEventPlannerText
 {
     color: #5C2E6F;
 }
 
-.esriCTBottonGo
+.esriCTBottomGo
 {
-    background-image: url("../images/search-purple.png") !important;
+    background-image: url("../images/searchPurple.png") !important;
 }
 
-.esriCTAddAcitivityList
+.esriCTAddEventList
 {
-    background-image: url("../images/add-activity-list-purple.png") !important;
+    background-image: url("../images/addActivityListPurple.png") !important;
 }
 
-.esriCTDirectionAcitivityList
+.esriCTDirectionEventList
 {
-    background-image: url("../images/direction-purple.png") !important;
+    background-image: url("../images/directionPurple.png") !important;
 }
 
-.esriCTDeleteAcitivityList
+.esriCTDeleteEventList
 {
-    background-image: url("../images/delete-purple.png") !important;
+    background-image: url("../images/deletePurple.png") !important;
 }
 
-.esriCTplusRound
+.esriCTPlusRound
 {
-    background-image: url("../images/add-to-list-purple.png") !important;
+    background-image: url("../images/addToListPurple.png") !important;
 }
 
-.esriCTimgOrderByDateDown
+.esriCTImgOrderByDateDown
 {
-    background-image: url("../images/date-arrow-purple.png");
+    background-image: url("../images/dateArrowDownPurple.png");
 }
 
-.esriCTimgOrderByDateUp
+.esriCTImgOrderByDateUp
 {
-    background-image: url("../images/date-arrow-purple-up.png");
+    background-image: url("../images/dateArrowUpPurple.png");
 }
 
 /*End of Activity planner*/
-.esriCTtabs ul li a.esriCTImageTab
+
+.esriCTTabs ul li a.esriCTImageTab
 {
     color: #5C2E6F;
 }
-.esriCTtabs ul li.infoSelectedTab
+
+.esriCTTabs ul li.esriCTInfoSelectedTab
 {
     background: #5C2E6F;
 }
-.esriCTtabs li
+
+.esriCTTabs li
 {
     color: #5C2E6F;
 }
@@ -822,18 +699,33 @@ input
 .esriCTImageTab
 {
     color: #5C2E6F;
-    background: url("../images/direction-purple.png");
+    background: url("../images/directionPurple.png");
 }
-.esriCTImageTabselected
+
+.esriCTImageTabSelected
 {
     color: #5C2E6F;
-    background: url("../images/direction-select.png");
+    background: url("../images/directionSelected.png");
 }
-.esriCTActivitySerachGoButton
+
+.esriCTActivitySearchGoButton
 {
     background: none repeat scroll 0% 0% #5C2E6F;
 }
+
 .esriCTActivityHeadText
 {
     color: #5C2E6F;
+}
+.esriCTInfoAddToListIcon
+{
+    background-image: url("../images/addToListPurple.png") !important;
+}
+.esriCTTabs div, .esriCTInfoAddToListText
+{
+    color: #5C2E6F;
+}
+.esriCTDivActivityAppContainer
+{
+    border: 1px solid #5C2E6F;
 }

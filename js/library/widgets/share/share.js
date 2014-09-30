@@ -76,7 +76,7 @@ define([
                     }
                 }
             }));
-            this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.share, "class": "esriCTImgSocialMedia" }, null);
+            this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.shareTooltips, "class": "esriCTImgSocialMedia" }, null);
             applicationHeaderDiv = domConstruct.create("div", { "class": "esriCTApplicationShareicon" }, dom.byId("esriCTParentDivContainer"));
             applicationHeaderDiv.appendChild(this.divAppContainer);
             this.own(on(this.domNode, "click", lang.hitch(this, function () {

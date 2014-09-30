@@ -38,7 +38,7 @@ define([
         * @name widgets/help/help
         */
         postCreate: function () {
-            this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.help, "class": "esriCTHelpImg" }, null);
+            this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.helpTooltips, "class": "esriCTHelpImg" }, null);
             this.own(on(this.domNode, "click", lang.hitch(this, function () {
 
                 /**

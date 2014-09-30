@@ -26,21 +26,22 @@ define({
         embedding: "Embedding"// Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
     },
     tooltips: {
-        search: "Buscar",
-        route: "@es@ Route",
-        locate: "Ubicación actual",
-        share: "Compartir",
-        help: "Ayuda",
-        clearEntry: "@es@ Clear",
-        hidePanel: "@es@ Hide panel",
-        showPanel: "@es@ Show panel",
-        printButton: "@es@ Print",
-        close: "@es@ Close"
+        searchTooltips: "Buscar",
+        routeTooltips: "@es@ Route",
+        locateTooltips: "Ubicación actual",
+        shareTooltips: "Compartir",
+        helpTooltips: "Ayuda",
+        eventsTooltips: "@es@ Events",
+        clearEntryTooltips: "@es@ Clear",
+        hidePanelTooltips: "@es@ Hide panel",
+        showPanelTooltips: "@es@ Show panel",
+        printButtonooltips: "@es@ Print",
+        closeTooltips: "@es@ Close"
     },
     titles: {
         directionsDisplayText: "@es@ Area of Interest",
         informationPanelTitle: "@es@ Information for current map view",
-        webpageDisplayText: "@es@ Copy/paste HTML into your web page",
+        webpageDisplayText: "@es@ Copy/Paste HTML into your web page",
         splashScreenContent: "@es@  Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
         serchResultText: "@es@ SEARCH RESULT",
         directionText: "@es@ DIRECTIONS TO",
@@ -60,11 +61,13 @@ define({
         gobuttonText: "@es@ Go",
         noLegendAvailable: "@es@ No Legend Available.",
         loadingText: "@es@ Loading...",
-        galleryInfoText: "@es@ Gallery",
-        informationText: "@es@ Information",
-        commentInfoText: "@es@ Comments",
+        galleryInfoTitle: "@es@ Gallery",
+        informationTitle: "@es@ Information",
+        commentInfoTitle: "@es@ Comments",
         backToMapText: "@es@ BACK TO MAP",
-	    orderByDate: "@es@ Order by Date"
+        orderByDate: "@es@ Order by Date",
+        carouselUtilitiesText: "@es@ utilities",
+        addToListTitle: "@es@ Add to list"
     },
     errorMessages: {
         invalidSearch: "No hay resultados",
@@ -86,7 +89,9 @@ define({
         maxLenghtCommentstring: "@es@ Comment should not exceed 250 characters .",
         commentError: "@es@ Unable to add comments. Comments table is either absent or does not have write acccess .",
         addedActivities: "@es@ All activities within specified date range are already added to the My List.",
-        activitySerachGeolocationText: "@es@ Geolocation is not supported in selected browser."
+        activitySerachGeolocationText: "@es@ Geolocation is not supported in selected browser.",
+        portalUrlNotFound: "@es@ Portal URL cannot be empty",
+        activityAlreadyadded: "@es Activity is already added"
     },
     notUsed: {
         addressDisplayText: "@es@ Address",

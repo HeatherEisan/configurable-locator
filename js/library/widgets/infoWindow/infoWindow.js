@@ -23,7 +23,6 @@ define([
     "dojo/_base/lang",
     "dojo/on",
     "dojo/dom-attr",
-    "../scrollBar/scrollBar",
     "dojo/dom",
     "dojo/dom-class",
     "esri/domUtils",
@@ -36,11 +35,12 @@ define([
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dijit/_WidgetsInTemplateMixin"
 
-], function (declare, domConstruct, domStyle, lang, on, domAttr, ScrollBar, dom, domClass, domUtils, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, query, topic, sharedNls, _WidgetsInTemplateMixin) {
+], function (declare, domConstruct, domStyle, lang, on, domAttr, dom, domClass, domUtils, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, query, topic, sharedNls, _WidgetsInTemplateMixin) {
     return declare([InfoWindowBase, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
         sharedNls: sharedNls,
         InfoShow: true,
+        widgetName: null,
 
         postCreate: function () {
             this.infoWindowContainer = domConstruct.create("div", {}, dom.byId("esriCTParentDivContainer"));
@@ -51,28 +51,23 @@ define([
             this.own(on(this.backToMap, "click", lang.hitch(this, function () {
                 this._closeInfowindow();
             })));
-            this.own(on(this.esriCTMobileArrow, "click", lang.hitch(this, function () {
+            this.own(on(this.mobileArrow, "click", lang.hitch(this, function () {
                 this.InfoShow = false;
                 this._openInfowindow();
             })));
             topic.subscribe("openMobileInfowindow", lang.hitch(this, function () {
                 this._openInfowindow();
             }));
-            topic.subscribe("onWindowResize", lang.hitch(this, function () {
-                this.onWindowResize();
+            topic.subscribe("getInfoWidgetName", lang.hitch(this, function (value) {
+                this.widgetName = value;
             }));
-            if (!dojo.configData.CommentsLayer.Visibility) {
-                domStyle.set(this.commentsTab, "display", "none");
-                domClass.add(this.informationTab, "esriCTInfoInformationTabNotCommenet");
-                domClass.add(this.galleryTab, "esriCTInfoGalleryTabNotCommenet");
-                domClass.add(this.getDir, "esriCTInfoDirectionTabNotCommenet");
-            }
+            this.onWindowResize();
             this.own(on(this.divClose, "click", lang.hitch(this, function () {
                 this.InfoShow = true;
                 domUtils.hide(this.domNode);
                 this.map.getLayer("highlightLayerId").clear();
             })));
-            this.own(on(this.esriCTMobileCloseDiv, "click", lang.hitch(this, function () {
+            this.own(on(this.mobileCloseDiv, "click", lang.hitch(this, function () {
                 dojo.featurePoint = null;
                 this.InfoShow = true;
                 dojo.setMapTipPosition = true;
@@ -80,50 +75,51 @@ define([
                 this.map.getLayer("highlightLayerId").clear();
             })));
             this.own(on(this.informationTab, "click", lang.hitch(this, function () {
-                this._showInformationTab(this.informationTab, dojo.byId("informationTabContainer"));
-                domClass.remove(this.getDirselect, "esriCTImageTabselected");
+                this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
+                domClass.remove(this.getDirselect, "esriCTImageTabSelected");
                 domClass.add(this.getDirselect, "esriCTImageTab");
             })));
             this.own(on(this.galleryTab, "click", lang.hitch(this, function () {
-                this._showInformationTab(this.galleryTab, dojo.byId("galleryTabContainer"));
-                domClass.remove(this.getDirselect, "esriCTImageTabselected");
+                this._showInfoWindowTab(this.galleryTab, dojo.byId("galleryTabContainer"));
+                domClass.remove(this.getDirselect, "esriCTImageTabSelected");
                 domClass.add(this.getDirselect, "esriCTImageTab");
             })));
             this.own(on(this.commentsTab, "click", lang.hitch(this, function () {
-                this._showInformationTab(this.commentsTab, dojo.byId("commentsTabContainer"));
-                domClass.remove(this.getDirselect, "esriCTImageTabselected");
+                this._showInfoWindowTab(this.commentsTab, dojo.byId("commentsTabContainer"));
+                domClass.remove(this.getDirselect, "esriCTImageTabSelected");
                 domClass.add(this.getDirselect, "esriCTImageTab");
             })));
-            this.own(on(this.getDir, "click", lang.hitch(this, function () {
-                this._showInformationTab(this.getDir, dojo.byId("getDirContainer"));
-                domClass.add(this.getDirselect, "esriCTImageTabselected");
+            this.own(on(this.esriCTGetDir, "click", lang.hitch(this, function () {
+                this._showInfoWindowTab(this.esriCTGetDir, dojo.byId("getDirContainer"));
+                domClass.add(this.getDirselect, "esriCTImageTabSelected");
                 domClass.remove(this.getDirselect, "esriCTImageTab");
             })));
         },
 
-        _showInformationTab: function (tabNode, containerNode) {
+        _showInfoWindowTab: function (tabNode, containerNode) {
             var infoContainer, infoTab;
             infoContainer = query('.displayBlock')[0];
-            infoTab = query('.infoSelectedTab')[0];
+            infoTab = query('.esriCTInfoSelectedTab')[0];
             if (infoContainer) {
                 domClass.remove(infoContainer, "displayBlock");
             }
             if (infoTab) {
-                domClass.remove(infoTab, "infoSelectedTab");
+                domClass.remove(infoTab, "esriCTInfoSelectedTab");
             }
-            domClass.remove(this.getDirselect, "esriCTImageTabselected");
+            domClass.remove(this.getDirselect, "esriCTImageTabSelected");
             domClass.add(this.getDirselect, "esriCTImageTab");
-            domClass.add(tabNode, "infoSelectedTab");
+            domClass.add(tabNode, "esriCTInfoSelectedTab");
             domClass.add(containerNode, "displayBlock");
-
-            if (dojo.postCommentScrollBar) {
-                dojo.postCommentScrollBar.rePositionScrollBar();
-            }
         },
 
-        show: function (detailsTab, screenPoint) {
+        show: function (screenPoint) {
+            if (this.widgetName.toLowerCase() === "infoevent") {
+                domStyle.set(this.commentsTab, "display", "none");
+            } else if (this.widgetName.toLowerCase() === "infoactivity") {
+                domStyle.set(this.commentsTab, "display", "block");
+            }
             this.InfoShow = false;
-            this._showInformationTab(this.informationTab, dojo.byId("informationTabContainer"));
+            this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
             this.setLocation(screenPoint);
         },
 
@@ -215,46 +211,16 @@ define([
         * @memberOf widgets/infoWindow/infoWindow
         */
         _openInfowindow: function () {
-            domClass.remove(query(".cloasedivmobile")[0], "scrollbar_footerVisible");
+            domClass.remove(query(".esriCTCloseDivMobile")[0], "scrollbar_footerVisible");
             domClass.add(query(".esriCTInfoContent")[0], "esriCTShowInfoContent");
-            domClass.add(query(".divInfoMobileContent")[0], "divHideInfoMobileContent");
+            domClass.add(query(".esriCTInfoMobileContent")[0], "divHideInfoMobileContent");
             domClass.add(query(".esriCTDivTriangle")[0], "esriCThidedivTriangle");
             domClass.add(query(".esriCTInfoWindow")[0], "esriCTinfoWindowHeightWidth");
-            if (dojo.window.getBox().w <= 767) {
-                var divInfoContentHeight = document.documentElement.clientHeight - 60,
-                    esriInfoStyle = { height: divInfoContentHeight + 'px' };
-                domAttr.set(this.divInfoScrollContent, "style", esriInfoStyle);
-                if (this.infoContainerScrollbar) {
-                    if (domClass.contains(this.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight")) {
-                        domClass.remove(this.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
-                    }
-                    domClass.add(this.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
-                    this.infoContainerScrollbar.removeScrollBar();
-                }
-                this.infoContainerScrollbar = new ScrollBar({domNode: this.divInfoScrollContent});
-                this.infoContainerScrollbar.setContent(this.divInfoDetailsScroll);
-                this.infoContainerScrollbar.createScrollBar();
-                dojo.onInfoWindowResize = true;
-                this.isMobileInfoWindowOpen = true;
-                this.infoWindowResizeOnMap();
-            }
-        },
-
-        resizeInfoScrollContainer: function () {
-            var divInfoContentHeight = document.documentElement.clientHeight - 190,
-                esriInfoStyle = { height: divInfoContentHeight + 'px' };
-            domAttr.set(this.divInfoScrollContent, "style", esriInfoStyle);
-            if (this.infoContainerScrollbar) {
-                domClass.add(this.infoContainerScrollbar._scrollBarContent, "esriCTZeroHeight");
-                this.infoContainerScrollbar.removeScrollBar();
-            }
-            this.infoContainerScrollbar = new ScrollBar({
-                domNode: this.divInfoScrollContent
-            });
-            this.infoContainerScrollbar.setContent(this.divInfoDetailsScroll);
-            this.infoContainerScrollbar.createScrollBar();
+            dojo.onInfoWindowResize = true;
+            this.isMobileInfoWindowOpen = true;
             this.infoWindowResizeOnMap();
         },
+
         /**
         * Hide mobile info window
         * @memberOf widgets/infoWindow/infoWindow
@@ -264,10 +230,10 @@ define([
             this.isMobileInfoWindowOpen = false;
             this.infoWindowResizeOnMap();
             domClass.remove(query(".esriCTInfoContent")[0], "esriCTShowInfoContent");
-            domClass.remove(query(".divInfoMobileContent")[0], "divHideInfoMobileContent");
+            domClass.remove(query(".esriCTInfoMobileContent")[0], "divHideInfoMobileContent");
             domClass.remove(query(".esriCThidedivTriangle")[0], "esriCThidedivTriangle");
             domClass.remove(query(".esriCTInfoWindow")[0], "esriCTinfoWindowHeightWidth");
-            domClass.add(query(".cloasedivmobile")[0], "scrollbar_footerVisible");
+            domClass.add(query(".esriCTCloseDivMobile")[0], "scrollbar_footerVisible");
         }
     });
 });
