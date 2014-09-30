@@ -1,20 +1,20 @@
 ﻿/*global define,dojo,dojoConfig,esri,alert,selectedBasemap */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
- | Copyright 2013 Esri
- |
- | Licensed under the Apache License, Version 2.0 (the "License");
- | you may not use this file except in compliance with the License.
- | You may obtain a copy of the License at
- |
- |    http://www.apache.org/licenses/LICENSE-2.0
- |
- | Unless required by applicable law or agreed to in writing, software
- | distributed under the License is distributed on an "AS IS" BASIS,
- | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- | See the License for the specific language governing permissions and
- | limitations under the License.
- */
+| Copyright 2013 Esri
+|
+| Licensed under the Apache License, Version 2.0 (the "License");
+| you may not use this file except in compliance with the License.
+| You may obtain a copy of the License at
+|
+|    http://www.apache.org/licenses/LICENSE-2.0
+|
+| Unless required by applicable law or agreed to in writing, software
+| distributed under the License is distributed on an "AS IS" BASIS,
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+| See the License for the specific language governing permissions and
+| limitations under the License.
+*/
 //============================================================================================================================//
 define([
     "dojo/_base/declare",
@@ -28,8 +28,9 @@ define([
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
-    "esri/layers/ArcGISTiledMapServiceLayer"
-], function (declare, domConstruct, array, lang, on, dom, query, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, ArcGISTiledMapServiceLayer) {
+    "esri/layers/ArcGISTiledMapServiceLayer",
+    "esri/layers/OpenStreetMapLayer"
+], function (declare, domConstruct, array, lang, on, dom, query, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, ArcGISTiledMapServiceLayer, OpenStreetMapLayer) {
 
     //========================================================================================================================//
 
@@ -68,7 +69,7 @@ define([
                 thumbnailPath = basemap.ThumbnailSource;
             }
             divContainer = domConstruct.create("div", { "class": "esriCTbaseMapContainerNode" });
-            imgThumbnail = domConstruct.create("img", { "class": "basemapThumbnail", "src": thumbnailPath }, null);
+            imgThumbnail = domConstruct.create("img", { "class": "esriCTBasemapThumbnail", "src": thumbnailPath }, null);
             on(imgThumbnail, "click", lang.hitch(this, function () {
                 if (this.enableToggling) {
                     dojo.selectedBasemapIndex++;
@@ -86,22 +87,27 @@ define([
         _changeBaseMap: function (preLayerIndex) {
             var basemap, basemapLayers, basemapLayerId = "defaultBasemap";
             basemapLayers = dojo.configData.BaseMapLayers[preLayerIndex];
-            this.map.onLayerRemove = lang.hitch(this, function (layer) {
-                this._addBasemapLayerOnMap(basemapLayerId);
+            this.enableToggling = false;
+            this.map.onLayerRemove = lang.hitch(this, function () {
+                if (this.enableToggling) {
+                    this._addBasemapLayerOnMap(basemapLayerId);
+                }
             });
 
             if (basemapLayers.length) {
                 array.forEach(basemapLayers, lang.hitch(this, function (layer, index) {
                     basemap = this.map.getLayer(basemapLayerId + index);
+                    if (basemapLayers.length - 1 === index) {
+                        this.enableToggling = true;
+                    }
                     if (basemap) {
-                        this.enableToggling = false;
                         this.map.removeLayer(basemap);
                     }
                 }));
             } else {
                 basemap = this.map.getLayer(basemapLayerId);
                 if (basemap) {
-                    this.enableToggling = false;
+                    this.enableToggling = true;
                     this.map.removeLayer(basemap);
                 }
             }
@@ -113,6 +119,10 @@ define([
         */
         _addBasemapLayerOnMap: function (basemapLayerId) {
             var layer, basemapLayers = dojo.configData.BaseMapLayers[dojo.selectedBasemapIndex];
+
+            this.map.onLayerAdd = lang.hitch(this, function () {
+                this.enableToggling = true;
+            });
             if (basemapLayers.length) {
                 array.forEach(basemapLayers, lang.hitch(this, function (basemap, index) {
                     this.enableToggling = false;
@@ -121,13 +131,13 @@ define([
                 }));
             } else {
                 this.enableToggling = false;
-                layer = new ArcGISTiledMapServiceLayer(basemapLayers.MapURL, { id: basemapLayerId, visible: true });
+                if (basemapLayers.layerType === "OpenStreetMap") {
+                    layer = new OpenStreetMapLayer({ id: basemapLayerId, visible: true });
+                } else {
+                    layer = new ArcGISTiledMapServiceLayer(basemapLayers.MapURL, { id: basemapLayerId, visible: true });
+                }
                 this.map.addLayer(layer, 0);
             }
-
-            this.map.onLayerAdd = lang.hitch(this, function (layer) {
-                this.enableToggling = true;
-            });
         },
 
         /**
@@ -136,8 +146,8 @@ define([
         */
         _loadSharedBasemap: function () {
             if (window.location.toString().split("$selectedBasemapIndex=").length > 1) {
+                var preLayerIndex = dojo.selectedBasemapIndex;
                 dojo.selectedBasemapIndex = parseInt(window.location.toString().split("$selectedBasemapIndex=")[1].split("$")[0], 10);
-                var preLayerIndex = dojo.configData.BaseMapLayers.length - 1;
                 this._changeBasemapThumbnail(preLayerIndex);
             }
         },
@@ -171,7 +181,7 @@ define([
                 thumbnailPath = dojo.configData.BaseMapLayers[presentThumbNail].ThumbnailSource;
 
             }
-            query('.basemapThumbnail')[0].src = thumbnailPath;
+            query('.esriCTBasemapThumbnail')[0].src = thumbnailPath;
         }
     });
 });

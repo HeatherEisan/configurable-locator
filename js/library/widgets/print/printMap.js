@@ -52,7 +52,7 @@ define([
         * @memberOf widgets/printMap/printMap
         */
         _showModal: function () {
-            var dataObject, _self = this, basemap;
+            var dataObject, _self = this, basemap, printWindow;
             basemap = _self.map.getLayer("defaultBasemap");
             if (!basemap) {
                 basemap = _self.map.getLayer("defaultBasemap0");
@@ -66,9 +66,11 @@ define([
                 "BaseMapLayer": basemap,
                 "config": dojo.configData,
                 "dojoConfig": dojoConfig.baseURL,
-                "HighlightedLayer": _self.map.getLayer("highlightLayerId")
+                "HighlightedLayer": _self.map.getLayer("highlightLayerId"),
+                "Directions": _self.directions
             };
-            window.showModalDialog(dojoConfig.baseURL + "/js/library/widgets/print/templates/print.html", dataObject);
+            printWindow = window.open(dojoConfig.baseURL + "/js/library/widgets/print/templates/print.html", dataObject);
+            printWindow.opener.mapData = dataObject;
         },
 
         /**

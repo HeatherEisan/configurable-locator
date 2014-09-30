@@ -19,17 +19,16 @@
 
 require([
     "esri/map",
-    "esri/layers/ImageServiceParameters",
-    "esri/layers/ArcGISImageServiceLayer",
     "../../../../config.js",
     "esri/symbols/PictureMarkerSymbol",
     "esri/layers/FeatureLayer",
     "dojo/_base/Color",
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol",
-    "esri/geometry/Polyline"
-
-], function (esriMap, ImageServiceParameters, ArcGISImageServiceLayer, config, PictureMarkerSymbol, FeatureLayer, Color, SimpleLineSymbol, SimpleFillSymbol, Polyline) {
+    "esri/geometry/Polyline",
+    "dojo/dom-construct",
+    "dojo/dom"
+], function (esriMap, config, PictureMarkerSymbol, FeatureLayer, Color, SimpleLineSymbol, SimpleFillSymbol, Polyline, domConstruct, dom) {
     /**
     * create print  widget
     *
@@ -37,7 +36,7 @@ require([
     * @name widgets/printMap/print
     */
 
-    var window_opener = window.dialogArguments, tempBuffer = 'tempBuffer', printmap, params = dojo.byId("paramid"), GraphicLayer, bufferLayer, initialExtent, baseMapLayer, routeLayer, imageServiceLayer, highlightedLayer, highLightsymbol,
+    var window_opener = window.opener.mapData, tempBuffer = 'tempBuffer', printmap, GraphicLayer, bufferLayer, initialExtent, baseMapLayer, routeLayer, highlightedLayer, highLightsymbol,
         gLayer, i, j, buffersymbol, polygon, geoLocationPushpin, locatorMarkupSymbol, graphic, layerMode, featureLayer, symbols, polyline;
     GraphicLayer = window_opener.GraphicLayer;
     bufferLayer = window_opener.Bufferlayer;
@@ -48,19 +47,13 @@ require([
     printmap = new esri.Map("mapPrint", { extent: initialExtent, slider: false });
     baseMapLayer = new esri.layers.ArcGISTiledMapServiceLayer(baseMapLayer.url);
     printmap.addLayer(baseMapLayer);
-    params = new ImageServiceParameters();
-    params.format = "PNG24";
-    imageServiceLayer = new ArcGISImageServiceLayer(baseMapLayer.url, { imageServiceParameters: params });
-    printmap.addLayer(imageServiceLayer);
     document.title = config.ApplicationName;
     /**
-    routeLayer.graphics[0].geometry
-
     * function to add polygon and graphics in the print map window when it gets open
     * @memberOf widgets/printMap/print
     */
     dojo.connect(printmap, "onLoad", function () {
-
+        var directionsInfoData = window.opener.mapData.Directions;
         printmap.disablePan();
         printmap.disableDoubleClickZoom();
         printmap.disableKeyboardNavigation();
@@ -68,18 +61,18 @@ require([
         gLayer = new esri.layers.GraphicsLayer();
         gLayer.id = tempBuffer;
         for (i = 0; i < bufferLayer.graphics.length; i++) {
-            buffersymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(config.BufferSymbology.LineSymbolColor.split(",")[0], 10), parseInt(config.BufferSymbology.LineSymbolColor.split(",")[1], 10), parseInt(config.BufferSymbology.FillSymbolColor.split(",")[2], 10), parseFloat(config.BufferSymbology.FillSymbolTransparency.split(",")[0], 10)]), 2
+            buffersymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(config.BufferSymbology.LineSymbolColor.split(",")[0], 10), parseInt(config.BufferSymbology.LineSymbolColor.split(",")[1], 10), parseInt(config.BufferSymbology.FillSymbolColor.split(",")[2], 10), parseFloat(config.BufferSymbology.LineSymbolTransparency.split(",")[0], 10)]), 2
                 ),
-                new Color([parseInt(config.BufferSymbology.FillSymbolColor.split(",")[0], 10), parseInt(config.BufferSymbology.FillSymbolColor.split(",")[1], 10), parseInt(config.BufferSymbology.LineSymbolColor.split(",")[2], 10), parseFloat(config.BufferSymbology.LineSymbolTransparency.split(",")[0], 10)])
+                new Color([parseInt(config.BufferSymbology.FillSymbolColor.split(",")[0], 10), parseInt(config.BufferSymbology.FillSymbolColor.split(",")[1], 10), parseInt(config.BufferSymbology.LineSymbolColor.split(",")[2], 10), parseFloat(config.BufferSymbology.FillSymbolTransparency.split(",")[0], 10)])
                 );
             polygon = new esri.geometry.Polygon(bufferLayer.graphics[i].geometry.toJson());
             gLayer.add(new esri.Graphic(polygon, buffersymbol));
         }
-        geoLocationPushpin = window.dialogArguments.dojoConfig + config.LocatorSettings.DefaultLocatorSymbol;
+        geoLocationPushpin = window.opener.mapData.dojoConfig + config.LocatorSettings.DefaultLocatorSymbol;
         locatorMarkupSymbol = new PictureMarkerSymbol(geoLocationPushpin, config.LocatorSettings.MarkupSymbolSize.width, config.LocatorSettings.MarkupSymbolSize.height);
         graphic = new esri.Graphic(GraphicLayer.graphics[0].geometry, locatorMarkupSymbol, null, null);
         gLayer.add(graphic);
-        highLightsymbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, config.locatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
+        highLightsymbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, config.LocatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
                             new dojo.Color(config.RippleColor), 4), new dojo.Color([0, 0, 0, 0]));
         gLayer.add(new esri.Graphic(highlightedLayer.graphics[0].geometry, highLightsymbol, {}, null));
         for (j = 0; j < config.OperationalLayers.length; j++) {
@@ -103,18 +96,28 @@ require([
                 * load operational layer if it's type is feature along with its layer mode
                 */
                 featureLayer = new FeatureLayer(config.OperationalLayers[j].ServiceURL, {
-                    id: "index",
                     mode: layerMode,
                     outFields: ["*"],
                     displayOnPan: false
                 });
             }
+            printmap.addLayer(featureLayer);
         }
-        printmap.addLayer(featureLayer);
-        symbols = new SimpleLineSymbol().setColor(config.RouteColor).setWidth(config.RouteWidth);
+        symbols = new SimpleLineSymbol().setColor(config.DrivingDirectionSettings.RouteColor).setWidth(config.DrivingDirectionSettings.RouteWidth);
         polyline = new Polyline(routeLayer.graphics[0].geometry.toJson());
         gLayer.add(new esri.Graphic(polyline, symbols));
         printmap.addLayer(gLayer);
-        window.print();
+        //Print Directions on Page
+        if (directionsInfoData.Features.length > 0) {
+            dom.byId("title").innerHTML = directionsInfoData.Title + "<br/>" + directionsInfoData.Distance + " " + directionsInfoData.Time;
+            domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": directionsInfoData.Features[0].attributes.text }, dom.byId("directionsList"));
+            for (j = 1; j < directionsInfoData.Features.length; j++) {
+                domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": directionsInfoData.Features[j].attributes.text + "(" + parseFloat(directionsInfoData.Features[j].attributes.length).toFixed(2) + "miles" + ")" }, dom.byId("directionsList"));
+            }
+        }
+        setTimeout(function () {
+            dom.byId("loading").style.display = "none";
+            window.print();
+        }, 1000);
     });
 });

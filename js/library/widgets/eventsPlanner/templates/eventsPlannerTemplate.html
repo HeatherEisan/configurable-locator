@@ -1,0 +1,63 @@
+﻿<div class="esriCTDivActivityAppContainer esriCTHideContainerHeight" data-dojo-attach-point="applicationHeaderActivityContainer">
+    <div class="esriCTDivActivityContainer">
+        <div class="esriCTEventTabSelected" data-dojo-attach-point="activityTab">
+            <span>${sharedNls.titles.activityTabName}</span>
+        </div>
+        <div class="esriCTEventListTab" data-dojo-attach-point="activityListTab">
+            <span>${sharedNls.titles.activityListTabName}</span>
+        </div>
+        <div data-dojo-attach-point="TabContentContainer">
+            <div class="esriCTActivityPlaner" data-dojo-attach-point="activityPlanner">
+                <div class="esriCTActiviyDateContainer">
+                    <div class="esriCTActiviyDateInnerContainer">
+                        <div class="esriCTDivClear">
+                            <div class="esriCTDivFromDate">
+                                <span class="esriCTFromDateText">${sharedNls.titles.fromDateText}</span>
+                            </div>
+                            <div class="esriCTDivToDate">
+                                <span class="esriCTDivTODateText">${sharedNls.titles.toDateText}</span>
+                            </div>
+                        </div>
+                        <div class="esriCTDivClear">
+                            <div class="esriCTDivFromDate">
+                                <input type="date" name="fromDate" data-dojo-type="dijit/form/DateTextBox" data-dojo-attach-point="myFromDate"
+                                    required="true" />
+                            </div>
+                            <div class="esriCTDivToDate">
+                                <input type="date" name="toDate" data-dojo-type="dijit/form/DateTextBox" data-dojo-attach-point="myToDate"
+                                    required="true" />
+                            </div>
+                            <div class="esriCTBottomGo" data-dojo-attach-point="bottonGo">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="esriCTActivityList" data-dojo-attach-point="activityList">
+                <div class="esriCTMyListHeaderRow">
+                    <div class="esriCTMyListHeaderLeft">
+                        <div style="display: table" data-dojo-attach-point="orderByDate">
+                            <div class="esriCTMyListHeaderText">
+                                ${sharedNls.titles.orderByDate}
+                            </div>
+                            <div class="esriCTImgOrderByDate esriCTImgOrderByDateDown" data-dojo-attach-point="orderByDateImage">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="esriCTHeaderMyListRight">
+                        <div>
+                            <div class="esriCTHeaderDirectionAcitivityList">
+                            </div>
+                            <div class="esriCTHeaderShareAcitivityList">
+                            </div>
+                            <div class="esriCTHeaderAddAcitivityList">
+                            </div>
+                            <div class="esriCTHeaderPrintAcitivityList">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -26,21 +26,23 @@ define({
         embedding: "Embedding"// Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
     },
     tooltips: {
-        search: "Search",
-        route: "Route",
-        locate: "Locate",
-        share: "Share",
-        help: "Help",
-        clearEntry: "Clear",
-        hidePanel: "Hide panel",
-        showPanel: "Show panel",
-        close: "Close"
+        searchTooltips: "Search",
+        routeTooltips: "Route",
+        locateTooltips: "Locate",
+        shareTooltips: "Share",
+        helpTooltips: "Help",
+        eventsTooltips: "Events",
+        clearEntryTooltips: "Clear",
+        hidePanelTooltips: "Hide panel",
+        showPanelTooltips: "Show panel",
+        printButtonooltips: "Print",
+        closeTooltips: "Close"
     },
     titles: {
         directionsDisplayText: "Area of Interest",
         informationPanelTitle: "Information for current map view",
-        webpageDisplayText: "Copy/paste HTML into your web page",
-        splashScreenContent: "@fr@ Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
+        webpageDisplayText: "Copy/Paste HTML into your web page",
+        splashScreenContent: "Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
         serchResultText: "SEARCH RESULT",
         directionText: "DIRECTIONS TO",
         galleryText: "GALLERY",
@@ -59,11 +61,13 @@ define({
         gobuttonText: "Go",
         noLegendAvailable: "No Legend Available.",
         loadingText: "Loading...",
-        galleryInfoText: "Gallery",
-        informationText: "Information",
-        commentInfoText: "Comments",
+        galleryInfoTitle: "Gallery",
+        informationTitle: "Information",
+        commentInfoTitle: "Comments",
         backToMapText: "BACK TO MAP",
-        orderByDate: "Order by Date"
+        orderByDate: "Order by Date",
+        carouselUtilitiesText: "utilities",
+        addToListTitle: "Add to list"
     },
     errorMessages: {
         invalidSearch: "No results found",
@@ -83,7 +87,9 @@ define({
         maxLenghtCommentstring: "Comment should not exceed 250 characters .",
         commentError: "Unable to add comments. Comments table is either absent or does not have write acccess .",
         addedActivities: "All activities within specified date range are already added to the My List.",
-        activitySerachGeolocationText: "Geolocation is not supported in selected browser."
+        activitySerachGeolocationText: "Geolocation is not supported in selected browser.",
+        portalUrlNotFound: "Portal URL cannot be empty",
+        activityAlreadyadded: "Activity is already added"
     },
     notUsed: {
         addressDisplayText: "Address",
