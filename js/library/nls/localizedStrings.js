@@ -79,7 +79,8 @@ define({
             eventsINMylist: "Events in MyList",
             numberOfFoundFeatureNearAddress: "Found ${0} facility(ies)",
             numberOfFoundEventsNearAddress: "Found ${0} Event",
-            addToListTitle: "Add to list"
+            addToListTitle: "Add to list",
+            directionFromText: "DIRECTIONS from "
         },
         errorMessages: {
             invalidSearch: "No results found",
@@ -109,7 +110,17 @@ define({
             errorInQueringLayer: "Failed to query Comment layer",
             loadingText: "Loading...",
             noLegend: "No Legend Available."
+        },
+        //end of shared nls
+
+         //App nls
+        appErrorMessage: {
+            layerTitleError: "Title and/or QueryLayerId parameters in SearchSettings do not match with configured operational layers.",
+            titleNotMatching: "Title and/or QueryLayerId parameters in the InfoWindowSettings and SearchSettings do not match.",
+            lengthDoNotMatch: "The number of objects in InfoWindowSettings and SearchSettings do not match.",
+            webmapTitleError: "Title and/or QueryLayerId parameters in SearchSettings do not match with configured webmap"
         }
+        //End of App nls
     },
     es: true,
     fr: true,

@@ -23,22 +23,17 @@ define([
     "dojo/dom-attr",
     "dojo/_base/lang",
     "dojo/on",
-    "dojo/dom-geometry",
-    "dojo/dom",
     "dojo/_base/array",
     "dojo/dom-class",
     "dojo/query",
     "dojo/string",
     "esri/tasks/locator",
     "esri/tasks/query",
-    "../scrollBar/scrollBar",
     "dojo/Deferred",
     "dojo/DeferredList",
     "esri/tasks/QueryTask",
     "esri/geometry",
     "esri/graphic",
-    "esri/layers/GraphicsLayer",
-    "esri/symbols/PictureMarkerSymbol",
     "esri/geometry/Point",
     "dojo/text!./templates/searchSettingTemplate.html",
     "dijit/_WidgetBase",
@@ -46,18 +41,15 @@ define([
     "dijit/_WidgetsInTemplateMixin",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
-    "esri/urlUtils",
-    "esri/SpatialReference",
     "esri/tasks/BufferParameters",
     "dojo/_base/Color",
     "esri/tasks/GeometryService",
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol",
     "esri/symbols/SimpleMarkerSymbol",
-    "esri/units",
     "../carouselContainer/carouselContainer"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, ScrollBar, Deferred, DeferredList, QueryTask, Geometry, Graphic, GraphicsLayer, PictureMarkerSymbol, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, urlUtils, SpatialReference, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol, units, CarouselContainer) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol, CarouselContainer) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -111,6 +103,7 @@ define([
         */
         _clearBuffer: function () {
             this.map.getLayer("tempBufferLayer").clear();
+            topic.publish("hideInfoWindow");
         },
 
         /**

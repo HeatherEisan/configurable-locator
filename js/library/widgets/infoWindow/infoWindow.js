@@ -188,8 +188,8 @@ define([
         * @memberOf widgets/infoWindow/infoWindow
         */
         onWindowResize: function () {
-            this.infoWindowzIndex = 997;
-            domStyle.set(this.domNode, { zIndex: 997 });
+            this.infoWindowzIndex = 1000;
+            domStyle.set(this.domNode, { zIndex: 1000 });
         },
 
         /**

@@ -162,12 +162,12 @@
 
 .esriCTEventsImg
 {
-    background-image: url("../images/img24x24/activityPlannerOrange24.png");
+    background-image: url("../images/img24x24/activityPlannerGray24.png");
 }
 
 .esriCTEventsImgSelected
 {
-    background-image: url("../images/img24x24/activity-planner-orange-24.png");
+    background-image: url("../images/img24x24/activityPlannerOrange24.png");
 }
 .esriCTInfoAddlistText
 {
@@ -449,6 +449,7 @@ input
     background: #d15706;
     color: #fff;
 }
+
 @media screen and (max-width:767px)
 {
     .esriCTInfoSubmitButton, .esriCTInfoPostButton, .esriCTInfoBackButton, .esriCTCloseDivMobile
@@ -488,6 +489,18 @@ input
     border-top: 1px solid #d15706 !important;
 }
 
+.esriCTDivSearchResultHolder
+{
+    border: 1px solid #d15706;
+    z-index: 997;
+    position: absolute;
+    top: 48px;
+    right: 0px;
+    width: 360px;
+    background: #fff;
+    border-top: none;
+}
+
 /*legends */
 
 .esriCTLegendChangePositionUp
@@ -513,7 +526,7 @@ input
     background: #fff;
 }
 
-.esriCTSpanHeader
+.esriCTSpanHeader, .esriCTSpanHeaderInfoWindow
 {
     color: #d15706;
 }
@@ -572,7 +585,7 @@ input
 
 .esriCTDivPrint
 {
-    background: url("../images/print-orange.png") no-repeat center center !important;
+    background: url("../images/printOrange.png") no-repeat center center !important;
 }
 
 .esriCTCarouselUtilitiesHeader
@@ -673,6 +686,10 @@ input
     background-image: url("../images/dateArrowUpOrange.png");
 }
 
+.esriCTEventListTabSelected
+{
+     color: #d15706;
+}
 /*End of Activity planner*/
 
 .esriCTTabs ul li a.esriCTImageTab
@@ -715,11 +732,27 @@ input
 {
     background-image: url("../images/addToListOrange.png") !important;
 }
-.esriCTTabs div, .esriCTInfoAddToListText, .esriCTInfoSubmitButton, .esriCTInfoPostButton, .esriCTInfoBackButton, .esriCTCloseDivMobile
+.esriCTTabs div, .esriCTInfoAddToListText, .esriCTCloseDivMobile
 {
     color: #d15706;
 }
 .esriCTDivActivityAppContainer
 {
     border: 1px solid #d15706;
+}
+.esriCTHeaderDirectionAcitivityList
+{
+    background-image: url("../images/directionOrange.png") !important;
+}
+.esriCTHeaderShareAcitivityList
+{
+    background-image: url("../images/shareOrange.png") !important;
+}
+.esriCTHeaderAddAcitivityList
+{
+    background-image: url("../images/addActivityListOrange.png") !important;
+}
+.esriCTHeaderPrintAcitivityList
+{
+    background-image: url("../images/printOrange.png") !important;
 }

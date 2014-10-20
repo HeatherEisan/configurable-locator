@@ -52,13 +52,19 @@ define([
         * @memberOf widgets/printMap/printMap
         */
         _showModal: function () {
-            var dataObject, _self = this, basemap, printWindow;
+            var dataObject, _self = this, basemap, printWindow, ID;
             basemap = _self.map.getLayer("defaultBasemap");
             if (!basemap) {
                 basemap = _self.map.getLayer("defaultBasemap0");
             }
+            if (_self.map.getLayer("geoLocationGraphicsLayer") && this.map.getLayer("geoLocationGraphicsLayer").graphics.length > 0) {
+                ID = "geoLocationGraphicsLayer";
+            }
+            if (_self.map.getLayer("esriGraphicsLayerMapSettings") && this.map.getLayer("esriGraphicsLayerMapSettings").graphics.length > 0) {
+                ID = "esriGraphicsLayerMapSettings";
+            }
             dataObject = {
-                "GraphicLayer": _self.map.getLayer("esriGraphicsLayerMapSettings"),
+                "GraphicLayer": _self.map.getLayer(ID),
                 "Bufferlayer": _self.map.getLayer("tempBufferLayer"),
                 "Extent": _self.map.extent,
                 "RouteLayer": _self.map.getLayer("routeLayerId"),

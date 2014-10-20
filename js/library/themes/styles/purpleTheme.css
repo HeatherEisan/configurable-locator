@@ -167,7 +167,7 @@
 
 .esriCTEventsImgSelected
 {
-    background-image: url("../images/img24x24/activity-planner-purple-24.png");
+    background-image: url("../images/img24x24/activityPlannerPurple24.png");
 }
 
 .esriCTFacebook
@@ -423,7 +423,7 @@ input
 
 .esriCTDivTriangle
 {
-    background-image: url("../images/bottomArrowBlue.png");
+    background-image: url("../images/bottomArrowPurple.png");
 }
 
 .esriCTImgCalloutArrow
@@ -496,6 +496,18 @@ input
     border-bottom: 1px solid #5C2E6F;
 }
 
+.esriCTDivSearchResultHolder
+{
+    border: 1px solid #5C2E6F;
+    z-index: 997;
+    position: absolute;
+    top: 48px;
+    right: 0px;
+    width: 360px;
+    background: #fff;
+    border-top: none;
+}
+
 /* Legends */
 
 .esriCTDivLegendBoxContent
@@ -513,7 +525,7 @@ input
     background: #fff;
 }
 
-.esriCTSpanHeader
+.esriCTSpanHeader, .esriCTSpanHeaderInfoWindow
 {
     color: #5C2E6F;
 }
@@ -679,6 +691,10 @@ input
     background-image: url("../images/dateArrowUpPurple.png");
 }
 
+.esriCTEventListTabSelected
+{
+     color: #5C2E6F;
+}
 /*End of Activity planner*/
 
 .esriCTTabs ul li a.esriCTImageTab
@@ -728,4 +744,20 @@ input
 .esriCTDivActivityAppContainer
 {
     border: 1px solid #5C2E6F;
+}
+.esriCTHeaderDirectionAcitivityList
+{
+    background-image: url("../images/directionPurple.png") !important;
+}
+.esriCTHeaderShareAcitivityList
+{
+    background-image: url("../images/sharePurple.png") !important;
+}
+.esriCTHeaderAddAcitivityList
+{
+    background-image: url("../images/addActivityListPurple.png") !important;
+}
+.esriCTHeaderPrintAcitivityList
+{
+    background-image: url("../images/printPurple.png") !important;
 }

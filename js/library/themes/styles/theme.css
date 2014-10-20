@@ -191,12 +191,11 @@ body
 
 .esriCTDivSearchResultHolder
 {
-    z-index: 997;
+    z-index: 998;
     position: absolute;
     top: 48px;
     right: 0px;
     width: 360px;
-    border: 1px solid #007ac2;
     background: #fff;
     border-top: none;
 }
@@ -713,7 +712,7 @@ input
 .esriCTdivToggle
 {
     position: absolute;
-    z-index: 1008;
+    z-index: 999;
     transition: bottom 0.1s ease-in;
     bottom: 0px;
     right: 0;
@@ -757,7 +756,7 @@ input
     bottom: 0;
     position: absolute;
     width: 100%;
-    z-index: 10005;
+    z-index: 999;
     display: none;
     background-color: White;
 }
@@ -1198,6 +1197,15 @@ input
     border-bottom: 1px solid #b4b4b4;
     color: #808080;
 }
+
+.esriCTSearchResultInfotextForEvent
+{
+    padding: 10px 25px 10px 0px;
+    text-align: justify;
+    clear: both;
+    border-bottom: 1px solid #b4b4b4;
+    color: #808080;
+}
 .esriCTDivDirectioncontent div.esriCTAddressContent
 {
     padding-left: 15px;
@@ -1516,6 +1524,7 @@ input
     vertical-align: middle;
     padding: 10px 0px;
     width: 230px;
+    cursor:pointer;
 }
 
 .esriCTMyListDates
@@ -1593,6 +1602,49 @@ input
 
 .esriCTHeaderDirectionAcitivityList
 {
+
+    height: 22px !important;
+    width: 22px !important;
+    float: left;
+    margin-right: 15px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+.esriCTHeaderShareAcitivityList
+{
+
+    height: 22px !important;
+    width: 22px !important;
+    float: left;
+    margin-right: 15px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+.esriCTHeaderAddAcitivityList
+{
+
+    height: 22px !important;
+    width: 22px !important;
+    float: left;
+    margin-right: 15px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+.esriCTHeaderPrintAcitivityList
+{
+
+    height: 22px !important;
+    width: 22px !important;
+    float: left;
+    margin-right: 15px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+.esriCTHeaderDirectionAcitivityListDisable
+{
     background-image: url("../images/getDirection.png") !important;
     height: 22px !important;
     width: 22px !important;
@@ -1600,8 +1652,7 @@ input
     margin-right: 15px;
     background-repeat: no-repeat;
 }
-
-.esriCTHeaderShareAcitivityList
+.esriCTHeaderShareAcitivityListDisable
 {
     background-image: url("../images/share.png") !important;
     height: 22px !important;
@@ -1610,8 +1661,7 @@ input
     margin-right: 15px;
     background-repeat: no-repeat;
 }
-
-.esriCTHeaderAddAcitivityList
+.esriCTHeaderAddAcitivityListDisable
 {
     background-image: url("../images/addActivityListGray.png") !important;
     height: 22px !important;
@@ -1621,7 +1671,7 @@ input
     background-repeat: no-repeat;
 }
 
-.esriCTHeaderPrintAcitivityList
+.esriCTHeaderPrintAcitivityListDisable
 {
     background-image: url("../images/print.png") !important;
     height: 22px !important;
@@ -1630,6 +1680,7 @@ input
     margin-right: 15px;
     background-repeat: no-repeat;
 }
+
 
 .esriCTMyListIcons
 {
@@ -1654,15 +1705,32 @@ input
     display: table-cell;
     cursor: pointer;
 }
+.esriCTMyListHeaderTextDisable
+{
+    display: table-cell;
+    color: #6e6e6e;
+}
 
 .esriCTImgOrderByDate
 {
+
     display: table-cell;
     width: 16px;
     height: 16px;
     background-repeat: no-repeat;
     cursor: pointer;
 }
+.esriCTImgOrderByDateDisable
+{
+    display: table-cell;
+    width: 16px;
+    height: 16px;
+    background-repeat: no-repeat;
+    }
+.esriCTImgOrderByDateDownDisable
+{
+     background-image: url("../images/dateArrowDownGray.png");
+    }
 
 .esriCTDivFacilityImages
 {
@@ -2267,6 +2335,17 @@ input
     background: #007AC2 !important;
 }
 
+.esriCTSpanHeaderInfoWindow
+{
+    font-weight: bolder;
+    margin-left: 8px !important;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin: 15px 0 0 0;
+    float: left;
+    width: 300px;
+}
+
 .esriCTCalloutText
 {
     font-weight: bold;
@@ -2332,7 +2411,7 @@ input
 .esriCTDirectionMainContainer
 {
     height: 100%;
-    width: 100%;
+    width: 340px;
     margin: 0 auto;
     overflow: hidden;
 }
@@ -2471,14 +2550,15 @@ input
     min-height: 71px;
     background-color: #fff;
     cursor: default !important;
-    padding: 20px 1px 0px 20px;
+    padding: 20px 1px 0px 0px;
+    width:322px;
 }
 
 .esriCTDirectionMainContainer div.esriCTAddressContent
 {
     background-color: #fff;
     cursor: default !important;
-    padding: 15px 1px 0px 15px;
+    padding: 15px 1px 0px 8px;
     float: left;
     height: 100%;
 }
@@ -2905,3 +2985,5 @@ input::-ms-clear
 }
 
 /* End of legends */
+
+

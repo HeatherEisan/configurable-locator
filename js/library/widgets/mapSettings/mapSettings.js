@@ -83,7 +83,7 @@ define([
 
                 this._onSetInfoWindowPosition(infoTitle, screenPoint, infoPopupWidth, infoPopupHeight);
             }));
-            topic.subscribe("infowindowInstance", lang.hitch(this, function (result) {
+            topic.subscribe("hideInfoWindow", lang.hitch(this, function (result) {
                 this.infoWindowPanel.hide();
                 this.infoWindowPanel.InfoShow = true;
             }));
@@ -473,8 +473,6 @@ define([
             var queryTask, queryLayer, isLayerVisible, currentDate = new Date().getTime().toString() + index, deferred;
             queryTask = new esri.tasks.QueryTask(dojo.configData.InfoWindowSettings[index].InfoQueryURL);
             // this.operationalLayers = dojo.configData.OperationalLayers;
-
-
             if (this.operationalLayers[index].layerObject) {
                 isLayerVisible = this.operationalLayers[index].layerObject.visibleAtMapScale;
             } else {
@@ -528,9 +526,10 @@ define([
         */
         _fetchQueryResults: function (featureArray, mapPoint) {
             var point, featurePoint, infoWindowParameter;
+            featureArray = this._getDateInFormat(featureArray);
             if (featureArray.length > 0) {
                 if (featureArray.length === 1) {
-                    featurePoint = mapPoint;
+                    featurePoint = featureArray[0].attr.geometry;
                     infoWindowParameter = {
                         "mapPoint": featurePoint,
                         "attribute": featureArray[0].attr.attributes,
@@ -552,7 +551,7 @@ define([
                             "featureSet": featureArray[0].attr
                         };
                     } else {
-                        point = mapPoint;
+                        point = featureArray[0].attr.geometry;
                         infoWindowParameter = {
                             "mapPoint": point,
                             "attribute": featureArray[0].attr.attributes,
@@ -570,6 +569,55 @@ define([
             }
         },
 
+
+        /**
+        * format the date in pattern
+        * @returns feature Array
+        * @param {object} featureArray contains attributes, geometry, mapPoint
+        * @memberOf widgets/mapSettings/mapSettings
+        */
+        _getDateInFormat: function (featureArray) {
+            var attributeNames = [], i, key, e;
+            if (featureArray.length > 0) {
+                for (i = 0; i < featureArray[0].fields.length; i++) {
+                    if (featureArray[0].fields[i].type === "esriFieldTypeDate") {
+                        attributeNames.push(featureArray[0].fields[i].name);
+                    }
+                }
+                for (key in featureArray[0].attr.attributes) {
+                    if (featureArray[0].attr.attributes.hasOwnProperty(key)) {
+                        for (e = 0; e < attributeNames.length; e++) {
+                            if (attributeNames[e] === key) {
+                                featureArray[0].attr.attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureArray[0].attr.attributes[key]), { datePattern: dojo.configData.EventSearchSettings[0].DisplayDateFormat, selector: "date" });
+                            }
+                        }
+                    }
+                }
+            } else {
+                topic.publish("hideProgressIndicator");
+            }
+            return featureArray;
+        },
+
+        /**
+        * convert the UTC time stamp from Millisecond
+        * @returns Date
+        * @param {object} utcMilliseconds contains UTC millisecond
+        * @memberOf widgets/mapSettings/mapSettings
+        */
+        utcTimestampFromMs: function (utcMilliseconds) {
+            return this.localToUtc(new Date(utcMilliseconds));
+        },
+
+        /**
+        * convert the local time to UTC
+        * @param {object} localTimestamp contains Local time
+        * @returns Date
+        * @memberOf widgets/mapSettings/mapSettings
+        */
+        localToUtc: function (localTimestamp) {
+            return new Date(localTimestamp.getTime() + (localTimestamp.getTimezoneOffset() * 60000));
+        },
 
         /**
         * get the string of service URL using query operation

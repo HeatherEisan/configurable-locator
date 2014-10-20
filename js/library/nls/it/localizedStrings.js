@@ -67,7 +67,8 @@ define({
         backToMapText: "@it@ BACK TO MAP",
         orderByDate: "@it@ Order by Date",
         carouselUtilitiesText: "@it@ utilities",
-        addToListTitle: "@it@ Add to list"
+        addToListTitle: "@it@ Add to list",
+        directionFromText: "@fr@DIRECTIONS from "
     },
     errorMessages: {
         invalidSearch: "Nessun risultato trovato.",
@@ -96,6 +97,16 @@ define({
     notUsed: {
         addressDisplayText: "@it@ Address",
         backToMap: "@it@ Back to map"
+    },
+    //end of shared nls
+
+    //App nls
+    appErrorMessage: {
+        layerTitleError: "@it@ Title and/or QueryLayerId parameters in SearchSettings do not match with configured operational layers.",
+        titleNotMatching: "@it@ Title and/or QueryLayerId parameters in the InfoWindowSettings and SearchSettings do not match.",
+        lengthDoNotMatch: "@it@ The number of objects in InfoWindowSettings and SearchSettings do not match.",
+        webmapTitleError: "@it@ Title and/or QueryLayerId parameters in SearchSettings do not match with configured webmap"
     }
+    //End of App nls
 });
 
