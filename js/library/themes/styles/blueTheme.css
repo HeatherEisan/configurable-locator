@@ -456,6 +456,17 @@ input
     border-top: 1px solid #007AC2 !important;
 }
 
+.esriCTDivSearchResultHolder
+{
+    border: 1px solid #007ac2;
+    z-index: 997;
+    position: absolute;
+    top: 48px;
+    right: 0px;
+    width: 360px;
+    background: #fff;
+    border-top: none;
+}
 /*legends */
 
 .esriCTLegendChangePositionUp
@@ -482,7 +493,7 @@ input
     background: #fff;
 }
 
-.esriCTSpanHeader
+.esriCTSpanHeader, .esriCTSpanHeaderInfoWindow
 {
     color: #007ac2;
 }
@@ -644,6 +655,12 @@ input
     background: #007ac2;
     color: #fff;
 }
+
+.esriCTEventListTabSelected
+{
+    color: #007ac2;
+}
+
 @media screen and (max-width:767px)
 {
     .esriCTInfoSubmitButton, .esriCTInfoPostButton, .esriCTInfoBackButton, .esriCTCloseDivMobile
@@ -702,4 +719,20 @@ input
 .esriCTDivActivityAppContainer
 {
     border: 1px solid #007AC2;
+}
+.esriCTHeaderDirectionAcitivityList
+{
+    background-image: url("../images/direction.png") !important;
+}
+.esriCTHeaderShareAcitivityList
+{
+    background-image: url("../images/shareBlue.png") !important;
+}
+.esriCTHeaderAddAcitivityList
+{
+    background-image: url("../images/addActivityListBlue.png") !important;
+}
+.esriCTHeaderPrintAcitivityList
+{
+    background-image: url("../images/printBlue.png") !important;
 }

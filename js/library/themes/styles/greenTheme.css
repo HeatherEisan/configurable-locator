@@ -482,6 +482,18 @@ input
     border-bottom: 1px solid #028D6A;
 }
 
+.esriCTDivSearchResultHolder
+{
+    border: 1px solid #028D6A;
+    z-index: 997;
+    position: absolute;
+    top: 48px;
+    right: 0px;
+    width: 360px;
+    background: #fff;
+    border-top: none;
+}
+
 /* Carousel Container */
 
 .esriCTBoxContainer
@@ -490,7 +502,7 @@ input
     background: #fff;
 }
 
-.esriCTSpanHeader
+.esriCTSpanHeader, .esriCTSpanHeaderInfoWindow
 {
     color: #028D6A;
 }
@@ -648,6 +660,12 @@ input
     background-image: url("../images/dateArrowUpGreen.png");
 }
 
+.esriCTEventListTabSelected
+{
+     color: #028D6A;
+}
+
+
 /*End of Activity planner*/
 
 /* Info window */
@@ -706,6 +724,23 @@ input
     background: #028D6A;
     color: #fff;
 }
+.esriCTHeaderDirectionAcitivityList
+{
+    background-image: url("../images/directionGreen.png") !important;
+}
+.esriCTHeaderShareAcitivityList
+{
+    background-image: url("../images/shareGreen.png") !important;
+}
+.esriCTHeaderAddAcitivityList
+{
+    background-image: url("../images/addActivityListGreen.png") !important;
+}
+.esriCTHeaderPrintAcitivityList
+{
+    background-image: url("../images/printGreen.png") !important;
+}
+
 @media screen and (max-width:767px)
 {
     .esriCTInfoSubmitButton, .esriCTInfoPostButton, .esriCTInfoBackButton, .esriCTCloseDivMobile

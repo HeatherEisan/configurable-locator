@@ -134,10 +134,13 @@ define([
         * @memberOf widgets/carouselContainer/carouselContainer
         */
         removeAllPod: function () {
-            var i;
+            var i, j, childNodesArray = [];
             if (this.resultboxPanelContent && this.resultboxPanelContent.childNodes) {
                 for (i = 0; i < this.resultboxPanelContent.childNodes.length; i++) {
-                    this.resultboxPanelContent.removeChild(this.resultboxPanelContent.childNodes[i]);
+                    childNodesArray.push(this.resultboxPanelContent.childNodes[i]);
+                }
+                for (j = 0; j < childNodesArray.length; j++) {
+                    this.resultboxPanelContent.removeChild(childNodesArray[j]);
                 }
             }
         },
@@ -147,7 +150,7 @@ define([
         * @memberOf widgets/carouselContainer/carouselContainer
         */
         showCarouselContainer: function () {
-            if (this.divCarouselContent) {
+            if (this.divCarouselContent && this.isResultFound > 0) {
                 domStyle.set(this.divImageBackground, "display", "block");
                 domStyle.set(this.divCarouselContent, "display", "block");
                 domStyle.set(this.divToggle, "display", "block");
@@ -172,15 +175,17 @@ define([
         */
         show: function () {
             var customLogoPositionChange;
-            domStyle.set(this.divCarouselContent, "display", "block");
-            this._setLegendPositionUp();
-            domClass.add(this.divImageBackground, "esriCTResultImageBlock");
-            domClass.replace(this.divCarouselContent, "esriCTBottomPanelHeight", "esriCTzeroHeight");
-            domClass.replace(this.imgToggleResults, "esriCTDownDownarrowImage", "esriCTUparrowImage");
-            domClass.replace(this.divToggle, "esriCTBottomPanelPosition", "esriCTZeroBottom");
-            customLogoPositionChange = query('.esriCTCustomMapLogo');
-            if (customLogoPositionChange[0]) {
-                domClass.replace(customLogoPositionChange[0], "esriCTCustomMapLogoPostionChange", "esriCTCustomMapLogoBottom");
+            if (this.isResultFound > 0) {
+                domStyle.set(this.divCarouselContent, "display", "block");
+                this._setLegendPositionUp();
+                domClass.add(this.divImageBackground, "esriCTResultImageBlock");
+                domClass.replace(this.divCarouselContent, "esriCTBottomPanelHeight", "esriCTzeroHeight");
+                domClass.replace(this.imgToggleResults, "esriCTDownDownarrowImage", "esriCTUparrowImage");
+                domClass.replace(this.divToggle, "esriCTBottomPanelPosition", "esriCTZeroBottom");
+                customLogoPositionChange = query('.esriCTCustomMapLogo');
+                if (customLogoPositionChange[0]) {
+                    domClass.replace(customLogoPositionChange[0], "esriCTCustomMapLogoPostionChange", "esriCTCustomMapLogoBottom");
+                }
             }
         },
 
@@ -190,14 +195,16 @@ define([
         */
         hide: function () {
             var customLogoPositionChange;
-            domStyle.set(this.divCarouselContent, "display", "none");
-            domClass.replace(this.divCarouselContent, "esriCTzeroHeight", "esriCTBottomPanelHeight");
-            domClass.replace(this.imgToggleResults, "esriCTUparrowImage", "esriCTDownDownarrowImage");
-            domClass.replace(this.divToggle, "esriCTZeroBottom", "esriCTBottomPanelPosition");
-            this._setLegendPositionDown();
-            customLogoPositionChange = query('.esriCTCustomMapLogo');
-            if (customLogoPositionChange[0]) {
-                domClass.replace(customLogoPositionChange[0], "esriCTCustomMapLogoBottom", "esriCTCustomMapLogoPostionChange");
+            if (this.isResultFound > 0) {
+                domStyle.set(this.divCarouselContent, "display", "none");
+                domClass.replace(this.divCarouselContent, "esriCTzeroHeight", "esriCTBottomPanelHeight");
+                domClass.replace(this.imgToggleResults, "esriCTUparrowImage", "esriCTDownDownarrowImage");
+                domClass.replace(this.divToggle, "esriCTZeroBottom", "esriCTBottomPanelPosition");
+                this._setLegendPositionDown();
+                customLogoPositionChange = query('.esriCTCustomMapLogo');
+                if (customLogoPositionChange[0]) {
+                    domClass.replace(customLogoPositionChange[0], "esriCTCustomMapLogoBottom", "esriCTCustomMapLogoPostionChange");
+                }
             }
         },
 
@@ -208,7 +215,9 @@ define([
         _setLegendPositionDown: function () {
             var legendChangePositionDownContainer, mapLogoPostionDown;
             legendChangePositionDownContainer = query('.esriCTDivLegendBox')[0];
-            domClass.remove(legendChangePositionDownContainer, "esriCTDivLegendBoxUp");
+            if (legendChangePositionDownContainer) {
+                domClass.remove(legendChangePositionDownContainer, "esriCTDivLegendBoxUp");
+            }
             mapLogoPostionDown = query('.esriControlsBR')[0];
             domClass.remove(mapLogoPostionDown, "esriCTDivMapPositionUp");
             domClass.add(mapLogoPostionDown, "esriCTDivMapPositionTop");
@@ -222,7 +231,9 @@ define([
         _setLegendPositionUp: function () {
             var legendChangePositionDownContainer, mapLogoPostionDown;
             legendChangePositionDownContainer = query('.esriCTDivLegendBox')[0];
-            domClass.add(legendChangePositionDownContainer, "esriCTDivLegendBoxUp");
+            if (legendChangePositionDownContainer) {
+                domClass.add(legendChangePositionDownContainer, "esriCTDivLegendBoxUp");
+            }
             mapLogoPostionDown = query('.esriControlsBR')[0];
             domClass.remove(mapLogoPostionDown, "esriCTDivMapPositionTop");
             domClass.add(mapLogoPostionDown, "esriCTDivMapPositionUp");

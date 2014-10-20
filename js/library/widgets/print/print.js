@@ -28,6 +28,7 @@ require([
     "esri/geometry/Polyline",
     "dojo/dom-construct",
     "dojo/dom"
+
 ], function (esriMap, config, PictureMarkerSymbol, FeatureLayer, Color, SimpleLineSymbol, SimpleFillSymbol, Polyline, domConstruct, dom) {
     /**
     * create print  widget
@@ -53,7 +54,7 @@ require([
     * @memberOf widgets/printMap/print
     */
     dojo.connect(printmap, "onLoad", function () {
-        var directionsInfoData = window.opener.mapData.Directions;
+        var directionsInfoData = window.opener.mapData.Directions, routeUnitString, subStringRouteUnit;
         printmap.disablePan();
         printmap.disableDoubleClickZoom();
         printmap.disableKeyboardNavigation();
@@ -73,7 +74,7 @@ require([
         graphic = new esri.Graphic(GraphicLayer.graphics[0].geometry, locatorMarkupSymbol, null, null);
         gLayer.add(graphic);
         highLightsymbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, config.LocatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID,
-                            new dojo.Color(config.RippleColor), 4), new dojo.Color([0, 0, 0, 0]));
+                             new Color([parseInt(config.RippleColor.split(",")[0], 10), parseInt(config.RippleColor.split(",")[1], 10), parseInt(config.RippleColor.split(",")[2], 10)]), 4), new dojo.Color([0, 0, 0, 0]));
         gLayer.add(new esri.Graphic(highlightedLayer.graphics[0].geometry, highLightsymbol, {}, null));
         for (j = 0; j < config.OperationalLayers.length; j++) {
             layerMode = null;
@@ -103,16 +104,22 @@ require([
             }
             printmap.addLayer(featureLayer);
         }
-        symbols = new SimpleLineSymbol().setColor(config.DrivingDirectionSettings.RouteColor).setWidth(config.DrivingDirectionSettings.RouteWidth);
+        symbols = new SimpleLineSymbol().setColor(new Color([parseInt(config.DrivingDirectionSettings.RouteColor.split(",")[0], 10), parseInt(config.DrivingDirectionSettings.RouteColor.split(",")[1], 10), parseInt(config.DrivingDirectionSettings.RouteColor.split(",")[2], 10), parseFloat(config.DrivingDirectionSettings.Transparency.split(",")[0], 10)])).setWidth(config.DrivingDirectionSettings.RouteWidth);
         polyline = new Polyline(routeLayer.graphics[0].geometry.toJson());
         gLayer.add(new esri.Graphic(polyline, symbols));
         printmap.addLayer(gLayer);
         //Print Directions on Page
+        routeUnitString = config.DrivingDirectionSettings.RouteUnit;
+        if (routeUnitString !== "") {
+            subStringRouteUnit = " " + routeUnitString.substring(4, routeUnitString.length);
+        } else {
+            subStringRouteUnit = config.DrivingDirectionSettings.RouteUnit;
+        }
         if (directionsInfoData.Features.length > 0) {
             dom.byId("title").innerHTML = directionsInfoData.Title + "<br/>" + directionsInfoData.Distance + " " + directionsInfoData.Time;
             domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": directionsInfoData.Features[0].attributes.text }, dom.byId("directionsList"));
             for (j = 1; j < directionsInfoData.Features.length; j++) {
-                domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": directionsInfoData.Features[j].attributes.text + "(" + parseFloat(directionsInfoData.Features[j].attributes.length).toFixed(2) + "miles" + ")" }, dom.byId("directionsList"));
+                domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": directionsInfoData.Features[j].attributes.text + "(" + parseFloat(directionsInfoData.Features[j].attributes.length).toFixed(2) + subStringRouteUnit + ")" }, dom.byId("directionsList"));
             }
         }
         setTimeout(function () {

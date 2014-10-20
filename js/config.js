@@ -313,7 +313,7 @@ define([], function () {
 
 
         // Set the ripple color
-        RippleColor: "#23238E",
+        RippleColor: "35,35,142",
 
         // Set the locator ripple size(in pixels)
         LocatorRippleSize: 40,
@@ -448,15 +448,14 @@ define([], function () {
         // DRIVING DIRECTIONS SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
         // RouteServiceURL: Set URL for routing service
-        // RouteWidth: Set width(in pixels) of the route
+        //Known values for RouteUnit: esriFeet | esriKilometers | esriMeters | esriMiles | esriNauticalMiles | esriYards
         DrivingDirectionSettings: {
             RouteServiceURL: "http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World",
-            RouteColor: "#0000FF",
+            RouteColor: "0,0,225",
             RouteWidth: 6,
-            RouteUnit: "Miles"
+            Transparency: "0.5",
+            RouteUnit: "esriMiles"
         },
-
-
 
         // ------------------------------------------------------------------------------------------------------------------------
         // SETTINGS FOR MAP SHARING

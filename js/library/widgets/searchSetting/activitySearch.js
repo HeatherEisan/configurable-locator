@@ -31,28 +31,20 @@ define([
     "dojo/string",
     "esri/tasks/locator",
     "esri/tasks/query",
-    "../scrollBar/scrollBar",
-    "dojo/Deferred",
-    "dojo/DeferredList",
     "esri/tasks/QueryTask",
     "esri/geometry",
     "esri/graphic",
-    "esri/layers/GraphicsLayer",
-    "esri/symbols/PictureMarkerSymbol",
-    "esri/geometry/Point",
     "dojo/text!./templates/searchSettingTemplate.html",
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
-    "esri/urlUtils",
-    "esri/units",
     "../carouselContainer/carouselContainer",
     "widgets/locator/locator",
     "esri/request"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, ScrollBar, Deferred, DeferredList, QueryTask, Geometry, Graphic, GraphicsLayer, PictureMarkerSymbol, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, urlUtils, units, CarouselContainer, LocatorTool, esriRequest) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, QueryTask, Geometry, Graphic, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, CarouselContainer, LocatorTool, esriRequest) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -94,6 +86,7 @@ define([
             });
             dijit.registry.byId("geoLocation").onGeolocationComplete = lang.hitch(this, function (mapPoint, isPreLoaded) {
                 if (mapPoint && isPreLoaded) {
+                    this.clearLocatorGraphics();
                     this.createBuffer(mapPoint);
                 }
             });
@@ -176,7 +169,10 @@ define([
                     for (j in featureObject[i].attributes) {
                         if (featureObject[i].attributes.hasOwnProperty(j)) {
                             if (!featureObject[i].attributes[j]) {
-                                featureObject[i].attributes[j] = "N/A";
+                                featureObject[i].attributes[j] = sharedNls.showNullValue;
+                            }
+                            if (dojo.isString(featureObject[i].attributes[j]) && lang.trim(featureObject[i].attributes[j]) === "") {
+                                featureObject[i].attributes[j] = sharedNls.showNullValue;
                             }
                         }
                     }
@@ -231,6 +227,10 @@ define([
         * @memberOf widgets/searchSettings/activitySearch
         */
         _queryForSelectedActivityInList: function () {
+            this.removeGraphics();
+            this.removeBuffer();
+            this._showLocateContainer();
+            topic.publish("hideInfoWindow");
             this.carouselContainer.removeAllPod();
             this.carouselContainer.addPod(this.carouselPodData);
             this.locatorAddress = "";
@@ -303,7 +303,10 @@ define([
                         this._clearGraphicsAndCarousel();
                         topic.publish("hideProgressIndicator");
                     }
-                }));
+                }), function (error) {
+                    topic.publish("hideProgressIndicator");
+                    alert(error);
+                });
             }));
         },
 
@@ -370,7 +373,6 @@ define([
                         this.executeWithoutGeolocation(this.featureSetWithoutNullValue, QueryURL, widgetName, 0);
                     }
                 });
-
                 dijit.registry.byId("geoLocation").onGeolocationError = lang.hitch(this, function (error, isPreLoaded) {
                     if (isPreLoaded) {
                         this.removeGraphics();
@@ -385,6 +387,9 @@ define([
                         this.executeWithoutGeolocation(this.featureSetWithoutNullValue, QueryURL, widgetName, 0);
                     }
                 });
+            } else {
+                topic.publish("hideProgressIndicator");
+                alert(sharedNls.errorMessages.activitySerachGeolocationText);
             }
         },
 
@@ -406,37 +411,39 @@ define([
                 this.carouselContainer.show();
                 this.highlightFeature(featureSetWithoutNullValue[index].geometry);
                 this.map.centerAt(featureSetWithoutNullValue[index].geometry);
-                this._setSearchContent(featureSetWithoutNullValue, false, QueryURL, widgetName);
+                this.setSearchContent(featureSetWithoutNullValue, false, QueryURL, widgetName);
                 resultcontent = { "value": index };
                 facilityObject = { "Feature": featureSetWithoutNullValue, "SelectedItem": resultcontent, "QueryURL": QueryURL, "WidgetName": widgetName };
-                this._setFacility(facilityObject);
+                this.setFacility(facilityObject);
                 divDirectioncontent = query(".esriCTDivDirectioncontent")[0];
                 if (divDirectioncontent) {
                     domConstruct.empty(divDirectioncontent);
+
+                    locatorParamsForEventContainer = {
+                        defaultAddress: dojo.configData.LocatorSettings.LocatorDefaultAddress,
+                        preLoaded: false,
+                        parentDomNode: divDirectioncontent,
+                        map: this.map,
+                        graphicsLayerId: "esriGraphicsLayerMapSettings",
+                        locatorSettings: dojo.configData.LocatorSettings,
+                        configSearchSettings: dojo.configData.SearchSettings
+                    };
+                    searchContenData = this.getKeyValue(dojo.configData.EventSearchSettings[0].SearchDisplayFields);
+                    divHeader = domConstruct.create("div", {}, divDirectioncontent);
+                    domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + featureSetWithoutNullValue[0].attributes[searchContenData] }, divHeader);
+                    locatorParamsForEventContainer = new LocatorTool(locatorParamsForEventContainer);
+                    eventMapPoint = this.map.getLayer(locatorParamsForEventContainer.graphicsLayerId);
+                    locatorParamsForEventContainer.candidateClicked = lang.hitch(this, function (graphic) {
+                        if (graphic && graphic.attributes && graphic.attributes.address) {
+                            this.locatorAddress = graphic.attributes.address;
+                        }
+                        topic.publish("hideInfoWindow");
+                        this.removeGeolocationPushPin();
+                        routeObject = { "StartPoint": eventMapPoint.graphics[0], "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL };
+                        this.showRoute(routeObject);
+                    });
                 }
-                locatorParamsForEventContainer = {
-                    defaultAddress: dojo.configData.LocatorSettings.LocatorDefaultAddress,
-                    preLoaded: false,
-                    parentDomNode: divDirectioncontent,
-                    map: this.map,
-                    graphicsLayerId: "esriGraphicsLayerMapSettings",
-                    locatorSettings: dojo.configData.LocatorSettings,
-                    configSearchSettings: dojo.configData.SearchSettings
-                };
-                searchContenData = this.getKeyValue(dojo.configData.EventSearchSettings[0].SearchDisplayFields);
-                divHeader = domConstruct.create("div", {}, divDirectioncontent);
-                domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + featureSetWithoutNullValue[0].attributes[searchContenData] }, divHeader);
-                locatorParamsForEventContainer = new LocatorTool(locatorParamsForEventContainer);
-                eventMapPoint = this.map.getLayer(locatorParamsForEventContainer.graphicsLayerId);
-                locatorParamsForEventContainer.candidateClicked = lang.hitch(this, function (graphic) {
-                    if (graphic && graphic.attributes && graphic.attributes.address) {
-                        this.locatorAddress = graphic.attributes.address;
-                    }
-                    this.removeGeolocationPushPin();
-                    routeObject = { "StartPoint": eventMapPoint.graphics[0], "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL };
-                    this.showRoute(routeObject);
-                });
-                this._setGallery(featureSetWithoutNullValue, resultcontent);
+                this.setGallery(featureSetWithoutNullValue, resultcontent);
                 topic.publish("hideProgressIndicator");
             } else {
                 queryObject = { "FeatureData": featureSetWithoutNullValue, "SolveRoute": null, "Index": index, "QueryURL": QueryURL, "WidgetName": widgetName, "Address": null, "IsRouteCreated": false };
@@ -482,6 +489,7 @@ define([
             widgetName = "SearchedFacility";
             topic.publish("showProgressIndicator");
             this.removeGraphics();
+            topic.publish("hideInfoWindow");
             if (this.map.getLayer("geoLocationGraphicsLayer").graphics.length > 0) {
                 pushPinGemotery = this.map.getLayer("geoLocationGraphicsLayer").graphics;
             } else {
@@ -557,6 +565,47 @@ define([
                 }
             }
             return objectId;
+        },
+
+        /**
+        * get the feature within buffer and sort it in ascending order.
+        * @param {object} featureset Contains information of feature within buffer
+        * @param {object} geometry Contains geometry service of route
+        * @param {mapPoint} map point
+        * @memberOf widgets/searchSettings/activitySearch
+        */
+        _executeQueryForEventForList: function (featureSetObject) {
+            this.featureSetWithoutNullValue = this.removeNullValue(featureSetObject);
+            if (Modernizr.geolocation) {
+                dijit.registry.byId("geoLocation").showCurrentLocation(false);
+                dijit.registry.byId("geoLocation").onGeolocationComplete = lang.hitch(this, function (mapPoint, isPreLoaded) {
+                    if (mapPoint) {
+                        if (!isPreLoaded) {
+                            var routeObject = { "StartPoint": mapPoint, "EndPoint": this.featureSetWithoutNullValue };
+                            this._showRouteForList(routeObject);
+                        } else {
+                            topic.publish("hideProgressIndicator");
+                            alert("Unable to find start point.");
+                        }
+                    }
+                });
+            } else {
+                topic.publish("hideProgressIndicator");
+                alert(sharedNls.errorMessages.activitySerachGeolocationText);
+            }
+            dijit.registry.byId("geoLocation").onGeolocationError = lang.hitch(this, function (error, isPreLoaded) {
+                if (isPreLoaded) {
+                    this.removeGraphics();
+                    this.clearLocatorGraphics();
+                    this.removeBuffer();
+                    this.carouselContainer.hideCarouselContainer();
+                    this.carouselContainer._setLegendPositionDown();
+                }
+                if (!isPreLoaded) {
+                    this.clearLocatorGraphics();
+                    topic.publish("hideProgressIndicator");
+                }
+            });
         }
     });
 });

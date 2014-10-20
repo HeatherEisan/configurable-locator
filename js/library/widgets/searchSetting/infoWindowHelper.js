@@ -31,39 +31,23 @@ define([
     "dojo/string",
     "esri/tasks/locator",
     "esri/tasks/query",
-    "../scrollBar/scrollBar",
     "dojo/Deferred",
     "dojo/DeferredList",
     "esri/tasks/QueryTask",
     "esri/geometry",
-    "esri/tasks/BufferParameters",
     "esri/graphic",
-    "dojo/_base/Color",
-    "esri/symbols/SimpleLineSymbol",
-    "esri/symbols/SimpleFillSymbol",
-    "esri/symbols/SimpleMarkerSymbol",
-    "esri/symbols/PictureMarkerSymbol",
-    "esri/layers/GraphicsLayer",
-    "esri/tasks/GeometryService",
     "esri/geometry/Point",
-    "widgets/geoLocation/geoLocation",
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
-    "esri/tasks/RouteParameters",
-    "esri/tasks/RouteTask",
-    "esri/tasks/FeatureSet",
-    "esri/SpatialReference",
-    "esri/urlUtils",
-    "esri/units",
     "dojo/date",
     "dojo/date/locale",
     "widgets/locator/locator",
     "dojo/NodeList-manipulate"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, ScrollBar, Deferred, DeferredList, QueryTask, Geometry, BufferParameters, Graphic, Color, SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol, PictureMarkerSymbol, GraphicsLayer, GeometryService, Point, GeoLocation, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, RouteParameters, RouteTask, FeatureSet, SpatialReference, urlUtils, units, date, locale, LocatorTool) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, date, locale, LocatorTool) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -221,7 +205,7 @@ define([
                 searchContentData = string.substitute(dojo.configData.EventSearchSettings[0].SearchDisplayFields, attribute);
             }
             divHeader = domConstruct.create("div", {}, directionMainContainer);
-            domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + searchContentData }, divHeader);
+            domConstruct.create("div", { "class": "esriCTSpanHeaderInfoWindow", "innerHTML": sharedNls.titles.directionText + " " + searchContentData }, divHeader);
             locatorInfoWindowParams = {
                 defaultAddress: dojo.configData.LocatorSettings.LocatorDefaultAddress,
                 preLoaded: false,
@@ -494,7 +478,7 @@ define([
                     if (result.length > 0) {
                         for (l = 0; l < result.length; l++) {
                             commentValue = string.substitute(dojo.configData.ActivitySearchSettings[i].CommentsSettings.CommentField, result[l].attributes);
-                            if (commentValue) {
+                            if (commentValue !== sharedNls.showNullValue) {
                                 divCommentRowCont = domConstruct.create("div", { "class": "esriCTDivCommentRowCont" }, divContentDiv);
                                 divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divCommentRowCont);
                                 esriCTCommentDateStar = domConstruct.create("div", { "class": "esriCTCommentDateStar" }, divCommentRow);
@@ -547,7 +531,9 @@ define([
             var divStarRating, postCommentContainer, buttonDiv, backButton, submitButton, j, starInfoWindow = [], backToMapHide, postCommentContent, outerCommentContainer;
             backToMapHide = query('.esriCTCloseDivMobile')[0];
             outerCommentContainer = query('.esriCTCommentInfoOuterContainer')[0];
-            domStyle.set(backToMapHide, "display", "none");
+            if (backToMapHide) {
+                domStyle.set(backToMapHide, "display", "none");
+            }
             domStyle.set(outerCommentContainer, "display", "none");
             if (dojo.byId("divCTPostCommentContainer")) {
                 domConstruct.destroy(dojo.byId("divCTPostCommentContainer"));
@@ -590,7 +576,7 @@ define([
             divContentDiv = query('.esriCTCommentInfoContent')[0];
             topic.publish("showProgressIndicator");
             backText = query('.esriCTInfoBackButton')[0];
-            backToMapHide = query('.cloasedivmobile')[0];
+            backToMapHide = query('.esriCTCloseDivMobile')[0];
             if (lang.trim(dojo.byId("txtComments").value) === "" && self.rankValue === 0) {
                 domStyle.set(outerCommentContainer, "display", "none");
                 alert(sharedNls.errorMessages.commentString);
@@ -620,7 +606,7 @@ define([
                     attr[this.getKeyValue(dojo.configData.ActivitySearchSettings[i].CommentsSettings.SubmissionDateField)] = currentDateFormat; // date.utcMsFromTimestamp(date.localToUtc(date.localTimestampNow()));
                     attr[this.getKeyValue(dojo.configData.ActivitySearchSettings[i].CommentsSettings.RankField)] = this.rankValue;
                     setAttribute = {
-                        comments: dojo.byId("txtComments").value.trim(),
+                        comments: lang.trim(dojo.byId("txtComments").value),
                         submitId: currentDateFormat,
                         rank: self.rankValue
                     };
@@ -755,6 +741,23 @@ define([
                     }
                 }
             }
+        },
+
+
+        /**
+        * Get date from the layer
+        * @param {object} date field of layer
+        * @memberOf widgets/SearchSetting/InfoWindowHelper
+        */
+        _getObjectId: function (response) {
+            var objectId, j;
+            for (j = 0; j < response.fields.length; j++) {
+                if (response.fields[j].type === "esriFieldTypeOID") {
+                    objectId = response.fields[j].name;
+                    break;
+                }
+            }
+            return objectId;
         },
 
         /**

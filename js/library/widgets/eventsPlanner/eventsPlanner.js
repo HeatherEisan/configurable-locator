@@ -42,8 +42,9 @@ define([
     "dojo/store/Memory",
     "esri/units",
     "dojo/string",
-    "esri/request"
-], function (declare, domConstruct, lang, on, dom, domAttr, domClass, html, domStyle, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, DateTextBox, date, parser, locale, array, Query, QueryTask, Memory, units, string, esriRequest) {
+    "esri/request",
+    "widgets/printForEvent/printForEventWindow"
+], function (declare, domConstruct, lang, on, dom, domAttr, domClass, html, domStyle, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, DateTextBox, date, parser, locale, array, Query, QueryTask, Memory, units, string, esriRequest, PrintForEventWindow) {
 
     //========================================================================================================================//
 
@@ -56,6 +57,8 @@ define([
         featureSet: null,
         infowIndexForMyList: null,
         featureSetOfInfoWindow: null,
+        addToListFeatures: [],
+        dateFieldArray: [],
         /**
         * create eventsPlanner widget
         *
@@ -94,6 +97,7 @@ define([
                 this.myToDate.constraints.min = this.myFromDate.value;
             })));
             this.own(on(this.bottonGo, "click", lang.hitch(this, function () {
+                topic.publish("hideInfoWindow");
                 this.featureSet = null;
                 this._activityPlannerDateValidation();
             })));
@@ -121,12 +125,23 @@ define([
             }));
 
             topic.subscribe("addToMyList", lang.hitch(this, function (featureArray) {
+                var infoWindowClick = true;
                 this.featureSetOfInfoWindow = featureArray;
-                this._addtoMyList(featureArray.attributes, this.featureSet, true);
+                this.addToListFeatures.push(this.featureSetOfInfoWindow);
+                this._addtoMyList(featureArray.attributes, this.featureSet, infoWindowClick);
             }));
+
             topic.subscribe("getEventObjectID", lang.hitch(this, function (value) {
                 this.objectId = value;
             }));
+
+            this.own(on(this.directionForEvents, "click", lang.hitch(this, function () {
+                this._eventForListClick();
+            })));
+
+            this.own(on(this.printEventList, "click", lang.hitch(this, function () {
+                this._printForEventList();
+            })));
         },
 
         /**
@@ -159,10 +174,11 @@ define([
             topic.publish("showProgressIndicator");
             var _self = this, splitedField, AddressField, startDateFeild, infoWindowParameter, activityListObjectId, objectIdField, displayDateFormat, nameField, activityList, sortedActivityList, activityPlannerContainer, plannerListTable, activityPlannerListRow, activityPlannerLeft = [],
                 activityPlannerAddList = [], activityPlannerRight, eventDate, name, startDate, l, address, eventIndex, startDateAtt, objectIDAttr;
-            if (featureSet) {
-                this.featureSet = featureSet;
-            }
-            array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (eventSearchSettings) {
+            array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (eventSearchSettings, eventSettingIndex) {
+                if (featureSet) {
+                    this.featureSet = this._changeDateFormat(featureSet, eventSettingIndex);
+                    this.featureSet.features = this._removeNullValue(this.featureSet.features);
+                }
                 objectIdField = this.objectId;
                 displayDateFormat = eventSearchSettings.DisplayDateFormat;
                 nameField = eventSearchSettings.SearchDisplayFields;
@@ -171,19 +187,6 @@ define([
                 AddressField = splitedField[1];
                 startDateAtt = this._getKeyValue(startDateFeild);
                 objectIDAttr = objectIdField;
-                if (this.featureSet) {
-                    array.forEach(this.featureSet.features, function (feature, Index) {
-                        var j;
-                        for (j in feature.attributes) {
-                            if (feature.attributes.hasOwnProperty(j)) {
-                                if (!feature.attributes[j]) {
-                                    feature.attributes[j] = "";
-                                }
-                            }
-                        }
-                    });
-
-                }
                 //hide the eventPlanner list if already present
                 this._hideActivitiesList();
                 activityPlannerContainer = domConstruct.create("div", { "class": "esriCTEventPlannerContainer" }, this.activityPlanner);
@@ -207,7 +210,7 @@ define([
                 sortedActivityList = activityList.query({}, { sort: [{ attribute: startDateAtt, ascending: true}] });
                 array.forEach(sortedActivityList, function (eventPlanner, k) {
                     name = string.substitute(nameField, eventPlanner);
-                    startDate = Number(string.substitute(startDateFeild, eventPlanner));
+                    startDate = string.substitute(startDateFeild, eventPlanner);
                     address = string.substitute(AddressField, eventPlanner);
                     activityPlannerListRow = domConstruct.create("div", { "class": "esriCTEventPlannerList" }, plannerListTable);
                     activityPlannerLeft[k] = domConstruct.create("div", { "class": "esriCTEventPlannerLeft", "value": eventPlanner }, activityPlannerListRow);
@@ -231,19 +234,21 @@ define([
                     }));
                     on(activityPlannerLeft[k], "click", lang.hitch(this, function (e) {
                         activityListObjectId = e.currentTarget.value[this.objectId];
-                        var featurData;
-                        for (l = 0; l < this.featureSet.features.length; l++) {
-                            if (this.featureSet.features[l].attributes[this.objectId] === activityListObjectId) {
-                                featurData = this.featureSet.features[l];
+                        var featureData;
+                        if (this.featureSet) {
+                            for (l = 0; l < this.featureSet.features.length; l++) {
+                                if (this.featureSet.features[l].attributes[this.objectId] === activityListObjectId) {
+                                    featureData = this.featureSet.features[l];
+                                }
                             }
                         }
                         infoWindowParameter = {
-                            "mapPoint": featurData.geometry,
-                            "attribute": featurData.attributes,
+                            "mapPoint": featureData.geometry,
+                            "attribute": featureData.attributes,
                             "layerId": eventSearchSettings.QueryLayerId,
                             "layerTitle": eventSearchSettings.Title,
-                            "featureArray": featurData,
-                            "featureSet": featurData
+                            "featureArray": featureData,
+                            "featureSet": featureData
                         };
                         topic.publish("createInfoWindowContent", infoWindowParameter);
                     }));
@@ -286,7 +291,7 @@ define([
         * @memberOf widgets/eventPlanner/eventPlanner
         */
         _hideActivitiesList: function () {
-            if (this.activityPlanner.childElementCount > 1) {
+            if (this.activityPlanner.childNodes.length > 1) {
                 domConstruct.destroy(this.activityPlanner.children[1]);
             }
         },
@@ -304,6 +309,28 @@ define([
         },
 
         /**
+        * change the date format
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _changeDateFormat: function (featureSet, index) {
+            var displayDateFormat = dojo.configData.EventSearchSettings[index].DisplayDateFormat, i, key, k;
+            if (featureSet) {
+                for (i = 0; i < this.dateFieldArray.length; i++) {
+                    for (k = 0; k < featureSet.features.length; k++) {
+                        for (key in featureSet.features[k].attributes) {
+                            if (featureSet.features[k].attributes.hasOwnProperty(key)) {
+                                if (key === this.dateFieldArray[i]) {
+                                    featureSet.features[k].attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureSet.features[k].attributes[key]), { datePattern: displayDateFormat, selector: "date" });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return featureSet;
+        },
+
+        /**
         * show Mylist tap and block the eventPlanner tab
         * @memberOf widgets/eventPlanner/eventPlanner
         */
@@ -313,7 +340,6 @@ define([
             domClass.replace(this.activityTab, "esriCTEventTabSelected", "esriCTEventTab");
             domClass.replace(this.activityPlanner, "esriCTShowContainerHeight", "esriCTHideContainerHeight");
             domClass.replace(this.activityListTab, "esriCTEventListTab", "esriCTEventListTabSelected");
-
             this._showActivitiesList();
         },
 
@@ -373,8 +399,18 @@ define([
         _addtoMyList: function (eventDetails, featureSet, infowindowClick) {
             topic.publish("showProgressIndicator");
             var sortedMyList, eventObject;
+
             //add the selected event object to the memory store
             this.myListStore.add(eventDetails);
+            if (this.myListStore.data.length > 0) {
+                domClass.replace(this.directionForEvents, "esriCTHeaderDirectionAcitivityList", "esriCTHeaderDirectionAcitivityListDisable");
+                domClass.replace(this.shareForEvent, "esriCTHeaderShareAcitivityList ", "esriCTHeaderShareAcitivityListDisable");
+                domClass.replace(this.calenderForEvent, "esriCTHeaderAddAcitivityList ", "esriCTHeaderAddAcitivityListDisable");
+                domClass.replace(this.printEventList, "esriCTHeaderPrintAcitivityList", "esriCTHeaderPrintAcitivityListDisable");
+                domClass.replace(this.orderByDateList, "esriCTMyListHeaderText", "esriCTMyListHeaderTextDisable");
+                domClass.replace(this.orderByDateImage, "esriCTImgOrderByDateDown", "esriCTImgOrderByDateDownDisable");
+                domClass.replace(this.orderByDateImage, "esriCTImgOrderByDate", "esriCTImgOrderByDateDisable");
+            }
             //display myList tab
             if (!infowindowClick) {
                 domClass.replace(this.activityTab, "esriCTEventTab", "esriCTEventTabSelected");
@@ -404,7 +440,11 @@ define([
         */
         _refreshMyList: function (eventObject) {
             topic.publish("showProgressIndicator");
-            var myListContainer, isIndexFound = false, evenObjectID, featureArray = [], eventObjectToRefresh, startDateFeild, AddressField, myListTable, myListRow, myListLeft = [], myListRight, widgetName, myListIcons, eventDate, name, startDate, address, objectIdField, myListDeleteIcon = [], k, directionAcitivityList = [], objectidOfEvents, index, splitedField, eventIndex;
+            var myListContainer, isIndexFound = false, evenObjectID, featureArray = [], eventObjectToRefresh, startDateFeild, AddressField, myListTable, myListRow, myListLeft = [], myListRight, widgetName, myListIcons, eventDate, name, address, objectIdField, myListDeleteIcon = [], k, directionAcitivityList = [], objectidOfEvents, index, splitedField, eventIndex,
+                activityListObjectId, l, infoWindowParameter;
+            if (this.featureSet) {
+                this.featureSet.features = this._removeNullValue(this.featureSet.features);
+            }
             widgetName = "Event";
             array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (eventSearchSettings) {
                 splitedField = eventSearchSettings.SearchDisplaySubFields.split(',');
@@ -413,27 +453,15 @@ define([
                 if (eventObject.EventDeatils) {
                     evenObjectID = string.substitute("${" + this.objectId + "}", eventObject.EventDeatils);
                 }
-                if (this.featureSet) {
-                    array.forEach(this.featureSet.features, function (feature, Index) {
-                        var j;
-                        for (j in feature.attributes) {
-                            if (feature.attributes.hasOwnProperty(j)) {
-                                if (!feature.attributes[j]) {
-                                    feature.attributes[j] = "";
-                                }
-                            }
-                        }
-                    });
-                }
                 // remove the already added events to the display container while displaying
-                if (this.activityList.childElementCount > 1) {
+                if (this.activityList.childNodes.length > 1) {
                     domConstruct.destroy(this.activityList.children[1]);
                 }
                 myListContainer = domConstruct.create("div", { "class": "esriCTMyListContainer" }, this.activityList);
                 myListTable = domConstruct.create("div", { "class": "esriCTMyListTable" }, myListContainer);
                 array.forEach(eventObject.SortedData, function (myListEvent, j) {
                     name = string.substitute(eventSearchSettings.SearchDisplayFields, myListEvent);
-                    startDate = Number(string.substitute(startDateFeild, myListEvent));
+                    eventDate = string.substitute(startDateFeild, myListEvent);
                     address = string.substitute(AddressField, myListEvent);
                     objectIdField = string.substitute("${" + this.objectId + "}", myListEvent);
                     myListRow = domConstruct.create("div", { "class": "esriCTMyListRow" }, myListTable);
@@ -443,17 +471,41 @@ define([
                     }
                     domConstruct.create("div", { "class": "esriCTMyListText", "innerHTML": name }, myListLeft[j]);
                     //convert the date in millisecond to display date format
-                    eventDate = locale.format(this.utcTimestampFromMs(startDate), { datePattern: eventSearchSettings.DisplayDateFormat, selector: "date" });
                     if (!address) {
                         address = sharedNls.showNullValue;
                     }
                     domConstruct.create("div", { "class": "esriCTMyListDates", "innerHTML": eventDate + "," + " " + address }, myListLeft[j]);
                     myListRight = domConstruct.create("div", { "class": "esriCTMyListRight" }, myListRow);
                     myListIcons = domConstruct.create("div", { "class": "esriCTMyListIcons" }, myListRight);
+                    on(myListLeft[j], "click", lang.hitch(this, function (e) {
+                        activityListObjectId = e.currentTarget.value[this.objectId];
+                        var featureData, isFeatureDataFound = false;
+                        if (this.featureSet) {
+                            for (l = 0; l < this.featureSet.features.length; l++) {
+                                if (this.featureSet.features[l].attributes[this.objectId] === activityListObjectId) {
+                                    featureData = this.featureSet.features[l];
+                                    isFeatureDataFound = true;
+                                }
+                            }
+                        }
+                        if (!isFeatureDataFound) {
+                            featureData = this.featureSetOfInfoWindow;
+                        }
+                        infoWindowParameter = {
+                            "mapPoint": featureData.geometry,
+                            "attribute": featureData.attributes,
+                            "layerId": eventSearchSettings.QueryLayerId,
+                            "layerTitle": eventSearchSettings.Title,
+                            "featureArray": featureData,
+                            "featureSet": featureData
+                        };
+                        topic.publish("createInfoWindowContent", infoWindowParameter);
+                    }));
                     directionAcitivityList[j] = domConstruct.create("div", { "class": "esriCTDirectionEventList" }, myListIcons);
                     domAttr.set(directionAcitivityList[j], "ObjectID", objectIdField);
                     on(directionAcitivityList[j], "click", lang.hitch(this, function (e) {
                         topic.publish("getAcitivityListDiv", directionAcitivityList[j]);
+                        topic.publish("hideInfoWindow");
                         topic.publish("showProgressIndicator");
                         objectidOfEvents = domAttr.get(e.currentTarget, "ObjectID");
                         featureArray.length = 0;
@@ -486,9 +538,20 @@ define([
                     } else {
                         domClass.remove(myListRow, "esriCTMyListRowChecked");
                     }
+
+
                     on(myListDeleteIcon[j], "click", lang.hitch(this, function (e) {
                         eventIndex = array.indexOf(myListDeleteIcon, e.currentTarget);
                         this.myListStore.remove(myListLeft[eventIndex].value.id);
+                        if (!(this.myListStore.data.length > 0)) {
+                            domClass.replace(this.directionForEvents, "esriCTHeaderDirectionAcitivityListDisable", "esriCTHeaderDirectionAcitivityList");
+                            domClass.replace(this.shareForEvent, "esriCTHeaderShareAcitivityListDisable", "esriCTHeaderShareAcitivityList");
+                            domClass.replace(this.calenderForEvent, "esriCTHeaderAddAcitivityListDisable", "esriCTHeaderAddAcitivityList");
+                            domClass.replace(this.printEventList, "esriCTHeaderPrintAcitivityListDisable", "esriCTHeaderPrintAcitivityList");
+                            domClass.replace(this.orderByDateList, "esriCTMyListHeaderTextDisable", "esriCTMyListHeaderText");
+                            domClass.replace(this.orderByDateImage, "esriCTImgOrderByDateDown", " esriCTImgOrderByDateDownDisable");
+                            domClass.replace(this.orderByDateImage, "esriCTImgOrderByDate", "esriCTImgOrderByDateDisable");
+                        }
                         //sort with ascending order of date
                         eventObject.SortedData = this._sortMyList(true, this.featureSet);
                         eventObjectToRefresh = { "EventDeatils": null, "SortedData": eventObject.SortedData, "InfowindowClick": eventObject.InfowindowClick };
@@ -507,6 +570,7 @@ define([
         * @memberOf widgets/eventPlanner/eventPlanner
         */
         _sortMyList: function (ascendingFlag, featureSet) {
+            this.ascendingFlag = ascendingFlag;
             var sortResult, i, startDate, startDateFeild, splitedField, _self = this;
             topic.publish("getMyListStoreData", this.myListStore);
             for (i = 0; i < dojo.configData.EventSearchSettings.length; i++) {
@@ -532,6 +596,7 @@ define([
         */
         _queryForActivity: function (startDate, endDate) {
             var queryTask, queryLayer, eventLayer, layerRequestData;
+            this.dateFieldArray = null;
             array.forEach(dojo.configData.EventSearchSettings, (lang.hitch(this, function (eventSearchSettings) {
                 eventLayer = eventSearchSettings.QueryURL;
                 queryTask = new QueryTask(eventLayer);
@@ -546,6 +611,7 @@ define([
                     var objectId;
                     objectId = this._getObjectId(response);
                     this.objectId = objectId;
+                    this.dateFieldArray = this._getDateField(response);
                     queryTask.execute(queryLayer, lang.hitch(this, this._showActivitiesList));
                 }), function (error) {
                     console.log("Error: ", error.message);
@@ -570,6 +636,24 @@ define([
             return objectId;
         },
 
+
+
+        /**
+        * Get date field from layer
+        * @param {object} object of layer
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _getDateField: function (response) {
+            var j, dateFieldArray = [], dateField;
+            for (j = 0; j < response.fields.length; j++) {
+                if (response.fields[j].type === "esriFieldTypeDate") {
+                    dateField = response.fields[j].name;
+                    dateFieldArray.push(dateField);
+                }
+            }
+            return dateFieldArray;
+        },
+
         /**
         * convert the UTC time stamp from Millisecond
         * @returns Date
@@ -588,6 +672,107 @@ define([
         */
         localToUtc: function (localTimestamp) {
             return new Date(localTimestamp.getTime() + (localTimestamp.getTimezoneOffset() * 60000));
+        },
+
+        /**
+        * route for event list
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _eventForListClick: function () {
+            var featureArray = [], splitedField, startDateFeild, g, k, l, featureArrayMyList, eventListArrayList, q, u, sortResult, t;
+            topic.publish("hideInfoWindow");
+            array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (eventSearchSettings) {
+                splitedField = eventSearchSettings.SearchDisplaySubFields.split(',');
+                startDateFeild = this._getKeyValue(splitedField[0]);
+            }), this);
+            if (this.myListStore.data.length > 0) {
+                for (l = 0; l < this.myListStore.data.length; l++) {
+                    for (k = 0; k < this.featureSet.features.length; k++) {
+                        if (this.myListStore.data[l][this.objectId] === this.featureSet.features[k].attributes[this.objectId]) {
+                            featureArray.push(this.featureSet.features[k]);
+                        }
+                    }
+                    for (g = 0; g < this.addToListFeatures.length; g++) {
+                        if (this.myListStore.data[l][this.objectId] === this.addToListFeatures[g].attributes[this.objectId]) {
+                            featureArray.push(this.addToListFeatures[g]);
+                        }
+                    }
+                }
+                featureArrayMyList = new Memory();
+                for (t = 0; t < featureArray.length; t++) {
+                    featureArrayMyList.add(featureArray[t].attributes);
+                }
+                if (this.ascendingFlag) {
+                    sortResult = featureArrayMyList.query({}, { sort: [{ attribute: startDateFeild, ascending: true}] });
+                } else {
+                    sortResult = featureArrayMyList.query({}, { sort: [{ attribute: startDateFeild, descending: true}] });
+                }
+                eventListArrayList = [];
+                for (q = 0; q < sortResult.length; q++) {
+                    for (u = 0; u < featureArray.length; u++) {
+                        if (sortResult[q][this.objectId] === featureArray[u].attributes[this.objectId]) {
+                            eventListArrayList.push(featureArray[u]);
+                        }
+                    }
+                }
+                topic.publish("eventForListClick", eventListArrayList);
+            }
+        },
+
+        /**
+        * print event List data
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _printForEventList: function () {
+            var directionData, displayDateFormat, nameField, splitedField, startDateFeild, AddressField, sortResult, eventDataArray = [], l;
+            array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (eventSearchSettings) {
+                displayDateFormat = eventSearchSettings.DisplayDateFormat;
+                nameField = this._getKeyValue(eventSearchSettings.SearchDisplayFields);
+                splitedField = eventSearchSettings.SearchDisplaySubFields.split(',');
+                startDateFeild = this._getKeyValue(splitedField[0]);
+                AddressField = this._getKeyValue(splitedField[1]);
+            }), this);
+            if (this.ascendingFlag) {
+                sortResult = this.myListStore.query({}, { sort: [{ attribute: startDateFeild, ascending: true}] });
+            } else {
+                sortResult = this.myListStore.query({}, { sort: [{ attribute: startDateFeild, descending: true}] });
+            }
+            if (sortResult.length > 0) {
+                for (l = 0; l < sortResult.length; l++) {
+                    directionData = {
+                        "Name": sortResult[l][nameField] === "" ? sharedNls.showNullValue : sortResult[l][nameField],
+                        "Address": sortResult[l][AddressField] === "" ? sharedNls.showNullValue : sortResult[l][AddressField],
+                        "StartDate": sortResult[l][startDateFeild] === "" ? sharedNls.showNullValue : dojo.date.locale.format(this.utcTimestampFromMs(sortResult[l][startDateFeild]), { datePattern: displayDateFormat, selector: "date" })
+                    };
+                    eventDataArray.push(directionData);
+                }
+            }
+            this.printForEventList = new PrintForEventWindow({ "eventListData": eventDataArray });
+        },
+
+        /**
+        * Remove null value from the attribute.
+        * @param {object} featureObject is object for feature
+        * @return {object} feature set after removing null value
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _removeNullValue: function (featureObject) {
+            var i, j;
+            if (featureObject) {
+                for (i = 0; i < featureObject.length; i++) {
+                    for (j in featureObject[i].attributes) {
+                        if (featureObject[i].attributes.hasOwnProperty(j)) {
+                            if (!featureObject[i].attributes[j]) {
+                                featureObject[i].attributes[j] = sharedNls.showNullValue;
+                            }
+                            if (dojo.isString(featureObject[i].attributes[j]) && lang.trim(featureObject[i].attributes[j]) === "") {
+                                featureObject[i].attributes[j] = sharedNls.showNullValue;
+                            }
+                        }
+                    }
+                }
+            }
+            return featureObject;
         }
     });
 });

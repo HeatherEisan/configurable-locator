@@ -38,8 +38,6 @@ define([
     "esri/tasks/QueryTask",
     "esri/geometry",
     "esri/graphic",
-    "esri/layers/GraphicsLayer",
-    "esri/symbols/PictureMarkerSymbol",
     "esri/geometry/Point",
     "dojo/text!./templates/searchSettingTemplate.html",
     "dijit/_WidgetBase",
@@ -61,12 +59,15 @@ define([
     "dojo/store/Memory",
     "../searchSetting/infoWindowHelper",
     "widgets/locator/locator",
-    "widgets/print/printMap"
+    "widgets/print/printMap",
+    "../searchSetting/carouselContainerHelper",
+    "esri/dijit/Directions",
+    "dojo/_base/Color"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, GraphicsLayer, PictureMarkerSymbol, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, urlUtils, CarouselContainer, ActivitySearch, LocatorHelper, GeoLocation, RouteParameters, FeatureSet, SpatialReference, RouteTask, SimpleLineSymbol, units, Memory, InfoWindowHelper, LocatorTool, PrintMap) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, urlUtils, CarouselContainer, ActivitySearch, LocatorHelper, GeoLocation, RouteParameters, FeatureSet, SpatialReference, RouteTask, SimpleLineSymbol, units, Memory, InfoWindowHelper, LocatorTool, PrintMap, CarouselContainerHelper, Directions, Color) {
     // ========================================================================================================================//
 
-    return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, ActivitySearch, InfoWindowHelper, LocatorHelper], {
+    return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, ActivitySearch, InfoWindowHelper, LocatorHelper, CarouselContainerHelper], {
         templateString: template,
         sharedNls: sharedNls,
         carouselPodData: [],
@@ -121,7 +122,7 @@ define([
                 this._showActivityTab();
             })));
             this._createCarouselContainer();
-            this._createCarouselPod();
+            this.createCarouselPod();
             this._showActivitySearchContainer();
 
             this.own(on(this.divSearchPanel, "click", lang.hitch(this, function () {
@@ -156,6 +157,7 @@ define([
                 if (candidate && candidate.attributes && candidate.attributes.address) {
                     this.locatorAddress = candidate.attributes.address;
                 }
+                this._showLocateContainer();
                 this.removeGeolocationPushPin();
                 if (candidate.geometry) {
                     locatorObject._toggleTexBoxControls(false);
@@ -169,9 +171,18 @@ define([
             topic.subscribe("getAcitivityListDiv", lang.hitch(this, function (value) {
                 this.acitivityListDiv = value;
             }));
+
+            topic.subscribe("eventForListClick", lang.hitch(this, function (featureSetObject) {
+                this._executeQueryForEventForList(featureSetObject);
+            }));
             this._getLayerInformaiton();
+            this._createDirectionWidget();
         },
 
+        /**
+        * address search setting
+        * @memberOf widgets/searchSettings/searchSettings
+        */
         _addSearchSettings: function (layerSetting) {
             var i;
             for (i = 0; i < layerSetting.length; i++) {
@@ -186,66 +197,6 @@ define([
         _createCarouselContainer: function () {
             this.carouselContainer = new CarouselContainer();
             this.carouselContainer.createPod(dom.byId("esriCTParentDivContainer"), "Result");
-        },
-
-        /**
-        * create carousel pod and set it content
-        * @memberOf widgets/searchSettings/searchSettings
-        */
-        _createCarouselPod: function () {
-            var divCarouselPod, divGallerycontent, divPodInfoContainer, divcommentcontent, divHeader, divsearchcontent, i, key, carouselPodKey;
-            for (i = 0; i < dojo.configData.BottomPanelInfoPodSettings.length; i++) {
-                for (key in dojo.configData.BottomPanelInfoPodSettings[i]) {
-                    if (dojo.configData.BottomPanelInfoPodSettings[i].hasOwnProperty(key)) {
-                        if (dojo.configData.BottomPanelInfoPodSettings && dojo.configData.BottomPanelInfoPodSettings[i][key].Enabled) {
-                            divCarouselPod = domConstruct.create("div", { "class": "esriCTBoxContainer" });
-                            divPodInfoContainer = domConstruct.create("div", { "class": "esriCTInfoContainer" }, divCarouselPod);
-                            carouselPodKey = key;
-                            if (!dojo.configData.ActivitySearchSettings[0].CommentsSettings.Enabled) {
-                                if (carouselPodKey.toLowerCase() === "commentspod") {
-                                    carouselPodKey = "default";
-                                }
-                            }
-                        } else {
-                            domClass.replace(this.resultboxPanelContent, "esriCTresultboxPanelContentNotComment");
-                            carouselPodKey = "default";
-                        }
-                        switch (carouselPodKey.toLowerCase()) {
-                        case "searchresultpod":
-                            divHeader = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
-                            domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.serchResultText }, divHeader);
-                            divsearchcontent = domConstruct.create("div", { "class": "esriCTResultContent" }, divHeader);
-                            domConstruct.create("div", { "class": "esriCTDivSearchResulContent" }, divsearchcontent);
-                            break;
-                        case "facilityinformationpod":
-                            this.facilityContainer = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
-                            this.divfacilitycontent = domConstruct.create("div", {}, this.facilityContainer);
-                            domConstruct.create("div", { "class": "esriCTdivFacilityContent" }, this.divfacilitycontent);
-                            break;
-                        case "directionspod":
-                            this.directionContainer = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
-                            domConstruct.create("div", { "class": "esriCTDivDirectioncontent" }, this.directionContainer);
-                            break;
-                        case "gallerypod":
-                            divHeader = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
-                            domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.galleryText }, divHeader);
-                            divGallerycontent = domConstruct.create("div", { "class": "esriCTResultContent" }, divHeader);
-                            domConstruct.create("div", { "class": "esriCTDivGalleryContent" }, divGallerycontent);
-                            break;
-                        case "commentspod":
-                            divHeader = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
-                            domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.commentText }, divHeader);
-                            divcommentcontent = domConstruct.create("div", { "class": "esriCTResultContent" }, divHeader);
-                            domConstruct.create("div", { "class": "esriCTDivCommentContent" }, divcommentcontent);
-                            break;
-                        case "default":
-                            break;
-                        }
-                        domAttr.set(divCarouselPod, "CarouselPodName", carouselPodKey);
-                        this.carouselPodData.push(divCarouselPod);
-                    }
-                }
-            }
         },
 
         /**
@@ -315,7 +266,10 @@ define([
                     for (j in featureObject[i].attributes) {
                         if (featureObject[i].attributes.hasOwnProperty(j)) {
                             if (!featureObject[i].attributes[j]) {
-                                featureObject[i].attributes[j] = "";
+                                featureObject[i].attributes[j] = sharedNls.showNullValue;
+                            }
+                            if (dojo.isString(featureObject[i].attributes[j]) && lang.trim(featureObject[i].attributes[j]) === "") {
+                                featureObject[i].attributes[j] = sharedNls.showNullValue;
                             }
                         }
                     }
@@ -374,6 +328,7 @@ define([
         showRoute: function (routeObject) {
             topic.publish("showProgressIndicator");
             this.removeRouteAndGraphics();
+            this.removeRouteGraphichOfDirectionWidget();
             var routeTask, address, routeParams, routeGraphic, symbols, directions, queryObject, directionObject, resultcontent, facilityObject;
             routeParams = new RouteParameters();
             routeParams.stops = new FeatureSet();
@@ -393,22 +348,23 @@ define([
             routeTask.solve(routeParams).then(lang.hitch(this, function (result) {
                 this.isRouteCreated = true;
                 directions = result.routeResults[0].directions;
-                symbols = new SimpleLineSymbol().setColor(dojo.configData.DrivingDirectionSettings.RouteColor).setWidth(dojo.configData.DrivingDirectionSettings.RouteWidth);
+                symbols = new SimpleLineSymbol().setColor(new Color([parseInt(dojo.configData.DrivingDirectionSettings.RouteColor.split(",")[0], 10), parseInt(dojo.configData.DrivingDirectionSettings.RouteColor.split(",")[1], 10), parseInt(dojo.configData.DrivingDirectionSettings.RouteColor.split(",")[2], 10), parseFloat(dojo.configData.DrivingDirectionSettings.Transparency.split(",")[0], 10)])).setWidth(dojo.configData.DrivingDirectionSettings.RouteWidth);
                 routeGraphic = new esri.Graphic(directions.mergedGeometry, symbols, null, null);
                 this.map.getLayer("routeLayerId").add(routeGraphic);
                 this.map.getLayer("routeLayerId").show();
-                if (routeObject.WidgetName.toLowerCase() === "activitysearch") {
+                switch (routeObject.WidgetName.toLowerCase()) {
+                case "activitysearch":
                     queryObject = { "FeatureData": routeObject.EndPoint, "SolveRoute": result.routeResults, "Index": routeObject.Index, "QueryURL": routeObject.QueryURL, "WidgetName": routeObject.WidgetName, "Address": address, "IsRouteCreated": true };
                     topic.publish("showProgressIndicator");
                     this.removeBuffer();
                     this.queryCommentLayer(queryObject);
-                }
-                if (routeObject.WidgetName.toLowerCase() === "searchedfacility") {
+                    break;
+                case "searchedfacility":
                     queryObject = { "FeatureData": routeObject.EndPoint, "SolveRoute": result.routeResults, "Index": routeObject.Index, "QueryURL": routeObject.QueryURL, "WidgetName": routeObject.WidgetName, "Address": address, "IsRouteCreated": true };
                     topic.publish("showProgressIndicator");
                     this.queryCommentLayer(queryObject);
-                }
-                if (routeObject.WidgetName.toLowerCase() === "event") {
+                    break;
+                case "event":
                     this.removeCommentPod();
                     this.removeBuffer();
                     routeObject.EndPoint = this.removeEmptyValue(routeObject.EndPoint);
@@ -416,62 +372,70 @@ define([
                     topic.publish("showProgressIndicator");
                     this.carouselContainer.showCarouselContainer();
                     this.carouselContainer.show();
-                    this._setSearchContent(routeObject.EndPoint, false, routeObject.QueryURL, routeObject.WidgetName);
+                    this.setSearchContent(routeObject.EndPoint, false, routeObject.QueryURL, routeObject.WidgetName);
                     this.highlightFeature(routeObject.EndPoint[routeObject.Index].geometry);
                     this.map.centerAt(routeObject.EndPoint[routeObject.Index].geometry);
                     resultcontent = { "value": routeObject.Index };
                     facilityObject = { "Feature": routeObject.EndPoint, "SelectedItem": resultcontent, "QueryURL": routeObject.QueryURL, "WidgetName": routeObject.WidgetName };
-                    this._setFacility(facilityObject);
+                    this.setFacility(facilityObject);
                     directionObject = { "Feature": routeObject.EndPoint, "SelectedItem": resultcontent, "SolveRoute": result.routeResults, "Address": address, "WidgetName": routeObject.WidgetName };
-                    this._setDirection(directionObject);
-                    this._setGallery(routeObject.EndPoint, resultcontent);
+                    this.setDirection(directionObject);
+                    this.setGallery(routeObject.EndPoint, resultcontent);
                     topic.publish("hideProgressIndicator");
-                }
-                if (routeObject.WidgetName.toLowerCase() === "unifiedsearch") {
+                    break;
+                case "unifiedsearch":
                     queryObject = { "FeatureData": routeObject.EndPoint, "SolveRoute": result.routeResults, "Index": routeObject.Index, "QueryURL": routeObject.QueryURL, "WidgetName": routeObject.WidgetName, "Address": address, "IsRouteCreated": true };
                     topic.publish("showProgressIndicator");
                     this.queryCommentLayer(queryObject);
-                }
-                if (routeObject.WidgetName.toLowerCase() === "infoevent" || routeObject.WidgetName.toLowerCase() === "infoactivity") {
+                    break;
+                case "infoevent":
                     resultcontent = { "value": 0 };
                     this.removeBuffer();
                     directionObject = { "Feature": routeObject.EndPoint, "SelectedItem": resultcontent, "SolveRoute": result.routeResults, "Address": address, "WidgetName": routeObject.WidgetName };
-                    this._setDirection(directionObject, true);
+                    this.setDirection(directionObject, true);
+                    break;
+                case "infoactivity":
+                    resultcontent = { "value": 0 };
+                    this.removeBuffer();
+                    directionObject = { "Feature": routeObject.EndPoint, "SelectedItem": resultcontent, "SolveRoute": result.routeResults, "Address": address, "WidgetName": routeObject.WidgetName };
+                    this.setDirection(directionObject, true);
+                    break;
+                case "default":
+                    break;
                 }
                 this.map.setExtent(result.routeResults[0].directions.mergedGeometry.getExtent(), true);
                 topic.publish("hideProgressIndicator");
             }), lang.hitch(this, function (error) {
                 alert(sharedNls.errorMessages.routeComment);
-                if (routeObject.WidgetName.toLowerCase() === "activitysearch") {
-                    this.removeBuffer();
-                    this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, 0);
-                }
-                if (routeObject.WidgetName.toLowerCase() === "searchedfacility") {
-                    this.removeBuffer();
-                    this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
-                }
-                if (routeObject.WidgetName.toLowerCase() === "event") {
-                    this.removeBuffer();
-                    this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
-                }
+                this._executeWhenRouteNotCalculated(routeObject);
                 topic.publish("hideProgressIndicator");
                 this.isRouteCreated = false;
             }), lang.hitch(this, function (error) {
                 alert(sharedNls.errorMessages.routeComment);
-                if (routeObject.WidgetName.toLowerCase() === "activitysearch") {
-                    this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, 0);
-                }
-                if (routeObject.WidgetName.toLowerCase() === "searchedfacility") {
-                    this.removeBuffer();
-                    this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
-                }
-                if (routeObject.WidgetName.toLowerCase() === "event") {
-                    this.removeBuffer();
-                    this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
-                }
+                this._executeWhenRouteNotCalculated(routeObject);
                 topic.publish("hideProgressIndicator");
                 this.isRouteCreated = false;
             }));
+        },
+
+        /**
+        * execute this function when route is not calculated due to any error
+        * @param{object} routeObject contains route information
+        * @memberOf widgets/searchResult/searchResult
+        */
+        _executeWhenRouteNotCalculated: function (routeObject) {
+            if (routeObject.WidgetName.toLowerCase() === "activitysearch") {
+                this.removeBuffer();
+                this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, 0);
+            }
+            if (routeObject.WidgetName.toLowerCase() === "searchedfacility") {
+                this.removeBuffer();
+                this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
+            }
+            if (routeObject.WidgetName.toLowerCase() === "event") {
+                this.removeBuffer();
+                this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
+            }
         },
 
         /**
@@ -483,7 +447,7 @@ define([
             var symbol;
             this.clearHighlightFeature();
             if (featureGeometry) {
-                symbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, dojo.configData.LocatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new dojo.Color(dojo.configData.RippleColor), 4), new dojo.Color([0, 0, 0, 0]));
+                symbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, dojo.configData.LocatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(dojo.configData.RippleColor.split(",")[0], 10), parseInt(dojo.configData.RippleColor.split(",")[1], 10), parseInt(dojo.configData.RippleColor.split(",")[2], 10)]), 4), new dojo.Color([0, 0, 0, 0]));
                 this.map.getLayer("highlightLayerId").add(new esri.Graphic(featureGeometry, symbol, {}, null));
             }
         },
@@ -541,7 +505,8 @@ define([
                                         return b.attributes[this.objectIdForCommentLayer] - a.attributes[this.objectIdForCommentLayer];
                                     }));
                                 }
-                                if (queryObject.WidgetName.toLowerCase() === "activitysearch") {
+                                switch (queryObject.WidgetName.toLowerCase()) {
+                                case "activitysearch":
                                     topic.publish("showProgressIndicator");
                                     resultcontent = { "value": 0 };
                                     this.carouselContainer.showCarouselContainer();
@@ -550,11 +515,11 @@ define([
                                     if (!queryObject.IsRouteCreated) {
                                         this.map.centerAt(queryObject.FeatureData[0].geometry);
                                     }
-                                    this._setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName);
+                                    this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName);
                                     this._createCommonPods(queryObject, commentArray, resultcontent);
                                     topic.publish("hideProgressIndicator");
-                                }
-                                if (queryObject.WidgetName.toLowerCase() === "searchedfacility") {
+                                    break;
+                                case "searchedfacility":
                                     topic.publish("showProgressIndicator");
                                     this.highlightFeature(queryObject.FeatureData[queryObject.Index].geometry);
                                     if (!queryObject.IsRouteCreated) {
@@ -563,8 +528,8 @@ define([
                                     resultcontent = { "value": queryObject.Index };
                                     this._createCommonPods(queryObject, commentArray, resultcontent);
                                     topic.publish("hideProgressIndicator");
-                                }
-                                if (queryObject.WidgetName.toLowerCase() === "unifiedsearch") {
+                                    break;
+                                case "unifiedsearch":
                                     topic.publish("showProgressIndicator");
                                     resultcontent = { "value": 0 };
                                     this.carouselContainer.showCarouselContainer();
@@ -573,16 +538,19 @@ define([
                                     if (!queryObject.IsRouteCreated) {
                                         this.map.centerAt(queryObject.FeatureData[queryObject.Index].geometry);
                                     }
-                                    this._setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName);
+                                    this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName);
                                     this._createCommonPods(queryObject, commentArray, resultcontent);
                                     topic.publish("hideProgressIndicator");
-                                }
-                                if (queryObject.WidgetName.toLowerCase() === "infoactivity") {
+                                    break;
+                                case "infoactivity":
                                     resultcontent = { "value": 0 };
                                     if (commentArray !== null) {
                                         this._setInfoWindowComment(commentArray, resultcontent, featureId);
                                     }
                                     topic.publish("hideProgressIndicator");
+                                    break;
+                                case "default":
+                                    break;
                                 }
                             }
                         }), function (err) {
@@ -590,7 +558,6 @@ define([
                             topic.publish("hideProgressIndicator");
                         });
                     }
-
                 })));
             } catch (error) {
                 this._createPodWithoutCommentLayer(queryObject);
@@ -608,41 +575,44 @@ define([
         _createCommonPods: function (queryObject, commentArray, resultcontent) {
             var directionObject, facilityObject, locatorParamsForCarouselContainer, locatorObjectForCarouselContainer, divDirectioncontent, activityMapPoint, routeObject, divHeader, searchContenData;
             facilityObject = { "Feature": queryObject.FeatureData, "SelectedItem": resultcontent, "QueryURL": queryObject.QueryURL, "WidgetName": queryObject.WidgetName };
-            this._setFacility(facilityObject);
+            this.setFacility(facilityObject);
             if (queryObject.SolveRoute === null) {
                 divDirectioncontent = query(".esriCTDivDirectioncontent")[0];
                 if (divDirectioncontent) {
                     domConstruct.empty(divDirectioncontent);
+
+                    locatorParamsForCarouselContainer = {
+                        defaultAddress: dojo.configData.LocatorSettings.LocatorDefaultAddress,
+                        preLoaded: false,
+                        parentDomNode: divDirectioncontent,
+                        map: this.map,
+                        graphicsLayerId: "esriGraphicsLayerMapSettings",
+                        locatorSettings: dojo.configData.LocatorSettings,
+                        configSearchSettings: dojo.configData.SearchSettings
+                    };
+                    searchContenData = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
+                    divHeader = domConstruct.create("div", {}, divDirectioncontent);
+                    domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + queryObject.FeatureData[resultcontent.value].attributes[searchContenData] }, divHeader);
+                    activityMapPoint = this.map.getLayer(locatorParamsForCarouselContainer.graphicsLayerId);
+                    locatorObjectForCarouselContainer = new LocatorTool(locatorParamsForCarouselContainer);
+                    locatorObjectForCarouselContainer.candidateClicked = lang.hitch(this, function (graphic) {
+                        if (graphic && graphic.attributes && graphic.attributes.address) {
+                            this.locatorAddress = graphic.attributes.address;
+                        }
+                        topic.publish("hideInfoWindow");
+                        this._clearBuffer();
+                        this.removeGeolocationPushPin();
+                        routeObject = { "StartPoint": activityMapPoint.graphics[0], "EndPoint": queryObject.FeatureData, "Index": 0, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL };
+                        this.showRoute(routeObject);
+                    });
                 }
-                locatorParamsForCarouselContainer = {
-                    defaultAddress: dojo.configData.LocatorSettings.LocatorDefaultAddress,
-                    preLoaded: false,
-                    parentDomNode: divDirectioncontent,
-                    map: this.map,
-                    graphicsLayerId: "esriGraphicsLayerMapSettings",
-                    locatorSettings: dojo.configData.LocatorSettings,
-                    configSearchSettings: dojo.configData.SearchSettings
-                };
-                searchContenData = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
-                divHeader = domConstruct.create("div", {}, divDirectioncontent);
-                domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + queryObject.FeatureData[resultcontent.value].attributes[searchContenData] }, divHeader);
-                activityMapPoint = this.map.getLayer(locatorParamsForCarouselContainer.graphicsLayerId);
-                locatorObjectForCarouselContainer = new LocatorTool(locatorParamsForCarouselContainer);
-                locatorObjectForCarouselContainer.candidateClicked = lang.hitch(this, function (graphic) {
-                    if (graphic && graphic.attributes && graphic.attributes.address) {
-                        this.locatorAddress = graphic.attributes.address;
-                    }
-                    this.removeGeolocationPushPin();
-                    routeObject = { "StartPoint": activityMapPoint.graphics[0], "EndPoint": queryObject.FeatureData, "Index": 0, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL };
-                    this.showRoute(routeObject);
-                });
             } else {
                 directionObject = { "Feature": queryObject.FeatureData, "SelectedItem": resultcontent, "SolveRoute": queryObject.SolveRoute, "Address": queryObject.Address, "WidgetName": queryObject.WidgetName };
-                this._setDirection(directionObject);
+                this.setDirection(directionObject);
             }
-            this._setGallery(queryObject.FeatureData, resultcontent);
+            this.setGallery(queryObject.FeatureData, resultcontent);
             if (commentArray !== null) {
-                this._setComment(queryObject.FeatureData, commentArray, resultcontent);
+                this.setComment(queryObject.FeatureData, commentArray, resultcontent);
             }
         },
 
@@ -660,7 +630,7 @@ define([
                 this.carouselContainer.show();
                 this.highlightFeature(queryObject.FeatureData[0].geometry);
                 this.map.centerAt(queryObject.FeatureData[0].geometry);
-                this._setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName);
+                this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName);
                 this._createCommonPods(queryObject, null, resultcontent);
                 this.setCommentForError();
                 topic.publish("hideProgressIndicator");
@@ -697,331 +667,14 @@ define([
         },
 
         /**
-        * set the content in (Search result) carousel pod
-        * @param {object} result contains features
-        * @param {boolean} isBufferNeeded
-        * @param {object} queryURL contains Layer URL
-        * @param {string} widgetName contains name of widgets
-        * @memberOf widgets/searchResult/searchResult
-        */
-        _setSearchContent: function (result, isBufferNeeded, queryURL, widgetName) {
-            var isPodEnabled = this.getPodStatus("SearchResultPod"), searchContenTitle, searchedFacilityObject, divHeaderContent, i, resultcontent = [], milesCalulatedData, searchContenData;
-            if (isPodEnabled) {
-                if (widgetName.toLowerCase() === "unifiedsearch") {
-                    searchContenTitle = sharedNls.titles.numberOfFeaturesFoundNearAddress;
-                    searchContenData = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
-                } else if (widgetName.toLowerCase() === "activitysearch") {
-                    searchContenTitle = sharedNls.titles.numberOfFoundFeatureNearAddress;
-                    searchContenData = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
-                } else if (widgetName.toLowerCase() === "event") {
-                    searchContenTitle = sharedNls.titles.numberOfFoundEventsNearAddress;
-                    searchContenData = this.getKeyValue(dojo.configData.EventSearchSettings[0].SearchDisplayFields);
-                }
-                divHeaderContent = query('.esriCTDivSearchResulContent');
-                if (divHeaderContent.length > 0) {
-                    domConstruct.empty(divHeaderContent[0]);
-                    this.spanFeatureListContainer = domConstruct.create("div", { "class": "esriCTSpanFeatureListContainer", "innerHTML": string.substitute(searchContenTitle, [result.length]) }, divHeaderContent[0]);
-                    for (i = 0; i < result.length; i++) {
-                        if (!isBufferNeeded && result[i].distance) {
-                            milesCalulatedData = "(" + parseFloat(result[i].distance).toFixed(2) + "miles" + ")";
-                        } else {
-                            milesCalulatedData = "";
-                        }
-                        if (widgetName.toLowerCase() !== "event") {
-                            resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotext", "innerHTML": result[i].attributes[searchContenData] + milesCalulatedData }, divHeaderContent[0]);
-                            domClass.add(resultcontent[0], "esriCTDivHighlightFacility");
-                            domAttr.set(resultcontent[i], "value", i);
-                            searchedFacilityObject = { "FeatureData": result, "SelectedRow": resultcontent[i], "IsBufferNeeded": isBufferNeeded, "QueryLayer": queryURL, "WidgetName": widgetName };
-                            this.own(on(resultcontent[i], "click", lang.hitch(this, this._clickOnSearchedFacility, searchedFacilityObject)));
-                        } else {
-                            resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotext", "innerHTML": result[i].attributes[searchContenData] + milesCalulatedData }, divHeaderContent[0]);
-                        }
-                    }
-                }
-            }
-        },
-
-        /**
-        * set the content in (Facility) carousel pod if user click on search result data
-        * @param {object} facilityObject contans feature, widget name, selected facility, Layer URL
-        * @memberOf widgets/searchResult/searchResult
-        */
-        _setFacility: function (facilityObject) {
-            var divHeaderContent, facilityContenTitle, infowWindowData, divHeader, divFacilityContainer, divFacilityContent, k, j, m, p, activityImageDiv, SearchSettingsLayers, isPodEnabled, divFacilityImages;
-            isPodEnabled = this.getPodStatus("FacilityInformationPod");
-            if (isPodEnabled) {
-                divHeaderContent = query('.esriCTdivFacilityContent');
-                if (divHeaderContent.length > 0) {
-                    domConstruct.empty(divHeaderContent[0]);
-                    divHeader = domConstruct.create("div", {}, divHeaderContent[0]);
-                    if (facilityObject.WidgetName.toLowerCase() === "unifiedsearch") {
-                        facilityContenTitle = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
-                    } else if (facilityObject.WidgetName.toLowerCase() === "activitysearch") {
-                        facilityContenTitle = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
-                    } else if (facilityObject.WidgetName.toLowerCase() === "event") {
-                        facilityContenTitle = this.getKeyValue(dojo.configData.EventSearchSettings[0].SearchDisplayFields);
-                    } else if (facilityObject.WidgetName.toLowerCase() === "searchedfacility") {
-                        facilityContenTitle = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
-                    }
-                    facilityObject.Feature = this.removeNullValue(facilityObject.Feature);
-                    for (p = 0; p < dojo.configData.InfoWindowSettings.length; p++) {
-                        if (facilityObject.QueryURL === dojo.configData.InfoWindowSettings[p].InfoQueryURL) {
-                            infowWindowData = dojo.configData.InfoWindowSettings[p].InfoWindowData;
-                            break;
-                        }
-                    }
-                    if (facilityObject.SelectedItem && facilityObject.Feature) {
-                        domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": facilityObject.Feature[facilityObject.SelectedItem.value].attributes[facilityContenTitle] }, divHeader);
-                        divFacilityContainer = domConstruct.create("div", { "class": "esriCTResultContent" }, divHeaderContent[0]);
-                        divFacilityContent = domConstruct.create("div", {}, divFacilityContainer);
-                        if (infowWindowData.length === 0) {
-                            domConstruct.create("div", { "class": "esriCTInfoText", "innerHTML": "Feilds are not configured." }, divFacilityContent);
-                        }
-                        for (j = 0; j < infowWindowData.length; j++) {
-                            domConstruct.create("div", { "class": "esriCTInfoText", "innerHTML": infowWindowData[j].DisplayText + " " + string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes) }, divFacilityContent);
-                        }
-                        if (facilityObject.WidgetName.toLowerCase() !== "event") {
-                            domConstruct.create("div", { "class": "esriCTCarouselUtilitiesHeader", "innerHTML": sharedNls.titles.carouselUtilitiesText }, divFacilityContent);
-                            divFacilityImages = domConstruct.create("div", { "class": "esriCTDivFacilityImages" }, divFacilityContent);
-                            if (facilityObject.Feature) {
-                                for (m = 0; m < dojo.configData.ActivitySearchSettings.length; m++) {
-                                    SearchSettingsLayers = dojo.configData.ActivitySearchSettings[m];
-                                }
-                                for (k = 0; k < SearchSettingsLayers.ActivityList.length; k++) {
-                                    if (dojo.string.substitute(SearchSettingsLayers.ActivityList[k].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes)) {
-                                        if (facilityObject.Feature[facilityObject.SelectedItem.value].attributes[dojo.string.substitute(SearchSettingsLayers.ActivityList[k].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes)] === "Yes") {
-                                            activityImageDiv = domConstruct.create("div", { "class": "esriCTActivityImage" }, divFacilityImages);
-                                            domConstruct.create("img", { "src": SearchSettingsLayers.ActivityList[k].Image }, activityImageDiv);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-
-        /**
-        * set the content in (Direction) carousel pod if user click on search result data
-        * @param {object} directionObject contains widget name, solve route results, selected facility
-        * @param {boolean} isInfoWindowClick
-        * @memberOf widgets/searchResult/searchResult
-        */
-        _setDirection: function (directionObject, isInfoWindowClick) {
-            var isPodEnabled = this.getPodStatus("DirectionsPod"), divHeaderContent, directionTitle, divHeader, divDirectionContainer, divDrectionContent, distanceAndDuration, printButton, j, divDrectionList, printmapData;
-            if (isInfoWindowClick) {
-                isPodEnabled = true;
-                divHeaderContent = query('.esriCTDirectionMainContainer');
-            } else {
-                divHeaderContent = query('.esriCTDivDirectioncontent');
-            }
-            if (isPodEnabled) {
-                if (divHeaderContent.length > 0) {
-                    domConstruct.empty(divHeaderContent[0]);
-                    if (directionObject.WidgetName.toLowerCase() === "unifiedsearch") {
-                        directionTitle = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
-                    } else if (directionObject.WidgetName.toLowerCase() === "activitysearch") {
-                        directionTitle = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
-                    } else if (directionObject.WidgetName.toLowerCase() === "event") {
-                        directionTitle = this.getKeyValue(dojo.configData.EventSearchSettings[0].SearchDisplayFields);
-                    } else {
-                        directionTitle = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
-                    }
-                    divHeader = domConstruct.create("div", {}, divHeaderContent[0]);
-                    if (directionObject.SelectedItem) {
-                        domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + directionObject.Feature[directionObject.SelectedItem.value].attributes[directionTitle] }, divHeader);
-                        //set start location text
-                        directionObject.SolveRoute[0].directions.features[0].attributes.text = directionObject.SolveRoute[0].directions.features[0].attributes.text.replace('Location 1', directionObject.Address);
-                        if (directionObject.WidgetName.toLowerCase() !== "infoactivity" && directionObject.WidgetName.toLowerCase() !== "infoevent") {
-                            printButton = domConstruct.create("div", { "class": "esriCTDivPrint", "title": sharedNls.tooltips.printButtonooltips }, divHeader);
-                            printmapData = {
-                                "Features": directionObject.SolveRoute[0].directions.features,
-                                "Title": sharedNls.titles.directionText + " " + directionObject.Feature[directionObject.SelectedItem.value].attributes[directionTitle],
-                                "Distance": sharedNls.titles.directionTextDistance + parseFloat(directionObject.SolveRoute[0].directions.totalLength).toFixed(2) + "mi",
-                                "Time": sharedNls.titles.directionTextTime + parseFloat(directionObject.SolveRoute[0].directions.totalDriveTime).toFixed(2) + "min"
-                            };
-                            this.own(on(printButton, "click", lang.hitch(this, this._printMap, printmapData)));
-                        }
-                        divDirectionContainer = domConstruct.create("div", { "class": "esriCTDirectionResultContent" }, divHeaderContent[0]);
-                        distanceAndDuration = domConstruct.create("div", { "class": "esriCTDistanceAndDuration" }, divHeader);
-                        domConstruct.create("div", { "class": "esriCTDivDistance", "innerHTML": sharedNls.titles.directionTextDistance + parseFloat(directionObject.SolveRoute[0].directions.totalLength).toFixed(2) + "mi" }, distanceAndDuration);
-                        domConstruct.create("div", { "class": "esriCTDivTime", "innerHTML": sharedNls.titles.directionTextTime + parseFloat(directionObject.SolveRoute[0].directions.totalDriveTime).toFixed(2) + "min" }, distanceAndDuration);
-                        divDrectionContent = domConstruct.create("div", { "class": "esriCTDirectionRow" }, divDirectionContainer);
-                        divDrectionList = domConstruct.create("ol", {}, divDrectionContent);
-                        domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": directionObject.SolveRoute[0].directions.features[0].attributes.text }, divDrectionList);
-                        for (j = 1; j < directionObject.SolveRoute[0].directions.features.length; j++) {
-                            domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": directionObject.SolveRoute[0].directions.features[j].attributes.text + "(" + parseFloat(directionObject.SolveRoute[0].directions.features[j].attributes.length).toFixed(2) + "miles" + ")" }, divDrectionList);
-                        }
-                    }
-                }
-            }
-        },
-
-        /**
         * initialize the object of printMap Widget
         * @param {object} directions contains solve route result
         * @memberOf widgets/searchResult/searchResult
         */
-        _printMap: function (directions) {
+        print: function (directions) {
             topic.publish("showProgressIndicator");
-            this.printMap = new PrintMap({ map: this.map, "directions": directions });
+            this.printMap = new PrintMap({ map: this.map, "directions": directions});
             topic.publish("hideProgressIndicator");
-        },
-
-
-        /**
-        * set the images in (Gallery) carousel pod
-        * @param {object} selectedFeature contains the information of search result
-        * @param {object} resultcontent store the value of the click of search result
-        * @memberOf widgets/searchResult/searchResult
-        */
-        _setGallery: function (selectedFeature, resultcontent) {
-            var isPodEnabled = this.getPodStatus("GalleryPod"), divHeaderContent, layerID;
-            if (isPodEnabled) {
-                divHeaderContent = query('.esriCTDivGalleryContent');
-                if (divHeaderContent.length > 0) {
-                    domConstruct.empty(divHeaderContent[0]);
-                }
-                if (this.map._layers) {
-                    for (layerID in this.map._layers) {
-                        if (this.map._layers.hasOwnProperty(layerID)) {
-                            if (this.map._layers[layerID].url && this.map._layers[layerID].hasAttachments && (this.map._layers[layerID].url === dojo.configData.ActivitySearchSettings[0].QueryURL)) {
-                                this.map._layers[layerID].queryAttachmentInfos(selectedFeature[resultcontent.value].attributes[this.map._layers[layerID].objectIdField], lang.hitch(this, this._setAttachments), this._logError);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        },
-
-        /**
-        * query on attachment and show the images on carousel pod
-        * @param {object} response contain the images which are in the feature layer
-        * @memberOf widgets/searchResult/searchResult
-        */
-        _setAttachments: function (response) {
-            topic.publish("showProgressIndicator");
-            var divAttchment, divHeaderContent, divPreviousImg, divNextImg;
-            this.imageCount = 0;
-            divHeaderContent = query('.esriCTDivGalleryContent');
-            if (divHeaderContent) {
-                domConstruct.empty(divHeaderContent[0]);
-            }
-            if (response.length > 1) {
-                divPreviousImg = domConstruct.create("div", { "class": "esriCTImgPrev" }, divHeaderContent[0]);
-                divNextImg = domConstruct.create("div", { "class": "esriCTImgNext" }, divHeaderContent[0]);
-                divAttchment = domConstruct.create("img", { "class": "esriCTDivAttchment" }, divHeaderContent[0]);
-                domAttr.set(divAttchment, "src", response[0].url);
-                this.own(on(divPreviousImg, "click", lang.hitch(this, this._previousImage, response, divAttchment)));
-                this.own(on(divNextImg, "click", lang.hitch(this, this._nextImage, response, divAttchment)));
-
-            } else if (response.length === 1) {
-                divAttchment = domConstruct.create("img", { "class": "esriCTDivAttchment" }, divHeaderContent[0]);
-                domAttr.set(divAttchment, "src", response[0].url);
-            } else {
-                domConstruct.create("div", { "class": "esriCTGalleryBox", "innerHTML": sharedNls.errorMessages.imageDoesNotFound }, divHeaderContent[0]);
-            }
-            topic.publish("hideProgressIndicator");
-        },
-
-        /**
-        * change the image when click on previous arrow of image
-        * @param {object} response contain the images which are in the feature layer
-        * @param {node} divAttchmentInfo is domNode
-        * @memberOf widgets/searchResult/searchResult
-        */
-        _previousImage: function (response, divAttchment) {
-            this.imageCount--;
-            if (this.imageCount < 0) {
-                this.imageCount = response.length - 1;
-            }
-            domAttr.set(divAttchment, "src", response[this.imageCount].url);
-        },
-
-        /**
-        * change the image when click on next arrow of image
-        * @param {object} response contain the images which are in the feature layer
-        * @param {node} divAttchmentInfo is domNode
-        * @memberOf widgets/searchResult/searchResult
-        */
-        _nextImage: function (response, divAttchment) {
-            this.imageCount++;
-            if (this.imageCount === response.length) {
-                this.imageCount = 0;
-            }
-            domAttr.set(divAttchment, "src", response[this.imageCount].url);
-        },
-
-        /**
-        * show error in console
-        * @memberOf widgets/searchResult/searchResult
-        */
-        _logError: function (error) {
-            console.log(error);
-        },
-        /**
-        * set the content in (Comments) carousel pod
-        * @param {object} feature contains feature
-        * @param {object} result contains features array
-        * @param {object} resultcontent store the value of the click of search result
-        * @memberOf widgets/searchResult/searchResult
-        */
-        _setComment: function (feature, result, resultcontent) {
-            var isPodEnabled = this.getPodStatus("CommentsPod"), divHeaderContent, j, index, divHeaderStar, divStar, commentAttribute, utcMilliseconds, l, isCommentFound, rankFieldAttribute, esriCTCommentDateStar, divCommentRow;
-            if (isPodEnabled) {
-                for (index = 0; index < dojo.configData.ActivitySearchSettings.length; index++) {
-                    if (dojo.configData.ActivitySearchSettings[index].CommentsSettings.Enabled) {
-                        divHeaderContent = query('.esriCTDivCommentContent');
-                        if (result.length === 0) {
-                            if (divHeaderContent[0]) {
-                                domConstruct.empty(divHeaderContent[0]);
-                            }
-                            divCommentRow = domConstruct.create("div", { "class": "esriCTRowNoComment" }, divHeaderContent[0]);
-                            domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
-                            return;
-                        }
-                        result = this.removeNullValue(result);
-                        isCommentFound = false;
-                        if (result.length !== 0) {
-                            divHeaderContent = query('.esriCTDivCommentContent');
-                            if (divHeaderContent[0]) {
-                                domConstruct.empty(divHeaderContent[0]);
-                            }
-                            for (l = 0; l < result.length; l++) {
-                                rankFieldAttribute = string.substitute(dojo.configData.ActivitySearchSettings[index].CommentsSettings.RankField, result[l].attributes);
-                                commentAttribute = string.substitute(dojo.configData.ActivitySearchSettings[index].CommentsSettings.CommentField, result[l].attributes);
-                                if (feature[resultcontent.value].attributes[this.objectIdForCommentLayer] === Number(result[l].attributes.id)) {
-                                    if (commentAttribute) {
-                                        divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
-                                        isCommentFound = true;
-                                        esriCTCommentDateStar = domConstruct.create("div", { "class": "esriCTCommentDateStar" }, divCommentRow);
-                                        divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, esriCTCommentDateStar);
-                                        for (j = 0; j < 5; j++) {
-                                            divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
-                                            if (j < rankFieldAttribute) {
-                                                domClass.add(divStar, "esriCTRatingStarChecked");
-                                            }
-                                        }
-                                        if (string.substitute(dojo.configData.ActivitySearchSettings[index].CommentsSettings.SubmissionDateField, result[l].attributes) === null) {
-                                            utcMilliseconds = 0;
-                                        } else {
-                                            utcMilliseconds = Number(dojo.string.substitute(dojo.configData.ActivitySearchSettings[index].CommentsSettings.SubmissionDateField, result[l].attributes));
-                                        }
-                                        domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": commentAttribute }, divCommentRow);
-                                        domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), { datePattern: dojo.configData.ActivitySearchSettings[index].CommentsSettings.DisplayDateFormat, selector: "date" }) }, esriCTCommentDateStar);
-                                    }
-                                }
-                            }
-                        }
-                        if (!isCommentFound) {
-                            divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
-                            domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
-                        }
-                    }
-                }
-            }
         },
 
         /**
@@ -1055,6 +708,115 @@ define([
             secondPlace = data.indexOf("}");
             keyValue = data.substring(Number(firstPlace) + 1, secondPlace);
             return keyValue;
+        },
+
+        /**
+        * create route for multiple points
+        * @param {object} contains Start point, End point, widget name and query URL
+        * @memberOf widgets/searchResult/searchResult
+        */
+        _showRouteForList: function (routeObject) {
+            var geoArray, i;
+            topic.publish("showProgressIndicator");
+            this._clearGraphicsAndCarousel();
+            this.removeRouteGraphichOfDirectionWidget();
+            geoArray = [];
+            geoArray.push(routeObject.StartPoint.geometry);
+            for (i = 0; i < routeObject.EndPoint.length; i++) {
+                geoArray.push(routeObject.EndPoint[i].geometry);
+            }
+            this._esriDirectionsWidget.updateStops(geoArray).then(lang.hitch(this, function () {
+                this._esriDirectionsWidget.getDirections();
+            }),
+                function (err) {
+                    alert(err);
+                    topic.publish("hideProgressIndicator");
+                });
+        },
+
+        /**
+        * Highlight multiple features
+        * @param {object} featureGeometry contains the feature geometry
+        * @memberOf widgets/searchResult/searchResult
+        */
+        highlightMultipleFeatures: function (featureGeometry) {
+            var symbol;
+            if (featureGeometry) {
+                symbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, dojo.configData.LocatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(dojo.configData.RippleColor.split(",")[0], 10), parseInt(dojo.configData.RippleColor.split(",")[1], 10), parseInt(dojo.configData.RippleColor.split(",")[2], 10)]), 4), new dojo.Color([0, 0, 0, 0]));
+                this.map.getLayer("highlightLayerId").add(new esri.Graphic(featureGeometry, symbol, {}, null));
+            }
+        },
+
+        /**
+        * Converts min to hour
+        * @param {string} string contains the minute
+        * @memberOf widgets/searchResult/searchResult
+        */
+        convertMinToHr: function (minutes) {
+            var hours, convertMinutes, displayTime;
+            hours = Math.floor(Math.abs(minutes) / 60);
+            convertMinutes = Math.round((Math.abs(minutes) % 60));
+            if (hours === 0) {
+                displayTime = convertMinutes + 'min';
+            } else if (convertMinutes === 0) {
+                displayTime = hours + 'hrs';
+            } else {
+                displayTime = hours + 'hrs' + ":" + convertMinutes + 'min';
+            }
+            return displayTime;
+        },
+
+        /**
+        * Remove Graphics of Direction widget
+        * @memberOf widgets/searchResult/searchResult
+        */
+        removeRouteGraphichOfDirectionWidget: function () {
+            this._esriDirectionsWidget._clearRouteGraphics();
+            this._esriDirectionsWidget.removeStops();
+            this._esriDirectionsWidget._clearStopGraphics();
+        },
+
+        /**
+        * Create Direction widget
+        * @memberOf widgets/searchResult/searchResult
+        */
+        _createDirectionWidget: function () {
+            try {
+                urlUtils.addProxyRule({
+                    urlPrefix: dojo.configData.DrivingDirectionSettings.RouteServiceURL,
+                    proxyUrl: dojo.configData.ProxyUrl
+                });
+                urlUtils.addProxyRule({
+                    urlPrefix: dojo.configData.GeometryService,
+                    proxyUrl: dojo.configData.ProxyUrl
+                });
+                this._esriDirectionsWidget = new Directions({
+                    map: this.map,
+                    directionsLengthUnits: dojo.configData.DrivingDirectionSettings.RouteUnit,
+                    showTrafficOption: false,
+                    routeTaskUrl: dojo.configData.DrivingDirectionSettings.RouteServiceURL
+                });
+                this._esriDirectionsWidget.options.geocoderOptions.autoComplete = true;
+                this._esriDirectionsWidget.autoSolve = false;
+                this._esriDirectionsWidget.startup();
+                this._esriDirectionsWidget.options.routeSymbol.color = new Color([parseInt(dojo.configData.DrivingDirectionSettings.RouteColor.split(",")[0], 10), parseInt(dojo.configData.DrivingDirectionSettings.RouteColor.split(",")[1], 10), parseInt(dojo.configData.DrivingDirectionSettings.RouteColor.split(",")[2], 10), parseFloat(dojo.configData.DrivingDirectionSettings.Transparency.split(",")[0], 10)]);
+                this._esriDirectionsWidget.options.routeSymbol.width = parseInt(dojo.configData.DrivingDirectionSettings.RouteWidth, 10);
+                this.own(on(this._esriDirectionsWidget, "directions-finish", lang.hitch(this, function (a) {
+                    if (this._esriDirectionsWidget.directions !== null) {
+                        this._esriDirectionsWidget.zoomToFullRoute();
+                        setTimeout(lang.hitch(this, function () {
+                            this._esriDirectionsWidget._printDirections();
+                        }), 2000);
+                        topic.publish("hideProgressIndicator");
+                    } else {
+                        alert(a.result.details);
+                        topic.publish("hideProgressIndicator");
+                    }
+                })));
+                topic.publish("hideProgressIndicator");
+            } catch (error) {
+                alert(error);
+            }
         }
     });
 });
