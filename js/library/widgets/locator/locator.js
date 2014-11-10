@@ -644,11 +644,13 @@ define([
         * @memberOf widgets/locator/locator
         * @param {} mapPoint
         */
-        _locateAddressOnMap: function (mapPoint) {
+        _locateAddressOnMap: function (mapPoint, isSharedGraphic) {
             var geoLocationPushpin, locatorMarkupSymbol;
             this._clearGraphics();
-            this.map.setLevel(dojo.configData.ZoomLevel);
-            this.map.centerAt(mapPoint);
+            if (!isSharedGraphic) {
+                this.map.setLevel(dojo.configData.ZoomLevel);
+                this.map.centerAt(mapPoint);
+            }
             geoLocationPushpin = dojoConfig.baseURL + this.locatorSettings.DefaultLocatorSymbol;
             locatorMarkupSymbol = new esri.symbol.PictureMarkerSymbol(geoLocationPushpin, this.locatorSettings.MarkupSymbolSize.width, this.locatorSettings.MarkupSymbolSize.height);
             this.selectedGraphic = new esri.Graphic(mapPoint, locatorMarkupSymbol, {}, null);

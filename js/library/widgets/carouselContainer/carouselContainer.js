@@ -78,8 +78,10 @@ define([
                 if (this.isResultFound > 0) {
                     if (domClass.contains(this.divCarouselContent, "esriCTzeroHeight")) {
                         this.show();
+                        dojo.isShowPod = "true";
                     } else {
                         this.hide();
+                        dojo.isShowPod = "false";
                     }
                 }
             })));

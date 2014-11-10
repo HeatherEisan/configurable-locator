@@ -141,8 +141,8 @@
     }
     .esriCTSpanHeader
     {
-       height:35px;
-        }
+        height: 35px;
+    }
 
 }
 
@@ -229,7 +229,7 @@
 
     .esriCTSpanHeader
     {
-       height:35px;
+        height: 35px;
     }
 
 }
@@ -542,10 +542,9 @@
         background-position: 94%;
     }
     .esriCTActivityText
-{
-
-    padding-right: 60px;
-}
+    {
+        padding-right: 60px;
+    }
     .scrollbar_footerVisible
     {
         display: none;
@@ -678,7 +677,7 @@
 
     .esriCTSpanHeader
     {
-       height:35px;
+        height: 35px;
     }
 
 }
@@ -710,7 +709,10 @@
     {
         width: 100% !important;
     }
-
+    .esriCTAddressContent, .esriCTDirectionMainContainer
+    {
+        width: 300px;
+    }
     .esriCTTxtAddress
     {
         font-size: 15px !important;
@@ -1044,11 +1046,10 @@
     {
         background-position: 88%;
     }
-.esriCTActivityText
-{
-
-    padding-right: 60px;
-}
+    .esriCTActivityText
+    {
+        padding-right: 60px;
+    }
     .scrollbar_footerVisible
     {
         display: none;
@@ -1161,7 +1162,7 @@
     }
     .esriCTSpanHeader
     {
-       height:35px;
+        height: 35px;
     }
 
 }

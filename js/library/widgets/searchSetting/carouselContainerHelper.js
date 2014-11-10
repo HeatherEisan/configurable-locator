@@ -28,6 +28,7 @@ define([
     "dojo/query",
     "dojo/string",
     "esri/tasks/query",
+    "esri/units",
     "dojo/text!./templates/searchSettingTemplate.html",
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
@@ -35,7 +36,7 @@ define([
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, dom, domClass, query, string, Query, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, dom, domClass, query, string, Query, units, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -139,8 +140,13 @@ define([
                             resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotext", "innerHTML": result[i].attributes[searchContenData] + milesCalulatedData }, divHeaderContent[0]);
                             domClass.add(resultcontent[0], "esriCTDivHighlightFacility");
                             domAttr.set(resultcontent[i], "value", i);
-                            searchedFacilityObject = { "FeatureData": result, "SelectedRow": resultcontent[i], "IsBufferNeeded": isBufferNeeded, "QueryLayer": queryURL, "WidgetName": widgetName };
+                            searchedFacilityObject = { "FeatureData": result, "SelectedRow": resultcontent[i], "IsBufferNeeded": isBufferNeeded, "QueryLayer": queryURL, "WidgetName": widgetName, "searchedFacilityIndex": i };
                             this.own(on(resultcontent[i], "click", lang.hitch(this, this._clickOnSearchedFacility, searchedFacilityObject)));
+                            if (window.location.href.toString().split("$selectedSearchResult=").length > 1 && !this.isFirstSearchResult && Number(window.location.href.toString().split("$selectedSearchResult=")[1].split("$")[0]) === i) {
+                                this.sharedGraphic = true;
+                                this._clickOnSearchedFacility(searchedFacilityObject);
+                                this.isFirstSearchResult = true;
+                            }
                         } else {
                             resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotextForEvent", "innerHTML": result[i].attributes[searchContenData] + milesCalulatedData }, divHeaderContent[0]);
                         }
@@ -438,14 +444,9 @@ define([
         * @memberOf widgets/searchResult/carouselContainerHelper
         */
         _getSubStringUnitData: function () {
-            var routeUnitString, subStringRouteUnit;
-            routeUnitString = dojo.configData.DrivingDirectionSettings.RouteUnit;
-            if (routeUnitString !== "") {
-                subStringRouteUnit = " " + routeUnitString.substring(4, routeUnitString.length);
-            } else {
-                subStringRouteUnit = dojo.configData.DrivingDirectionSettings.RouteUnit;
-            }
-            return subStringRouteUnit;
+            var routeUnitString;
+            routeUnitString = " " + this._esriDirectionsWidget.directionsLengthUnits.substring(4, this._esriDirectionsWidget.directionsLengthUnits.length);
+            return routeUnitString;
         }
     });
 });

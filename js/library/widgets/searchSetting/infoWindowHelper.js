@@ -90,7 +90,7 @@ define([
                     }));
                 }));
             } else {
-                extentChanged = this.map.setExtent(this._calculateCustomMapExtent(infoWindowZoomLevelObject.Mappoint));
+                extentChanged = this.map.setExtent(this._calculateCustomMapExtent(dojo.selectedMapPoint));
                 extentChanged.then(lang.hitch(this, function () {
                     topic.publish("hideProgressIndicator");
                     screenPoint = this.map.toScreen(dojo.selectedMapPoint);
@@ -167,7 +167,6 @@ define([
             this._infoWindowGalleryTab(infoWindowParameter.attribute, widgetName);
             this._infoWindowCommentTab(index, widgetName, infoWindowParameter.attribute);
             /*direction tab*/
-
             this._infoWindowDirectionTab(infoWindowParameter.attribute, widgetName, infoWindowParameter.featureSet);
 
             //Check if InfowindowContent available if not then showing infp title as mobile title.
@@ -182,6 +181,7 @@ define([
                 }
             }
             infoWindowZoomLevelObject = { "Mappoint": infoWindowParameter.mapPoint, "MobileTitle": infoTitle, "InfoPopupWidth": infoPopupWidth, "InfoPopupHeight": infoPopupHeight, "InfoWindowParameter": infoWindowParameter.featureCount };
+            dojo.selectedMapPoint = infoWindowParameter.mapPoint;
             this._setInfoWindowZoomLevel(infoWindowZoomLevelObject);
             topic.publish("hideProgressIndicator");
         },
@@ -217,7 +217,17 @@ define([
             };
             infoWindowMapPoint = this.map.getLayer(locatorInfoWindowParams.graphicsLayerId);
             locatorInfoWindowObject = new LocatorTool(locatorInfoWindowParams);
+            setTimeout(lang.hitch(this, function () {
+                if (window.location.href.toString().split("$addressLocationDirection=").length > 1) {
+                    var mapPoint = new Point(window.location.href.toString().split("$addressLocationDirection=")[1].split("$")[0].split(",")[0], window.location.href.toString().split("$addressLocationDirection=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
+                    locatorInfoWindowObject._locateAddressOnMap(mapPoint, true);
+                    routeObject = { "StartPoint": infoWindowMapPoint.graphics[0], "EndPoint": [endPoint], "Index": 0, "WidgetName": widgetName, "QueryURL": null };
+                    this.showRoute(routeObject);
+                }
+            }), 8000);
+
             locatorInfoWindowObject.candidateClicked = lang.hitch(this, function (graphic) {
+                dojo.addressLocationDirection = locatorInfoWindowObject.selectedGraphic.geometry.x.toString() + "," + locatorInfoWindowObject.selectedGraphic.geometry.y.toString();
                 if (graphic && graphic.attributes && graphic.attributes.address) {
                     this.locatorAddress = graphic.attributes.address;
                 }
@@ -249,7 +259,6 @@ define([
             divInformationContent = domConstruct.create("div", { "class": "esriCTInfoWindoContainer" }, divInfoRow);
             divHeader = domConstruct.create("div", { "class": "esriCTDivHeadercontainerInfo" }, divInformationContent);
             domConstruct.create("div", { "class": "esriCTheadText", "innerHTML": sharedNls.titles.facilityInfo }, divHeader);
-
             if (widgetName.toLowerCase() === "infoevent") {
                 divAddToListContainer = domConstruct.create("div", { "class": "esriCTInfoAddlist" }, divHeader);
                 domConstruct.create("div", { "class": "esriCTInfoAddToListIcon" }, divAddToListContainer);
@@ -305,7 +314,6 @@ define([
                     domConstruct.create("div", { "class": "esriCTSecondChild", "innerHTML": string.substitute(dojo.configData.InfoWindowSettings[infoIndex].InfoWindowData[k].FieldName, attributes) }, divAccessfee);
                 }
             }
-
             if (widgetName.toLowerCase() === "infoactivity") {
                 for (j = 0; j < dojo.configData.ActivitySearchSettings.length; j++) {
                     SearchSettingsLayers = dojo.configData.ActivitySearchSettings[j];
@@ -413,7 +421,6 @@ define([
                 domAttr.set(divAttchmentInfo, "src", response[0].url);
                 this.own(on(divPreviousImgInfo, "click", lang.hitch(this, this._previousImageInfo, response, divAttchmentInfo)));
                 this.own(on(divNextImgInfo, "click", lang.hitch(this, this._nextImageInfo, response, divAttchmentInfo)));
-
             } else if (response.length === 1) {
                 divAttchmentInfo = domConstruct.create("img", { "class": "esriCTDivAttchmentInfo" }, this.galleryContainer);
                 domAttr.set(divAttchmentInfo, "src", response[0].url);
