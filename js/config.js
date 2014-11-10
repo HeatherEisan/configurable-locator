@@ -29,7 +29,7 @@ define([], function () {
         // 5.  Set URL for Custom logo                       - [ Tag(s) to look for: CustomLogoUrl ]
         // 6.  Set proxy url                                 - [ Tag(s) to look for: ProxyUrl ]
         // 7.  Set Legend Visibility                         - [ Tag(s) to look for: ShowLegend ]
-        // 8.  Set settings  for splash screen               - [ Tag(s) to look for: SplashScreen ]     
+        // 8.  Set settings  for splash screen               - [ Tag(s) to look for: SplashScreen ]
         // 9.  Specify Theme                                 - [ Tag(s) to look for: ThemeColor ]
         // 10. Specify header widget settings                - [ Tag(s) to look for: AppHeaderWidgets ]
         // 11. Set initial map extent                        - [ Tag(s) to look for: DefaultExtent]
@@ -91,7 +91,7 @@ define([], function () {
         //------------------------------------------------------------------------------------------------------------------------
         // Header Widget Settings
         //-------------------default-----------------------------------------------------------------------------------------------------
-        // Set widgets settings such as widget  widgetPath, mapInstanceRequired to be displayed in header panel      
+        // Set widgets settings such as widget  widgetPath, mapInstanceRequired to be displayed in header panel
         // WidgetPath: path of the widget respective to the widgets package.
         // MapInstanceRequired: true if widget is dependent on the map instance.
 
@@ -198,7 +198,7 @@ define([], function () {
         // QueryLayerId: This is the layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
         // SearchDisplayTitle: This text is displayed in search results as the title to group results.
         // SearchDisplayFields: Attribute that will be displayed in the search box when user performs a search.
-        // SearchExpression: Configure the query expression to be used for search.           
+        // SearchExpression: Configure the query expression to be used for search.
         ActivitySearchSettings: [{
             UnifiedSearch: "true",
             Title: "WaterAccess",
@@ -294,9 +294,9 @@ define([], function () {
         // QueryLayerId: This is the layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
         // SearchDisplayTitle: This text is displayed in search results as the title to group results.
         // SearchDisplayFields: Attribute that will be displayed in the search box when user performs a search.
-        // SearchDisplaySubFields: Attribute that will be displayed in the search box when user performs a search.  
-        // SearchExpression: Configure the query expression to be used for search. 
-        // DisplayDateFormat: Configure the date format. 
+        // SearchDisplaySubFields: Attribute that will be displayed in the search box when user performs a search.
+        // SearchExpression: Configure the query expression to be used for search.
+        // DisplayDateFormat: Configure the date format.
 
 
         EventSearchSettings: [{
@@ -308,7 +308,7 @@ define([], function () {
             SearchDisplaySubFields: "${STARTDATE},${ADDRESS}",
             SearchExpressionForDate: "STARTDATE >= ${0} AND ENDDATE <= ${1}",
             SearchExpression: "UPPER(ADDRESS) LIKE UPPER('${0}%')",
-            DisplayDateFormat: "MM/dd/yyyy"
+            DisplayDateFormat: "MMMM dd, yyyy"
         }],
 
 
@@ -373,11 +373,11 @@ define([], function () {
                 DisplayText: "Address:",
                 FieldName: "${ADDRESS}"
             }, {
-                DisplayText: "City:",
-                FieldName: "${CITY}"
+                DisplayText: "Start Date:",
+                FieldName: "${STARTDATE}"
             }, {
-                DisplayText: "URL:",
-                FieldName: "${URL}"
+                DisplayText: "End Date:",
+                FieldName: "${ENDDATE}"
             }]
         }],
 
@@ -435,7 +435,7 @@ define([], function () {
         //Distance is configured in "miles"
         BufferDistance: "2",
 
-        // Configure graphic color to be set for buffer 
+        // Configure graphic color to be set for buffer
         BufferSymbology: {
             FillSymbolColor: "0,0,255",
             FillSymbolTransparency: "0.25",
@@ -448,13 +448,12 @@ define([], function () {
         // DRIVING DIRECTIONS SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
         // RouteServiceURL: Set URL for routing service
-        //Known values for RouteUnit: esriFeet | esriKilometers | esriMeters | esriMiles | esriNauticalMiles | esriYards
         DrivingDirectionSettings: {
             RouteServiceURL: "http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World",
             RouteColor: "0,0,225",
             RouteWidth: 6,
             Transparency: "0.5",
-            RouteUnit: "esriMiles"
+            RouteUnit: "MILES"
         },
 
         // ------------------------------------------------------------------------------------------------------------------------

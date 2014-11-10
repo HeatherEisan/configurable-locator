@@ -200,16 +200,6 @@ body
     border-top: none;
 }
 
-.esriCTTxtAddress
-{
-    outline: medium none;
-    padding: 5px 7px !important;
-    vertical-align: middle !important;
-    width: 240px;
-    overflow: hidden;
-    vertical-align: middle !important;
-    height: 18px;
-}
 
 input
 {
@@ -1524,7 +1514,7 @@ input
     vertical-align: middle;
     padding: 10px 0px;
     width: 230px;
-    cursor:pointer;
+    cursor: pointer;
 }
 
 .esriCTMyListDates
@@ -1602,7 +1592,6 @@ input
 
 .esriCTHeaderDirectionAcitivityList
 {
-
     height: 22px !important;
     width: 22px !important;
     float: left;
@@ -1613,7 +1602,6 @@ input
 
 .esriCTHeaderShareAcitivityList
 {
-
     height: 22px !important;
     width: 22px !important;
     float: left;
@@ -1624,7 +1612,6 @@ input
 
 .esriCTHeaderAddAcitivityList
 {
-
     height: 22px !important;
     width: 22px !important;
     float: left;
@@ -1635,7 +1622,6 @@ input
 
 .esriCTHeaderPrintAcitivityList
 {
-
     height: 22px !important;
     width: 22px !important;
     float: left;
@@ -1713,7 +1699,6 @@ input
 
 .esriCTImgOrderByDate
 {
-
     display: table-cell;
     width: 16px;
     height: 16px;
@@ -1726,11 +1711,11 @@ input
     width: 16px;
     height: 16px;
     background-repeat: no-repeat;
-    }
+}
 .esriCTImgOrderByDateDownDisable
 {
-     background-image: url("../images/dateArrowDownGray.png");
-    }
+    background-image: url("../images/dateArrowDownGray.png");
+}
 
 .esriCTDivFacilityImages
 {
@@ -2338,7 +2323,6 @@ input
 .esriCTSpanHeaderInfoWindow
 {
     font-weight: bolder;
-    margin-left: 8px !important;
     text-transform: uppercase;
     font-weight: bold;
     margin: 15px 0 0 0;
@@ -2411,7 +2395,7 @@ input
 .esriCTDirectionMainContainer
 {
     height: 100%;
-    width: 340px;
+    width: 320px;
     margin: 0 auto;
     overflow: hidden;
 }
@@ -2550,15 +2534,14 @@ input
     min-height: 71px;
     background-color: #fff;
     cursor: default !important;
-    padding: 20px 1px 0px 0px;
-    width:322px;
+    padding: 20px 0px 0px 0px;
+    width: 320px;
 }
 
 .esriCTDirectionMainContainer div.esriCTAddressContent
 {
     background-color: #fff;
     cursor: default !important;
-    padding: 15px 1px 0px 8px;
     float: left;
     height: 100%;
 }
@@ -2618,7 +2601,7 @@ input
     outline: medium none;
     padding: 5px 10px !important;
     vertical-align: middle !important;
-    width: 238px;
+    width: 234px;
     overflow: hidden;
     vertical-align: middle !important;
     height: 18px;

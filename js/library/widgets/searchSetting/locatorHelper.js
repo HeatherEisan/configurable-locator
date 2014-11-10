@@ -66,13 +66,17 @@ define([
             this.carouselContainer.removeAllPod();
             this.carouselContainer.addPod(this.carouselPodData);
             geometryService = new GeometryService(dojo.configData.GeometryService);
-            if (mapPoint.geometry && dojo.configData.BufferDistance) {
+            if ((mapPoint || mapPoint.geometry) && dojo.configData.BufferDistance) {
                 params = new BufferParameters();
                 params.distances = [dojo.configData.BufferDistance];
                 params.unit = GeometryService.UNIT_STATUTE_MILE;
                 params.bufferSpatialReference = this.map.spatialReference;
                 params.outSpatialReference = this.map.spatialReference;
-                params.geometries = [mapPoint.geometry];
+                if (mapPoint.geometry) {
+                    params.geometries = [mapPoint.geometry];
+                } else {
+                    params.geometries = [mapPoint];
+                }
                 geometryService.buffer(params, lang.hitch(this, function (geometries) {
                     this.showBuffer(geometries, mapPoint);
                 }));
@@ -87,7 +91,9 @@ define([
         */
         showBuffer: function (geometries, mapPoint) {
             var bufferSymbol;
-            this._clearBuffer();
+            if (!dojo.sharedGeolocation) {
+                this._clearBuffer();
+            }
             bufferSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(dojo.configData.BufferSymbology.LineSymbolColor.split(",")[0], 10), parseInt(dojo.configData.BufferSymbology.LineSymbolColor.split(",")[1], 10), parseInt(dojo.configData.BufferSymbology.FillSymbolColor.split(",")[2], 10), parseFloat(dojo.configData.BufferSymbology.LineSymbolTransparency.split(",")[0], 10)]), 2
                         ),
                         new Color([parseInt(dojo.configData.BufferSymbology.FillSymbolColor.split(",")[0], 10), parseInt(dojo.configData.BufferSymbology.FillSymbolColor.split(",")[1], 10), parseInt(dojo.configData.BufferSymbology.LineSymbolColor.split(",")[2], 10), parseFloat(dojo.configData.BufferSymbology.FillSymbolTransparency.split(",")[0], 10)])
@@ -117,7 +123,9 @@ define([
             var graphic;
             graphic = new Graphic(point, symbol);
             layer.add(graphic);
-            this.map.setExtent(point.getExtent().expand(1.6));
+            if (!this.sharedGraphic) {
+                this.map.setExtent(point.getExtent().expand(1.6));
+            }
         },
 
         /**

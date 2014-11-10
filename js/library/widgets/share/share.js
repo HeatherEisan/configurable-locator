@@ -88,7 +88,6 @@ define([
                 this._shareLink();
                 this._showHideShareContainer();
             })));
-
             on(this.imgEmbedding, "click", lang.hitch(this, function () {
                 this._showEmbeddingContainer();
             }));
@@ -121,7 +120,6 @@ define([
                     contHeight += domStyle.get(this.divShareContainer, "height");
                 }
             }
-            //adding 2px in height of share container to display border
             domStyle.set(this.divAppContainer, "height", contHeight + 60 + "px");
         },
         /**
@@ -130,7 +128,7 @@ define([
         * @memberOf widgets/share/share
         */
         _shareLink: function () {
-            var mapExtent, url, urlStr, encodedUri;
+            var mapExtent, url, urlStr, encodedUri, clickCoords;
             /**
             * get current map extent to be shared
             */
@@ -142,6 +140,32 @@ define([
             mapExtent = this._getMapExtent();
             url = esri.urlToObject(window.location.toString());
             urlStr = encodeURI(url.path) + "?extent=" + mapExtent;
+
+            if (dojo.addressLocation) {
+                urlStr += "$address=" + dojo.addressLocation;
+            }
+            if (dojo.mapClickedPoint) {
+                clickCoords = dojo.mapClickedPoint.x + "," + dojo.mapClickedPoint.y;
+                urlStr += "$mapClickPoint=" + clickCoords;
+            }
+            if (dojo.activitySearch) {
+                urlStr += "$activitySearch=" + dojo.activitySearch.join(",");
+            }
+            if (dojo.isShowPod && dojo.isShowPod.toString() === "false") {
+                urlStr += "$isShowPod=" + dojo.isShowPod.toString();
+            }
+            if (dojo.searchFacilityIndex >= 0) {
+                urlStr += "$selectedSearchResult=" + dojo.searchFacilityIndex;
+            }
+            if (dojo.selectedBasemapIndex !== null) {
+                urlStr += "$selectedBasemapIndex=" + dojo.selectedBasemapIndex;
+            }
+            if (dojo.addressLocationDirection) {
+                urlStr += "$addressLocationDirection=" + dojo.addressLocationDirection.toString();
+            }
+            if (dojo.addressLocationDirectionActivity) {
+                urlStr += "$addressLocationDirectionActivity=" + dojo.addressLocationDirectionActivity.toString();
+            }
             try {
                 /**
                 * call tinyurl service to generate share URL
@@ -211,7 +235,6 @@ define([
             this.facebookHandle = on(this.tdFacebook, "click", lang.hitch(this, function () { this._share("facebook", tinyUrl, urlStr); }));
             this.twitterHandle = on(this.tdTwitter, "click", lang.hitch(this, function () { this._share("twitter", tinyUrl, urlStr); }));
             this.emailHandle = on(this.tdMail, "click", lang.hitch(this, function () { this._share("email", tinyUrl, urlStr); }));
-
         },
 
         /**
@@ -233,7 +256,6 @@ define([
         * @memberOf widgets/share/share
         */
         _share: function (site, tinyUrl, urlStr) {
-
             /*
             * hide share panel once any of the sharing options is selected
             */
@@ -259,6 +281,7 @@ define([
         * @memberOf widgets/share/share
         */
         _shareOptions: function (site, url) {
+            domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMediaSelected");
             switch (site) {
             case "facebook":
                 window.open(string.substitute(dojo.configData.MapSharingOptions.FacebookShareURL, [url]));

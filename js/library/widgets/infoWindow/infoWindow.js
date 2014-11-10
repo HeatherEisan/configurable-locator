@@ -66,13 +66,15 @@ define([
                 this.InfoShow = true;
                 domUtils.hide(this.domNode);
                 this.map.getLayer("highlightLayerId").clear();
+                dojo.mapClickedPoint = null;
             })));
             this.own(on(this.mobileCloseDiv, "click", lang.hitch(this, function () {
-                dojo.featurePoint = null;
                 this.InfoShow = true;
                 dojo.setMapTipPosition = true;
                 domUtils.hide(this.domNode);
+                dojo.infoWindowIsShowing = false;
                 this.map.getLayer("highlightLayerId").clear();
+                dojo.mapClickedPoint = null;
             })));
             this.own(on(this.informationTab, "click", lang.hitch(this, function () {
                 this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
@@ -121,6 +123,7 @@ define([
             this.InfoShow = false;
             this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
             this.setLocation(screenPoint);
+            //dojo.isInfoPopupShared = false;
         },
 
         resize: function (width, height) {
@@ -180,6 +183,7 @@ define([
         _hideInfoContainer: function () {
             this.own(on(this.divClose, "click", lang.hitch(this, function () {
                 domUtils.hide(this.domNode);
+                dojo.infoWindowIsShowing = false;
             })));
         },
 

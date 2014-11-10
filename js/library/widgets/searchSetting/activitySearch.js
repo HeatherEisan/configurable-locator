@@ -87,6 +87,7 @@ define([
             dijit.registry.byId("geoLocation").onGeolocationComplete = lang.hitch(this, function (mapPoint, isPreLoaded) {
                 if (mapPoint && isPreLoaded) {
                     this.clearLocatorGraphics();
+                    dojo.sharedGeolocation = mapPoint;
                     this.createBuffer(mapPoint);
                 }
             });
@@ -186,11 +187,18 @@ define([
         * @memberOf widgets/searchSettings/activitySearch
         */
         _showActivitySearchContainer: function () {
-            var activitySearchMainContainer, activitySearchContent = [], activityTickMark, activityImageDiv, i, activitySearchMainContent, k, activitySearchGoButton, SearchSettingsLayers;
+            var activitySearchMainContainer, activitySearchContent = [], activityTickMark, activityImageDiv, i, activitySearchMainContent, k, activitySearchGoButton, SearchSettingsLayers, c;
             activitySearchMainContainer = domConstruct.create("div", { "class": "esriCTActivityMainContainer" }, this.divActivityContainer);
             activitySearchMainContent = domConstruct.create("div", { "class": "esriCTActivityTable" }, activitySearchMainContainer);
             for (k = 0; k < dojo.configData.ActivitySearchSettings.length; k++) {
                 SearchSettingsLayers = dojo.configData.ActivitySearchSettings[k];
+                if (window.location.href.toString().split("$activitySearch=").length > 1) {
+                    for (c = 0; c < SearchSettingsLayers.ActivityList.length; c++) {
+                        if (window.location.href.toString().split("$activitySearch=")[1].split("$")[0].split(SearchSettingsLayers.ActivityList[c].FieldName.toString()).length > 1) {
+                            SearchSettingsLayers.ActivityList[c].IsSelected = true;
+                        }
+                    }
+                }
                 for (i = 0; i < SearchSettingsLayers.ActivityList.length; i++) {
                     activitySearchContent[i] = domConstruct.create("div", { "class": "esriCTActivityRow", "index": i }, activitySearchMainContent);
                     activityImageDiv = domConstruct.create("div", { "class": "esriCTActivityImage" }, activitySearchContent[i]);
@@ -207,6 +215,11 @@ define([
             }
             activitySearchGoButton = domConstruct.create("div", { "class": "esriCTActivitySearchGoButton", "innerHTML": "GO" }, this.divActivityContainer);
             this.own(on(activitySearchGoButton, "click", lang.hitch(this, this._queryForSelectedActivityInList)));
+            if (window.location.href.toString().split("$activitySearch=").length > 1) {
+                this._queryForSelectedActivityInList();
+                domClass.replace(this.domNode, "esriCTHeaderSearch", "esriCTHeaderSearchSelected");
+                domClass.replace(this.divSearchContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
+            }
         },
 
         /**
@@ -234,7 +247,7 @@ define([
             this.carouselContainer.removeAllPod();
             this.carouselContainer.addPod(this.carouselPodData);
             this.locatorAddress = "";
-            var activityArray = [], infoActivity, selectedRow, j, i, k, selectedFeatureText, SearchSettingsLayers;
+            var activityArray = [], infoActivity, selectedRow, j, i, k, selectedFeatureText, SearchSettingsLayers, selectedActivityArray = [];
             topic.publish("showProgressIndicator");
             domClass.replace(this.domNode, "esriCTHeaderSearch", "esriCTHeaderSearchSelected");
             for (k = 0; k < dojo.configData.ActivitySearchSettings.length; k++) {
@@ -248,18 +261,22 @@ define([
                 selectedRow = query('.esriCTTickMark');
                 if (selectedRow) {
                     for (j = 0; j < selectedRow.length; j++) {
-                        selectedFeatureText = selectedRow[j].textContent;
+                        selectedFeatureText = selectedRow[j].textContent || selectedRow[j].innerText;
                         for (i = 0; i < activityArray.length; i++) {
                             if (selectedFeatureText === activityArray[i].Alias) {
                                 domAttr.set(selectedRow[j], "activity", activityArray[i].FieldName);
                                 domAttr.set(selectedRow[j], "index", i);
+                                selectedActivityArray.push(activityArray[i].FieldName);
                             }
                         }
                     }
+                    dojo.activitySearch = selectedActivityArray;
+                    dojo.addressLocation = null;
                     this._queryForSelectedActivityInLayer(selectedRow);
                 } else {
                     alert(sharedNls.errorMessages.activityNotSelected);
                     this._clearGraphicsAndCarousel();
+                    this.removeRouteGraphichOfDirectionWidget();
                     topic.publish("hideProgressIndicator");
                 }
             }
@@ -286,6 +303,7 @@ define([
             if (activityQueryString === "") {
                 alert(sharedNls.errorMessages.activityNotSelected);
                 this._clearGraphicsAndCarousel();
+                this.removeRouteGraphichOfDirectionWidget();
                 topic.publish("hideProgressIndicator");
                 return;
             }
@@ -301,10 +319,12 @@ define([
                     } else {
                         alert(sharedNls.errorMessages.invalidSearch);
                         this._clearGraphicsAndCarousel();
+                        this.removeRouteGraphichOfDirectionWidget();
                         topic.publish("hideProgressIndicator");
                     }
                 }), function (error) {
                     topic.publish("hideProgressIndicator");
+                    this.removeRouteGraphichOfDirectionWidget();
                     alert(error);
                 });
             }));
@@ -418,7 +438,6 @@ define([
                 divDirectioncontent = query(".esriCTDivDirectioncontent")[0];
                 if (divDirectioncontent) {
                     domConstruct.empty(divDirectioncontent);
-
                     locatorParamsForEventContainer = {
                         defaultAddress: dojo.configData.LocatorSettings.LocatorDefaultAddress,
                         preLoaded: false,
@@ -483,13 +502,17 @@ define([
             highlightedDiv = query('.esriCTDivHighlightFacility')[0];
             domClass.replace(highlightedDiv, "esriCTSearchResultInfotext", "esriCTDivHighlightFacility");
             domClass.replace(searchedFacilityObject.SelectedRow, "esriCTDivHighlightFacility", "esriCTSearchResultInfotext");
+            dojo.searchFacilityIndex = searchedFacilityObject.searchedFacilityIndex;
             if (searchedFacilityObject.WidgetName.toLowerCase() === "activitysearch") {
                 this.removeBuffer();
+
             }
             widgetName = "SearchedFacility";
             topic.publish("showProgressIndicator");
             this.removeGraphics();
-            topic.publish("hideInfoWindow");
+            if (!this.sharedGraphic) {
+                topic.publish("hideInfoWindow");
+            }
             if (this.map.getLayer("geoLocationGraphicsLayer").graphics.length > 0) {
                 pushPinGemotery = this.map.getLayer("geoLocationGraphicsLayer").graphics;
             } else {
@@ -581,7 +604,7 @@ define([
                 dijit.registry.byId("geoLocation").onGeolocationComplete = lang.hitch(this, function (mapPoint, isPreLoaded) {
                     if (mapPoint) {
                         if (!isPreLoaded) {
-                            var routeObject = { "StartPoint": mapPoint, "EndPoint": this.featureSetWithoutNullValue };
+                            var routeObject = { "StartPoint": mapPoint, "EndPoint": this.featureSetWithoutNullValue, WidgetName: "routeForList" };
                             this._showRouteForList(routeObject);
                         } else {
                             topic.publish("hideProgressIndicator");

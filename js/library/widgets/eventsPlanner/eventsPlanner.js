@@ -59,6 +59,7 @@ define([
         featureSetOfInfoWindow: null,
         addToListFeatures: [],
         dateFieldArray: [],
+        isEventShared: false,
         /**
         * create eventsPlanner widget
         *
@@ -125,23 +126,35 @@ define([
             }));
 
             topic.subscribe("addToMyList", lang.hitch(this, function (featureArray) {
-                var infoWindowClick = true;
+                var infoWindowClick = true, eventDataObject;
                 this.featureSetOfInfoWindow = featureArray;
                 this.addToListFeatures.push(this.featureSetOfInfoWindow);
-                this._addtoMyList(featureArray.attributes, this.featureSet, infoWindowClick);
+                eventDataObject = { "eventDetails": featureArray.attributes, "featureSet": this.featureSet, "infoWindowClick": infoWindowClick };
+                this._addtoMyList(eventDataObject);
             }));
 
             topic.subscribe("getEventObjectID", lang.hitch(this, function (value) {
                 this.objectId = value;
             }));
-
             this.own(on(this.directionForEvents, "click", lang.hitch(this, function () {
                 this._eventForListClick();
             })));
-
             this.own(on(this.printEventList, "click", lang.hitch(this, function () {
                 this._printForEventList();
             })));
+            setTimeout(lang.hitch(this, function () {
+                if (window.location.toString().split("$eventplanner=").length > 1) {
+                    var startDate, endDate;
+                    startDate = window.location.toString().split("$startDate=")[1].split("$endDate=")[0].replace(new RegExp(",", 'g'), "/");
+                    endDate = window.location.toString().split("$startDate=")[1].split("$endDate=")[1].split("$")[0].replace(new RegExp(",", 'g'), "/");
+                    this._queryForActivity(startDate, endDate);
+                    this.isEventShared = true;
+                    if (window.location.toString().split("$eventRoutePoint=")[1] !== "") {
+                        dojo.eventRoutePoint = window.location.toString().split("$eventRoutePoint=")[1].split("$")[0];
+                        topic.publish("getExecuteQueryForFeatures", dojo.eventRoutePoint, dojo.configData.EventSearchSettings[0].QueryURL, "Event");
+                    }
+                }
+            }), 5000);
         },
 
         /**
@@ -173,7 +186,7 @@ define([
         _showActivitiesList: function (featureSet) {
             topic.publish("showProgressIndicator");
             var _self = this, splitedField, AddressField, startDateFeild, infoWindowParameter, activityListObjectId, objectIdField, displayDateFormat, nameField, activityList, sortedActivityList, activityPlannerContainer, plannerListTable, activityPlannerListRow, activityPlannerLeft = [],
-                activityPlannerAddList = [], activityPlannerRight, eventDate, name, startDate, l, address, eventIndex, startDateAtt, objectIDAttr;
+                activityPlannerAddList = [], activityPlannerRight, eventDate, name, startDate, l, address, eventIndex, startDateAtt, objectIDAttr, a, eventDataObject;
             array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (eventSearchSettings, eventSettingIndex) {
                 if (featureSet) {
                     this.featureSet = this._changeDateFormat(featureSet, eventSettingIndex);
@@ -230,8 +243,16 @@ define([
                     domConstruct.create("div", { "class": "esriCTPlusRound" }, activityPlannerAddList[k]);
                     on(activityPlannerAddList[k], "click", lang.hitch(this, function (e) {
                         eventIndex = array.indexOf(activityPlannerAddList, e.currentTarget);
-                        this._addtoMyList(activityPlannerLeft[eventIndex].value, this.featureSet, false);
+                        dojo.addToListIndex = activityPlannerAddList;
+                        eventDataObject = { "eventDetails": activityPlannerLeft[eventIndex].value, "featureSet": this.featureSet, "infoWindowClick": false };
+                        if (dojo.eventIndex) {
+                            dojo.eventIndex += "," + eventIndex.toString();
+                        } else {
+                            dojo.eventIndex = eventIndex.toString();
+                        }
+                        this._addtoMyList(eventDataObject);
                     }));
+
                     on(activityPlannerLeft[k], "click", lang.hitch(this, function (e) {
                         activityListObjectId = e.currentTarget.value[this.objectId];
                         var featureData;
@@ -250,9 +271,19 @@ define([
                             "featureArray": featureData,
                             "featureSet": featureData
                         };
+                        dojo.mapClickedPoint = featureData.geometry;
                         topic.publish("createInfoWindowContent", infoWindowParameter);
                     }));
                 }, this);
+                setTimeout(lang.hitch(this, function () {
+                    if (window.location.href.split("$eventIndex=")[1] !== "$eventRoutePoint=" && this.isEventShared) {
+                        for (a = 0; a < window.location.href.split("$eventIndex=")[1].split("$")[0].split(",").length; a++) {
+                            eventDataObject = { "eventDetails": activityPlannerLeft[a].value, "featureSet": this.featureSet, "infoWindowClick": false };
+                            this._addtoMyList(eventDataObject);
+                            this.isEventShared = false;
+                        }
+                    }
+                }), 5000);
                 domStyle.set(activityPlannerContainer, "display", "block");
             }));
             topic.publish("hideProgressIndicator");
@@ -357,6 +388,7 @@ define([
                 formattedToDate = locale.format(this.myToDate.value, { datePattern: dateFormat, selector: "date" });
                 try {
                     this._queryForActivity(formattedFromDate, formattedToDate);
+                    //this._queryForActivity(dojo.fromDate, dojo.toDate);
                 } catch (error) {
                     alert(error);
                 }
@@ -391,17 +423,11 @@ define([
             return isValid;
         },
 
-        /**
-        * add the selected event to my list and displays the sorted list
-        * @param {object} eventDetails contains eventPlanner details
-        * @memberOf widgets/eventPlanner/eventPlanner
-        */
-        _addtoMyList: function (eventDetails, featureSet, infowindowClick) {
+        _addtoMyList: function (eventDataObject) {
             topic.publish("showProgressIndicator");
             var sortedMyList, eventObject;
-
             //add the selected event object to the memory store
-            this.myListStore.add(eventDetails);
+            this.myListStore.add(eventDataObject.eventDetails);
             if (this.myListStore.data.length > 0) {
                 domClass.replace(this.directionForEvents, "esriCTHeaderDirectionAcitivityList", "esriCTHeaderDirectionAcitivityListDisable");
                 domClass.replace(this.shareForEvent, "esriCTHeaderShareAcitivityList ", "esriCTHeaderShareAcitivityListDisable");
@@ -412,7 +438,7 @@ define([
                 domClass.replace(this.orderByDateImage, "esriCTImgOrderByDate", "esriCTImgOrderByDateDisable");
             }
             //display myList tab
-            if (!infowindowClick) {
+            if (!eventDataObject.infowindowClick) {
                 domClass.replace(this.activityTab, "esriCTEventTab", "esriCTEventTabSelected");
                 domClass.replace(this.activityListTab, "esriCTEventListTabSelected", "esriCTEventListTab");
                 domStyle.set(this.activityPlanner, "display", "none");
@@ -424,10 +450,10 @@ define([
             }
             //sort with ascending order of date
             sortedMyList = this._sortMyList(true, this.featureSet);
-            if (!infowindowClick) {
-                eventObject = { "EventDeatils": eventDetails, "SortedData": sortedMyList, "InfowindowClick": infowindowClick };
+            if (!eventDataObject.infowindowClick) {
+                eventObject = { "EventDeatils": eventDataObject.eventDetails, "SortedData": sortedMyList, "InfowindowClick": eventDataObject.infowindowClick };
             } else {
-                eventObject = { "EventDeatils": eventDetails, "SortedData": sortedMyList, "InfowindowClick": infowindowClick };
+                eventObject = { "EventDeatils": eventDataObject.eventDetails, "SortedData": sortedMyList, "InfowindowClick": eventDataObject.infowindowClick };
             }
             this._refreshMyList(eventObject);
             topic.publish("hideProgressIndicator");
@@ -442,6 +468,7 @@ define([
             topic.publish("showProgressIndicator");
             var myListContainer, isIndexFound = false, evenObjectID, featureArray = [], eventObjectToRefresh, startDateFeild, AddressField, myListTable, myListRow, myListLeft = [], myListRight, widgetName, myListIcons, eventDate, name, address, objectIdField, myListDeleteIcon = [], k, directionAcitivityList = [], objectidOfEvents, index, splitedField, eventIndex,
                 activityListObjectId, l, infoWindowParameter;
+            dojo.addToListEvents = eventObject;
             if (this.featureSet) {
                 this.featureSet.features = this._removeNullValue(this.featureSet.features);
             }
@@ -499,6 +526,7 @@ define([
                             "featureArray": featureData,
                             "featureSet": featureData
                         };
+                        dojo.mapClickedPoint = featureData.geometry;
                         topic.publish("createInfoWindowContent", infoWindowParameter);
                     }));
                     directionAcitivityList[j] = domConstruct.create("div", { "class": "esriCTDirectionEventList" }, myListIcons);
@@ -520,6 +548,8 @@ define([
                             }
                             if (isIndexFound) {
                                 featureArray.push(this.featureSet.features[index]);
+                                dojo.eventRoutePoint = this.featureSet.features[index].attributes.OBJECTID;
+                                dojo.featureObject = this.featureSet;
                             } else {
                                 featureArray.push(this.featureSetOfInfoWindow);
                             }
@@ -538,8 +568,6 @@ define([
                     } else {
                         domClass.remove(myListRow, "esriCTMyListRowChecked");
                     }
-
-
                     on(myListDeleteIcon[j], "click", lang.hitch(this, function (e) {
                         eventIndex = array.indexOf(myListDeleteIcon, e.currentTarget);
                         this.myListStore.remove(myListLeft[eventIndex].value.id);
@@ -597,11 +625,13 @@ define([
         _queryForActivity: function (startDate, endDate) {
             var queryTask, queryLayer, eventLayer, layerRequestData;
             this.dateFieldArray = null;
+            dojo.eventPlannerQuery = startDate.toString() + "," + endDate.toString();
             array.forEach(dojo.configData.EventSearchSettings, (lang.hitch(this, function (eventSearchSettings) {
                 eventLayer = eventSearchSettings.QueryURL;
                 queryTask = new QueryTask(eventLayer);
                 queryLayer = new Query();
                 queryLayer.where = string.substitute(eventSearchSettings.SearchExpressionForDate, { "0": "'" + startDate + "'", "1": "'" + endDate + "'" });
+                //dojo.eventPlannerQuery = queryLayer.where;
                 queryLayer.outSpatialReference = this.map.spatialReference;
                 queryLayer.returnGeometry = true;
                 queryLayer.outFields = ["*"];
@@ -746,8 +776,8 @@ define([
                     };
                     eventDataArray.push(directionData);
                 }
+                this.printForEventList = new PrintForEventWindow({ "eventListData": eventDataArray });
             }
-            this.printForEventList = new PrintForEventWindow({ "eventListData": eventDataArray });
         },
 
         /**
