@@ -185,12 +185,10 @@
     {
         width: 61px;
     }
-
     .esriCTTxtAddress
     {
         font-size: 14px !important;
     }
-
     .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding
     {
         height: 44px !important;
@@ -260,7 +258,6 @@
     {
         font-size: 14px !important;
     }
-
     .esriCTTxtAddress
     {
         font-size: 14px !important;
@@ -317,7 +314,7 @@
     .esriCTApplicationHeader
     {
         height: 61px;
-        z-index: 997;
+        z-index: 1000;
     }
 
     .esriCTDivActivityAppContainer
@@ -466,6 +463,7 @@
         z-index: 1000;
         background: #fff;
         width: 100%;
+        text-align: left;
     }
 
     .scrollbar_footerVisible
@@ -475,7 +473,7 @@
 
     .esriCTinfoWindow
     {
-        z-index: 998;
+        z-index: 1001;
     }
     .esriCTInfoScrollContent
     {
@@ -497,9 +495,6 @@
     {
         bottom: 35px !important;
     }
-
-
-
     .esriCTActivityList, .esriCTEventPlannerListTable, .esriCTActivityPlaner
     {
         width: 100%;
@@ -537,14 +532,6 @@
         width: 135px !important;
     }
 
-    .esriCTTickMark
-    {
-        background-position: 94%;
-    }
-    .esriCTActivityText
-    {
-        padding-right: 60px;
-    }
     .scrollbar_footerVisible
     {
         display: none;
@@ -704,6 +691,7 @@
     {
         font-size: 14px !important;
     }
+    /*********************************************************/
 
     .esriCTDivSearchResultHolder, .esriCTAddressContentHeight
     {
@@ -713,16 +701,11 @@
     {
         width: 300px;
     }
-    .esriCTTxtAddress
-    {
-        font-size: 15px !important;
-        width: 210px;
-    }
 
     .esriCTApplicationHeader
     {
         height: 61px !important;
-        z-index: 997;
+        z-index: 1000;
     }
 
     .esriCTDivActivityAppContainer, .esriCTDivSearchResultHolder
@@ -934,6 +917,7 @@
         z-index: 1000;
         background: #fff;
         width: 100%;
+        text-align: left;
     }
 
     .scrollbar_footerVisible
@@ -943,7 +927,7 @@
 
     .esriCTinfoWindow
     {
-        z-index: 998;
+        z-index: 1001;
     }
 
 
@@ -1023,7 +1007,7 @@
 
     .esriCTDivFromDate, .esriCTDivToDate
     {
-        width: 118px !important;
+        width: 117px !important;
     }
 
     .esriCTActiviyDateInnerContainer, .esriCTActivityPlaner
@@ -1042,14 +1026,6 @@
         width: 220px;
     }
 
-    .esriCTTickMark
-    {
-        background-position: 88%;
-    }
-    .esriCTActivityText
-    {
-        padding-right: 60px;
-    }
     .scrollbar_footerVisible
     {
         display: none;
@@ -1111,7 +1087,7 @@
 
     .esriCTinfoWindow
     {
-        z-index: 998;
+        z-index: 1001;
     }
 
     .esriCTRightTab

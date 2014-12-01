@@ -152,10 +152,15 @@ define([
         * @memberOf widgets/carouselContainer/carouselContainer
         */
         showCarouselContainer: function () {
+            var legendChangePositionDownContainer;
             if (this.divCarouselContent && this.isResultFound > 0) {
                 domStyle.set(this.divImageBackground, "display", "block");
                 domStyle.set(this.divCarouselContent, "display", "block");
                 domStyle.set(this.divToggle, "display", "block");
+                legendChangePositionDownContainer = query('.esriCTDivLegendBox')[0];
+                if (legendChangePositionDownContainer) {
+                    domClass.add(legendChangePositionDownContainer, "esriCTDivLegendBoxTop");
+                }
             }
         },
 
@@ -165,9 +170,14 @@ define([
         */
         hideCarouselContainer: function () {
             if (this.divCarouselContent) {
+                var legendChangePositionDownContainer;
                 domStyle.set(this.divImageBackground, "display", "none");
                 domStyle.set(this.divCarouselContent, "display", "none");
                 domStyle.set(this.divToggle, "display", "none");
+                legendChangePositionDownContainer = query('.esriCTDivLegendBox')[0];
+                if (legendChangePositionDownContainer) {
+                    domClass.remove(legendChangePositionDownContainer, "esriCTDivLegendBoxTop");
+                }
             }
         },
 

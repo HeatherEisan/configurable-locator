@@ -1,4 +1,4 @@
-﻿/*global define,dojo */
+﻿/*global define,dojo,alert */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -41,6 +41,7 @@ define([
         sharedNls: sharedNls,
         InfoShow: true,
         widgetName: null,
+        isTabEnabled: true,
 
         postCreate: function () {
             this.infoWindowContainer = domConstruct.create("div", {}, dom.byId("esriCTParentDivContainer"));
@@ -115,15 +116,76 @@ define([
         },
 
         show: function (screenPoint) {
+            var iscommentsPodEnabled = this.getPodStatus("CommentsPod"), tabName, tabEnabled = 0, isdirectionsPodEnabled, isgalleryPodEnabled, isfacilityInformationPodEnabled, faclityInfo;
+            isdirectionsPodEnabled = this.getPodStatus("DirectionsPod");
+            isgalleryPodEnabled = this.getPodStatus("GalleryPod");
+            isfacilityInformationPodEnabled = this.getPodStatus("FacilityInformationPod");
+
+            if (!isgalleryPodEnabled) {
+                domStyle.set(this.galleryTab, "display", "none");
+            } else {
+                tabEnabled++;
+                tabName = "GalleryPod";
+            }
+            if (!isfacilityInformationPodEnabled) {
+                domStyle.set(this.informationTab, "display", "none");
+            } else {
+                tabEnabled++;
+                tabName = "FacilityInformationPod";
+            }
+            if (!isdirectionsPodEnabled) {
+                domStyle.set(this.esriCTGetDir, "display", "none");
+            } else {
+                tabEnabled++;
+                tabName = "DirectionsPod";
+            }
+            if (!iscommentsPodEnabled) {
+                domStyle.set(this.commentsTab, "display", "none");
+            } else {
+                tabEnabled++;
+                tabName = "CommentsPod";
+            }
             if (this.widgetName.toLowerCase() === "infoevent") {
                 domStyle.set(this.commentsTab, "display", "none");
             } else if (this.widgetName.toLowerCase() === "infoactivity") {
-                domStyle.set(this.commentsTab, "display", "block");
+                if (iscommentsPodEnabled) {
+                    domStyle.set(this.commentsTab, "display", "block");
+                } else {
+                    domStyle.set(this.commentsTab, "display", "none");
+                }
             }
             this.InfoShow = false;
-            this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
-            this.setLocation(screenPoint);
-            //dojo.isInfoPopupShared = false;
+            faclityInfo = "FacilityInformationPod";
+            if (tabEnabled > 1 && dojo.configData.PodSettings[1][faclityInfo].Enabled) {
+                this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
+            } else {
+                if (tabName === "CommentsPod") {
+                    this._showInfoWindowTab(this.commentsTab, dojo.byId("commentsTabContainer"));
+                } else if (tabName === "GalleryPod") {
+                    this._showInfoWindowTab(this.galleryTab, dojo.byId("galleryTabContainer"));
+                } else if (tabName === "FacilityInformationPod") {
+                    this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
+                } else if (tabName === "DirectionsPod") {
+                    this._showInfoWindowTab(this.esriCTGetDir, dojo.byId("getDirContainer"));
+                    domClass.add(this.getDirselect, "esriCTImageTabSelected");
+                    domClass.remove(this.getDirselect, "esriCTImageTab");
+                } else {
+                    this.isTabEnabled = false;
+                    domClass.remove(this.divInfoContainer, "displayBlock");
+                    alert("Please enable the PodSettings in Config.");
+                }
+            }
+            if (tabName) {
+                if (tabName === "CommentsPod" && this.widgetName.toLowerCase() === "infoevent" && tabEnabled === 1) {
+                    this.isTabEnabled = false;
+                    domClass.remove(this.divInfoContainer, "displayBlock");
+                    alert("Please enable the PodSettings in Config.");
+                } else if (tabName && this.widgetName.toLowerCase() === "infoactivity") {
+                    this.setLocation(screenPoint);
+                } else {
+                    this.setLocation(screenPoint);
+                }
+            }
         },
 
         resize: function (width, height) {
@@ -161,15 +223,17 @@ define([
         },
 
         setLocation: function (location) {
-            if (location.spatialReference) {
-                location = this.map.toScreen(location);
-            }
-            domStyle.set(this.domNode, {
-                left: (location.x - (this.infoWindowWidth / 2)) + "px",
-                bottom: (location.y + 25) + "px"
-            });
-            if (!this.InfoShow) {
-                domUtils.show(this.domNode);
+            if (this.isTabEnabled) {
+                if (location.spatialReference) {
+                    location = this.map.toScreen(location);
+                }
+                domStyle.set(this.domNode, {
+                    left: (location.x - (this.infoWindowWidth / 2)) + "px",
+                    bottom: (location.y + 25) + "px"
+                });
+                if (!this.InfoShow) {
+                    domUtils.show(this.domNode);
+                }
             }
         },
 
@@ -192,8 +256,8 @@ define([
         * @memberOf widgets/infoWindow/infoWindow
         */
         onWindowResize: function () {
-            this.infoWindowzIndex = 1000;
-            domStyle.set(this.domNode, { zIndex: 1000 });
+            this.infoWindowzIndex = 1001;
+            domStyle.set(this.domNode, { zIndex: 1001 });
         },
 
         /**
@@ -205,6 +269,8 @@ define([
                 this.infoWindowzIndex = 1002;
                 domStyle.set(this.domNode, { zIndex: 1002 });
             } else {
+                dojo.doQuery = "false";
+                dojo.addressLocationDirectionActivity = null;
                 this.infoWindowzIndex = 997;
                 domStyle.set(this.domNode, { zIndex: 997 });
             }
@@ -238,6 +304,26 @@ define([
             domClass.remove(query(".esriCThidedivTriangle")[0], "esriCThidedivTriangle");
             domClass.remove(query(".esriCTInfoWindow")[0], "esriCTinfoWindowHeightWidth");
             domClass.add(query(".esriCTCloseDivMobile")[0], "scrollbar_footerVisible");
+        },
+        /**
+        * Returns the pod enabled status from config file.
+        * @param {string} Key name mensioned in config file
+        * @memberOf widgets/infoWindow/infoWindow
+        */
+        getPodStatus: function (keyValue) {
+            var isEnabled, i, key;
+            isEnabled = false;
+            for (i = 0; i < dojo.configData.PodSettings.length; i++) {
+                for (key in dojo.configData.PodSettings[i]) {
+                    if (dojo.configData.PodSettings[i].hasOwnProperty(key)) {
+                        if (key === keyValue && dojo.configData.PodSettings[i][key].Enabled) {
+                            isEnabled = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            return isEnabled;
         }
     });
 });

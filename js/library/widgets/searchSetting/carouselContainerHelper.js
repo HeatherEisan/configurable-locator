@@ -49,10 +49,10 @@ define([
         */
         createCarouselPod: function () {
             var divCarouselPod, divGallerycontent, divPodInfoContainer, divcommentcontent, divHeader, divsearchcontent, i, key, carouselPodKey;
-            for (i = 0; i < dojo.configData.BottomPanelInfoPodSettings.length; i++) {
-                for (key in dojo.configData.BottomPanelInfoPodSettings[i]) {
-                    if (dojo.configData.BottomPanelInfoPodSettings[i].hasOwnProperty(key)) {
-                        if (dojo.configData.BottomPanelInfoPodSettings && dojo.configData.BottomPanelInfoPodSettings[i][key].Enabled) {
+            for (i = 0; i < dojo.configData.PodSettings.length; i++) {
+                for (key in dojo.configData.PodSettings[i]) {
+                    if (dojo.configData.PodSettings[i].hasOwnProperty(key)) {
+                        if (dojo.configData.PodSettings && dojo.configData.PodSettings[i][key].Enabled) {
                             divCarouselPod = domConstruct.create("div", { "class": "esriCTBoxContainer" });
                             divPodInfoContainer = domConstruct.create("div", { "class": "esriCTInfoContainer" }, divCarouselPod);
                             carouselPodKey = key;
@@ -115,7 +115,7 @@ define([
         setSearchContent: function (result, isBufferNeeded, queryURL, widgetName) {
             var isPodEnabled = this.getPodStatus("SearchResultPod"), subStringRouteUnit, searchContenTitle, searchedFacilityObject, divHeaderContent, i, resultcontent = [], milesCalulatedData, searchContenData;
             if (isPodEnabled) {
-                if (widgetName.toLowerCase() === "unifiedsearch") {
+                if (widgetName.toLowerCase() === "unifiedsearch" || widgetName.toLowerCase() === "geolocation") {
                     searchContenTitle = sharedNls.titles.numberOfFeaturesFoundNearAddress;
                     searchContenData = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
                 } else if (widgetName.toLowerCase() === "activitysearch") {
@@ -138,14 +138,15 @@ define([
                         }
                         if (widgetName.toLowerCase() !== "event") {
                             resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotext", "innerHTML": result[i].attributes[searchContenData] + milesCalulatedData }, divHeaderContent[0]);
-                            domClass.add(resultcontent[0], "esriCTDivHighlightFacility");
                             domAttr.set(resultcontent[i], "value", i);
                             searchedFacilityObject = { "FeatureData": result, "SelectedRow": resultcontent[i], "IsBufferNeeded": isBufferNeeded, "QueryLayer": queryURL, "WidgetName": widgetName, "searchedFacilityIndex": i };
                             this.own(on(resultcontent[i], "click", lang.hitch(this, this._clickOnSearchedFacility, searchedFacilityObject)));
-                            if (window.location.href.toString().split("$selectedSearchResult=").length > 1 && !this.isFirstSearchResult && Number(window.location.href.toString().split("$selectedSearchResult=")[1].split("$")[0]) === i) {
-                                this.sharedGraphic = true;
+                            if (window.location.href.toString().split("$selectedSearchResult=").length > 1 && Number(window.location.href.toString().split("$selectedSearchResult=")[1].split("$")[0]) === i) {
+                                domClass.add(resultcontent[i], "esriCTDivHighlightFacility");
                                 this._clickOnSearchedFacility(searchedFacilityObject);
                                 this.isFirstSearchResult = true;
+                            } else if (query('.esriCTDivHighlightFacility').length < 1 && !this.isFirstSearchResult) {
+                                domClass.add(resultcontent[0], "esriCTDivHighlightFacility");
                             }
                         } else {
                             resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotextForEvent", "innerHTML": result[i].attributes[searchContenData] + milesCalulatedData }, divHeaderContent[0]);
@@ -175,6 +176,8 @@ define([
                     } else if (facilityObject.WidgetName.toLowerCase() === "event") {
                         facilityContenTitle = this.getKeyValue(dojo.configData.EventSearchSettings[0].SearchDisplayFields);
                     } else if (facilityObject.WidgetName.toLowerCase() === "searchedfacility") {
+                        facilityContenTitle = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
+                    } else if (facilityObject.WidgetName.toLowerCase() === "geolocation") {
                         facilityContenTitle = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
                     }
                     facilityObject.Feature = this.removeNullValue(facilityObject.Feature);
@@ -239,6 +242,8 @@ define([
                         directionTitle = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
                     } else if (directionObject.WidgetName.toLowerCase() === "event") {
                         directionTitle = this.getKeyValue(dojo.configData.EventSearchSettings[0].SearchDisplayFields);
+                    } else if (directionObject.WidgetName.toLowerCase() === "geolocation") {
+                        directionTitle = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
                     } else {
                         directionTitle = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
                     }
@@ -444,8 +449,30 @@ define([
         * @memberOf widgets/searchResult/carouselContainerHelper
         */
         _getSubStringUnitData: function () {
-            var routeUnitString;
-            routeUnitString = " " + this._esriDirectionsWidget.directionsLengthUnits.substring(4, this._esriDirectionsWidget.directionsLengthUnits.length);
+            var routeUnitString, unitsValue, unitName, defaultUnit = "Miles";
+            if (this._esriDirectionsWidget.directionsLengthUnits.substring(0, 4) === "esri") {
+                unitsValue = this._esriDirectionsWidget.directionsLengthUnits.substring(4, this._esriDirectionsWidget.directionsLengthUnits.length).toUpperCase();
+            } else {
+                unitsValue = "KILOMETERS";
+            }
+            switch (unitsValue) {
+            case "MILES":
+                unitName = "Miles";
+                break;
+            case "METERS":
+                unitName = "Meters";
+                break;
+            case "KILOMETERS":
+                unitName = "Kilometers";
+                break;
+            case "NAUTICALMILES":
+                unitName = "Nautical Miles";
+                break;
+            default:
+                unitName = defaultUnit;
+                break;
+            }
+            routeUnitString = " " + unitName;
             return routeUnitString;
         }
     });

@@ -98,11 +98,12 @@ define([
                 this.myToDate.constraints.min = this.myFromDate.value;
             })));
             this.own(on(this.bottonGo, "click", lang.hitch(this, function () {
-                topic.publish("hideInfoWindow");
+                var isExtentSet = true;
+                topic.publish("extentSetValue", isExtentSet);
+                topic.publish("isSharedLink");
                 this.featureSet = null;
                 this._activityPlannerDateValidation();
             })));
-
             this.own(on(this.activityTab, "click", lang.hitch(this, function () {
                 this._showActivityListTab();
             })));
@@ -110,7 +111,9 @@ define([
                 this._showActivityTab();
             })));
             this.own(on(this.orderByDate, "click", lang.hitch(this, function () {
-                var sortedMyList, eventObject;
+                var isExtentSet = true, sortedMyList, eventObject;
+                topic.publish("extentSetValue", isExtentSet);
+                topic.publish("isSharedLink");
                 if (dojo.hasClass(this.orderByDateImage, "esriCTImgOrderByDateDown")) {
                     //sort with descending order of date
                     sortedMyList = this._sortMyList(false, this.featureSet);
@@ -124,37 +127,53 @@ define([
             topic.subscribe("getInfoWidgetName", lang.hitch(this, function (value) {
                 this.infowIndexForMyList = value;
             }));
-
             topic.subscribe("addToMyList", lang.hitch(this, function (featureArray) {
-                var infoWindowClick = true, eventDataObject;
+                var isExtentSet = true, infoWindowClick = true, addToListEventFeature = [], i, eventDataObject;
+                topic.publish("extentSetValue", isExtentSet);
+                topic.publish("isSharedLink");
                 this.featureSetOfInfoWindow = featureArray;
+                dojo.eventInfoWindowData = featureArray.geometry;
                 this.addToListFeatures.push(this.featureSetOfInfoWindow);
+                if (this.addToListFeatures.length > 0) {
+                    for (i = 0; i < this.addToListFeatures.length; i++) {
+                        addToListEventFeature.push(this.addToListFeatures[i].attributes.OBJECTID);
+                    }
+                }
+                dojo.eventInfoWindowAttribute = addToListEventFeature.join(",");
                 eventDataObject = { "eventDetails": featureArray.attributes, "featureSet": this.featureSet, "infoWindowClick": infoWindowClick };
                 this._addtoMyList(eventDataObject);
             }));
-
             topic.subscribe("getEventObjectID", lang.hitch(this, function (value) {
                 this.objectId = value;
             }));
             this.own(on(this.directionForEvents, "click", lang.hitch(this, function () {
+                var isExtentSet = true;
+                topic.publish("extentSetValue", isExtentSet);
+                topic.publish("isSharedLink");
                 this._eventForListClick();
             })));
             this.own(on(this.printEventList, "click", lang.hitch(this, function () {
                 this._printForEventList();
             })));
             setTimeout(lang.hitch(this, function () {
+                var startDate, endDate, formatedStartDate, formatedEndDate, eventObjectId;
                 if (window.location.toString().split("$eventplanner=").length > 1) {
-                    var startDate, endDate;
-                    startDate = window.location.toString().split("$startDate=")[1].split("$endDate=")[0].replace(new RegExp(",", 'g'), "/");
-                    endDate = window.location.toString().split("$startDate=")[1].split("$endDate=")[1].split("$")[0].replace(new RegExp(",", 'g'), "/");
-                    this._queryForActivity(startDate, endDate);
+                    startDate = window.location.toString().split("$startDate=")[1].split("$endDate=")[0].replace(new RegExp(",", 'g'), " ");
+                    endDate = window.location.toString().split("$startDate=")[1].split("$endDate=")[1].split("$")[0].replace(new RegExp(",", 'g'), " ");
+                    formatedStartDate = locale.format(new Date(startDate), { datePattern: "MM/dd/yyyy", selector: "date" });
+                    formatedEndDate = locale.format(new Date(endDate), { datePattern: "MM/dd/yyyy", selector: "date" });
+                    this._queryForActivity(formatedStartDate, formatedEndDate);
+                    this.myToDate.textbox.value = formatedEndDate;
+                    this.myFromDate.textbox.value = formatedStartDate;
+                    topic.publish("toggleWidget", "eventsPlanner");
+                    this._showActivityTab();
                     this.isEventShared = true;
-                    if (window.location.toString().split("$eventRoutePoint=")[1] !== "") {
-                        dojo.eventRoutePoint = window.location.toString().split("$eventRoutePoint=")[1].split("$")[0];
-                        topic.publish("getExecuteQueryForFeatures", dojo.eventRoutePoint, dojo.configData.EventSearchSettings[0].QueryURL, "Event");
-                    }
                 }
-            }), 5000);
+                if (window.location.toString().split("$eventInfoWindowAttribute=").length > 1) {
+                    eventObjectId = window.location.toString().split("eventInfoWindowAttribute=")[1].split("$")[0];
+                    this._queryForEventShare(eventObjectId);
+                }
+            }), 3000);
         },
 
         /**
@@ -168,7 +187,6 @@ define([
                 */
                 domClass.replace(this.domNode, "esriCTEventsImg", "esriCTEventsImgSelected");
                 domClass.replace(this.applicationHeaderActivityContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
-                // domClass.replace(this.applicationHeaderActivityContainer, "esriCTZeroHeight", "esriCTEventHeight");
             } else {
                 /**
                 * when user clicks on eventPlanner icon in header panel, open the eventPlanner panel if it is closed
@@ -185,15 +203,15 @@ define([
         */
         _showActivitiesList: function (featureSet) {
             topic.publish("showProgressIndicator");
-            var _self = this, splitedField, AddressField, startDateFeild, infoWindowParameter, activityListObjectId, objectIdField, displayDateFormat, nameField, activityList, sortedActivityList, activityPlannerContainer, plannerListTable, activityPlannerListRow, activityPlannerLeft = [],
-                activityPlannerAddList = [], activityPlannerRight, eventDate, name, startDate, l, address, eventIndex, startDateAtt, objectIDAttr, a, eventDataObject;
+            var splitedField, AddressField, startDateFeild, infoWindowParameter, activityListObjectId, objectIdField, nameField, activityList, sortedActivityList, activityPlannerContainer, plannerListTable, activityPlannerListRow, activityPlannerLeft = [],
+                activityPlannerAddList = [], activityPlannerRight, name, startDate, l, address, eventIndex, startDateAtt, objectIDAttr, eventDataObject, featureArray = [], a, k, index, objectId, isIndexFound;
             array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (eventSearchSettings, eventSettingIndex) {
                 if (featureSet) {
                     this.featureSet = this._changeDateFormat(featureSet, eventSettingIndex);
+                    this.featureSet = featureSet;
                     this.featureSet.features = this._removeNullValue(this.featureSet.features);
                 }
                 objectIdField = this.objectId;
-                displayDateFormat = eventSearchSettings.DisplayDateFormat;
                 nameField = eventSearchSettings.SearchDisplayFields;
                 splitedField = eventSearchSettings.SearchDisplaySubFields.split(',');
                 startDateFeild = splitedField[0];
@@ -232,30 +250,29 @@ define([
                     }
                     domConstruct.create("div", { "class": "esriCTEventPlannerText", "innerHTML": name }, activityPlannerLeft[k]);
                     //convert the date in millisecond to display date format
-                    eventDate = dojo.date.locale.format(_self.utcTimestampFromMs(startDate), { datePattern: displayDateFormat, selector: "date" });
                     if (!address) {
                         address = sharedNls.showNullValue;
                     }
-                    domConstruct.create("div", { "class": "esriCTEventPlannerDates", "innerHTML": eventDate + "," + " " + address }, activityPlannerLeft[k]);
+                    domConstruct.create("div", { "class": "esriCTEventPlannerDates", "innerHTML": startDate + "," + " " + address }, activityPlannerLeft[k]);
                     activityPlannerRight = domConstruct.create("div", { "class": "esriCTEventPlannerRight" }, activityPlannerListRow);
                     activityPlannerAddList[k] = domConstruct.create("div", { "class": "esriCTEventPlannerAddlist" }, activityPlannerRight);
                     domConstruct.create("div", { "class": "esriCTEventPlannerAddlistText", "innerHTML": "Add to List" }, activityPlannerAddList[k]);
                     domConstruct.create("div", { "class": "esriCTPlusRound" }, activityPlannerAddList[k]);
                     on(activityPlannerAddList[k], "click", lang.hitch(this, function (e) {
+                        var isExtentSet = true;
+                        topic.publish("extentSetValue", isExtentSet);
+                        topic.publish("isSharedLink");
                         eventIndex = array.indexOf(activityPlannerAddList, e.currentTarget);
                         dojo.addToListIndex = activityPlannerAddList;
                         eventDataObject = { "eventDetails": activityPlannerLeft[eventIndex].value, "featureSet": this.featureSet, "infoWindowClick": false };
-                        if (dojo.eventIndex) {
-                            dojo.eventIndex += "," + eventIndex.toString();
-                        } else {
-                            dojo.eventIndex = eventIndex.toString();
-                        }
                         this._addtoMyList(eventDataObject);
                     }));
 
                     on(activityPlannerLeft[k], "click", lang.hitch(this, function (e) {
+                        var isExtentSet = true, featureData;
+                        topic.publish("extentSetValue", isExtentSet);
+                        topic.publish("isSharedLink");
                         activityListObjectId = e.currentTarget.value[this.objectId];
-                        var featureData;
                         if (this.featureSet) {
                             for (l = 0; l < this.featureSet.features.length; l++) {
                                 if (this.featureSet.features[l].attributes[this.objectId] === activityListObjectId) {
@@ -276,14 +293,54 @@ define([
                     }));
                 }, this);
                 setTimeout(lang.hitch(this, function () {
-                    if (window.location.href.split("$eventIndex=")[1] !== "$eventRoutePoint=" && this.isEventShared) {
+                    if (window.location.href.split("$eventIndex=")[1] && window.location.href.split("$eventIndex=")[1].substring(0, 16) !== "$eventRoutePoint" && this.isEventShared) {
                         for (a = 0; a < window.location.href.split("$eventIndex=")[1].split("$")[0].split(",").length; a++) {
-                            eventDataObject = { "eventDetails": activityPlannerLeft[a].value, "featureSet": this.featureSet, "infoWindowClick": false };
-                            this._addtoMyList(eventDataObject);
-                            this.isEventShared = false;
+                            if (this.featureSet) {
+                                for (k = 0; k < this.featureSet.features.length; k++) {
+                                    if (Number(window.location.href.split("$eventIndex=")[1].split("$")[0].split(",")[a]) === this.featureSet.features[k].attributes[this.objectId]) {
+                                        eventDataObject = { "eventDetails": this.featureSet.features[k].attributes, "featureSet": this.featureSet, "infoWindowClick": false };
+                                        this._addtoMyList(eventDataObject);
+                                        this.isEventShared = false;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                eventDataObject = { "eventDetails": this.featureSetOfInfoWindow[0].features[0].attributes, "featureSet": this.featureSet, "infoWindowClick": false };
+                                this._addtoMyList(eventDataObject);
+                                this.isEventShared = false;
+                            }
                         }
+                        if (window.location.toString().split("$eventRoutePoint=").length > 1 && window.location.toString().split("$eventRoutePoint=")[1].substring(0, 1) !== "$") {
+                            if (window.location.toString().split("$sharedGeolocation=")[1] && window.location.toString().split("$sharedGeolocation=")[1].substring(0, 5) === "false") {
+                                objectId = window.location.toString().split("$eventRoutePoint=")[1].split("$")[0];
+                                isIndexFound = false;
+                                if (this.featureSet) {
+                                    for (k = 0; k < this.featureSet.features.length; k++) {
+                                        if (Number(objectId) === this.featureSet.features[k].attributes[this.objectId]) {
+                                            index = k;
+                                            isIndexFound = true;
+                                            break;
+                                        }
+                                    }
+                                    if (isIndexFound) {
+                                        featureArray.push(this.featureSet.features[index]);
+                                    } else {
+                                        featureArray.push(this.featureSetOfInfoWindow);
+                                    }
+                                } else {
+                                    featureArray.push(this.featureSetOfInfoWindow);
+                                }
+                                domClass.replace(this.applicationHeaderActivityContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
+                                topic.publish("getExecuteQueryForFeatures", featureArray, dojo.configData.EventSearchSettings[0].QueryURL, "Event");
+                            } else if (window.location.toString().split("$eventRouteforList=").length > 1) {
+                                this._eventForListClick();
+                            }
+                        } else if (window.location.toString().split("$eventRouteforList=").length > 1) {
+                            this._eventForListClick();
+                        }
+
                     }
-                }), 5000);
+                }), 3000);
                 domStyle.set(activityPlannerContainer, "display", "block");
             }));
             topic.publish("hideProgressIndicator");
@@ -351,7 +408,33 @@ define([
                         for (key in featureSet.features[k].attributes) {
                             if (featureSet.features[k].attributes.hasOwnProperty(key)) {
                                 if (key === this.dateFieldArray[i]) {
-                                    featureSet.features[k].attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureSet.features[k].attributes[key]), { datePattern: displayDateFormat, selector: "date" });
+                                    if (featureSet.features[k].attributes[key] !== sharedNls.showNullValue) {
+                                        featureSet.features[k].attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureSet.features[k].attributes[key]), { datePattern: displayDateFormat, selector: "date" });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return featureSet;
+        },
+
+        /**
+        * change the date format
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _changeDateFormatForSharedEvents: function (featureSet, index) {
+            var displayDateFormat = dojo.configData.EventSearchSettings[index].DisplayDateFormat, i, key, j;
+            if (featureSet) {
+                for (j = 0; j < this.dateFieldArray.length; j++) {
+                    for (i = 0; i < featureSet.length; i++) {
+                        for (key in featureSet[i].attributes) {
+                            if (featureSet[i].attributes.hasOwnProperty(key)) {
+                                if (key === this.dateFieldArray[j]) {
+                                    if (featureSet[i].attributes[key] !== sharedNls.showNullValue) {
+                                        featureSet[i].attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureSet[i].attributes[key]), { datePattern: displayDateFormat, selector: "date" });
+                                    }
                                 }
                             }
                         }
@@ -388,7 +471,6 @@ define([
                 formattedToDate = locale.format(this.myToDate.value, { datePattern: dateFormat, selector: "date" });
                 try {
                     this._queryForActivity(formattedFromDate, formattedToDate);
-                    //this._queryForActivity(dojo.fromDate, dojo.toDate);
                 } catch (error) {
                     alert(error);
                 }
@@ -425,12 +507,11 @@ define([
 
         _addtoMyList: function (eventDataObject) {
             topic.publish("showProgressIndicator");
-            var sortedMyList, eventObject;
+            var sortedMyList, eventObject, l;
             //add the selected event object to the memory store
             this.myListStore.add(eventDataObject.eventDetails);
             if (this.myListStore.data.length > 0) {
                 domClass.replace(this.directionForEvents, "esriCTHeaderDirectionAcitivityList", "esriCTHeaderDirectionAcitivityListDisable");
-                domClass.replace(this.shareForEvent, "esriCTHeaderShareAcitivityList ", "esriCTHeaderShareAcitivityListDisable");
                 domClass.replace(this.calenderForEvent, "esriCTHeaderAddAcitivityList ", "esriCTHeaderAddAcitivityListDisable");
                 domClass.replace(this.printEventList, "esriCTHeaderPrintAcitivityList", "esriCTHeaderPrintAcitivityListDisable");
                 domClass.replace(this.orderByDateList, "esriCTMyListHeaderText", "esriCTMyListHeaderTextDisable");
@@ -441,6 +522,7 @@ define([
             if (!eventDataObject.infowindowClick) {
                 domClass.replace(this.activityTab, "esriCTEventTab", "esriCTEventTabSelected");
                 domClass.replace(this.activityListTab, "esriCTEventListTabSelected", "esriCTEventListTab");
+                domClass.replace(this.applicationHeaderActivityContainer, "esriCTShowContainerHeight", "esriCTHideContainerHeight");
                 domStyle.set(this.activityPlanner, "display", "none");
                 domStyle.set(this.activityList, "display", "block");
             } else {
@@ -456,7 +538,16 @@ define([
                 eventObject = { "EventDeatils": eventDataObject.eventDetails, "SortedData": sortedMyList, "InfowindowClick": eventDataObject.infowindowClick };
             }
             this._refreshMyList(eventObject);
+            dojo.eventIndex = null;
+            for (l = 0; l < this.myListStore.data.length; l++) {
+                if (dojo.eventIndex) {
+                    dojo.eventIndex += "," + this.myListStore.data[l][this.objectId].toString();
+                } else {
+                    dojo.eventIndex = this.myListStore.data[l][this.objectId].toString();
+                }
+            }
             topic.publish("hideProgressIndicator");
+
         },
 
         /**
@@ -465,9 +556,8 @@ define([
         * @memberOf widgets/eventPlanner/eventPlanner
         */
         _refreshMyList: function (eventObject) {
-            topic.publish("showProgressIndicator");
-            var myListContainer, isIndexFound = false, evenObjectID, featureArray = [], eventObjectToRefresh, startDateFeild, AddressField, myListTable, myListRow, myListLeft = [], myListRight, widgetName, myListIcons, eventDate, name, address, objectIdField, myListDeleteIcon = [], k, directionAcitivityList = [], objectidOfEvents, index, splitedField, eventIndex,
-                activityListObjectId, l, infoWindowParameter;
+            var myListContainer, evenObjectID, featureArray = [], eventObjectToRefresh, startDateFeild, AddressField, myListTable, myListRow, myListLeft = [], myListRight, widgetName, myListIcons, eventDate, name, address, objectIdField, myListDeleteIcon = [], splitedField,
+                eventIndex, activityListObjectId, l, infoWindowParameter, directionAcitivityList = [], m, k;
             dojo.addToListEvents = eventObject;
             if (this.featureSet) {
                 this.featureSet.features = this._removeNullValue(this.featureSet.features);
@@ -505,8 +595,10 @@ define([
                     myListRight = domConstruct.create("div", { "class": "esriCTMyListRight" }, myListRow);
                     myListIcons = domConstruct.create("div", { "class": "esriCTMyListIcons" }, myListRight);
                     on(myListLeft[j], "click", lang.hitch(this, function (e) {
+                        var isExtentSet = true, featureData, isFeatureDataFound = false;
+                        topic.publish("extentSetValue", isExtentSet);
+                        topic.publish("isSharedLink");
                         activityListObjectId = e.currentTarget.value[this.objectId];
-                        var featureData, isFeatureDataFound = false;
                         if (this.featureSet) {
                             for (l = 0; l < this.featureSet.features.length; l++) {
                                 if (this.featureSet.features[l].attributes[this.objectId] === activityListObjectId) {
@@ -531,35 +623,15 @@ define([
                     }));
                     directionAcitivityList[j] = domConstruct.create("div", { "class": "esriCTDirectionEventList" }, myListIcons);
                     domAttr.set(directionAcitivityList[j], "ObjectID", objectIdField);
-                    on(directionAcitivityList[j], "click", lang.hitch(this, function (e) {
-                        topic.publish("getAcitivityListDiv", directionAcitivityList[j]);
-                        topic.publish("hideInfoWindow");
-                        topic.publish("showProgressIndicator");
-                        objectidOfEvents = domAttr.get(e.currentTarget, "ObjectID");
-                        featureArray.length = 0;
-                        if (this.featureSet) {
-                            for (k = 0; k < this.featureSet.features.length; k++) {
-                                if (Number(objectidOfEvents) === this.featureSet.features[k].attributes[this.objectId]) {
-                                    eventObject.InfowindowClick = false;
-                                    index = k;
-                                    isIndexFound = true;
-                                    break;
-                                }
-                            }
-                            if (isIndexFound) {
-                                featureArray.push(this.featureSet.features[index]);
-                                dojo.eventRoutePoint = this.featureSet.features[index].attributes.OBJECTID;
-                                dojo.featureObject = this.featureSet;
-                            } else {
-                                featureArray.push(this.featureSetOfInfoWindow);
-                            }
-                        } else {
-                            featureArray.push(this.featureSetOfInfoWindow);
-                        }
-                        topic.publish("getExecuteQueryForFeatures", featureArray, dojo.configData.EventSearchSettings[0].QueryURL, widgetName);
+                    on(directionAcitivityList[j], "click", lang.hitch(this, function () {
+                        var isExtentSet = true;
+                        topic.publish("extentSetValue", isExtentSet);
+                        topic.publish("isSharedLink");
+                        this._clickOnEventList(directionAcitivityList[j], featureArray, eventObject, widgetName);
                     }));
                     domConstruct.create("div", { "class": "esriCTAddEventList" }, myListIcons);
                     myListDeleteIcon[j] = domConstruct.create("div", { "class": "esriCTDeleteEventList" }, myListIcons);
+                    domAttr.set(myListDeleteIcon[j], "ID", myListEvent.id);
                     //if new event is being added, highlight the added event
                     if (eventObject.EventDeatils) {
                         if (objectIdField === evenObjectID) {
@@ -569,11 +641,29 @@ define([
                         domClass.remove(myListRow, "esriCTMyListRowChecked");
                     }
                     on(myListDeleteIcon[j], "click", lang.hitch(this, function (e) {
+                        var isExtentSet = true;
+                        topic.publish("extentSetValue", isExtentSet);
+                        topic.publish("isSharedLink");
                         eventIndex = array.indexOf(myListDeleteIcon, e.currentTarget);
                         this.myListStore.remove(myListLeft[eventIndex].value.id);
+                        dojo.eventIndex = null;
+                        for (m = 0; m < this.myListStore.data.length; m++) {
+                            if (dojo.eventIndex) {
+                                dojo.eventIndex += "," + this.myListStore.data[m][this.objectId].toString();
+                            } else {
+                                dojo.eventIndex = this.myListStore.data[m][this.objectId].toString();
+                            }
+                        }
+                        dojo.eventInfoWindowAttribute = null;
+                        for (k = 0; k < this.myListStore.data.length; k++) {
+                            if (dojo.eventInfoWindowAttribute) {
+                                dojo.eventInfoWindowAttribute += "," + this.myListStore.data[k][this.objectId].toString();
+                            } else {
+                                dojo.eventInfoWindowAttribute = this.myListStore.data[k][this.objectId].toString();
+                            }
+                        }
                         if (!(this.myListStore.data.length > 0)) {
                             domClass.replace(this.directionForEvents, "esriCTHeaderDirectionAcitivityListDisable", "esriCTHeaderDirectionAcitivityList");
-                            domClass.replace(this.shareForEvent, "esriCTHeaderShareAcitivityListDisable", "esriCTHeaderShareAcitivityList");
                             domClass.replace(this.calenderForEvent, "esriCTHeaderAddAcitivityListDisable", "esriCTHeaderAddAcitivityList");
                             domClass.replace(this.printEventList, "esriCTHeaderPrintAcitivityListDisable", "esriCTHeaderPrintAcitivityList");
                             domClass.replace(this.orderByDateList, "esriCTMyListHeaderTextDisable", "esriCTMyListHeaderText");
@@ -593,13 +683,51 @@ define([
         },
 
         /**
+        * Function to show event list in window
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _clickOnEventList: function (eventListObject, featureArray, eventObject, widgetName) {
+            var index, isIndexFound = false, k, objectidOfEvents;
+            dojo.infowindowDirection = null;
+            topic.publish("getAcitivityListDiv", eventListObject);
+            topic.publish("hideInfoWindow");
+            topic.publish("showProgressIndicator");
+            objectidOfEvents = domAttr.get(eventListObject, "ObjectID");
+            featureArray.length = 0;
+            if (this.featureSet) {
+                for (k = 0; k < this.featureSet.features.length; k++) {
+                    if (Number(objectidOfEvents) === this.featureSet.features[k].attributes[this.objectId]) {
+                        eventObject.InfowindowClick = false;
+                        index = k;
+                        isIndexFound = true;
+                        break;
+                    }
+                }
+                if (isIndexFound) {
+                    featureArray.push(this.featureSet.features[index]);
+                    dojo.eventRoutePoint = this.featureSet.features[index].attributes[this.objectId];
+                    dojo.featureObject = this.featureSet;
+                } else {
+                    featureArray.push(this.featureSetOfInfoWindow);
+                    dojo.infoRoutePoint = this.featureSetOfInfoWindow.attributes[this.objectId];
+                }
+            } else {
+                featureArray.push(this.featureSetOfInfoWindow);
+                dojo.infoRoutePoint = this.featureSetOfInfoWindow.attributes[this.objectId];
+            }
+            domClass.replace(this.applicationHeaderActivityContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
+            topic.publish("getExecuteQueryForFeatures", featureArray, dojo.configData.EventSearchSettings[0].QueryURL, widgetName);
+
+        },
+
+        /**
         * sort my list events in ascending or descending order
         * @param {object} ascendingFlag contains boolean flag for ascending value
         * @memberOf widgets/eventPlanner/eventPlanner
         */
         _sortMyList: function (ascendingFlag, featureSet) {
             this.ascendingFlag = ascendingFlag;
-            var sortResult, i, startDate, startDateFeild, splitedField, _self = this;
+            var sortResult, i, j, startDate, startDateFeild, splitedField, _self = this;
             topic.publish("getMyListStoreData", this.myListStore);
             for (i = 0; i < dojo.configData.EventSearchSettings.length; i++) {
                 splitedField = dojo.configData.EventSearchSettings[i].SearchDisplaySubFields.split(',');
@@ -607,11 +735,35 @@ define([
                 startDate = _self._getKeyValue(startDateFeild);
                 if (ascendingFlag) {
                     domClass.replace(this.orderByDateImage, "esriCTImgOrderByDateDown", "esriCTImgOrderByDateUp");
-                    sortResult = this.myListStore.query({}, { sort: [{ attribute: startDate, ascending: true}] });
+                    sortResult = this._sortDate(startDate, ascendingFlag);
                 } else {
                     domClass.replace(this.orderByDateImage, "esriCTImgOrderByDateUp", "esriCTImgOrderByDateDown");
-                    sortResult = this.myListStore.query({}, { sort: [{ attribute: startDate, descending: true}] });
+                    sortResult = this._sortDate(startDate, ascendingFlag);
                 }
+            }
+            this.myListStore.index = {};
+            for (j = 0; j < sortResult.length; j++) {
+                this.myListStore.index[sortResult[j].id] = j;
+            }
+            return sortResult;
+        },
+
+        /**
+        * sort date by order
+        * @param {object} startDate contains date attribute
+        * @param {object} ascendingFlag contains boolean flag for ascending value
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _sortDate: function (startDate, ascendingFlag) {
+            var sortResult;
+            if (ascendingFlag) {
+                sortResult = this.myListStore.data.sort(lang.hitch(this, function (a, b) {
+                    return new Date(b[startDate]).getTime() - new Date(a[startDate]).getTime();
+                }));
+            } else {
+                sortResult = this.myListStore.data.sort(lang.hitch(this, function (a, b) {
+                    return new Date(a[startDate]).getTime() - new Date(b[startDate]).getTime();
+                }));
             }
             return sortResult;
         },
@@ -625,13 +777,12 @@ define([
         _queryForActivity: function (startDate, endDate) {
             var queryTask, queryLayer, eventLayer, layerRequestData;
             this.dateFieldArray = null;
-            dojo.eventPlannerQuery = startDate.toString() + "," + endDate.toString();
+            dojo.eventPlannerQuery = this.myFromDate.value.toString() + "," + this.myToDate.value.toString();
             array.forEach(dojo.configData.EventSearchSettings, (lang.hitch(this, function (eventSearchSettings) {
                 eventLayer = eventSearchSettings.QueryURL;
                 queryTask = new QueryTask(eventLayer);
                 queryLayer = new Query();
                 queryLayer.where = string.substitute(eventSearchSettings.SearchExpressionForDate, { "0": "'" + startDate + "'", "1": "'" + endDate + "'" });
-                //dojo.eventPlannerQuery = queryLayer.where;
                 queryLayer.outSpatialReference = this.map.spatialReference;
                 queryLayer.returnGeometry = true;
                 queryLayer.outFields = ["*"];
@@ -651,6 +802,73 @@ define([
         },
 
         /**
+        * Query for event in share window
+        * @param {object} object of layer
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _queryForEventShare: function (eventObjectId) {
+            var queryTask, queryLayer, eventLayer, layerRequestData;
+            array.forEach(dojo.configData.EventSearchSettings, (lang.hitch(this, function (eventSearchSettings) {
+                eventLayer = eventSearchSettings.QueryURL;
+                queryTask = new QueryTask(eventLayer);
+                queryLayer = new Query();
+                queryLayer.objectIds = [eventObjectId];
+                queryLayer.outSpatialReference = this.map.spatialReference;
+                queryLayer.returnGeometry = true;
+                queryLayer.outFields = ["*"];
+                layerRequestData = this._getLayerInformation(eventLayer);
+                layerRequestData.then(lang.hitch(this, function (response) {
+                    topic.publish("showProgressIndicator");
+                    var objectId;
+                    objectId = this._getObjectId(response);
+                    this.objectId = objectId;
+                    this.dateFieldArray = this._getDateField(response);
+                    queryTask.execute(queryLayer, lang.hitch(this, this._eventResult));
+                }), function (error) {
+                    console.log("Error: ", error.message);
+                    topic.publish("hideProgressIndicator");
+                });
+
+            })));
+        },
+
+        /**
+        * Result got after query for event in share window
+        * @param {object} object of layer
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _eventResult: function (featureSet) {
+            var eventFeatureList = [], i, featureSetArray = [], eventDataObject, g;
+            if (featureSet) {
+                featureSet.features = this._removeNullValue(featureSet.features);
+                featureSet.features = this._changeDateFormatForSharedEvents(featureSet.features, 0);
+            }
+            if (featureSet) {
+                this.featureSetOfInfoWindow = featureSet.features;
+                dojo.eventInfoWindowData = featureSet.geometry;
+                this.addToListFeatures = this.featureSetOfInfoWindow;
+                for (i = 0; i < featureSet.features.length; i++) {
+                    eventDataObject = { "eventDetails": featureSet.features[i].attributes, "featureSet": null, "infoWindowClick": true };
+                    eventFeatureList.push(eventDataObject[i]);
+                    this._addtoMyList(eventDataObject);
+                }
+                if (window.location.toString().split("$infoRoutePoint=").length > 1) {
+                    if (window.location.toString().split("$infoRoutePoint=")[1].split("$")[0]) {
+                        for (g = 0; g < featureSet.features.length; g++) {
+                            if (Number(window.location.toString().split("$infoRoutePoint=")[1].split("$")[0]) === featureSet.features[g].attributes[this.objectId]) {
+                                featureSetArray.push(featureSet.features[g]);
+                            }
+                        }
+                    }
+                    domClass.replace(this.applicationHeaderActivityContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
+                    topic.publish("getExecuteQueryForFeatures", featureSetArray, dojo.configData.EventSearchSettings[0].QueryURL, "Event");
+                }
+                if (window.location.toString().split("$eventRouteforList=").length > 1) {
+                    this._eventForListClick();
+                }
+            }
+        },
+        /**
         * Get object id from the layer
         * @param {object} object of layer
         * @memberOf widgets/eventPlanner/eventPlanner
@@ -665,8 +883,6 @@ define([
             }
             return objectId;
         },
-
-
 
         /**
         * Get date field from layer
@@ -701,7 +917,7 @@ define([
         * @memberOf widgets/eventPlanner/eventPlanner
         */
         localToUtc: function (localTimestamp) {
-            return new Date(localTimestamp.getTime() + (localTimestamp.getTimezoneOffset() * 60000));
+            return new Date(localTimestamp.getTime());
         },
 
         /**
@@ -711,20 +927,31 @@ define([
         _eventForListClick: function () {
             var featureArray = [], splitedField, startDateFeild, g, k, l, featureArrayMyList, eventListArrayList, q, u, sortResult, t;
             topic.publish("hideInfoWindow");
+            dojo.addressLocation = null;
+            dojo.infowindowDirection = null;
+            dojo.doQuery = "false";
+            dojo.searchFacilityIndex = -1;
+            dojo.addressLocationDirectionActivity = null;
+            dojo.sharedGeolocation = null;
+            dojo.eventForListClicked = "true";
+            dojo.infoRoutePoint = null;
             array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (eventSearchSettings) {
                 splitedField = eventSearchSettings.SearchDisplaySubFields.split(',');
                 startDateFeild = this._getKeyValue(splitedField[0]);
             }), this);
             if (this.myListStore.data.length > 0) {
                 for (l = 0; l < this.myListStore.data.length; l++) {
-                    for (k = 0; k < this.featureSet.features.length; k++) {
-                        if (this.myListStore.data[l][this.objectId] === this.featureSet.features[k].attributes[this.objectId]) {
-                            featureArray.push(this.featureSet.features[k]);
+                    if (this.featureSet) {
+                        for (k = 0; k < this.featureSet.features.length; k++) {
+                            if (this.myListStore.data[l][this.objectId] === this.featureSet.features[k].attributes[this.objectId]) {
+                                featureArray.push(this.featureSet.features[k]);
+                            }
                         }
-                    }
-                    for (g = 0; g < this.addToListFeatures.length; g++) {
-                        if (this.myListStore.data[l][this.objectId] === this.addToListFeatures[g].attributes[this.objectId]) {
-                            featureArray.push(this.addToListFeatures[g]);
+                    } else {
+                        for (g = 0; g < this.addToListFeatures.length; g++) {
+                            if (this.myListStore.data[l][this.objectId] === this.addToListFeatures[g].attributes[this.objectId]) {
+                                featureArray.push(this.addToListFeatures[g]);
+                            }
                         }
                     }
                 }
@@ -795,7 +1022,7 @@ define([
                             if (!featureObject[i].attributes[j]) {
                                 featureObject[i].attributes[j] = sharedNls.showNullValue;
                             }
-                            if (dojo.isString(featureObject[i].attributes[j]) && lang.trim(featureObject[i].attributes[j]) === "") {
+                            if (dojo.isString(featureObject[i].attributes[j]) && lang.trim(featureObject[i].attributes[j]) === "NA") {
                                 featureObject[i].attributes[j] = sharedNls.showNullValue;
                             }
                         }

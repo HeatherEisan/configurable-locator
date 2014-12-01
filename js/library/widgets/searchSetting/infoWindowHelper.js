@@ -37,6 +37,7 @@ define([
     "esri/geometry",
     "esri/graphic",
     "esri/geometry/Point",
+    "esri/geometry/Extent",
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
@@ -47,13 +48,14 @@ define([
     "widgets/locator/locator",
     "dojo/NodeList-manipulate"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, date, locale, LocatorTool) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, GeometryExtent, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, date, locale, LocatorTool) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         sharedNls: sharedNls,
         featureArrayInfoWindow: null,
         rankValue: null,
+        isDirectionCalculated: false,
 
         /**
         * positioning the infoWindow on extent change
@@ -76,7 +78,7 @@ define([
         * @memberOf widgets/searchResult/infoWindowHelper
         */
         _setInfoWindowZoomLevel: function (infoWindowZoomLevelObject) {
-            var extentChanged, screenPoint, zoomDeferred;
+            var extentChanged, screenPoint, zoomDeferred, extent, mapDefaultExtent;
             dojo.selectedMapPoint = infoWindowZoomLevelObject.Mappoint;
             if (this.map.getLevel() !== dojo.configData.ZoomLevel && infoWindowZoomLevelObject.InfoWindowParameter) {
                 zoomDeferred = this.map.setLevel(dojo.configData.ZoomLevel);
@@ -90,7 +92,16 @@ define([
                     }));
                 }));
             } else {
-                extentChanged = this.map.setExtent(this._calculateCustomMapExtent(dojo.selectedMapPoint));
+                if (!dojo.isInfoPopupShared) {
+                    extentChanged = this.map.setExtent(this._calculateCustomMapExtent(dojo.selectedMapPoint));
+                } else {
+                    extent = this._getQueryString('extent');
+                    if (extent !== "") {
+                        mapDefaultExtent = extent.split(',');
+                        mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(mapDefaultExtent[0]), "ymin": parseFloat(mapDefaultExtent[1]), "xmax": parseFloat(mapDefaultExtent[2]), "ymax": parseFloat(mapDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
+                        extentChanged = this.map.setExtent(mapDefaultExtent);
+                    }
+                }
                 extentChanged.then(lang.hitch(this, function () {
                     topic.publish("hideProgressIndicator");
                     screenPoint = this.map.toScreen(dojo.selectedMapPoint);
@@ -99,7 +110,20 @@ define([
                 }));
             }
         },
-
+        /**
+        * get the string of service URL using query operation
+        * @param {number} key for service URL
+        * @memberOf widgets/mapSettings/mapSettings
+        */
+        _getQueryString: function (key) {
+            var extentValue = "", regex, qs;
+            regex = new RegExp("[\\?&]" + key + "=([^&#]*)");
+            qs = regex.exec(window.location.href);
+            if (qs && qs.length > 0) {
+                extentValue = qs[1];
+            }
+            return extentValue;
+        },
         /**
         *Fetch the geometry type of the mapPoint
         * @param {object} geometry Contains the geometry service
@@ -194,7 +218,7 @@ define([
         * @memberOf widgets/searchResult/infoWindowHelper
         */
         _infoWindowDirectionTab: function (attribute, widgetName, endPoint) {
-            var directionMainContainer, locatorInfoWindowObject, locatorInfoWindowParams, searchContentData, divHeader, infoWindowMapPoint, routeObject;
+            var directionMainContainer, locatorInfoWindowObject, locatorInfoWindowParams, searchContentData, divHeader, infoWindowMapPoint, routeObject, infoWindowPoint, point;
             if (dojo.byId("getDirContainer")) {
                 domConstruct.empty(dojo.byId("getDirContainer"));
             }
@@ -217,20 +241,16 @@ define([
             };
             infoWindowMapPoint = this.map.getLayer(locatorInfoWindowParams.graphicsLayerId);
             locatorInfoWindowObject = new LocatorTool(locatorInfoWindowParams);
-            setTimeout(lang.hitch(this, function () {
-                if (window.location.href.toString().split("$addressLocationDirection=").length > 1) {
-                    var mapPoint = new Point(window.location.href.toString().split("$addressLocationDirection=")[1].split("$")[0].split(",")[0], window.location.href.toString().split("$addressLocationDirection=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
-                    locatorInfoWindowObject._locateAddressOnMap(mapPoint, true);
-                    routeObject = { "StartPoint": infoWindowMapPoint.graphics[0], "EndPoint": [endPoint], "Index": 0, "WidgetName": widgetName, "QueryURL": null };
-                    this.showRoute(routeObject);
-                }
-            }), 8000);
-
             locatorInfoWindowObject.candidateClicked = lang.hitch(this, function (graphic) {
-                dojo.addressLocationDirection = locatorInfoWindowObject.selectedGraphic.geometry.x.toString() + "," + locatorInfoWindowObject.selectedGraphic.geometry.y.toString();
+                dojo.infowindowDirection = endPoint.geometry.x.toString() + "," + endPoint.geometry.y.toString();
+                dojo.infowindowDirection = dojo.infowindowDirection + "," + locatorInfoWindowObject.selectedGraphic.geometry.x.toString() + "," + locatorInfoWindowObject.selectedGraphic.geometry.y.toString();
+
                 if (graphic && graphic.attributes && graphic.attributes.address) {
                     this.locatorAddress = graphic.attributes.address;
                 }
+                dojo.eventInfoWindowData = null;
+                dojo.sharedGeolocation = null;
+                dojo.infoRoutePoint = null;
                 topic.publish("showProgressIndicator");
                 this.removeGeolocationPushPin();
                 this.carouselContainer.hideCarouselContainer();
@@ -239,6 +259,21 @@ define([
                 routeObject = { "StartPoint": infoWindowMapPoint.graphics[0], "EndPoint": [endPoint], "Index": 0, "WidgetName": widgetName, "QueryURL": null };
                 this.showRoute(routeObject);
             });
+            setTimeout(lang.hitch(this, function () {
+                if (window.location.href.toString().split("$infowindowDirection=").length > 1 && !this.isDirectionCalculated) {
+                    this.isDirectionCalculated = true;
+                    var mapPoint = new Point(window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0].split(",")[2], window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0].split(",")[3], this.map.spatialReference);
+                    dojo.infowindowDirection = window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0]; //mapPoint;
+                    locatorInfoWindowObject._locateAddressOnMap(mapPoint, true);
+                    routeObject = { "StartPoint": infoWindowMapPoint.graphics[0], "EndPoint": [endPoint], "Index": 0, "WidgetName": widgetName, "QueryURL": null };
+                    this.showRoute(routeObject);
+                    if (window.location.href.toString().split("$mapClickPoint=").length > 1) {
+                        infoWindowPoint = window.location.href.toString().split("$mapClickPoint=")[1].split("$")[0].split(",");
+                        point = new Point(parseFloat(infoWindowPoint[0]), parseFloat(infoWindowPoint[1]), this.map.spatialReference);
+                        topic.publish("showInfoWindowOnMap", point);
+                    }
+                }
+            }), 1000);
         },
 
         /**
@@ -282,7 +317,7 @@ define([
                 })));
             }
             contentDiv = domConstruct.create("div", { "class": "esriCTDivClear" }, divInformationContent);
-            divFacilityContent = domConstruct.create("div", {}, divInformationContent);
+            divFacilityContent = domConstruct.create("div", { "class": "esriCTUtilityImgContainer" }, divInformationContent);
             for (i in attributes) {
                 if (attributes.hasOwnProperty(i)) {
                     if (!attributes[i]) {
@@ -535,7 +570,7 @@ define([
         * @memberOf widgets/SearchSetting/InfoWindowHelper
         */
         _postComment: function (commentID, result) {
-            var divStarRating, postCommentContainer, buttonDiv, backButton, submitButton, j, starInfoWindow = [], backToMapHide, postCommentContent, outerCommentContainer;
+            var divStarRating, postCommentContainer, buttonDiv, backButton, submitButton, j, starInfoWindow = [], backToMapHide, postCommentContent, outerCommentContainer, textAreaContainerdiv;
             backToMapHide = query('.esriCTCloseDivMobile')[0];
             outerCommentContainer = query('.esriCTCommentInfoOuterContainer')[0];
             if (backToMapHide) {
@@ -557,7 +592,9 @@ define([
                 this.own(on(starInfoWindow[j], "mouseover", lang.hitch(this, this._selectHoverStars, starInfoWindow, j)));
                 this.own(on(starInfoWindow[j], "mouseout", lang.hitch(this, this._deSelectHoverStars, starInfoWindow, j)));
             }
-            domConstruct.create("textarea", { "class": "textAreaContainer", "id": "txtComments", "placeholder": sharedNls.titles.postCommentText }, postCommentContent);
+            textAreaContainerdiv = domConstruct.create("div", { "class": "textAreaContainerdiv" }, postCommentContainer);
+            domConstruct.create("textarea", { "class": "textAreaContainer", "id": "txtComments", "placeholder": sharedNls.titles.postCommentText }, textAreaContainerdiv);
+
             buttonDiv = domConstruct.create("div", { "class": "esriCTButtonDiv" }, postCommentContainer);
             backButton = domConstruct.create("div", { "class": "esriCTInfoBackButton", "innerHTML": sharedNls.titles.backButton }, buttonDiv);
             submitButton = domConstruct.create("div", { "class": "esriCTInfoSubmitButton", "innerHTML": sharedNls.titles.submitButton }, buttonDiv);

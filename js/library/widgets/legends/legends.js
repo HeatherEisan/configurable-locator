@@ -48,6 +48,7 @@ define([
         layerObject: null,
         _layerCollection: {},
         rendererArray: [],
+        isExtentBasedLegend: false,
         webmapUpdatedRenderer: null,
         hostedLayersJSON: null,
         newLeft: 0,
@@ -69,6 +70,11 @@ define([
             }));
             topic.subscribe("updateLegends", lang.hitch(this, this._updatedLegend));
             this.own(on(window, "orientationchange", lang.hitch(this, this._resetSlideControls)));
+            if (this.isExtentBasedLegend) {
+                this.map.on("extent-change", lang.hitch(this, function (evt) {
+                    this._updateLegend(evt.extent);
+                }));
+            }
         },
 
         /**
@@ -360,9 +366,11 @@ define([
         _setQueryParams: function (currentExtent) {
             var queryParams = new Query();
             queryParams.outFields = ["*"];
-            queryParams.geometry = currentExtent;
-            queryParams.spatialRelationship = "esriSpatialRelIntersects";
-            queryParams.returnGeometry = false;
+            if (this.isExtentBasedLegend) {
+                queryParams.geometry = currentExtent;
+                queryParams.spatialRelationship = "esriSpatialRelIntersects";
+                queryParams.returnGeometry = false;
+            }
             return queryParams;
         },
 
@@ -375,6 +383,9 @@ define([
             queryTask = new QueryTask(layer);
             defResult.hasDrawingInfo = hasDrawingInfo;
             defResult.count = 0;
+            if (!this.isExtentBasedLegend) {
+                queryParams.where = "1=1";
+            }
             queryTask.executeForCount(queryParams, lang.hitch(this, function (count) {
                 defResult.count = count;
                 queryDeferred.resolve(defResult);
@@ -656,7 +667,6 @@ define([
                     }
                 }
                 this._updatedLegend(mapExtent);
-
             }));
         },
 
