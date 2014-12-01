@@ -289,16 +289,16 @@ input
 {
     border-bottom: 1px solid #d15706;
     color: #d15706;
-    border-left: 1px solid #FAFAFA;
-    border-right: 1px solid #d15706;
+    border-right: 1px solid #FAFAFA;
+    border-left: 1px solid #d15706;
 }
 
 .esriCTSearchPanelSelected
 {
     border-bottom: 1px solid #d15706;
     color: #d15706;
-    border-left: 1px solid #d15706;
-    border-right: 1px solid #FAFAFA;
+    border-right: 1px solid #d15706;
+    border-left: 1px solid #FAFAFA;
 }
 
 .esriCTDivSearchPanel
@@ -306,6 +306,15 @@ input
     color: #d15706;
     border-left: 1px solid #fff;
     border-right: 1px solid #FAFAFA;
+}
+.esriCTTickMark
+{
+    color: #d15706;
+}
+.esriCTUtilityImgSelect
+{
+    border: 1px solid #d15706;
+    background: #d15706;
 }
 
 .esriCTDivAppHolder, .esriCTDivShareContainer, .esriCTDivActivityAppHoldern
@@ -492,7 +501,7 @@ input
 .esriCTDivSearchResultHolder
 {
     border: 1px solid #d15706;
-    z-index: 997;
+    z-index: 1000;
     position: absolute;
     top: 48px;
     right: 0px;
@@ -744,10 +753,7 @@ input
 {
     background-image: url("../images/directionOrange.png") !important;
 }
-.esriCTHeaderShareAcitivityList
-{
-    background-image: url("../images/shareOrange.png") !important;
-}
+
 .esriCTHeaderAddAcitivityList
 {
     background-image: url("../images/addActivityListOrange.png") !important;

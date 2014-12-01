@@ -128,7 +128,7 @@ define([
         * @memberOf widgets/share/share
         */
         _shareLink: function () {
-            var mapExtent, url, urlStr, encodedUri, clickCoords;
+            var mapExtent, url, urlStr, encodedUri, clickCoords, eventIndex, geolocationCoords, eventCoords = "";
             /**
             * get current map extent to be shared
             */
@@ -148,11 +148,17 @@ define([
                 clickCoords = dojo.mapClickedPoint.x + "," + dojo.mapClickedPoint.y;
                 urlStr += "$mapClickPoint=" + clickCoords;
             }
+            if (dojo.infowindowDirection) {
+                urlStr += "$infowindowDirection=" + dojo.infowindowDirection.toString();
+            }
             if (dojo.activitySearch) {
                 urlStr += "$activitySearch=" + dojo.activitySearch.join(",");
             }
             if (dojo.isShowPod && dojo.isShowPod.toString() === "false") {
                 urlStr += "$isShowPod=" + dojo.isShowPod.toString();
+            }
+            if (dojo.doQuery) {
+                urlStr += "$doQuery=" + dojo.doQuery.toString();
             }
             if (dojo.searchFacilityIndex >= 0) {
                 urlStr += "$selectedSearchResult=" + dojo.searchFacilityIndex;
@@ -160,12 +166,49 @@ define([
             if (dojo.selectedBasemapIndex !== null) {
                 urlStr += "$selectedBasemapIndex=" + dojo.selectedBasemapIndex;
             }
-            if (dojo.addressLocationDirection) {
-                urlStr += "$addressLocationDirection=" + dojo.addressLocationDirection.toString();
-            }
             if (dojo.addressLocationDirectionActivity) {
                 urlStr += "$addressLocationDirectionActivity=" + dojo.addressLocationDirectionActivity.toString();
             }
+            if (dojo.sharedGeolocation) {
+                if (dojo.sharedGeolocation === "false") {
+                    geolocationCoords = dojo.sharedGeolocation.toString();
+                } else {
+                    geolocationCoords = dojo.sharedGeolocation.geometry.x.toString() + "," + dojo.sharedGeolocation.geometry.y.toString();
+                }
+                urlStr += "$sharedGeolocation=" + geolocationCoords;
+            }
+            if (dojo.addressLocationDirection) {
+                urlStr += "$addressLocationDirection=" + dojo.addressLocationDirection.toString();
+            }
+            if (dojo.eventInfoWindowData) {
+                urlStr += "$eventInfoWindowData=" + dojo.eventInfoWindowData.x.toString() + "," + dojo.eventInfoWindowData.y.toString();
+            }
+            if (dojo.eventInfoWindowAttribute) {
+                urlStr += "$eventInfoWindowAttribute=" + dojo.eventInfoWindowAttribute;
+            }
+            if (dojo.infoRoutePoint) {
+                urlStr += "$infoRoutePoint=" + dojo.infoRoutePoint.toString();
+            }
+            if (dojo.eventForListClicked) {
+                urlStr += "$eventRouteforList=" + dojo.eventForListClicked.toString();
+            }
+            if (dojo.eventRoutePoint) {
+                urlStr += dojo.eventRoutePoint.toString();
+            }
+            if (dojo.eventPlannerQuery) {
+                eventIndex = "";
+                if (dojo.eventIndex) {
+                    eventIndex = dojo.eventIndex.toString();
+                }
+                if (dojo.eventRoutePoint) {
+                    eventCoords = dojo.eventRoutePoint.toString();
+                }
+                if (dojo.eventForListClicked) {
+                    urlStr += "$eventRouteforList=" + dojo.eventForListClicked.toString();
+                }
+                urlStr += "$eventplanner=" + "true" + "$startDate=" + dojo.eventPlannerQuery.split(",")[0].replace(new RegExp(" ", 'g'), ",").toString() + "$endDate=" + dojo.eventPlannerQuery.split(",")[1].replace(new RegExp(" ", 'g'), ",").toString() + "$eventIndex=" + eventIndex + "$eventRoutePoint=" + eventCoords;
+            }
+            urlStr += "$extentChanged=true";
             try {
                 /**
                 * call tinyurl service to generate share URL

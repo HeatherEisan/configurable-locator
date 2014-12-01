@@ -72,7 +72,7 @@ define([
         searchSettings: [],
         fetureLayerIndex: null,
         operationalLayers: [],
-
+        isInfowindowHide: false,
         /**
         * initialize map object
         *
@@ -85,9 +85,26 @@ define([
                 this._onSetInfoWindowPosition(infoTitle, screenPoint, infoPopupWidth, infoPopupHeight);
             }));
 
+            topic.subscribe("isSharedLink", lang.hitch(this, function () {
+                this.isInfowindowHide = true;
+            }));
+
             topic.subscribe("hideInfoWindow", lang.hitch(this, function (result) {
-                this.infoWindowPanel.hide();
-                this.infoWindowPanel.InfoShow = true;
+                if (window.location.href.toString().split("$mapClickPoint=").length <= 1) {
+                    this.infoWindowPanel.hide();
+                    this.infoWindowPanel.InfoShow = true;
+                    dojo.mapClickedPoint = null;
+                    this.isInfowindowHide = true;
+                } else {
+                    if (this.isInfowindowHide) {
+                        this.infoWindowPanel.hide();
+                        this.infoWindowPanel.InfoShow = true;
+                        dojo.mapClickedPoint = null;
+                    }
+                }
+            }));
+            topic.subscribe("showInfoWindowOnMap", lang.hitch(this, function (point) {
+                this._showInfoWindowOnMap(point);
             }));
             /**
             * load map
@@ -117,17 +134,24 @@ define([
                         if (window.location.toString().split("$address=").length > 1) {
                             topic.publish("addressSearch");
                         }
-                        if (window.location.href.toString().split("$mapClickPoint=").length > 1) {
+                        if (window.location.href.toString().split("$mapClickPoint=").length > 1 && window.location.href.toString().split("$infowindowDirection=").length <= 1) {
+                            dojo.isInfoPopupShared = true;
                             infoWindowPoint = window.location.href.toString().split("$mapClickPoint=")[1].split("$")[0].split(",");
-                            point = new Point(infoWindowPoint[0], infoWindowPoint[1], this.map.spatialReference);
+                            point = new Point(parseFloat(infoWindowPoint[0]), parseFloat(infoWindowPoint[1]), this.map.spatialReference);
                             this._showInfoWindowOnMap(point);
                         }
-                    }), 5000);
+                        if (window.location.href.toString().split("$infowindowDirection=").length > 1) {
+                            dojo.isInfoPopupShared = true;
+                            infoWindowPoint = window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0].split(",");
+                            point = new Point(parseFloat(infoWindowPoint[0]), parseFloat(infoWindowPoint[1]), this.map.spatialReference);
+                            this._showInfoWindowOnMap(point);
+                        }
+                    }), 3000);
                     this._mapEvents();
                     if (dojo.configData.ShowLegend) {
                         setTimeout(lang.hitch(this, function () {
                             this._createWebmapLegendLayerList(response.itemInfo.itemData.operationalLayers);
-                        }), 5000);
+                        }), 3000);
                     }
                     this.infoWindowPanel = new InfoWindow({ infoWindowWidth: dojo.configData.InfoPopupWidth, infoWindowHeight: dojo.configData.infoPopupHeight, map: this.map });
                 }), function (err) {
@@ -155,24 +179,30 @@ define([
                 this.map.on("load", lang.hitch(this, function () {
                     this._mapOnLoad();
                     if (dojo.configData.ShowLegend) {
-                        setTimeout(lang.hitch(this, function () {
-                            this._addLayerLegend();
-                            if (window.location.toString().split("$address=").length > 1) {
-                                topic.publish("addressSearch");
-                            }
-                            if (window.location.href.toString().split("$mapClickPoint=").length > 1) {
-                                infoWindowPoint = window.location.href.toString().split("$mapClickPoint=")[1].split("$")[0].split(",");
-                                point = new Point(infoWindowPoint[0], infoWindowPoint[1], this.map.spatialReference);
-                                this._showInfoWindowOnMap(point);
-                            }
-                        }), 5000);
-
+                        this._addLayerLegend();
                     }
+                    setTimeout(lang.hitch(this, function () {
+                        if (window.location.toString().split("$address=").length > 1) {
+                            topic.publish("addressSearch");
+                        }
+                        if (window.location.href.toString().split("$mapClickPoint=").length > 1 && window.location.href.toString().split("$infowindowDirection=").length <= 1) {
+                            dojo.isInfoPopupShared = true;
+                            infoWindowPoint = window.location.href.toString().split("$mapClickPoint=")[1].split("$")[0].split(",");
+                            point = new Point(parseFloat(infoWindowPoint[0]), parseFloat(infoWindowPoint[1]), this.map.spatialReference);
+                            this._showInfoWindowOnMap(point);
+                        }
+                        if (window.location.href.toString().split("$infowindowDirection=").length > 1) {
+                            dojo.isInfoPopupShared = true;
+                            infoWindowPoint = window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0].split(",");
+                            point = new Point(parseFloat(infoWindowPoint[0]), parseFloat(infoWindowPoint[1]), this.map.spatialReference);
+                            this._showInfoWindowOnMap(point);
+                        }
+                    }), 3000);
                 }));
                 this._mapEvents();
                 this.infoWindowPanel = new InfoWindow({ infoWindowWidth: dojo.configData.InfoPopupWidth, infoWindowHeight: dojo.configData.infoPopupHeight, map: this.map });
             }
-
+            dojo.isInfoPopupShared = false;
         },
         _createWebmapLegendLayerList: function (layers) {
             var i, webMapLayers = [], webmapLayerList = {}, hasLayers = false;
@@ -359,7 +389,6 @@ define([
                     this._setInfoWindowHeightWidth(infoPopupWidth, infoPopupHeight);
                     topic.publish("setMapTipPosition", dojo.selectedMapPoint, this.map, this.infoWindowPanel);
                 }
-                topic.publish("updateLegends", evt.extent);
             }));
         },
 
@@ -378,7 +407,7 @@ define([
         * @memberOf widgets/mapSettings/mapSettings
         */
         _mapOnLoad: function () {
-            var home, extentPoints, mapDefaultExtent, i, graphicsLayer, buffergraphicsLayer, extent, routegraphicsLayer, highlightfeature, imgSource, imgCustomLogo;
+            var home, extentPoints, mapDefaultExtent, i, graphicsLayer, buffergraphicsLayer, extent, routegraphicsLayer, highlightfeature, imgSource, imgCustomLogo, mapLogoPostionDown;
             extentPoints = dojo.configData && dojo.configData.DefaultExtent && dojo.configData.DefaultExtent.split(",");
             extent = this._getQueryString('extent');
             if (extent === "") {
@@ -398,6 +427,8 @@ define([
             home.extent = mapDefaultExtent;
             domConstruct.place(home.domNode, query(".esriSimpleSliderIncrementButton")[0], "after");
             home.startup();
+            mapLogoPostionDown = query('.esriControlsBR')[0];
+            domClass.add(mapLogoPostionDown, "esriCTDivMapPositionTop");
             if (dojo.configData.CustomLogoUrl && lang.trim(dojo.configData.CustomLogoUrl).length !== 0) {
                 if (dojo.configData.CustomLogoUrl.match("http:") || dojo.configData.CustomLogoUrl.match("https:")) {
                     imgSource = dojo.configData.CustomLogoUrl;
@@ -548,7 +579,7 @@ define([
         */
         _fetchQueryResults: function (featureArray, mapPoint) {
             var point, featurePoint, infoWindowParameter;
-            featureArray = this._getDateInFormat(featureArray);
+            featureArray = this._changeDateInFormat(featureArray);
             if (featureArray.length > 0) {
                 if (featureArray.length === 1) {
                     featurePoint = featureArray[0].attr.geometry;
@@ -591,15 +622,14 @@ define([
             }
         },
 
-
         /**
         * format the date in pattern
         * @returns feature Array
         * @param {object} featureArray contains attributes, geometry, mapPoint
         * @memberOf widgets/mapSettings/mapSettings
         */
-        _getDateInFormat: function (featureArray) {
-            var attributeNames = [], i, key, e;
+        _changeDateInFormat: function (featureArray) {
+            var attributeNames = [], i, key, e, t;
             if (featureArray.length > 0) {
                 for (i = 0; i < featureArray[0].fields.length; i++) {
                     if (featureArray[0].fields[i].type === "esriFieldTypeDate") {
@@ -610,7 +640,14 @@ define([
                     if (featureArray[0].attr.attributes.hasOwnProperty(key)) {
                         for (e = 0; e < attributeNames.length; e++) {
                             if (attributeNames[e] === key) {
-                                featureArray[0].attr.attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureArray[0].attr.attributes[key]), { datePattern: dojo.configData.EventSearchSettings[0].DisplayDateFormat, selector: "date" });
+                                for (t = 0; t < dojo.configData.EventSearchSettings.length; t++) {
+                                    if (featureArray[0].layerTitle === dojo.configData.EventSearchSettings[t].Title && featureArray[0].layerId === dojo.configData.EventSearchSettings[t].QueryLayerId) {
+                                        featureArray[0].attr.attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureArray[0].attr.attributes[key]), { datePattern: dojo.configData.EventSearchSettings[t].DisplayDateFormat, selector: "date" });
+                                    }
+                                }
+                                if (featureArray[0].layerTitle === dojo.configData.ActivitySearchSettings[0].Title && featureArray[0].layerId === dojo.configData.ActivitySearchSettings[0].QueryLayerId) {
+                                    featureArray[0].attr.attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureArray[0].attr.attributes[key]), { datePattern: dojo.configData.ActivitySearchSettings[0].DisplayDateFormat, selector: "date" });
+                                }
                             }
                         }
                     }
@@ -638,7 +675,7 @@ define([
         * @memberOf widgets/mapSettings/mapSettings
         */
         localToUtc: function (localTimestamp) {
-            return new Date(localTimestamp.getTime() + (localTimestamp.getTimezoneOffset() * 60000));
+            return new Date(localTimestamp.getTime());
         },
 
         /**
@@ -740,6 +777,8 @@ define([
         */
         _addHomeButton: function () {
             var home;
+            topic.publish("extentSetValue", true);
+            topic.publish("isSharedLink");
             home = new HomeButton({
                 map: this.map
             }, domConstruct.create("div", {}, null));
@@ -786,7 +825,6 @@ define([
                 * load operational layer if it's type is feature along with its layer mode
                 */
                 featureLayer = new FeatureLayer(layerInfo.ServiceURL, {
-                    //                    id: "index",
                     mode: layerMode,
                     outFields: ["*"],
                     displayOnPan: false
@@ -804,7 +842,6 @@ define([
         */
         _addDynamicLayerService: function (layerInfo) {
             var str, lastIndex, layerTitle;
-
             clearTimeout(this.stagedSearch);
             str = layerInfo.ServiceURL.split('/');
             lastIndex = str[str.length - 1];
@@ -873,7 +910,7 @@ define([
             var mmap = this.map;
             this.legendObject = new Legends({
                 map: mmap,
-                isExtentBasedLegend: true
+                isExtentBasedLegend: false
             }, domConstruct.create("div", {}, null));
             return this.legendObject;
         },

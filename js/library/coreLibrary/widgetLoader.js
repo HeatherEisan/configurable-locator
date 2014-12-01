@@ -62,7 +62,7 @@ define([
                     return;
                 }
                 dojo.configData.BaseMapLayers = baseMapLayers;
-                if (dojo.configData.SplashScreen && dojo.configData.SplashScreen.IsVisible && window.location.toString().split("extent=").length <= 1) {
+                if (dojo.configData.SplashScreen) {
                     splashScreen = new SplashScreen();
                     splashScreen.showSplashScreenDialog();
                 }

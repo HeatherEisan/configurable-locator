@@ -291,16 +291,16 @@ input
 {
     border-bottom: 1px solid #028D6A;
     color: #028D6A;
-    border-left: 1px solid #FAFAFA;
-    border-right: 1px solid #028D6A;
+    border-right: 1px solid #FAFAFA;
+    border-left: 1px solid #028D6A;
 }
 
 .esriCTSearchPanelSelected
 {
     border-bottom: 1px solid #028D6A;
     color: #028D6A;
-    border-left: 1px solid #028D6A;
-    border-right: 1px solid #FAFAFA;
+    border-right: 1px solid #028D6A;
+    border-left: 1px solid #FAFAFA;
 }
 
 .esriCTDivSearchPanel
@@ -308,6 +308,15 @@ input
     color: #028D6A;
     border-left: 1px solid #fff;
     border-right: 1px solid #FAFAFA;
+}
+.esriCTTickMark
+{
+    color: #028D6A;
+}
+.esriCTUtilityImgSelect
+{
+    border: 1px solid #028D6A;
+    background: #028D6A;
 }
 
 .esriCTDivAppHolder, .esriCTDivShareContainer, .esriCTDivActivityAppHolder
@@ -485,7 +494,7 @@ input
 .esriCTDivSearchResultHolder
 {
     border: 1px solid #028D6A;
-    z-index: 997;
+    z-index: 1000;
     position: absolute;
     top: 48px;
     right: 0px;
@@ -727,10 +736,6 @@ input
 .esriCTHeaderDirectionAcitivityList
 {
     background-image: url("../images/directionGreen.png") !important;
-}
-.esriCTHeaderShareAcitivityList
-{
-    background-image: url("../images/shareGreen.png") !important;
 }
 .esriCTHeaderAddAcitivityList
 {

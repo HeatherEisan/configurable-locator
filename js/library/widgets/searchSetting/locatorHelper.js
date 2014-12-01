@@ -61,7 +61,7 @@ define([
         * @param {map point}mapPoint Contains the map point
         * @memberOf widgets/searchResult/locatorHelper
         */
-        createBuffer: function (mapPoint) {
+        createBuffer: function (mapPoint, widgetName) {
             var params, geometryService;
             this.carouselContainer.removeAllPod();
             this.carouselContainer.addPod(this.carouselPodData);
@@ -78,7 +78,7 @@ define([
                     params.geometries = [mapPoint];
                 }
                 geometryService.buffer(params, lang.hitch(this, function (geometries) {
-                    this.showBuffer(geometries, mapPoint);
+                    this.showBuffer(geometries, mapPoint, widgetName);
                 }));
             }
         },
@@ -89,7 +89,7 @@ define([
         * @param {map point}mapPoint Contains the map point
         * @memberOf widgets/searchResult/locatorHelper
         */
-        showBuffer: function (geometries, mapPoint) {
+        showBuffer: function (geometries, mapPoint, widgetName) {
             var bufferSymbol;
             if (!dojo.sharedGeolocation) {
                 this._clearBuffer();
@@ -100,7 +100,7 @@ define([
                         );
             this._addGraphic(this.map.getLayer("tempBufferLayer"), bufferSymbol, geometries[0]);
             topic.publish("showProgressIndicator");
-            this._queryLayer(geometries[0], mapPoint);
+            this._queryLayer(geometries[0], mapPoint, widgetName);
         },
 
         /**
@@ -110,6 +110,7 @@ define([
         _clearBuffer: function () {
             this.map.getLayer("tempBufferLayer").clear();
             topic.publish("hideInfoWindow");
+            this.isInfowindowHide = true;
         },
 
         /**
@@ -135,11 +136,15 @@ define([
         * @param {map point}mapPoint Contains the map point
         * @memberOf widgets/searchResult/locatorHelper
         */
-        _queryLayer: function (geometry, mapPoint) {
+        _queryLayer: function (geometry, mapPoint, widget) {
             var queryTask, queryLayer, routeObject, featuresWithinBuffer, layerobject, dist, featureSet, isDistanceFound, widgetName, i;
             featureSet = [];
             isDistanceFound = false;
-            widgetName = "unifiedSearch";
+            if (widget) {
+                widgetName = widget;
+            } else {
+                widgetName = "unifiedSearch";
+            }
             layerobject = dojo.configData.ActivitySearchSettings;
             array.forEach(dojo.configData.ActivitySearchSettings, lang.hitch(this, function (activitySearchSettings) {
                 layerobject = activitySearchSettings;
@@ -153,6 +158,7 @@ define([
                     }
                     queryTask.execute(queryLayer, lang.hitch(this, function (relatedRecords) {
                         if (relatedRecords.features.length !== 0) {
+                            this.dateFieldArray = this._getDateField(relatedRecords);
                             featuresWithinBuffer = relatedRecords.features;
                             for (i = 0; i < featuresWithinBuffer.length; i++) {
                                 if (mapPoint.geometry) {
@@ -171,17 +177,26 @@ define([
                                     return parseFloat(a.distance) - parseFloat(b.distance);
                                 });
                                 this.highlightFeature(featureSet[0].geometry);
+                                featureSet = this._changeDateFormat(featureSet);
                                 routeObject = { "StartPoint": mapPoint, "EndPoint": featureSet, "Index": 0, "WidgetName": widgetName, "QueryURL": layerobject.QueryURL };
                                 this.showRoute(routeObject);
                             }
                         } else {
                             alert(sharedNls.errorMessages.facilitydoestfound);
+                            dojo.eventInfoWindowData = null;
+                            dojo.eventInfoWindowAttribute = null;
+                            dojo.infoRoutePoint = null;
                             this.removeGraphics();
                             if (widgetName !== "unifiedSearch") {
                                 this.removeLocatorPushPin();
                             }
                             this.carouselContainer.hideCarouselContainer();
                             this.carouselContainer._setLegendPositionDown();
+                            if (window.location.href.toString().split("$extentChanged=").length > 1) {
+                                if (!this.isExtentSet) {
+                                    this.setExtentForShare();
+                                }
+                            }
                         }
                         topic.publish("hideProgressIndicator");
                     }));

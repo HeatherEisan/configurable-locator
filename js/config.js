@@ -33,7 +33,7 @@ define([], function () {
         // 9.  Specify Theme                                 - [ Tag(s) to look for: ThemeColor ]
         // 10. Specify header widget settings                - [ Tag(s) to look for: AppHeaderWidgets ]
         // 11. Set initial map extent                        - [ Tag(s) to look for: DefaultExtent]
-        // 12. Bottom Panel InfoPod Settings                 - [ Tag(s) to look for: BottomPanelInfoPodSettings ]
+        // 12. Bottom Panel InfoPod Settings                 - [ Tag(s) to look for: PodSettings ]
         // 13. Specify URLs for operational layers           - [ Tag(s) to look for: OperationalLayers]
         // 14. Customize zoom level for address search       - [ Tag(s) to look for: ZoomLevel ]
         // 15. Specify WebMap Id                             - [ Tag(s) to look for: WebMapId ]
@@ -119,7 +119,7 @@ define([], function () {
 
 
         // Set sequence for info pods in the bottom panel
-        BottomPanelInfoPodSettings: [{
+        PodSettings: [{
             SearchResultPod: {
                 Enabled: true
             }
@@ -206,6 +206,7 @@ define([], function () {
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
+            DisplayDateFormat: "MMM dd, yyyy",
             //Activities to be displayed in activity search and info window for a feature
             ActivityList: [{
                 FieldName: "FOURWHEEL",
@@ -448,6 +449,10 @@ define([], function () {
         // DRIVING DIRECTIONS SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
         // RouteServiceURL: Set URL for routing service
+        // RouteColor: Set color for route
+        // RouteWidth: Set width for route
+        // Transparency: Set transparency for route
+        // RouteUnit: Set unit for route, units supported by Direction widget are “MILES”, “METERS”, “KILOMETERS”, “NAUTICAL_MILES”. If there is a Typo error in any of these four units then the unit will be displayed in “KILOMETERS”. If the unit is specified other than these four units then unit will be displayed in “MILES”
         DrivingDirectionSettings: {
             RouteServiceURL: "http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World",
             RouteColor: "0,0,225",
