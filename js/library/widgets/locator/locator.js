@@ -46,8 +46,9 @@ define([
     "esri/tasks/GeometryService",
     "esri/tasks/locator",
     "esri/tasks/query",
-    "esri/tasks/QueryTask"
-], function (Array, Color, declare, lang, dom, domAttr, domClass, domConstruct, domGeom, domStyle, sharedNls, on, query, string, template, topic, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, Deferred, DeferredList, Geometry, Point, webMercatorUtils, Graphic, GraphicsLayer, GeometryService, Locator, Query, QueryTask) {
+    "esri/tasks/QueryTask",
+    "dijit/a11yclick"
+], function (Array, Color, declare, lang, dom, domAttr, domClass, domConstruct, domGeom, domStyle, sharedNls, on, query, string, template, topic, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, Deferred, DeferredList, Geometry, Point, webMercatorUtils, Graphic, GraphicsLayer, GeometryService, Locator, Query, QueryTask, a11yclick) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -87,7 +88,7 @@ define([
                 }));
                 this.parentDomNode = dom.byId("esriCTParentDivContainer");
                 this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.search, "class": "esriCTHeaderIcons esriCTHeaderSearch" }, null);
-                this.own(on(this.domNode, "click", lang.hitch(this, function () {
+                this.own(on(this.domNode, a11yclick, lang.hitch(this, function () {
                     this._toggleTexBoxControls(false);
                     this.onLocateButtonClick();
                     /**
@@ -139,7 +140,7 @@ define([
         */
         _attachLocatorEvents: function () {
             domAttr.set(this.imgSearchLoader, "src", dojoConfig.baseURL + "/js/library/themes/images/loader.gif");
-            this.own(on(this.divSearch, "click", lang.hitch(this, function (evt) {
+            this.own(on(this.divSearch, a11yclick, lang.hitch(this, function (evt) {
                 this._toggleTexBoxControls(true);
                 this._locateAddress();
             })));
@@ -167,7 +168,7 @@ define([
                 }
                 domClass.add(this.txtAddress, "esriCTColorChange");
             })));
-            this.own(on(this.close, "click", lang.hitch(this, function () {
+            this.own(on(this.close, a11yclick, lang.hitch(this, function () {
                 this._hideText();
             })));
         },
@@ -318,20 +319,17 @@ define([
         * @method _searchLocation
         */
         _searchLocation: function () {
-            var nameArray, locatorSettings, locator, searchFieldName, addressField, baseMapExtent,
+            var nameArray = {}, locatorSettings, locator, searchFieldName, addressField, baseMapExtent,
                 options, searchFields, addressFieldValues, s, deferredArray,
                 locatorDef, deferred, resultLength, deferredListResult, index, resultAttributes, key, order;
-
-            nameArray = {
-                Address: []
-            };
+            locatorSettings = this.locatorSettings;
+            nameArray[locatorSettings.DisplayText] = [];
             this._toggleTexBoxControls(true);
             domAttr.set(this.txtAddress, "defaultAddress", this.txtAddress.value);
 
             /**
             * call locator service specified in configuration file
             */
-            locatorSettings = this.locatorSettings;
             locator = new Locator(locatorSettings.LocatorURL);
             searchFieldName = locatorSettings.LocatorParameters.SearchField;
             addressField = {};
@@ -459,14 +457,13 @@ define([
         */
         _addressResult: function (candidates, nameArray, searchFields) {
             var order, j;
-
             for (order = 0; order < candidates.length; order++) {
                 if (candidates[order].attributes[this.locatorSettings.AddressMatchScore.Field] > this.locatorSettings.AddressMatchScore.Value) {
                     for (j in searchFields) {
                         if (searchFields.hasOwnProperty(j)) {
                             if (candidates[order].attributes[this.locatorSettings.FilterFieldName] === searchFields[j]) {
-                                if (nameArray.Address.length < this.locatorSettings.MaxResults) {
-                                    nameArray.Address.push({
+                                if (nameArray[this.locatorSettings.DisplayText].length < this.locatorSettings.MaxResults) {
+                                    nameArray[this.locatorSettings.DisplayText].push({
                                         name: string.substitute(this.locatorSettings.DisplayField, candidates[order].attributes),
                                         attributes: candidates[order]
                                     });
@@ -536,7 +533,7 @@ define([
         * @param {} idx
         */
         _toggleAddressList: function (addressList, idx) {
-            on(addressList[idx], "click", lang.hitch(this, function (evt) {
+            on(addressList[idx], a11yclick, lang.hitch(this, function (evt) {
                 var listContainer, listStatusSymbol;
                 listContainer = query(".esriCTListContainer", this.divAddressResults)[idx];
                 if (domClass.contains(listContainer, "esriCTShowAddressList")) {

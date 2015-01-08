@@ -31,30 +31,29 @@ define([], function () {
         // 7.  Set Legend Visibility                         - [ Tag(s) to look for: ShowLegend ]
         // 8.  Set settings  for splash screen               - [ Tag(s) to look for: SplashScreen ]
         // 9.  Specify Theme                                 - [ Tag(s) to look for: ThemeColor ]
-        // 10. Specify header widget settings                - [ Tag(s) to look for: AppHeaderWidgets ]
-        // 11. Set initial map extent                        - [ Tag(s) to look for: DefaultExtent]
-        // 12. Bottom Panel InfoPod Settings                 - [ Tag(s) to look for: PodSettings ]
-        // 13. Specify URLs for operational layers           - [ Tag(s) to look for: OperationalLayers]
-        // 14. Customize zoom level for address search       - [ Tag(s) to look for: ZoomLevel ]
-        // 15. Specify WebMap Id                             - [ Tag(s) to look for: WebMapId ]
-        // 16. Specify URL to ArcGIS Portal REST API         - [ Tag(s) to look for: PortalAPIURL ]
-        // 17. Specify the group title that contains basemaps- [ Tag(s) to look for: BasemapGroupTitle ]
-        // 18. Specify the group name that contains basemaps - [ Tag(s) to look for: BasemapGroupOwner ]
-        // 19. Specify spatial reference for basemaps        - [ Tag(s) to look for: BasemapSpatialReferenceWKID ]
-        // 20. Specify path to display the thumbnail         - [ Tag(s) to look for: NoThumbnail ]
-        // 21. Specify Activity SearchSettings               - [ Tag(s) to look for: ActivitySearchSettings]
-        // 22. Specify Event SearchSettings                  - [ Tag(s) to look for: EventSearchSettings]
-        // 23. Specify Ripple color settings                 - [ Tag(s) to look for: RippleColorSettings ]
-        // 24. Specify Locator ripple size                   - [ Tag(s) to look for: LocatorRippleSize ]
-        // 25. Customize InfoPopupHeight                     - [ Tag(s) to look for: InfoPopupHeight ]
-        // 26. Customize InfoPopupWidth                      - [ Tag(s) to look for: InfoPopupWidth ]
-        // 27. Specify Info Window setting                   - [ Tag(s) to look for: InfoWindowSetting ]
-        // 28. Set URL for LocatorSettings                   - [ Tag(s) to look for: LocatorSettings ]
-        // 29. Geometry service setting                      - [ Tag(s) to look for: GeometryService ]
-        // 30. Specify Buffer Symbology                      - [ Tag(s) to look for: BufferSymbology ]
-        // 31. Specify Buffer Distance                      - [ Tag(s) to look for: Buffer Distance ]
-        // 32. Customize Driving Direction Settings          - [ Tag(s) to look for: DrivingDirectionSettings]
-        // 33. Specify URLs for map sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
+        // 10. Set initial map extent                        - [ Tag(s) to look for: DefaultExtent]
+        // 11. Bottom Panel InfoPod Settings                 - [ Tag(s) to look for: PodSettings ]
+        // 12. Customize zoom level for address search       - [ Tag(s) to look for: ZoomLevel ]
+        // 13. Specify WebMap Id                             - [ Tag(s) to look for: WebMapId ]
+        // 14. Specify URL to ArcGIS Portal REST API         - [ Tag(s) to look for: PortalAPIURL ]
+        // 15. Specify the group title that contains basemaps- [ Tag(s) to look for: BasemapGroupTitle ]
+        // 16. Specify the group name that contains basemaps - [ Tag(s) to look for: BasemapGroupOwner ]
+        // 17. Specify spatial reference for basemaps        - [ Tag(s) to look for: BasemapSpatialReferenceWKID ]
+        // 18. Specify path to display the thumbnail         - [ Tag(s) to look for: NoThumbnail ]
+        // 19. Specify Activity SearchSettings               - [ Tag(s) to look for: ActivitySearchSettings]
+        // 20. Specify Event SearchSettings                  - [ Tag(s) to look for: EventSearchSettings]
+        // 21. Specify Ripple color settings                 - [ Tag(s) to look for: RippleColorSettings ]
+        // 22. Specify Locator ripple size                   - [ Tag(s) to look for: LocatorRippleSize ]
+        // 23. Customize InfoPopupHeight                     - [ Tag(s) to look for: InfoPopupHeight ]
+        // 24. Customize InfoPopupWidth                      - [ Tag(s) to look for: InfoPopupWidth ]
+        // 25. Specify Info Window setting                   - [ Tag(s) to look for: InfoWindowSetting ]
+        // 26. Set URL for LocatorSettings                   - [ Tag(s) to look for: LocatorSettings ]
+        // 27. Geometry service setting                      - [ Tag(s) to look for: GeometryService ]
+        // 28. Specify Buffer Symbology                      - [ Tag(s) to look for: BufferSymbology ]
+        // 29. Specify Buffer Distance                      -  [ Tag(s) to look for: Buffer Distance ]
+        // 30. Customize Driving Direction Settings          - [ Tag(s) to look for: DrivingDirectionSettings]
+        // 31. Specify URLs for map sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
+        // 32. Specify header widget settings                - [ Tag(s) to look for: AppHeaderWidgets ]
 
         // ------------------------------------------------------------------------------------------------------------------------
         // GENERAL SETTINGS
@@ -71,7 +70,7 @@ define([], function () {
         HelpURL: "help.htm",
 
         // Set custom logo url, displayed in lower left corner. Set to empty "" to disable.
-        CustomLogoUrl: "",
+        CustomLogoUrl: "/js/library/themes/images/nddotlogo.png",
 
         // Set proxy url
         ProxyUrl: "/proxy/proxy.ashx",
@@ -85,38 +84,13 @@ define([], function () {
             IsVisible: true
         },
 
-        // Set the application theme. Supported theme keys are blueTheme and greenTheme.
-        ThemeColor: "js/library/themes/styles/blueTheme.css",
+        // Set the application theme. Supported theme keys are blueTheme and greenTheme, orangeTheme, purpleTheme.
+        ThemeColor: "js/library/themes/styles/greenTheme.css",
 
-        //------------------------------------------------------------------------------------------------------------------------
-        // Header Widget Settings
-        //-------------------default-----------------------------------------------------------------------------------------------------
-        // Set widgets settings such as widget  widgetPath, mapInstanceRequired to be displayed in header panel
-        // WidgetPath: path of the widget respective to the widgets package.
-        // MapInstanceRequired: true if widget is dependent on the map instance.
-
-        AppHeaderWidgets: [{
-            WidgetPath: "widgets/searchSetting/searchSetting",
-            MapInstanceRequired: true
-        }, {
-            WidgetPath: "widgets/eventsPlanner/eventsPlanner",
-            MapInstanceRequired: true
-        }, {
-            WidgetPath: "widgets/geoLocation/geoLocation",
-            MapInstanceRequired: true
-        }, {
-            WidgetPath: "widgets/share/share",
-            MapInstanceRequired: true
-        }, {
-            WidgetPath: "widgets/help/help",
-            MapInstanceRequired: false
-        }],
 
         // Initial map extent. Use comma (,) to separate values and don't delete the last comma
         // The coordinates must be specified in the basemap's coordinate system, usually WKID:102100, unless a custom basemap is used
         DefaultExtent: "-9991781.18961914, 4083344.0852194074, -9160146.321876464, 4494881.045506775",
-
-
 
         // Set sequence for info pods in the bottom panel
         PodSettings: [{
@@ -141,31 +115,11 @@ define([], function () {
             }
         }],
 
-
-        // OPERATIONAL LAYER SETTINGS
-        // ------------------------------------------------------------------------------------------------------------------------
-        // Configure operational layers  below.
-        // The order of displaying layers is reversed on map. The last configured layer is displayed on top.
-        // ServiceURL: URL of the layer.
-        // LoadAsServiceType: Field to specify if the operational layers should be added as dynamic map service layer or feature layer.
-        //                    Supported service types are 'dynamic' or 'feature'.
-
-        OperationalLayers: [
-            {
-                ServiceURL: "http://54.193.222.183:6080/arcgis/rest/services/WaterAccess/FeatureServer/0",
-                LoadAsServiceType: "feature"
-            },
-            {
-                ServiceURL: "http://54.193.222.183:6080/arcgis/rest/services/Events/MapServer/0",
-                LoadAsServiceType: "feature"
-            }
-        ],
-
         // Following zoom level will be set for the map upon searching an address
         ZoomLevel: 12,
 
         // Choose if you want to use WebMap or Map Services for operational layers. If using WebMap, specify WebMapId within quotes, otherwise leave this empty and configure operational layers
-        WebMapId: "",
+        WebMapId: "daa3eeae86954f4cba87c044466c4c2f",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -200,8 +154,9 @@ define([], function () {
         // SearchDisplayFields: Attribute that will be displayed in the search box when user performs a search.
         // SearchExpression: Configure the query expression to be used for search.
         ActivitySearchSettings: [{
+            Enable: true,
             UnifiedSearch: "true",
-            Title: "WaterAccess",
+            Title: "WaterAccess - Water Access Locations",
             QueryLayerId: "0",
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
@@ -273,7 +228,7 @@ define([], function () {
             CommentsSettings: {
                 //Set to true if comments need to be displayed , or false if not required
                 Enabled: true,
-                Title: "WaterAccess",
+                Title: "WaterAccess - Water Access Locations",
                 QueryLayerId: "1",
                 // Specify field name used to be used as the foreign key to relate comment to activity
                 ForeignKeyFieldForActivity: "id",
@@ -298,18 +253,35 @@ define([], function () {
         // SearchDisplaySubFields: Attribute that will be displayed in the search box when user performs a search.
         // SearchExpression: Configure the query expression to be used for search.
         // DisplayDateFormat: Configure the date format.
-
+        // AddToCalenderSettings: Configure the parameters to create the ics file for an event.
 
         EventSearchSettings: [{
+            Enable: true,
             UnifiedSearch: "true",
-            Title: "Events",
+            Title: "Events - Events",
             QueryLayerId: "0",
             SearchDisplayTitle: "Events",
             SearchDisplayFields: "${CATEGORY}",
             SearchDisplaySubFields: "${STARTDATE},${ADDRESS}",
             SearchExpressionForDate: "STARTDATE >= ${0} AND ENDDATE <= ${1}",
             SearchExpression: "UPPER(ADDRESS) LIKE UPPER('${0}%')",
-            DisplayDateFormat: "MMMM dd, yyyy"
+            DisplayDateFormat: "MMMM dd, yyyy",
+            AddToCalendarSettings: [{
+                //Set the name of the ics file. This is a required key.
+                IcsFileName: "${CATEGORY}",
+                //Set the start date of the event in ics file. This is a required key.
+                StartDate: "${STARTDATE}",
+                //Set the End date of the event in ics file. This is a required key.
+                EndDate: "${ENDDATE}",
+                //Set the location of the event in ics file.
+                Location: "${ADDRESS},${CITY},${STATE}",
+                //Set the summary of the event in ics file.
+                Summary: "${CATEGORY}",
+                //Set the description of the event in ics file.
+                Description: "${DESCRIPTION}",
+                //Set the organizer of the event in ics file.
+                Organizer: ""
+            }]
         }],
 
 
@@ -342,45 +314,7 @@ define([], function () {
         // FieldName: Field used for displaying the value
         // Info-popup is a popup dialog that gets displayed on selecting a feature
         // Set the content to be displayed on the info-Popup. Define labels, field values, field types and field formats
-        InfoWindowSettings: [{
-            Title: "WaterAccess",
-            QueryLayerId: "0",
-            InfoWindowHeaderField: "Activity:${NAME}",
-            InfoWindowContent: "${NAME}",
-            ShowAllFields: false,
-            InfoWindowData: [{
-                DisplayText: "Access Fee:",
-                FieldName: "${ACCESSFEE}"
-            }, {
-                DisplayText: "Hours Open For:",
-                FieldName: "${OPERHOURS}"
-            }, {
-                DisplayText: "Management Unit:",
-                FieldName: "${MANAGEUNIT}"
-            }, {
-                DisplayText: "Facility Type:",
-                FieldName: "${Type}"
-            }]
-        }, {
-            Title: "Events",
-            QueryLayerId: "0",
-            InfoWindowHeaderField: "Event:${CATEGORY}",
-            InfoWindowContent: "${CATEGORY}",
-            ShowAllFields: false,
-            InfoWindowData: [{
-                DisplayText: "Category:",
-                FieldName: "${CATEGORY}"
-            }, {
-                DisplayText: "Address:",
-                FieldName: "${ADDRESS}"
-            }, {
-                DisplayText: "Start Date:",
-                FieldName: "${STARTDATE}"
-            }, {
-                DisplayText: "End Date:",
-                FieldName: "${ENDDATE}"
-            }]
-        }],
+        //   InfoWindowSettings: [],
 
         // ------------------------------------------------------------------------------------------------------------------------
         // GEOLOCATION SETTINGS
@@ -471,6 +405,24 @@ define([], function () {
             FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Configurable%20Locator",
             TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Configurable%20Locator ${0}",
             ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map!&body=${0}"
-        }
+        },
+
+        //------------------------------------------------------------------------------------------------------------------------
+        // Header Widget Settings
+        //-------------------default-----------------------------------------------------------------------------------------------------
+        // Set widgets settings such as widget  widgetPath, mapInstanceRequired to be displayed in header panel
+        // WidgetPath: path of the widget respective to the widgets package.
+
+        AppHeaderWidgets: [{
+            WidgetPath: "widgets/searchSetting/searchSetting"
+        }, {
+            WidgetPath: "widgets/myList/myList"
+        }, {
+            WidgetPath: "widgets/geoLocation/geoLocation"
+        }, {
+            WidgetPath: "widgets/share/share"
+        }, {
+            WidgetPath: "widgets/help/help"
+        }]
     };
 });

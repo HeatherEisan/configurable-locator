@@ -29,8 +29,9 @@ define([
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
     "esri/layers/ArcGISTiledMapServiceLayer",
-    "esri/layers/OpenStreetMapLayer"
-], function (declare, domConstruct, array, lang, on, dom, query, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, ArcGISTiledMapServiceLayer, OpenStreetMapLayer) {
+    "esri/layers/OpenStreetMapLayer",
+    "dijit/a11yclick"
+], function (declare, domConstruct, array, lang, on, dom, query, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, ArcGISTiledMapServiceLayer, OpenStreetMapLayer, a11yclick) {
 
     //========================================================================================================================//
 
@@ -70,7 +71,7 @@ define([
             }
             divContainer = domConstruct.create("div", { "class": "esriCTbaseMapContainerNode" });
             imgThumbnail = domConstruct.create("img", { "class": "esriCTBasemapThumbnail", "src": thumbnailPath }, null);
-            on(imgThumbnail, "click", lang.hitch(this, function () {
+            on(imgThumbnail, a11yclick, lang.hitch(this, function () {
                 if (this.enableToggling) {
                     dojo.selectedBasemapIndex++;
                     this._changeBasemapThumbnail();

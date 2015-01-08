@@ -38,8 +38,9 @@ define([
     "dojo/_base/Color",
     "esri/request",
     "esri/tasks/query",
-    "esri/tasks/QueryTask"
-], function (declare, domConstruct, domStyle, lang, array, query, domAttr, on, dom, domClass, template, topic, Deferred, DeferredList, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, Color, esriRequest, Query, QueryTask) {
+    "esri/tasks/QueryTask",
+    "dijit/a11yclick"
+], function (declare, domConstruct, domStyle, lang, array, query, domAttr, on, dom, domClass, template, topic, Deferred, DeferredList, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, Color, esriRequest, Query, QueryTask, a11yclick) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -298,10 +299,10 @@ define([
             this.divLegendContainer = domConstruct.create("div", { "class": "esriCTDivLegendContainer" }, this.divLegendListContainer);
             this.divLegendContent = domConstruct.create("div", { "class": "esriCTDivLegendContent" }, this.divLegendContainer);
             this.divLeftArrow = domConstruct.create("div", { "class": "esriCTLeftArrow" }, this.divLegendBoxContent);
-            on(this.divLeftArrow, "click", lang.hitch(this, this._slideLeft));
+            on(this.divLeftArrow, a11yclick, lang.hitch(this, this._slideLeft));
 
             this.divRightArrow = domConstruct.create("div", { "class": "esriCTRightArrow" }, this.divLegendBoxContent);
-            on(this.divRightArrow, "click", lang.hitch(this, this._slideRight));
+            on(this.divRightArrow, a11yclick, lang.hitch(this, this._slideRight));
         },
 
         /**

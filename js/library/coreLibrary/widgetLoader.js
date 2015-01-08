@@ -104,7 +104,7 @@ define([
                     widgetId = widgetConfig.WidgetPath.split('/')[widgetConfig.WidgetPath.split('/').length - 1];
                     // if this widget has not been registered
                     if (!dijit.registry.byId(widgetId)) {
-                        widgets[widgetConfig.WidgetPath] = new Widget({ id: widgetId, map: widgetConfig.MapInstanceRequired ? mapInstance : null });
+                        widgets[widgetConfig.WidgetPath] = new Widget({ id: widgetId, map: mapInstance });
                         deferred.resolve(widgetConfig.WidgetPath);
                     }
                 });

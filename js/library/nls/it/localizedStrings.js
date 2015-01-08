@@ -17,9 +17,9 @@
 */
 define({
     showNullValue: "@it@ N/A",
+    showApproxString: "@it@ Approx",
     buttons: {
         okButtonText: "@it@ OK",
-        link: "@it@ Link",
         email: "e-mail",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
         Facebook: "Facebook",  // Shown next to icon for sharing the current map extents via a Facebook post; works with shareViaFacebook tooltip
         Twitter: "Twitter",
@@ -27,40 +27,40 @@ define({
     },
     tooltips: {
         searchTooltips: "Cerca",
-        routeTooltips: "@it@ Route",
+        routeTooltips: "@it@ Driving Directions",
         locateTooltips: "Posizione corrente",
         shareTooltips: "Condividi",
         helpTooltips: "Guida",
-        eventsTooltips: "@it@ Events",
+        eventsTooltips: "@it@ My List",
         clearEntryTooltips: "@it@ Clear",
         hidePanelTooltips: "@it@ Hide panel",
         showPanelTooltips: "@it@ Show panel",
         printButtonooltips: "@it@ Print",
-        closeTooltips: "@it@ Close"
+        closeTooltips: "@it@ Close",
+        clearEntry: "@it@ Clear",
+        search: "@it@ Search",
+        carouselPodToggleButtonShowTooltips: "@it@ Show",
+        carouselPodToggleButtonHideTooltips: "@it@ Hide",
+        routeForListTooltips: "@it@ Driving Directions - List Items",
+        addToCalanderForListTooltips: "@it@ Add to Calendar - List Items",
+        printForListTooltips: "@it@ Print - List Items",
+        deleteFromListTooltips: "@it@ Delete from List",
+        addToCalanderTooltips: "@it@ Add to Calander"
     },
     titles: {
-        directionsDisplayText: "@it@ Area of Interest",
-        informationPanelTitle: "@it@ Information for current map view",
         webpageDisplayText: "@it@ Copy/Paste HTML into your web page",
-        splashScreenContent: "@it@  Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
         serchResultText: "@it@ SEARCH RESULT",
         directionText: "@it@ DIRECTIONS TO",
         galleryText: "@it@ GALLERY",
         commentText: "@it@ COMMENT",
-        facitilyPanelAccessFeeText: "@it@ Access Fee:",
-        facitilyPanelHoursOpenForText: "@it@ Hours Open For:",
-        facitilyPanelManagementUnitText: "@it@ Management Unit:",
-        facitilyPanelMarinaText: "@it@ Facility Type:",
         directionCurrentLocationText: "@it@ My Location",
         directionTextDistance: "@it@ Distance:",
         directionTextTime: "@it@ Duration:",
-        activityTabName: "@it@ Events",
         activityListTabName: "@it@ My List",
         fromDateText: "@it@ From Date",
         toDateText: "@it@ To Date",
         gobuttonText: "@it@ Go",
         noLegendAvailable: "@it@ No Legend Available.",
-        loadingText: "@it@ Loading...",
         galleryInfoTitle: "@it@ Gallery",
         informationTitle: "@it@ Information",
         commentInfoTitle: "@it@ Comments",
@@ -68,7 +68,18 @@ define({
         orderByDate: "@it@ Order by Date",
         carouselUtilitiesText: "@it@ utilities",
         addToListTitle: "@it@ Add to list",
-        directionFromText: "@fr@DIRECTIONS from "
+        unifiedSearchTabText: "@it@Search",
+        activitySearchTabText: "@it@Activity",
+        eventSearchTabText: "@it@Events",
+        postComment: "@it@ Post Comment",
+        rating: "@it@ rating",
+        backButton: "@it@ Back",
+        submitButton: "@it@ Submit",
+        postCommentText: "@it@ Enter comment",
+        numberOfFeaturesFoundNearAddress: "@it@ Found ${0} facility(ies) near the address",
+        numberOfFoundFeatureNearAddress: "@it@ Found ${0} facility(ies)",
+        numberOfFoundEventsNearAddress: "@it@ Found ${0} Event",
+        carouselPodToggleButtonText: "@it@ Result"
     },
     errorMessages: {
         invalidSearch: "Nessun risultato trovato.",
@@ -92,7 +103,13 @@ define({
         addedActivities: "@it@ All activities within specified date range are already added to the My List.",
         activitySerachGeolocationText: "@it@ Geolocation is not supported in selected browser.",
         portalUrlNotFound: "@it@ Portal URL cannot be empty",
-        activityAlreadyadded: "@it Activity is already added"
+        activityAlreadyadded: "@it@ This feature is already added to list",
+        errorInQueringLayer: "@it@ Failed to query Comment layer",
+        loadingText: "@it@ Loading...",
+        noLegend: "@it@ No Legend Available.",
+        noBasemap: "@it@ No Basemap Found",
+        feildNotconfigure: "@it@ Feilds are not configured.",
+        geolocationWidgetNotFoundMessage: "@it@ Geolocation widget is not configured."
     },
     notUsed: {
         addressDisplayText: "@it@ Address",
@@ -102,11 +119,7 @@ define({
 
     //App nls
     appErrorMessage: {
-        layerTitleError: "@it@ Title and/or QueryLayerId parameters in SearchSettings do not match with configured operational layers.",
-        titleNotMatching: "@it@ Title and/or QueryLayerId parameters in the InfoWindowSettings and SearchSettings do not match.",
-        lengthDoNotMatch: "@it@ The number of objects in InfoWindowSettings and SearchSettings do not match.",
         webmapTitleError: "@it@ Title and/or QueryLayerId parameters in SearchSettings do not match with configured webmap"
     }
     //End of App nls
 });
-

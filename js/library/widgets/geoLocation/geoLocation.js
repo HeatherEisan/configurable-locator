@@ -29,9 +29,10 @@ define([
     "esri/layers/GraphicsLayer",
     "esri/SpatialReference",
     "esri/symbols/PictureMarkerSymbol",
-    "esri/tasks/GeometryService"
+    "esri/tasks/GeometryService",
+    "dijit/a11yclick"
 
-], function (declare, lang, domConstruct, sharedNls, on, topic, _WidgetBase, Point, Graphic, GraphicsLayer, SpatialReference, PictureMarkerSymbol, GeometryService) {
+], function (declare, lang, domConstruct, sharedNls, on, topic, _WidgetBase, Point, Graphic, GraphicsLayer, SpatialReference, PictureMarkerSymbol, GeometryService, a11yclick) {
 
     //========================================================================================================================//
 
@@ -58,12 +59,12 @@ define([
             if (this.preLoaded) {
                 if (Modernizr.geolocation) {
                     this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.locateTooltips, "class": "esriCTTdGeolocation" }, null);
-                    this.own(on(this.domNode, "click", lang.hitch(this, function () {
+                    this.own(on(this.domNode, a11yclick, lang.hitch(this, function () {
                         /**
                         * minimize other open header panel widgets and call geolocation service
                         */
                         topic.publish("toggleWidget", "geolocation");
-                        this.showCurrentLocation(this.preLoaded);
+                        this.showCurrentLocation(this.preLoaded, true);
                     })));
                 }
             }
@@ -83,7 +84,7 @@ define([
         * @memberOf widgets/geoLocation/geoLocation
         */
 
-        showCurrentLocation: function (preLoaded) {
+        showCurrentLocation: function (preLoaded, centerAndZoom) {
             var mapPoint, self = this, currentBaseMap, geometryServiceUrl, geometryService, isPreLoaded = preLoaded;
             geometryServiceUrl = dojo.configData.GeometryService;
             geometryService = new GeometryService(geometryServiceUrl);
@@ -115,7 +116,9 @@ define([
                         }
                     }
                     mapPoint = newPoint[0];
-                    self.map.centerAndZoom(mapPoint, dojo.configData.ZoomLevel);
+                    if (centerAndZoom) {
+                        self.map.centerAndZoom(mapPoint, dojo.configData.ZoomLevel);
+                    }
                     self._addGraphic(mapPoint, isPreLoaded);
                 }, function (err) {
                     alert(sharedNls.errorMessages.invalidProjection);

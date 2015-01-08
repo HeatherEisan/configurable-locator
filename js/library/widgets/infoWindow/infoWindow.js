@@ -33,15 +33,17 @@ define([
     "dojo/query",
     "dojo/topic",
     "dojo/i18n!application/js/library/nls/localizedStrings",
-    "dijit/_WidgetsInTemplateMixin"
+    "dijit/_WidgetsInTemplateMixin",
+    "dijit/a11yclick"
 
-], function (declare, domConstruct, domStyle, lang, on, domAttr, dom, domClass, domUtils, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, query, topic, sharedNls, _WidgetsInTemplateMixin) {
+], function (declare, domConstruct, domStyle, lang, on, domAttr, dom, domClass, domUtils, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, query, topic, sharedNls, _WidgetsInTemplateMixin, a11yclick) {
     return declare([InfoWindowBase, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
         sharedNls: sharedNls,
         InfoShow: true,
         widgetName: null,
         isTabEnabled: true,
+        galaryObject : null,
 
         postCreate: function () {
             this.infoWindowContainer = domConstruct.create("div", {}, dom.byId("esriCTParentDivContainer"));
@@ -49,10 +51,10 @@ define([
             this._anchor = domConstruct.create("div", { "class": "esriCTDivTriangle" }, this.domNode);
             domUtils.hide(this.domNode);
             domAttr.set(this.backToMap, "innerHTML", sharedNls.titles.backToMapText);
-            this.own(on(this.backToMap, "click", lang.hitch(this, function () {
+            this.own(on(this.backToMap, a11yclick, lang.hitch(this, function () {
                 this._closeInfowindow();
             })));
-            this.own(on(this.mobileArrow, "click", lang.hitch(this, function () {
+            this.own(on(this.mobileArrow, a11yclick, lang.hitch(this, function () {
                 this.InfoShow = false;
                 this._openInfowindow();
             })));
@@ -62,14 +64,27 @@ define([
             topic.subscribe("getInfoWidgetName", lang.hitch(this, function (value) {
                 this.widgetName = value;
             }));
+
             this.onWindowResize();
-            this.own(on(this.divClose, "click", lang.hitch(this, function () {
+            topic.subscribe("galaryObject", lang.hitch(this, function (value) {
+                this.galaryObject = value;
+            }));
+
+            topic.subscribe("commentObject", lang.hitch(this, function (value) {
+                this.commentObject = value;
+            }));
+
+            topic.subscribe("directionObject", lang.hitch(this, function (value) {
+                this.directionObject = value;
+            }));
+
+            this.own(on(this.divClose, a11yclick, lang.hitch(this, function () {
                 this.InfoShow = true;
                 domUtils.hide(this.domNode);
                 this.map.getLayer("highlightLayerId").clear();
                 dojo.mapClickedPoint = null;
             })));
-            this.own(on(this.mobileCloseDiv, "click", lang.hitch(this, function () {
+            this.own(on(this.mobileCloseDiv, a11yclick, lang.hitch(this, function () {
                 this.InfoShow = true;
                 dojo.setMapTipPosition = true;
                 domUtils.hide(this.domNode);
@@ -77,25 +92,26 @@ define([
                 this.map.getLayer("highlightLayerId").clear();
                 dojo.mapClickedPoint = null;
             })));
-            this.own(on(this.informationTab, "click", lang.hitch(this, function () {
+            this.own(on(this.informationTab, a11yclick, lang.hitch(this, function () {
                 this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
                 domClass.remove(this.getDirselect, "esriCTImageTabSelected");
                 domClass.add(this.getDirselect, "esriCTImageTab");
             })));
-            this.own(on(this.galleryTab, "click", lang.hitch(this, function () {
+            this.own(on(this.galleryTab, a11yclick, lang.hitch(this, function () {
                 this._showInfoWindowTab(this.galleryTab, dojo.byId("galleryTabContainer"));
                 domClass.remove(this.getDirselect, "esriCTImageTabSelected");
                 domClass.add(this.getDirselect, "esriCTImageTab");
             })));
-            this.own(on(this.commentsTab, "click", lang.hitch(this, function () {
+            this.own(on(this.commentsTab, a11yclick, lang.hitch(this, function () {
                 this._showInfoWindowTab(this.commentsTab, dojo.byId("commentsTabContainer"));
                 domClass.remove(this.getDirselect, "esriCTImageTabSelected");
                 domClass.add(this.getDirselect, "esriCTImageTab");
             })));
-            this.own(on(this.esriCTGetDir, "click", lang.hitch(this, function () {
+            this.own(on(this.esriCTGetDir, a11yclick, lang.hitch(this, function () {
                 this._showInfoWindowTab(this.esriCTGetDir, dojo.byId("getDirContainer"));
                 domClass.add(this.getDirselect, "esriCTImageTabSelected");
                 domClass.remove(this.getDirselect, "esriCTImageTab");
+                topic.publish("showDirection", this.directionObject);
             })));
         },
 
@@ -245,7 +261,7 @@ define([
         },
 
         _hideInfoContainer: function () {
-            this.own(on(this.divClose, "click", lang.hitch(this, function () {
+            this.own(on(this.divClose, a11yclick, lang.hitch(this, function () {
                 domUtils.hide(this.domNode);
                 dojo.infoWindowIsShowing = false;
             })));

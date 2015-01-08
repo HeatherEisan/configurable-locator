@@ -28,8 +28,9 @@ define([
     "dijit/_TemplatedMixin",
     "dojo/dom-class",
     "dijit/_WidgetsInTemplateMixin",
-    "dojo/i18n!application/js/library/nls/localizedStrings"
-], function (declare, domConstruct, domStyle, lang, domAttr, on, template, _WidgetBase, _TemplatedMixin, domClass, _WidgetsInTemplateMixin, sharedNls) {
+    "dojo/i18n!application/js/library/nls/localizedStrings",
+    "dijit/a11yclick"
+], function (declare, domConstruct, domStyle, lang, domAttr, on, template, _WidgetBase, _TemplatedMixin, domClass, _WidgetsInTemplateMixin, sharedNls, a11yclick) {
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
         sharedNls: sharedNls,
@@ -44,7 +45,7 @@ define([
         postCreate: function () {
             this.inherited(arguments);
             domConstruct.create("div", { "class": "esriCTCustomButtonInner", "innerHTML": sharedNls.buttons.okButtonText }, this.customButton);
-            this.own(on(this.customButton, "click", lang.hitch(this, function () {
+            this.own(on(this.customButton, a11yclick, lang.hitch(this, function () {
                 this._hideSplashScreenDialog();
             })));
             this.domNode = domConstruct.create("div", { "class": "esriCTSplashScreen" }, dojo.body());

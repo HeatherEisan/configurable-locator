@@ -276,46 +276,27 @@ input
     border-right: 1px solid #DFDFDF;
     border-bottom: 1px solid #DFDFDF;
 }
-
 .esriCTResultColor
 {
     color: #5C2E6F;
 }
-
-.esriCTActivityPanelSelected
+.esriCTActivityPanelSelected, .esriCTEventsPanelSelected, .esriCTDivSearchPanel
 {
     color: #5C2E6F;
-    border-left: 1px solid #FAFAFA;
-    border-right: 1px solid #fff;
 }
-
-.esriCTActivityPanel
+.esriCTActivityPanel, .esriCTSearchPanelSelected, .esriCTEventsPanel
 {
-    border-bottom: 1px solid #5C2E6F;
+    border-color: #5C2E6F;
     color: #5C2E6F;
-    border-right: 1px solid #FAFAFA;
-    border-left: 1px solid #5C2E6F;
 }
-
-.esriCTSearchPanelSelected
-{
-    border-bottom: 1px solid #5C2E6F;
-    color: #5C2E6F;
-    border-right: 1px solid #5C2E6F;
-    border-left: 1px solid #FAFAFA;
-}
-
-.esriCTDivSearchPanel
+.esriCTActivityPanel, .esriCTSearchPanel, .esriCTEventsPanelSelected
 {
     color: #5C2E6F;
-    border-left: 1px solid #fff;
-    border-right: 1px solid #FAFAFA;
 }
 .esriCTTickMark
 {
     color: #5C2E6F;
 }
-
 .esriCTUtilityImgSelect
 {
     border: 1px solid #5C2E6F;
@@ -742,6 +723,7 @@ input
 {
     color: #5C2E6F;
 }
+
 .esriCTInfoAddToListIcon
 {
     background-image: url("../images/addToListPurple.png") !important;
@@ -750,10 +732,12 @@ input
 {
     color: #5C2E6F;
 }
+
 .esriCTDivActivityAppContainer
 {
     border: 1px solid #5C2E6F;
 }
+
 .esriCTHeaderDirectionAcitivityList
 {
     background-image: url("../images/directionPurple.png") !important;
@@ -763,7 +747,34 @@ input
 {
     background-image: url("../images/addActivityListPurple.png") !important;
 }
+
 .esriCTHeaderPrintAcitivityList
 {
     background-image: url("../images/printPurple.png") !important;
+}
+
+.esriCTTPaginationList
+{
+    color: #5C2E6F;
+}
+
+.esriCTTPaginationPrev
+{
+    float: left;
+    background-image: url("../images/leftArrowPagePurple.png");
+    margin: 0 5px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.esriCTTPaginationNext
+{
+    float: left;
+    background-image: url("../images/rightArrowPagePurple.png");
+    color: #d15706;
+    margin: 0 5px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
 }
