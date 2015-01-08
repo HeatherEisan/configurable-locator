@@ -43,8 +43,9 @@ require([
     //Print Directions on Page
     dom.byId("title").innerHTML = "My List";
     for (i = 0; i < eventInfoData.length; i++) {
-        domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": eventInfoData[i].Name + "<br>" + eventInfoData[i].StartDate + ", " + eventInfoData[i].Address }, dom.byId("directionsList"));
+        domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": eventInfoData[i].Name + "<br>" + (eventInfoData[i].StartDate === "" ? eventInfoData[i].StartDate : eventInfoData[i].StartDate + ", ") + eventInfoData[i].Address }, dom.byId("directionsList"));
     }
+    // Set time out for window print
     setTimeout(function () {
         window.print();
     }, 1000);

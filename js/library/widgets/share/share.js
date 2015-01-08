@@ -34,8 +34,9 @@ define([
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
     "dojo/i18n!application/js/library/nls/localizedStrings",
-    "dojo/topic"
-], function (declare, domConstruct, lang, domAttr, on, dom, domClass, domGeom, domStyle, string, esriRequest, html, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic) {
+    "dojo/topic",
+    "dijit/a11yclick"
+], function (declare, domConstruct, lang, domAttr, on, dom, domClass, domGeom, domStyle, string, esriRequest, html, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, a11yclick) {
 
     //========================================================================================================================//
 
@@ -79,7 +80,7 @@ define([
             this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.shareTooltips, "class": "esriCTImgSocialMedia" }, null);
             applicationHeaderDiv = domConstruct.create("div", { "class": "esriCTApplicationShareicon" }, dom.byId("esriCTParentDivContainer"));
             applicationHeaderDiv.appendChild(this.divAppContainer);
-            this.own(on(this.domNode, "click", lang.hitch(this, function () {
+            this.own(on(this.domNode, a11yclick, lang.hitch(this, function () {
 
                 /**
                 * minimize other open header panel widgets and show share panel
@@ -88,7 +89,7 @@ define([
                 this._shareLink();
                 this._showHideShareContainer();
             })));
-            on(this.imgEmbedding, "click", lang.hitch(this, function () {
+            on(this.imgEmbedding, a11yclick, lang.hitch(this, function () {
                 this._showEmbeddingContainer();
             }));
         },
@@ -128,7 +129,7 @@ define([
         * @memberOf widgets/share/share
         */
         _shareLink: function () {
-            var mapExtent, url, urlStr, encodedUri, clickCoords, eventIndex, geolocationCoords, eventCoords = "";
+            var mapExtent, url, urlStr, encodedUri, clickCoords, eventIndex, geolocationCoords;
             /**
             * get current map extent to be shared
             */
@@ -145,7 +146,7 @@ define([
                 urlStr += "$address=" + dojo.addressLocation;
             }
             if (dojo.mapClickedPoint) {
-                clickCoords = dojo.mapClickedPoint.x + "," + dojo.mapClickedPoint.y;
+                clickCoords = dojo.mapClickedPoint.x + "," + dojo.mapClickedPoint.y + "," + dojo.screenPoint;
                 urlStr += "$mapClickPoint=" + clickCoords;
             }
             if (dojo.infowindowDirection) {
@@ -186,6 +187,9 @@ define([
             if (dojo.eventInfoWindowAttribute) {
                 urlStr += "$eventInfoWindowAttribute=" + dojo.eventInfoWindowAttribute;
             }
+            if (dojo.eventInfoWindowIdActivity) {
+                urlStr += "$eventInfoWindowIdActivity=" + dojo.eventInfoWindowIdActivity;
+            }
             if (dojo.infoRoutePoint) {
                 urlStr += "$infoRoutePoint=" + dojo.infoRoutePoint.toString();
             }
@@ -193,20 +197,20 @@ define([
                 urlStr += "$eventRouteforList=" + dojo.eventForListClicked.toString();
             }
             if (dojo.eventRoutePoint) {
-                urlStr += dojo.eventRoutePoint.toString();
+                urlStr += "$eventRoutePoint=" + dojo.eventRoutePoint.toString();
+            }
+            if (dojo.eventIndex && dojo.eventPlannerQuery === undefined) {
+                urlStr += "$eventIndex=" + dojo.eventIndex.toString();
             }
             if (dojo.eventPlannerQuery) {
                 eventIndex = "";
                 if (dojo.eventIndex) {
                     eventIndex = dojo.eventIndex.toString();
                 }
-                if (dojo.eventRoutePoint) {
-                    eventCoords = dojo.eventRoutePoint.toString();
-                }
                 if (dojo.eventForListClicked) {
                     urlStr += "$eventRouteforList=" + dojo.eventForListClicked.toString();
                 }
-                urlStr += "$eventplanner=" + "true" + "$startDate=" + dojo.eventPlannerQuery.split(",")[0].replace(new RegExp(" ", 'g'), ",").toString() + "$endDate=" + dojo.eventPlannerQuery.split(",")[1].replace(new RegExp(" ", 'g'), ",").toString() + "$eventIndex=" + eventIndex + "$eventRoutePoint=" + eventCoords;
+                urlStr += "$eventplanner=" + "true" + "$startDate=" + dojo.eventPlannerQuery.split(",")[0].replace(new RegExp(" ", 'g'), ",").toString() + "$endDate=" + dojo.eventPlannerQuery.split(",")[1].replace(new RegExp(" ", 'g'), ",").toString() + "$eventIndex=" + eventIndex;
             }
             urlStr += "$extentChanged=true";
             try {
@@ -275,9 +279,9 @@ define([
             /**
             * add event handlers to sharing options
             */
-            this.facebookHandle = on(this.tdFacebook, "click", lang.hitch(this, function () { this._share("facebook", tinyUrl, urlStr); }));
-            this.twitterHandle = on(this.tdTwitter, "click", lang.hitch(this, function () { this._share("twitter", tinyUrl, urlStr); }));
-            this.emailHandle = on(this.tdMail, "click", lang.hitch(this, function () { this._share("email", tinyUrl, urlStr); }));
+            this.facebookHandle = on(this.tdFacebook, a11yclick, lang.hitch(this, function () { this._share("facebook", tinyUrl, urlStr); }));
+            this.twitterHandle = on(this.tdTwitter, a11yclick, lang.hitch(this, function () { this._share("twitter", tinyUrl, urlStr); }));
+            this.emailHandle = on(this.tdMail, a11yclick, lang.hitch(this, function () { this._share("email", tinyUrl, urlStr); }));
         },
 
         /**

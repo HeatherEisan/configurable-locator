@@ -46,25 +46,28 @@ define([
     "dojo/date",
     "dojo/date/locale",
     "widgets/locator/locator",
+    "dijit/a11yclick",
     "dojo/NodeList-manipulate"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, GeometryExtent, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, date, locale, LocatorTool) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, GeometryExtent, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, date, locale, LocatorTool, a11yclick) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
-        sharedNls: sharedNls,
-        featureArrayInfoWindow: null,
-        rankValue: null,
-        isDirectionCalculated: false,
+        sharedNls: sharedNls,                                   // Variable for shared NLS
+        featureArrayInfoWindow: null,                           // Variable store the feature in infowindow
+        rankValue: null,                                        // Variable for the rank value in post commnet tab
+        isDirectionCalculated: false,                           // Variable for Direction calculate
+        infoWindowFeatureData: [],                              // array to store for feature data of infoWindow
 
         /**
         * positioning the infoWindow on extent change
         * @param {object} selectedPoint contains feature
         * @param {object} map
         * @param {object} infoWindow
-        * @memberOf widgets/searchResult/infoWindowHelper
+        * @memberOf widgets/searchSetting/infoWindowHelper
         */
         _onSetMapTipPosition: function (selectedPoint, map, infoWindow) {
+            // check if faeture is contain
             if (selectedPoint) {
                 var screenPoint = map.toScreen(selectedPoint);
                 screenPoint.y = map.height - screenPoint.y;
@@ -78,42 +81,63 @@ define([
         * @memberOf widgets/searchResult/infoWindowHelper
         */
         _setInfoWindowZoomLevel: function (infoWindowZoomLevelObject) {
-            var extentChanged, screenPoint, zoomDeferred, extent, mapDefaultExtent;
+            var extentChanged, screenPoint, zoomDeferred;
             dojo.selectedMapPoint = infoWindowZoomLevelObject.Mappoint;
+            //check the zoomlevel of map and set infowindow zoom level according to it
             if (this.map.getLevel() !== dojo.configData.ZoomLevel && infoWindowZoomLevelObject.InfoWindowParameter) {
                 zoomDeferred = this.map.setLevel(dojo.configData.ZoomLevel);
                 zoomDeferred.then(lang.hitch(this, function () {
-                    extentChanged = this.map.setExtent(this._calculateCustomMapExtent(infoWindowZoomLevelObject.mapPoint));
+                    // check if "$extentChanged=" is present in url
+                    if (window.location.href.toString().split("$extentChanged=").length > 1) {
+                        if (this.isExtentSet) {
+                            extentChanged = this.map.setExtent(this._calculateCustomMapExtent(infoWindowZoomLevelObject.mapPoint));
+                        } else {
+                            topic.publish("hideProgressIndicator");
+                            screenPoint = this.map.toScreen(dojo.selectedMapPoint);
+                            screenPoint.y = this.map.height - screenPoint.y;
+                            topic.publish("setInfoWindowOnMap", infoWindowZoomLevelObject.MobileTitle, screenPoint, infoWindowZoomLevelObject.InfoPopupWidth, infoWindowZoomLevelObject.InfoPopupHeight);
+                        }
+                    } else {
+                        extentChanged = this.map.setExtent(this._calculateCustomMapExtent(dojo.selectedMapPoint));
+                    }
+                    if (extentChanged) {
+                        extentChanged.then(lang.hitch(this, function () {
+                            topic.publish("hideProgressIndicator");
+                            screenPoint = this.map.toScreen(dojo.selectedMapPoint);
+                            screenPoint.y = this.map.height - screenPoint.y;
+                            topic.publish("setInfoWindowOnMap", infoWindowZoomLevelObject.MobileTitle, screenPoint, infoWindowZoomLevelObject.InfoPopupWidth, infoWindowZoomLevelObject.InfoPopupHeight);
+                        }));
+                    }
+                }));
+            } else {
+                // check if "$extentChanged=" is present in url
+                if (window.location.href.toString().split("$extentChanged=").length > 1) {
+                    if (this.isExtentSet) {
+                        extentChanged = this.map.setExtent(this._calculateCustomMapExtent(dojo.selectedMapPoint));
+                    } else {
+                        topic.publish("hideProgressIndicator");
+                        screenPoint = this.map.toScreen(dojo.selectedMapPoint);
+                        screenPoint.y = this.map.height - screenPoint.y;
+                        topic.publish("setInfoWindowOnMap", infoWindowZoomLevelObject.MobileTitle, screenPoint, infoWindowZoomLevelObject.InfoPopupWidth, infoWindowZoomLevelObject.InfoPopupHeight);
+                    }
+                } else {
+                    extentChanged = this.map.setExtent(this._calculateCustomMapExtent(dojo.selectedMapPoint));
+                }
+                if (extentChanged) {
                     extentChanged.then(lang.hitch(this, function () {
                         topic.publish("hideProgressIndicator");
                         screenPoint = this.map.toScreen(dojo.selectedMapPoint);
                         screenPoint.y = this.map.height - screenPoint.y;
                         topic.publish("setInfoWindowOnMap", infoWindowZoomLevelObject.MobileTitle, screenPoint, infoWindowZoomLevelObject.InfoPopupWidth, infoWindowZoomLevelObject.InfoPopupHeight);
                     }));
-                }));
-            } else {
-                if (!dojo.isInfoPopupShared) {
-                    extentChanged = this.map.setExtent(this._calculateCustomMapExtent(dojo.selectedMapPoint));
-                } else {
-                    extent = this._getQueryString('extent');
-                    if (extent !== "") {
-                        mapDefaultExtent = extent.split(',');
-                        mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(mapDefaultExtent[0]), "ymin": parseFloat(mapDefaultExtent[1]), "xmax": parseFloat(mapDefaultExtent[2]), "ymax": parseFloat(mapDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
-                        extentChanged = this.map.setExtent(mapDefaultExtent);
-                    }
                 }
-                extentChanged.then(lang.hitch(this, function () {
-                    topic.publish("hideProgressIndicator");
-                    screenPoint = this.map.toScreen(dojo.selectedMapPoint);
-                    screenPoint.y = this.map.height - screenPoint.y;
-                    topic.publish("setInfoWindowOnMap", infoWindowZoomLevelObject.MobileTitle, screenPoint, infoWindowZoomLevelObject.InfoPopupWidth, infoWindowZoomLevelObject.InfoPopupHeight);
-                }));
             }
         },
+
         /**
         * get the string of service URL using query operation
         * @param {number} key for service URL
-        * @memberOf widgets/mapSettings/mapSettings
+        * @memberOf widgets/searchSetting/infoWindowHelper
         */
         _getQueryString: function (key) {
             var extentValue = "", regex, qs;
@@ -124,15 +148,19 @@ define([
             }
             return extentValue;
         },
+
         /**
         *Fetch the geometry type of the mapPoint
         * @param {object} geometry Contains the geometry service
+        * return selected MapPoint
         * @memberOf widgets/searchResult/infoWindowHelper
         */
         _getMapPoint: function (geometry) {
             var selectedMapPoint, mapPoint, rings, points;
+            //if geometry type is point
             if (geometry.type === "point") {
                 selectedMapPoint = geometry;
+                //if geometry type is polyline
             } else if (geometry.type === "polyline") {
                 selectedMapPoint = geometry.getPoint(0, 0);
             } else if (geometry.type === "polygon") {
@@ -156,53 +184,35 @@ define([
         * @memberOf widgets/searchResult/infoWindowHelper
         */
         _createInfoWindowContent: function (infoWindowParameter) {
-            var infoPopupHeight, infoWindowZoomLevelObject, featureSet = [], index, infoPopupWidth, infoTitle, i, j, widgetName, key;
+            var infoPopupHeight, queryURL, serchSetting, infoWindowZoomLevelObject, galaryObject, featureSet = [], index, infoPopupWidth, infoTitle, widgetName, commentObject, directionObject;
             featureSet.push(infoWindowParameter.featureSet);
-            for (i = 0; i < dojo.configData.InfoWindowSettings.length; i++) {
-                if (infoWindowParameter.layerTitle === dojo.configData.InfoWindowSettings[i].Title && infoWindowParameter.layerId === dojo.configData.InfoWindowSettings[i].QueryLayerId) {
-                    index = i;
-                    break;
-                }
-            }
-            widgetName = "";
-            for (key in dojo.configData) {
-                if (dojo.configData.hasOwnProperty(key)) {
-                    if (key === "ActivitySearchSettings" || key === "EventSearchSettings") {
-                        if (dojo.configData.ActivitySearchSettings[0].Title === infoWindowParameter.layerTitle && dojo.configData.ActivitySearchSettings[0].QueryLayerId === infoWindowParameter.layerId) {
-                            widgetName = "InfoActivity";
-                            break;
-                        }
-                        for (j = 0; j < dojo.configData.EventSearchSettings.length; j++) {
-                            if (dojo.configData.EventSearchSettings[j].Title === infoWindowParameter.layerTitle && dojo.configData.EventSearchSettings[j].QueryLayerId === infoWindowParameter.layerId) {
-                                widgetName = "InfoEvent";
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+            this.infoWindowFeatureData = infoWindowParameter.featureArray;
+            index = this._getInfowWindowIndex(infoWindowParameter.layerTitle, infoWindowParameter.layerId);
+            queryURL = this.getQueryUrl(infoWindowParameter.layerId, infoWindowParameter.layerTitle);
+            serchSetting = this.getSearchSetting(queryURL);
+            widgetName = this._getInfowWindowWidgetName(infoWindowParameter.layerTitle, infoWindowParameter.layerId);
             topic.publish("getInfoWidgetName", widgetName);
             // To know the click of feature in Event plannner.
             this._getMapPoint(infoWindowParameter.mapPoint);
             this.highlightFeature(infoWindowParameter.mapPoint);
             infoPopupHeight = dojo.configData.InfoPopupHeight;
             infoPopupWidth = dojo.configData.InfoPopupWidth;
-            this._infoWindowInformationTab(infoWindowParameter.attribute, index, widgetName, featureSet);
-            this._infoWindowGalleryTab(infoWindowParameter.attribute, widgetName);
-            this._infoWindowCommentTab(index, widgetName, infoWindowParameter.attribute);
+            this._infoWindowInformationTab(infoWindowParameter.attribute, index, widgetName, featureSet, Number(infoWindowParameter.IndexNumber), infoWindowParameter.featureArray.length, infoWindowParameter.widgetName, infoWindowParameter.layerId, infoWindowParameter.layerTitle);
+            galaryObject = { "attribute": infoWindowParameter.attribute, "widgetName": widgetName };
+            topic.publish("galaryObject", galaryObject);
+            this._infoWindowGalleryTab(galaryObject);
+            commentObject = { "attribute": infoWindowParameter.attribute, "widgetName": widgetName, "index": index };
+            topic.publish("commentObject", commentObject);
+            this._infoWindowCommentTab(commentObject);
             /*direction tab*/
-            this._infoWindowDirectionTab(infoWindowParameter.attribute, widgetName, infoWindowParameter.featureSet);
-
+            directionObject = { "attribute": infoWindowParameter.attribute, "widgetName": widgetName, "featureSet": infoWindowParameter.featureSet, "QueryURL": queryURL };
+            topic.publish("directionObject", directionObject);
             //Check if InfowindowContent available if not then showing infp title as mobile title.
             //In WebMap case infowindow contents will be not available
             if (dojo.configData.InfoWindowSettings[index].MobileCalloutField) {
                 infoTitle = string.substitute(dojo.configData.InfoWindowSettings[index].MobileCalloutField, infoWindowParameter.attribute);
             } else {
-                if (widgetName.toLowerCase() === "infoactivity") {
-                    infoTitle = string.substitute(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields, infoWindowParameter.attribute);
-                } else if (widgetName.toLowerCase() === "infoevent") {
-                    infoTitle = string.substitute(dojo.configData.EventSearchSettings[0].SearchDisplayFields, infoWindowParameter.attribute);
-                }
+                infoTitle = string.substitute(serchSetting.SearchDisplayFields, infoWindowParameter.attribute);
             }
             infoWindowZoomLevelObject = { "Mappoint": infoWindowParameter.mapPoint, "MobileTitle": infoTitle, "InfoPopupWidth": infoPopupWidth, "InfoPopupHeight": infoPopupHeight, "InfoWindowParameter": infoWindowParameter.featureCount };
             dojo.selectedMapPoint = infoWindowParameter.mapPoint;
@@ -211,42 +221,128 @@ define([
         },
 
         /**
+        * It gets the info window index from info window settings of selected feature
+        * @param {layerTitle} layerTitle of feature
+        * @param {layerId} layerID of feature
+        * @memberOf widgets/searchResult/infoWindowHelper
+        */
+        _getInfowWindowIndex: function (layerTitle, layerId) {
+            var index, i;
+            // looping for getting the feture Title and Layerid
+            for (i = 0; i < dojo.configData.InfoWindowSettings.length; i++) {
+                if (layerTitle === dojo.configData.InfoWindowSettings[i].Title && layerId === dojo.configData.InfoWindowSettings[i].QueryLayerId) {
+                    index = i;
+                    break;
+                }
+            }
+            return index;
+        },
+
+        /**
+        * Function get object id on the basic of setting name
+        * @param {LayerId} layer id value
+        * @param {LayerTitle} layer title value
+        * @memberOf widgets/searchResult/infoWindowHelper
+        */
+        getQueryUrl: function (LayerId, LayerTitle) {
+            var queryURL;
+            // Looping for getting object id from event search.
+            array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
+                if (settings.QueryLayerId === LayerId && settings.Title === LayerTitle) {
+                    queryURL = settings.QueryURL;
+                }
+            }));
+            // Looping for getting object id from activity search.
+            array.forEach(dojo.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
+                if (settings.QueryLayerId === LayerId && settings.Title === LayerTitle) {
+                    queryURL = settings.QueryURL;
+                }
+            }));
+            return queryURL;
+        },
+
+        /**
+        * It gets the feature type from  selected feature
+        * @param {layerTitle} layerTitle of feature
+        * @param {layerId} layerID of feature
+        * @memberOf widgets/searchResult/infoWindowHelper
+        */
+        _getInfowWindowWidgetName: function (layerTitle, layerId) {
+            var widgetName = "", key, j;
+            for (key in dojo.configData) {
+                if (dojo.configData.hasOwnProperty(key)) {
+                    if (key === "ActivitySearchSettings" || key === "EventSearchSettings") {
+                        if (dojo.configData.ActivitySearchSettings[0].Title === layerTitle && dojo.configData.ActivitySearchSettings[0].QueryLayerId === layerId) {
+                            widgetName = "InfoActivity";
+                            break;
+                        }
+                        for (j = 0; j < dojo.configData.EventSearchSettings.length; j++) {
+                            if (dojo.configData.EventSearchSettings[j].Title === layerTitle && dojo.configData.EventSearchSettings[j].QueryLayerId === layerId) {
+                                widgetName = "InfoEvent";
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            return widgetName;
+        },
+
+
+        /**
         * infoWindow Direction tab
         * @param {field} attribute is the field of feature
         * @param {Sting} widgetName is name of widget
         * @param {object} endPoint contain feature
         * @memberOf widgets/searchResult/infoWindowHelper
         */
-        _infoWindowDirectionTab: function (attribute, widgetName, endPoint) {
-            var directionMainContainer, locatorInfoWindowObject, locatorInfoWindowParams, searchContentData, divHeader, infoWindowMapPoint, routeObject, infoWindowPoint, point;
+        _infoWindowDirectionTab: function (directionObject) {
+            var directionMainContainer, serchSetting, locatorInfoWindowObject, locatorInfoWindowParams, searchContentData, divHeader, infoWindowMapPoint, routeObject, infoWindowPoint, point, mapLogoPostionDown, imgCustomLogo, pushPinGemotery;
+            //check direction container is present
             if (dojo.byId("getDirContainer")) {
                 domConstruct.empty(dojo.byId("getDirContainer"));
             }
             directionMainContainer = domConstruct.create("div", { "class": "esriCTDirectionMainContainer" }, dojo.byId("getDirContainer"));
-            if (widgetName.toLowerCase() === "infoactivity") {
-                searchContentData = string.substitute(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields, attribute);
-            } else if (widgetName.toLowerCase() === "infoevent") {
-                searchContentData = string.substitute(dojo.configData.EventSearchSettings[0].SearchDisplayFields, attribute);
-            }
+            serchSetting = this.getSearchSetting(directionObject.QueryURL);
+            searchContentData = string.substitute(serchSetting.SearchDisplayFields, directionObject.attribute);
             divHeader = domConstruct.create("div", {}, directionMainContainer);
             domConstruct.create("div", { "class": "esriCTSpanHeaderInfoWindow", "innerHTML": sharedNls.titles.directionText + " " + searchContentData }, divHeader);
+            this.removeHighlightedCircleGraphics();
+            //check if it is geolocation graphic or address search graphic
+            if (this.map.getLayer(this.geoLocationGraphicsLayerID).graphics.length > 0) {
+                pushPinGemotery = this.map.getLayer(this.geoLocationGraphicsLayerID).graphics;
+            } else {
+                pushPinGemotery = this.map.getLayer(this.locatorGraphicsLayerID).graphics;
+            }
+            if (pushPinGemotery && pushPinGemotery[0]) {
+                this.removeHighlightedCircleGraphics();
+                routeObject = { "StartPoint": pushPinGemotery[0], "EndPoint": [directionObject.featureSet], "Index": 0, "WidgetName": directionObject.widgetName, "QueryURL": directionObject.QueryURL };
+                this.showRoute(routeObject);
+            }
+            //locatorInfoWindowParams is the object of locator.js created for unified search
             locatorInfoWindowParams = {
                 defaultAddress: dojo.configData.LocatorSettings.LocatorDefaultAddress,
                 preLoaded: false,
                 parentDomNode: directionMainContainer,
                 map: this.map,
-                graphicsLayerId: "esriGraphicsLayerMapSettings",
+                graphicsLayerId: this.locatorGraphicsLayerID,
                 locatorSettings: dojo.configData.LocatorSettings,
                 configSearchSettings: dojo.configData.SearchSettings
             };
             infoWindowMapPoint = this.map.getLayer(locatorInfoWindowParams.graphicsLayerId);
             locatorInfoWindowObject = new LocatorTool(locatorInfoWindowParams);
             locatorInfoWindowObject.candidateClicked = lang.hitch(this, function (graphic) {
-                dojo.infowindowDirection = endPoint.geometry.x.toString() + "," + endPoint.geometry.y.toString();
-                dojo.infowindowDirection = dojo.infowindowDirection + "," + locatorInfoWindowObject.selectedGraphic.geometry.x.toString() + "," + locatorInfoWindowObject.selectedGraphic.geometry.y.toString();
-
+                //set variable for infowindow direction in case of share
+                dojo.infowindowDirection = directionObject.featureSet.geometry.x.toString() + "," + directionObject.featureSet.geometry.y.toString();
+                if (locatorInfoWindowObject && locatorInfoWindowObject.selectedGraphic) {
+                    dojo.infowindowDirection = dojo.infowindowDirection + "," + locatorInfoWindowObject.selectedGraphic.geometry.x.toString() + "," + locatorInfoWindowObject.selectedGraphic.geometry.y.toString();
+                }
                 if (graphic && graphic.attributes && graphic.attributes.address) {
                     this.locatorAddress = graphic.attributes.address;
+                }
+                //check if the layer information is in the graphic
+                if (graphic && graphic.layer) {
+                    this.selectedLayerTitle = graphic.layer.SearchDisplayTitle;
                 }
                 dojo.eventInfoWindowData = null;
                 dojo.sharedGeolocation = null;
@@ -254,10 +350,39 @@ define([
                 topic.publish("showProgressIndicator");
                 this.removeGeolocationPushPin();
                 this.carouselContainer.hideCarouselContainer();
-                this.carouselContainer._setLegendPositionDown();
-                this.removeRouteAndGraphics();
-                routeObject = { "StartPoint": infoWindowMapPoint.graphics[0], "EndPoint": [endPoint], "Index": 0, "WidgetName": widgetName, "QueryURL": null };
-                this.showRoute(routeObject);
+                if (dojo.configData.CustomLogoUrl) {
+                    // if ShowLegend is 'True' then set Legend Poition Down and place the customLogo image at the bottom of screen
+                    if (dojo.configData.ShowLegend) {
+                        imgCustomLogo = query('.esriCTCustomMapLogo')[0];
+                        this.carouselContainer._setLegendPositionDown();
+                        domClass.replace(imgCustomLogo, "esriCTCustomMapLogoBottom", "esriCTCustomMapLogoPostionChange");
+                    } else {
+                        mapLogoPostionDown = query('.esriControlsBR')[0];
+                        imgCustomLogo = query('.esriCTCustomMapLogo')[0];
+                        // if ShowLegend is 'False' then remove all classess which holds esriLogo and customLogo position above the bottom of screen
+                        if (query('.esriCTDivMapPositionTop')[0]) {
+                            domClass.remove(mapLogoPostionDown, "esriCTDivMapPositionTop");
+                        }
+                        if (query('.esriCTDivMapPositionUp')[0]) {
+                            domClass.remove(mapLogoPostionDown, "esriCTDivMapPositionUp");
+                        }
+                        if (query('.esriCTCustomMapLogoPostion')[0]) {
+                            domClass.remove(imgCustomLogo, "esriCTCustomMapLogoPostion");
+                        }
+                    }
+                }
+                this.removeHighlightedCircleGraphics();
+                //if layer informnation contains in graphic
+                if (graphic && graphic.layer) {
+                    this._queryLayer(graphic.geometry, graphic, directionObject.widgetName);
+                    if (locatorInfoWindowObject && locatorInfoWindowObject.selectedGraphic === null) {
+                        dojo.infowindowDirection = dojo.infowindowDirection + "," + graphic.geometry.x.toString() + "," + graphic.geometry.y.toString();
+                    }
+                    //if address is locate then pass startPoint and endPoint to showroute function
+                } else {
+                    routeObject = { "StartPoint": infoWindowMapPoint.graphics[0], "EndPoint": [directionObject.featureSet], "Index": 0, "WidgetName": directionObject.widgetName, "QueryURL": directionObject.QueryURL };
+                    this.showRoute(routeObject);
+                }
             });
             setTimeout(lang.hitch(this, function () {
                 if (window.location.href.toString().split("$infowindowDirection=").length > 1 && !this.isDirectionCalculated) {
@@ -265,7 +390,7 @@ define([
                     var mapPoint = new Point(window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0].split(",")[2], window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0].split(",")[3], this.map.spatialReference);
                     dojo.infowindowDirection = window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0]; //mapPoint;
                     locatorInfoWindowObject._locateAddressOnMap(mapPoint, true);
-                    routeObject = { "StartPoint": infoWindowMapPoint.graphics[0], "EndPoint": [endPoint], "Index": 0, "WidgetName": widgetName, "QueryURL": null };
+                    routeObject = { "StartPoint": infoWindowMapPoint.graphics[0], "EndPoint": [directionObject.featureSet], "Index": 0, "WidgetName": directionObject.widgetName, "QueryURL": directionObject.QueryURL };
                     this.showRoute(routeObject);
                     if (window.location.href.toString().split("$mapClickPoint=").length > 1) {
                         infoWindowPoint = window.location.href.toString().split("$mapClickPoint=")[1].split("$")[0].split(",");
@@ -278,49 +403,55 @@ define([
 
         /**
         * Information Tab for InfoWindow
-        * @param {field} attribute is the field of feature
+        * @param {field} attributes is the field of feature
         * @param {number} InfoIndex is the faeture layer id
         * @param {string} widgetName is name of widget
         * @param {object} featureSet Contain set of features
+        * @param {number} index
+        * @param {number} featureCount Contain no.of feature
+        * @param {string} featureClickName Contain name of feature
+        * @param {number} layerId Contain layer id
+        * @param {string} layerTitle Contain layer Title
         * @memberOf widgets/SearchSetting/InfoWindowHelper
         */
-        _infoWindowInformationTab: function (attributes, infoIndex, widgetName, featureSet) {
-            var divInfoRow, divInformationContent, divHeader, divAddToListContainer, contentDiv, divFacilityContent,
-                divAccessfee, SearchSettingsLayers, activityImageDiv, i, j, key, k, value, isAlreadyAdded, listData;
+        _infoWindowInformationTab: function (attributes, infoIndex, widgetName, featureSet, index, featureCount, featureClickName, layerId, layerTitle) {
+            var divInfoRow, divInformationContent, queryURLData, serchSetting, divHeader, divAddToListContainer, contentDiv, divFacilityContent, divPaginationPrevNext, divPaginationContainer, facilityDiv,
+                divAccessfee, SearchSettingsLayers, activityImageDiv, i, j, key, k, value, isAlreadyAdded, listData, objectIDField;
+            //if information tap container is present
             if (dojo.byId("informationTabContainer")) {
                 domConstruct.empty(dojo.byId("informationTabContainer"));
+            }
+            if (featureClickName === "listclick") {
+                featureCount = 1;
             }
             divInfoRow = domConstruct.create("div", { "class": "esriCTInfoWindoContainerOuter" }, dojo.byId("informationTabContainer"));
             divInformationContent = domConstruct.create("div", { "class": "esriCTInfoWindoContainer" }, divInfoRow);
             divHeader = domConstruct.create("div", { "class": "esriCTDivHeadercontainerInfo" }, divInformationContent);
             domConstruct.create("div", { "class": "esriCTheadText", "innerHTML": sharedNls.titles.facilityInfo }, divHeader);
-            if (widgetName.toLowerCase() === "infoevent") {
-                divAddToListContainer = domConstruct.create("div", { "class": "esriCTInfoAddlist" }, divHeader);
-                domConstruct.create("div", { "class": "esriCTInfoAddToListIcon" }, divAddToListContainer);
-                domConstruct.create("div", { "class": "esriCTInfoAddToListText", "innerHTML": sharedNls.titles.addToListTitle }, divAddToListContainer);
-                this.own(on(divAddToListContainer, "click", lang.hitch(this, function () {
-                    topic.publish("getEventObjectID", this.objectIdForEventLayer);
-                    isAlreadyAdded = false;
-                    if (this.myListStoreData.data.length > 0) {
-                        for (listData = 0; listData < this.myListStoreData.data.length; listData++) {
-                            if (this.myListStoreData.data[listData][this.objectIdForEventLayer] === featureSet[0].attributes[this.objectIdForEventLayer]) {
-                                alert(sharedNls.errorMessages.activityAlreadyadded);
-                                isAlreadyAdded = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!isAlreadyAdded) {
-                        topic.publish("toggleWidget", "Activities");
-                        topic.publish("addToMyList", featureSet[0]);
-                    }
-                })));
-            }
+            divPaginationContainer = domConstruct.create("div", { "class": "esriCTPaginationContainer" }, divHeader);
+            this.divPaginationCount = domConstruct.create("div", { "class": "esriCTTPaginationList", "innerHTML": index + "/" + featureCount }, divPaginationContainer);
+            divPaginationPrevNext = domConstruct.create("div", { "class": "esriCTTPaginationPrevNext" }, divPaginationContainer);
+            this.previousButton = domConstruct.create("div", { "class": "esriCTTPaginationPrev" }, divPaginationPrevNext);
+            this.nextButton = domConstruct.create("div", { "class": "esriCTTPaginationNext" }, divPaginationPrevNext);
             contentDiv = domConstruct.create("div", { "class": "esriCTDivClear" }, divInformationContent);
             divFacilityContent = domConstruct.create("div", { "class": "esriCTUtilityImgContainer" }, divInformationContent);
+            if (featureCount === 1) {
+                domClass.replace(divPaginationContainer, "esriCTPaginationDisContainer", "esriCTPaginationContainer");
+                domClass.replace(this.previousButton, "esriCTTPaginationDisPrev", "esriCTTPaginationPrev");
+                domClass.replace(this.nextButton, "esriCTTPaginationDisNext", "esriCTTPaginationNext");
+            } else if (index === 1) {
+                domClass.replace(this.previousButton, "esriCTTPaginationDisPrev", "esriCTTPaginationPrev");
+            } else if (featureCount === index) {
+                domClass.replace(this.nextButton, "esriCTTPaginationDisNext", "esriCTTPaginationNext");
+            }
+            this.own(on(this.previousButton, a11yclick, lang.hitch(this, this.previousButtonClick, featureCount)));
+            this.own(on(this.nextButton, a11yclick, lang.hitch(this, this.nextButtonClick, featureCount)));
+            queryURLData = this.getQueryUrl(layerId, layerTitle);
+            serchSetting = this.getSearchSetting(queryURLData);
+            //looping for attributes of feature and if it is null the show N/A
             for (i in attributes) {
                 if (attributes.hasOwnProperty(i)) {
-                    if (!attributes[i]) {
+                    if (!attributes[i] || attributes[i] === " ") {
                         attributes[i] = sharedNls.showNullValue;
                     }
                 }
@@ -334,7 +465,7 @@ define([
             } else if (dojo.configData.InfoWindowSettings[infoIndex].ShowAllFields === true) {
                 for (key in attributes) {
                     if (attributes.hasOwnProperty(key)) {
-                        if (key !== "OBJECTID") {
+                        if (key !== serchSetting.ObjectID) {
                             value = attributes[key];
                             divAccessfee = domConstruct.create("div", { "class": "esriCTInfofacility" }, contentDiv);
                             domConstruct.create("div", { "class": "esriCTFirstChild", "innerHTML": key }, divAccessfee);
@@ -346,47 +477,93 @@ define([
                 for (k = 0; k < dojo.configData.InfoWindowSettings[infoIndex].InfoWindowData.length; k++) {
                     divAccessfee = domConstruct.create("div", { "class": "esriCTInfofacility" }, contentDiv);
                     domConstruct.create("div", { "class": "esriCTFirstChild", "innerHTML": dojo.configData.InfoWindowSettings[infoIndex].InfoWindowData[k].DisplayText }, divAccessfee);
-                    domConstruct.create("div", { "class": "esriCTSecondChild", "innerHTML": string.substitute(dojo.configData.InfoWindowSettings[infoIndex].InfoWindowData[k].FieldName, attributes) }, divAccessfee);
+                    facilityDiv = domConstruct.create("div", { "class": "esriCTSecondChild" }, divAccessfee);
+                    if (string.substitute(dojo.configData.InfoWindowSettings[infoIndex].InfoWindowData[k].FieldName, attributes).substring(0, 4) === "http") {
+                        domConstruct.create("a", { "href": string.substitute(dojo.configData.InfoWindowSettings[infoIndex].InfoWindowData[k].FieldName, attributes), "innerHTML": string.substitute(dojo.configData.InfoWindowSettings[infoIndex].InfoWindowData[k].FieldName, attributes) }, facilityDiv);
+                        domClass.add(facilityDiv, "esriCTWordBreak");
+                    } else {
+                        facilityDiv.innerHTML = string.substitute(dojo.configData.InfoWindowSettings[infoIndex].InfoWindowData[k].FieldName, attributes);
+                    }
                 }
             }
-            if (widgetName.toLowerCase() === "infoactivity") {
+            // if widgetName is "infoactivity" and ActivitySearchSettings is enable from config
+            if (widgetName.toLowerCase() === "infoactivity" && dojo.configData.ActivitySearchSettings[0].Enable) {
                 for (j = 0; j < dojo.configData.ActivitySearchSettings.length; j++) {
                     SearchSettingsLayers = dojo.configData.ActivitySearchSettings[j];
+                    //looping for ActivityList to show the activity images in infowindow
                     for (i = 0; i < SearchSettingsLayers.ActivityList.length; i++) {
                         if (dojo.string.substitute(SearchSettingsLayers.ActivityList[i].FieldName, attributes)) {
                             if (attributes[dojo.string.substitute(SearchSettingsLayers.ActivityList[i].FieldName, attributes)] === "Yes") {
                                 activityImageDiv = domConstruct.create("div", { "class": "esriCTActivityImage" }, divFacilityContent);
-                                domConstruct.create("img", { "src": SearchSettingsLayers.ActivityList[i].Image }, activityImageDiv);
+                                domConstruct.create("img", { "src": SearchSettingsLayers.ActivityList[i].Image, "title": SearchSettingsLayers.ActivityList[i].Alias }, activityImageDiv);
                             }
                         }
                     }
                 }
             }
+            divAddToListContainer = domConstruct.create("div", { "class": "esriCTInfoAddlist" }, divInfoRow);
+            domConstruct.create("div", { "class": "esriCTInfoAddToListIcon" }, divAddToListContainer);
+            domConstruct.create("div", { "class": "esriCTInfoAddToListText", "innerHTML": sharedNls.titles.addToListTitle }, divAddToListContainer);
+            this.own(on(divAddToListContainer, a11yclick, lang.hitch(this, function () {
+                array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
+                    //check the layerId and layerTitle object
+                    if (settings.QueryLayerId === layerId && settings.Title === layerTitle) {
+                        objectIDField = settings.ObjectID;
+                    }
+                }));
+                array.forEach(dojo.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
+                    if (settings.QueryLayerId === layerId && settings.Title === layerTitle) {
+                        objectIDField = settings.ObjectID;
+                    }
+                }));
+                isAlreadyAdded = false;
+                //check MylistData length
+                if (this.myListStoreData.length > 0) {
+                    for (listData = 0; listData < this.myListStoreData.length; listData++) {
+                        if (this.myListStoreData[listData].value[this.myListStoreData[listData].key] === featureSet[0].attributes[objectIDField]) {
+                            alert(sharedNls.errorMessages.activityAlreadyadded);
+                            isAlreadyAdded = true;
+                            break;
+                        }
+                    }
+                }
+                //check if feature is not added in myList
+                if (!isAlreadyAdded) {
+                    if (query(".esriCTEventsImg")[0]) {
+                        topic.publish("toggleWidget", "myList");
+                        topic.publish("showActivityPlannerContainer");
+                    }
+                    topic.publish("addToMyList", featureSet[0], widgetName, layerId, layerTitle);
+                }
+            })));
         },
 
         /**
         * Comment Tab for InfoWindow
-        * @param {number} infoIndex is layer id
-        * @param {string} widgetName is name of widget
-        * @param {field} attribute is the field of feature
+        * @param {object} commentObject contain attribute, index, featureLayer, widget name
         * @memberOf widgets/SearchSetting/InfoWindowHelper
         */
-        _infoWindowCommentTab: function (infoIndex, widgetName, attribute) {
+        _infoWindowCommentTab: function (commentObject) {
             var SearchSettingsLayersForComment, searchSettingsData, i, outerCommentContainer, queryObject;
-            if (widgetName.toLowerCase() === "infoactivity") {
+            //check widgetName is "infoactivity"
+            if (commentObject.widgetName.toLowerCase() === "infoactivity") {
                 searchSettingsData = dojo.configData.ActivitySearchSettings;
-            } else if (widgetName.toLowerCase() === "infoevent") {
+                //check widgetName is "infoevent"
+            } else if (commentObject.widgetName.toLowerCase() === "infoevent") {
                 searchSettingsData = dojo.configData.EventSearchSettings;
             }
+            //loop for the searchSettingsData to fetch the information
             for (i = 0; i < searchSettingsData.length; i++) {
                 SearchSettingsLayersForComment = searchSettingsData[i];
+                // check if "SearchSettingsLayersForComment.CommentsSettings" contain comment
                 if (SearchSettingsLayersForComment.CommentsSettings && SearchSettingsLayersForComment.CommentsSettings.Enabled) {
+                    //check if commnet container is there or not
                     if (dojo.byId("commentsTabContainer")) {
                         domConstruct.empty(dojo.byId("commentsTabContainer"));
                     }
                     outerCommentContainer = domConstruct.create("div", { "class": "esriCTCommentInfoOuterContainer" }, dojo.byId("commentsTabContainer"));
                     domConstruct.create("div", { "class": "esriCTCommentContainer" }, outerCommentContainer);
-                    queryObject = { "FeatureData": attribute, "SolveRoute": null, "Index": infoIndex, "QueryURL": searchSettingsData[0].QueryURL, "WidgetName": widgetName, "Address": null, "IsRouteCreated": false };
+                    queryObject = { "FeatureData": commentObject.attribute, "SolveRoute": null, "Index": commentObject.infoIndex, "QueryURL": searchSettingsData[0].QueryURL, "WidgetName": commentObject.widgetName, "Address": null, "IsRouteCreated": false };
                     topic.publish("showProgressIndicator");
                     this.queryCommentLayer(queryObject);
                 }
@@ -395,19 +572,20 @@ define([
 
         /**
         * Gallery Tab for InfoWindow
-        * @param {field} attribute is the field of feature
-        * @param {string} widgetName is name of widget
+        * @param {object} galaryObject contain attribute, index, featureLayer, widget name, attachment
         * @memberOf widgets/SearchSetting/InfoWindowHelper
         */
-        _infoWindowGalleryTab: function (attribute, widgetName) {
+        _infoWindowGalleryTab: function (galaryObject) {
             var hasLayerAttachments;
+            //check the node "this.galleryContainer"
             if (this.galleryContainer) {
                 domConstruct.destroy(this.galleryContainer);
             }
             this.galleryContainer = domConstruct.create("div", { "class": "esriCTGalleryInfoContainer" }, dojo.byId("galleryTabContainer"));
-            if (attribute) {
-                hasLayerAttachments = this._setGallaryForInfoWindow(attribute, widgetName);
+            if (galaryObject.attribute) {
+                hasLayerAttachments = this._setGallaryForInfoWindow(galaryObject.attribute, galaryObject.widgetName);
             }
+            //if attachment is not on the layer
             if (!hasLayerAttachments) {
                 domConstruct.create("div", { "class": "esriCTGalleryBox", "innerHTML": sharedNls.errorMessages.imageDoesNotFound }, this.galleryContainer);
             }
@@ -421,11 +599,14 @@ define([
         */
         _setGallaryForInfoWindow: function (attribute, widgetName) {
             var layerIndex, layerID, searchSettingsData, hasLayerAttachments = false;
+            //check widgetName is "infoactivity"
             if (widgetName.toLowerCase() === "infoactivity") {
                 searchSettingsData = dojo.configData.ActivitySearchSettings;
+                //check widgetName is "infoevent"
             } else if (widgetName.toLowerCase() === "infoevent") {
                 searchSettingsData = dojo.configData.EventSearchSettings;
             }
+            //check map
             if (this.map._layers) {
                 for (layerIndex = 0; layerIndex < searchSettingsData.length; layerIndex++) {
                     for (layerID in this.map._layers) {
@@ -443,19 +624,21 @@ define([
 
         /**
         * Get Attachments For InfoWindow
-        * @param {object} responce is the information about the attachment
+        * @param {object} response is the information about the attachment
         * @memberOf widgets/SearchSetting/InfoWindowHelper
         */
         _getAttachments: function (response) {
             var divAttchmentInfo, divPreviousImgInfo, divNextImgInfo;
             this.imageCountInfo = 0;
+            //check response length which contain the information of attachment
             if (response.length > 1) {
                 divPreviousImgInfo = domConstruct.create("div", { "class": "esriCTImgPrev" }, this.galleryContainer);
                 divNextImgInfo = domConstruct.create("div", { "class": "esriCTImgNext" }, this.galleryContainer);
                 divAttchmentInfo = domConstruct.create("img", { "class": "esriCTDivAttchmentInfo" }, this.galleryContainer);
                 domAttr.set(divAttchmentInfo, "src", response[0].url);
-                this.own(on(divPreviousImgInfo, "click", lang.hitch(this, this._previousImageInfo, response, divAttchmentInfo)));
-                this.own(on(divNextImgInfo, "click", lang.hitch(this, this._nextImageInfo, response, divAttchmentInfo)));
+                this.own(on(divPreviousImgInfo, a11yclick, lang.hitch(this, this._previousImageInfo, response, divAttchmentInfo)));
+                this.own(on(divNextImgInfo, a11yclick, lang.hitch(this, this._nextImageInfo, response, divAttchmentInfo)));
+                // check if response(attchment) length is only 1
             } else if (response.length === 1) {
                 divAttchmentInfo = domConstruct.create("img", { "class": "esriCTDivAttchmentInfo" }, this.galleryContainer);
                 domAttr.set(divAttchmentInfo, "src", response[0].url);
@@ -473,6 +656,7 @@ define([
         */
         _previousImageInfo: function (response, divAttchmentInfo) {
             this.imageCountInfo--;
+            // if the image count value is -1 then set the image count value is 0
             if (this.imageCountInfo < 0) {
                 this.imageCountInfo = response.length - 1;
             }
@@ -487,6 +671,7 @@ define([
         */
         _nextImageInfo: function (response, divAttchmentInfo) {
             this.imageCountInfo++;
+            // check if image is found then change the sorce of that image
             if (this.imageCountInfo === response.length) {
                 this.imageCountInfo = 0;
             }
@@ -513,11 +698,13 @@ define([
             var j, divHeaderStar, divStar, utcMilliseconds, l, isCommentFound = false, divCommentRow, postCommentContainer, i, commentValue, divContentDiv,
                 esriCTCommentDateStar, postCommentButton, infocontainer, divCommentContainer, divCommentRowCont;
             try {
+                //loop for the ActivitySearchSettings
                 for (i = 0; i < dojo.configData.ActivitySearchSettings.length; i++) {
                     divCommentContainer = query('.esriCTCommentContainer')[0];
                     divContentDiv = domConstruct.create("div", { "class": "esriCTCommentInfoContent" }, divCommentContainer);
                     this.removeNullValue(result);
                     if (result.length > 0) {
+                        //loop for result which conatin comments of facility
                         for (l = 0; l < result.length; l++) {
                             commentValue = string.substitute(dojo.configData.ActivitySearchSettings[i].CommentsSettings.CommentField, result[l].attributes);
                             if (commentValue !== sharedNls.showNullValue) {
@@ -526,6 +713,7 @@ define([
                                 esriCTCommentDateStar = domConstruct.create("div", { "class": "esriCTCommentDateStar" }, divCommentRow);
                                 divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, esriCTCommentDateStar);
                                 isCommentFound = true;
+                                //loop for rating star
                                 for (j = 0; j < 5; j++) {
                                     divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
                                     if (j < string.substitute(dojo.configData.ActivitySearchSettings[i].CommentsSettings.RankField, result[l].attributes)) {
@@ -543,6 +731,7 @@ define([
                         }
                     }
                 }
+                //check if comment not found
                 if (!isCommentFound) {
                     domConstruct.empty(divContentDiv);
                     domConstruct.create("div", { "class": "esriCTNullCommentText", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divContentDiv);
@@ -551,9 +740,9 @@ define([
                 postCommentContainer = domConstruct.create("div", { "class": "esriCTButtonDiv" }, null);
                 postCommentButton = domConstruct.create("div", { "class": "esriCTInfoPostButton", "innerHTML": sharedNls.titles.postComment }, postCommentContainer);
                 infocontainer = query('.esriCTCommentContainer')[0];
-
                 domConstruct.place(postCommentContainer, infocontainer, "after");
-                this.own(on(postCommentButton, "click", lang.hitch(this, function () {
+                //click of postCommentButton on commnet panel in infowindow
+                this.own(on(postCommentButton, a11yclick, lang.hitch(this, function () {
                     this._postComment(featureId, result);
                 })));
             } catch (error) {
@@ -573,6 +762,7 @@ define([
             var divStarRating, postCommentContainer, buttonDiv, backButton, submitButton, j, starInfoWindow = [], backToMapHide, postCommentContent, outerCommentContainer, textAreaContainerdiv;
             backToMapHide = query('.esriCTCloseDivMobile')[0];
             outerCommentContainer = query('.esriCTCommentInfoOuterContainer')[0];
+            //check "backToMapHide" node
             if (backToMapHide) {
                 domStyle.set(backToMapHide, "display", "none");
             }
@@ -584,11 +774,12 @@ define([
             postCommentContent = domConstruct.create("div", { "class": "esriCTPostCommentContainer" }, postCommentContainer);
             domConstruct.create("div", { "class": "esriCTHeaderTextRating", "innerHTML": sharedNls.titles.rating }, postCommentContent);
             divStarRating = domConstruct.create("div", { "class": "esriCTStarPostComment" }, postCommentContent);
+            //loop for the rating stars
             for (j = 0; j < 5; j++) {
                 this.rankValue = 0;
                 this._checked = false;
                 starInfoWindow[j] = domConstruct.create("div", { "class": "esriCTRatingStarPostComment" }, divStarRating);
-                this.own(on(starInfoWindow[j], "click", lang.hitch(this, this._selectedStarForPostComment, starInfoWindow, starInfoWindow[j], j)));
+                this.own(on(starInfoWindow[j], a11yclick, lang.hitch(this, this._selectedStarForPostComment, starInfoWindow, starInfoWindow[j], j)));
                 this.own(on(starInfoWindow[j], "mouseover", lang.hitch(this, this._selectHoverStars, starInfoWindow, j)));
                 this.own(on(starInfoWindow[j], "mouseout", lang.hitch(this, this._deSelectHoverStars, starInfoWindow, j)));
             }
@@ -598,10 +789,12 @@ define([
             buttonDiv = domConstruct.create("div", { "class": "esriCTButtonDiv" }, postCommentContainer);
             backButton = domConstruct.create("div", { "class": "esriCTInfoBackButton", "innerHTML": sharedNls.titles.backButton }, buttonDiv);
             submitButton = domConstruct.create("div", { "class": "esriCTInfoSubmitButton", "innerHTML": sharedNls.titles.submitButton }, buttonDiv);
-            this.own(on(backButton, "click", lang.hitch(this, function () {
+            //click of backButton of comment tap in infowindow
+            this.own(on(backButton, a11yclick, lang.hitch(this, function () {
                 this._backButton();
             })));
-            this.own(on(submitButton, "click", lang.hitch(this, function () {
+            //click of submit button of comment in infowindow
+            this.own(on(submitButton, a11yclick, lang.hitch(this, function () {
                 this._submitButton(commentID, result);
             })));
         },
@@ -613,7 +806,7 @@ define([
         * @memberOf widgets/SearchSetting/InfoWindowHelper
         */
         _submitButton: function (selectedFeatureID, result) {
-            var commentsLayer, commentGraphic, currenDate, currentDateFormat, attr, self, setAttribute, updatedComments, i, k, l, currentMonth, divCommentRow, outerCommentContainer,
+            var commentsLayer, commentGraphic, currenDate, divCommentRowCont, currentDateFormat, attr, self, setAttribute, updatedComments, i, k, l, currentMonth, divCommentRow, outerCommentContainer,
                 destroyCommentText, esriCTCommentDateStar, divHeaderStar, divStar, backToMapHide, backText, contentDivAfterNewComment, divContentDiv;
             self = this;
             outerCommentContainer = query('.esriCTCommentInfoOuterContainer')[0];
@@ -621,6 +814,7 @@ define([
             topic.publish("showProgressIndicator");
             backText = query('.esriCTInfoBackButton')[0];
             backToMapHide = query('.esriCTCloseDivMobile')[0];
+            //check comment Text value
             if (lang.trim(dojo.byId("txtComments").value) === "" && self.rankValue === 0) {
                 domStyle.set(outerCommentContainer, "display", "none");
                 alert(sharedNls.errorMessages.commentString);
@@ -634,6 +828,7 @@ define([
                 alert(sharedNls.errorMessages.maxLenghtCommentstring);
                 topic.publish("hideProgressIndicator");
             } else {
+                //loop for ActivitySearchSettings  which is from config file
                 for (i = 0; i < dojo.configData.ActivitySearchSettings.length; i++) {
                     commentsLayer = new esri.layers.FeatureLayer(dojo.configData.ActivitySearchSettings[i].CommentsSettings.QueryURL, {
                         mode: esri.layers.FeatureLayer.MODE_SELECTION,
@@ -659,6 +854,7 @@ define([
                 updatedComments = [];
                 commentsLayer.applyEdits([commentGraphic], null, null, lang.hitch(this, function (msg) {
                     if (!msg[0].error) {
+                        //verify the windows width
                         if (dojo.window.getBox().w <= 768) {
                             domStyle.set(backText, "display", "none");
                             if (backToMapHide) {
@@ -666,23 +862,24 @@ define([
                             }
                         }
                         updatedComments.push({ "attributes": setAttribute });
+                        // loop for result which contain Date,Comment and star
                         for (i = 0; i < result.length; i++) {
                             updatedComments.push(result[i]);
                         }
                         domStyle.set(dojo.byId("divCTPostCommentContainer"), "display", "none");
                         domStyle.set(outerCommentContainer, "display", "block");
                         destroyCommentText = query('.esriCTNullCommentText')[0];
+                        //verify "destroyCommentText" node
                         if (destroyCommentText) {
                             domConstruct.destroy(destroyCommentText);
                         }
-                        if (divCommentRow && divCommentRow.parentElement === null) {
-                            divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, null);
-                        } else {
-                            divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divContentDiv);
-                        }
+
+                        divCommentRowCont = domConstruct.create("div", { "class": "esriCTDivCommentRowCont" }, divContentDiv);
+                        divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divCommentRowCont);
+
                         esriCTCommentDateStar = domConstruct.create("div", { "class": "esriCTCommentDateStar" }, divCommentRow);
                         divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, esriCTCommentDateStar);
-
+                        //loop for the rating star
                         for (k = 0; k < 5; k++) {
                             divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
                             if (k < setAttribute.rank) {
@@ -718,6 +915,7 @@ define([
             outerCommentContainer = query('.esriCTCommentInfoOuterContainer')[0];
             domStyle.set(dojo.byId("divCTPostCommentContainer"), "display", "none");
             domStyle.set(outerCommentContainer, "display", "block");
+            //validate the width of window
             if (dojo.window.getBox().w <= 768) {
                 domStyle.set(backToMapHide, "display", "block");
             }
@@ -732,10 +930,13 @@ define([
         */
         _selectedStarForPostComment: function (result, starInfoWindow, j) {
             var i;
+            // check if a node result has class="esriCTRatingStarChecked" present
             if ((dojo.hasClass(result[j], "esriCTRatingStarChecked")) && this._checked) {
+                // loop through 0 to 4 as there are 5 rating stars.
                 for (i = 4; i >= j; i--) {
                     domClass.replace(result[i], "esriCTRatingStar");
                 }
+                //check if rating star is selected.
                 if (j !== 0) {
                     domClass.add(result[j], "esriCTRatingStarChecked");
                     this.rankValue = j + 1;
@@ -744,6 +945,7 @@ define([
                     this.rankValue = j;
                 }
             } else {
+                //loop for the rating selected star
                 for (i = 0; i <= j; i++) {
                     domClass.add(result[i], "esriCTRatingStarChecked");
                     this._checked = true;
@@ -761,8 +963,11 @@ define([
         */
         _selectHoverStars: function (result, j) {
             var i;
+            //check whether result contain data
             if (result) {
+                //loop for selected star for infoWindow in comment panel
                 for (i = 0; i <= j; i++) {
+                    // check if a node result has class="esriCTRatingStar" present or class="esriCTRatingStarPostComment"
                     if (dojo.hasClass(result[i], "esriCTRatingStar") || dojo.hasClass(result[i], "esriCTRatingStarPostComment")) {
                         domClass.add(result[i], "esriCTRatingStarHover");
                     }
@@ -778,8 +983,11 @@ define([
         */
         _deSelectHoverStars: function (result, j) {
             var i;
+            //check whether result contain data
             if (result) {
+                //loop for selected star for infoWindow in comment panel
                 for (i = 0; i <= j; i++) {
+                    // check if a node result has class="esriCTRatingStarHover" present
                     if (dojo.hasClass(result[i], "esriCTRatingStarHover")) {
                         domClass.remove(result[i], "esriCTRatingStarHover");
                     }
@@ -795,7 +1003,9 @@ define([
         */
         _getObjectId: function (response) {
             var objectId, j;
+            //loop for the json response and store the objectId in esriFieldTypeOID
             for (j = 0; j < response.fields.length; j++) {
+                //check whether objectId type feild from layer is equal to "esriFieldTypeOID"
                 if (response.fields[j].type === "esriFieldTypeOID") {
                     objectId = response.fields[j].name;
                     break;
@@ -815,6 +1025,7 @@ define([
             width = this.map.extent.getWidth();
             infoWidth = (this.map.width / 2) + dojo.configData.InfoPopupWidth / 2 + 400;
             height = this.map.extent.getHeight();
+            //check if infoWindow width is grether than map width
             if (infoWidth > this.map.width) {
                 diff = infoWidth - this.map.width;
             } else {
@@ -824,6 +1035,7 @@ define([
             ratioWidth = width / this.map.width;
             totalYPoint = dojo.configData.InfoPopupHeight + 30 + 61;
             xmin = mapPoint.x - (width / 2);
+            //validate the width of window
             if (dojo.window.getBox().w >= 680) {
                 ymin = mapPoint.y - height + (ratioHeight * totalYPoint);
                 xmax = xmin + width + diff * ratioWidth;

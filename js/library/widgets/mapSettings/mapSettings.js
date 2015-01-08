@@ -53,26 +53,27 @@ define([
     "esri/layers/ArcGISDynamicMapServiceLayer",
     "esri/layers/ArcGISTiledMapServiceLayer",
     "esri/layers/OpenStreetMapLayer",
+    "dojo/on",
+    "dijit/a11yclick",
     "dojo/domReady!"
-], function (declare, domConstruct, domStyle, lang, esriUtils, array, dom, domAttr, query, domClass, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, esriMap, ImageParameters, FeatureLayer, GraphicsLayer, SimpleLineSymbol, SimpleRenderer, Color, BaseMapGallery, Legends, GeometryExtent, Point, SpatialReference, HomeButton, Deferred, DeferredList, InfoWindow, template, topic, ArcGISDynamicMapServiceLayer, ArcGISTiledMapServiceLayer, OpenStreetMapLayer) {
+], function (declare, domConstruct, domStyle, lang, esriUtils, array, dom, domAttr, query, domClass, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, esriMap, ImageParameters, FeatureLayer, GraphicsLayer, SimpleLineSymbol, SimpleRenderer, Color, BaseMapGallery, Legends, GeometryExtent, Point, SpatialReference, HomeButton, Deferred, DeferredList, InfoWindow, template, topic, ArcGISDynamicMapServiceLayer, ArcGISTiledMapServiceLayer, OpenStreetMapLayer, on, a11yclick) {
 
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         map: null,
-        templateString: template,
-        tempGraphicsLayerId: "esriGraphicsLayerMapSettings",
-        sharedNls: sharedNls,
-        stagedSearch: null,
-        infoWindowPanel: null,
-        tempBufferLayerId: "tempBufferLayer",
-        highlightLayerId: "highlightLayerId",
-        routeLayerId: "routeLayerId",
-        featureLayerId: "index",
-        searchSettings: [],
-        fetureLayerIndex: null,
-        operationalLayers: [],
-        isInfowindowHide: false,
+        templateString: template,                                      // Variable for template string
+        tempGraphicsLayerId: "esriGraphicsLayerMapSettings",           // Variable for graphic layer on map
+        sharedNls: sharedNls,                                          // Variable for shared NLS
+        stagedSearch: null,                                            // variable use for timer clear
+        infoWindowPanel: null,                                         // variable for infowindow panel
+        tempBufferLayerId: "tempBufferLayer",                          // variable for buffer(graphicLayer) on map
+        highlightLayerId: "highlightLayerId",                          // variable for ripple(graphicLayer) on map
+        routeLayerId: "routeLayerId",                                  // variable for route(graphicLayer) on map
+        searchSettings: [],                                            // searchSettings array is use to store the activity and event layer
+        operationalLayers: [],                                         // operationalLayers array is store the layers in webmapId case
+        isInfowindowHide: false,                                       // variable for hide infowindow
+        isExtentSet: false,                                            // variable for set the extent
         /**
         * initialize map object
         *
@@ -81,30 +82,37 @@ define([
         */
         postCreate: function () {
             var mapDeferred, layer, i, infoWindowPoint, point;
+            //subsribing fucntion for set the position of infowindow on map
             topic.subscribe("setInfoWindowOnMap", lang.hitch(this, function (infoTitle, screenPoint, infoPopupWidth, infoPopupHeight) {
                 this._onSetInfoWindowPosition(infoTitle, screenPoint, infoPopupWidth, infoPopupHeight);
             }));
-
-            topic.subscribe("isSharedLink", lang.hitch(this, function () {
-                this.isInfowindowHide = true;
+            //subscribing value for extent
+            topic.subscribe("extentSetValue", lang.hitch(this, function (value) {
+                this.isExtentSet = value;
             }));
-
+            //subscribing for hide infowindow.
             topic.subscribe("hideInfoWindow", lang.hitch(this, function (result) {
-                if (window.location.href.toString().split("$mapClickPoint=").length <= 1) {
+                //check whether "mapClickPoint" is in the share URL or not.
+                if (window.location.href.toString().split("$mapClickPoint=").length > 1) {
+                    if (this.isExtentSet) {
+                        this.infoWindowPanel.hide();
+                        this.infoWindowPanel.InfoShow = true;
+                        dojo.mapClickedPoint = null;
+                        this.isInfowindowHide = true;
+                    }
+                } else {
                     this.infoWindowPanel.hide();
                     this.infoWindowPanel.InfoShow = true;
                     dojo.mapClickedPoint = null;
                     this.isInfowindowHide = true;
-                } else {
-                    if (this.isInfowindowHide) {
-                        this.infoWindowPanel.hide();
-                        this.infoWindowPanel.InfoShow = true;
-                        dojo.mapClickedPoint = null;
-                    }
                 }
             }));
+            //subsribing fucntion for show infowindow on map
             topic.subscribe("showInfoWindowOnMap", lang.hitch(this, function (point) {
                 this._showInfoWindowOnMap(point);
+            }));
+            topic.subscribe("extentFromPoint", lang.hitch(this, function (mapPoint) {
+                this._extentFromPoint(mapPoint);
             }));
             /**
             * load map
@@ -204,6 +212,7 @@ define([
             }
             dojo.isInfoPopupShared = false;
         },
+
         _createWebmapLegendLayerList: function (layers) {
             var i, webMapLayers = [], webmapLayerList = {}, hasLayers = false;
             for (i = 0; i < layers.length; i++) {
@@ -221,6 +230,7 @@ define([
             }
             this._addLayerLegendWebmap(webMapLayers, webmapLayerList);
         },
+
         /**
         * set default id for basemaps
         * @memberOf widgets/mapSettings/mapSettings
@@ -375,12 +385,14 @@ define([
         * @memberOf widgets/mapSettings/mapSettings
         */
         _mapEvents: function () {
-            this.map.on("click", lang.hitch(this, function (evt) {
+            this.own(on(this.map, a11yclick, lang.hitch(this, function (evt) {
                 if (evt.graphic) {
                     topic.publish("showProgressIndicator");
+                    topic.publish("extentSetValue", true);
+                    topic.publish("hideCarouselContainer");
                     this._showInfoWindowOnMap(evt.mapPoint);
                 }
-            }));
+            })));
             this.map.on("extent-change", lang.hitch(this, function (evt) {
                 if (!this.infoWindowPanel.InfoShow) {
                     var infoPopupHeight, infoPopupWidth;
@@ -407,28 +419,32 @@ define([
         * @memberOf widgets/mapSettings/mapSettings
         */
         _mapOnLoad: function () {
-            var home, extentPoints, mapDefaultExtent, i, graphicsLayer, buffergraphicsLayer, extent, routegraphicsLayer, highlightfeature, imgSource, imgCustomLogo, mapLogoPostionDown;
+            var home, homeExtent, extentPoints, mapDefaultExtent, i, graphicsLayer, buffergraphicsLayer, extent, routegraphicsLayer, highlightfeature, imgSource, imgCustomLogo, mapLogoPostionDown;
             extentPoints = dojo.configData && dojo.configData.DefaultExtent && dojo.configData.DefaultExtent.split(",");
             extent = this._getQueryString('extent');
             if (extent === "") {
                 if (!dojo.configData.WebMapId) {
-                    mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(extentPoints[0]), "ymin": parseFloat(extentPoints[1]), "xmax": parseFloat(extentPoints[2]), "ymax": parseFloat(extentPoints[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
+                    mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(extentPoints[0]), "ymin": parseFloat(extentPoints[1]), "xmax": parseFloat(extentPoints[2]), "ymax": parseFloat(extentPoints[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid } });
                     this.map.setExtent(mapDefaultExtent);
                 }
             } else {
                 mapDefaultExtent = extent.split(',');
-                mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(mapDefaultExtent[0]), "ymin": parseFloat(mapDefaultExtent[1]), "xmax": parseFloat(mapDefaultExtent[2]), "ymax": parseFloat(mapDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
+                mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(mapDefaultExtent[0]), "ymin": parseFloat(mapDefaultExtent[1]), "xmax": parseFloat(mapDefaultExtent[2]), "ymax": parseFloat(mapDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid } });
                 this.map.setExtent(mapDefaultExtent);
             }
             /**
             * load esri 'Home Button' widget
             */
             home = this._addHomeButton();
-            home.extent = mapDefaultExtent;
+            homeExtent = new GeometryExtent({ "xmin": parseFloat(extentPoints[0]), "ymin": parseFloat(extentPoints[1]), "xmax": parseFloat(extentPoints[2]), "ymax": parseFloat(extentPoints[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid } });
+            home.extent = homeExtent;
             domConstruct.place(home.domNode, query(".esriSimpleSliderIncrementButton")[0], "after");
             home.startup();
-            mapLogoPostionDown = query('.esriControlsBR')[0];
-            domClass.add(mapLogoPostionDown, "esriCTDivMapPositionTop");
+            // if ShowLegend is 'true' then set esriLogo position above the Legend
+            if (dojo.configData.ShowLegend) {
+                mapLogoPostionDown = query('.esriControlsBR')[0];
+                domClass.add(mapLogoPostionDown, "esriCTDivMapPositionTop");
+            }
             if (dojo.configData.CustomLogoUrl && lang.trim(dojo.configData.CustomLogoUrl).length !== 0) {
                 if (dojo.configData.CustomLogoUrl.match("http:") || dojo.configData.CustomLogoUrl.match("https:")) {
                     imgSource = dojo.configData.CustomLogoUrl;
@@ -436,7 +452,10 @@ define([
                     imgSource = dojoConfig.baseURL + dojo.configData.CustomLogoUrl;
                 }
                 imgCustomLogo = domConstruct.create("img", { "src": imgSource, "class": "esriCTCustomMapLogo" }, dom.byId("esriCTParentDivContainer"));
-                domClass.add(imgCustomLogo, "esriCTCustomMapLogoBottom");
+                // if ShowLegend is 'true' then set customLogo position above the Legend
+                if (dojo.configData.ShowLegend) {
+                    domClass.add(imgCustomLogo, "esriCTCustomMapLogoBottom");
+                }
             }
             if (!dojo.configData.WebMapId) {
                 for (i in dojo.configData.OperationalLayers) {
@@ -560,14 +579,24 @@ define([
         * @memberOf widgets/mapSettings/mapSettings
         */
         _extentFromPoint: function (point) {
-            var tolerance, screenPoint, pnt1, pnt2, mapPoint1, mapPoint2;
-            tolerance = 35;
+            var tolerance, screenPoint, pnt1, pnt2, mapPoint1, mapPoint2, geometryPointData;
+            tolerance = 20;
             screenPoint = this.map.toScreen(point);
             pnt1 = new esri.geometry.Point(screenPoint.x - tolerance, screenPoint.y + tolerance);
             pnt2 = new esri.geometry.Point(screenPoint.x + tolerance, screenPoint.y - tolerance);
             mapPoint1 = this.map.toMap(pnt1);
             mapPoint2 = this.map.toMap(pnt2);
-            return new esri.geometry.Extent(mapPoint1.x, mapPoint1.y, mapPoint2.x, mapPoint2.y, this.map.spatialReference);
+            dojo.screenPoint = mapPoint1.x + "," + mapPoint1.y + "," + mapPoint2.x + "," + mapPoint2.y;
+            if (window.location.href.toString().split("$mapClickPoint=").length > 1) {
+                if (!this.isExtentSet) {
+                    geometryPointData = new esri.geometry.Extent(parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[2]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[3]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[4]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[5].split("$")[0]), this.map.spatialReference);
+                } else {
+                    geometryPointData = new esri.geometry.Extent(mapPoint1.x, mapPoint1.y, mapPoint2.x, mapPoint2.y, this.map.spatialReference);
+                }
+            } else {
+                geometryPointData = new esri.geometry.Extent(mapPoint1.x, mapPoint1.y, mapPoint2.x, mapPoint2.y, this.map.spatialReference);
+            }
+            return geometryPointData;
         },
 
         /**
@@ -578,44 +607,34 @@ define([
         * @memberOf widgets/mapSettings/mapSettings
         */
         _fetchQueryResults: function (featureArray, mapPoint) {
-            var point, featurePoint, infoWindowParameter;
+            var point, infoWindowParameter;
             featureArray = this._changeDateInFormat(featureArray);
             if (featureArray.length > 0) {
-                if (featureArray.length === 1) {
-                    featurePoint = featureArray[0].attr.geometry;
+                this.count = 0;
+                if (featureArray[this.count].attr.geometry.type === "polyline") {
+                    point = featureArray[this.count].attr.geometry.getPoint(0, 0);
                     infoWindowParameter = {
-                        "mapPoint": featurePoint,
+                        "mapPoint": point,
                         "attribute": featureArray[0].attr.attributes,
                         "layerId": featureArray[0].layerId,
                         "layerTitle": featureArray[0].layerTitle,
                         "featureArray": featureArray,
-                        "featureSet": featureArray[0].attr
+                        "featureSet": featureArray[0].attr,
+                        "IndexNumber": 0
                     };
                 } else {
-                    this.count = 0;
-                    if (featureArray[this.count].attr.geometry.type === "polyline") {
-                        point = featureArray[this.count].attr.geometry.getPoint(0, 0);
-                        infoWindowParameter = {
-                            "mapPoint": point,
-                            "attribute": featureArray[0].attr.attributes,
-                            "layerId": featureArray[0].layerId,
-                            "layerTitle": featureArray[0].layerTitle,
-                            "featureArray": featureArray,
-                            "featureSet": featureArray[0].attr
-                        };
-                    } else {
-                        point = featureArray[0].attr.geometry;
-                        infoWindowParameter = {
-                            "mapPoint": point,
-                            "attribute": featureArray[0].attr.attributes,
-                            "layerId": featureArray[0].layerId,
-                            "layerTitle": featureArray[0].layerTitle,
-                            "featureArray": featureArray,
-                            "featureSet": featureArray[0].attr
-                        };
-                    }
-                    topic.publish("hideProgressIndicator");
+                    point = featureArray[0].attr.geometry;
+                    infoWindowParameter = {
+                        "mapPoint": point,
+                        "attribute": featureArray[0].attr.attributes,
+                        "layerId": featureArray[0].layerId,
+                        "layerTitle": featureArray[0].layerTitle,
+                        "featureArray": featureArray,
+                        "featureSet": featureArray[0].attr,
+                        "IndexNumber": 1
+                    };
                 }
+                topic.publish("hideProgressIndicator");
                 topic.publish("createInfoWindowContent", infoWindowParameter);
             } else {
                 topic.publish("hideProgressIndicator");
@@ -629,32 +648,37 @@ define([
         * @memberOf widgets/mapSettings/mapSettings
         */
         _changeDateInFormat: function (featureArray) {
-            var attributeNames = [], i, key, e, t;
-            if (featureArray.length > 0) {
-                for (i = 0; i < featureArray[0].fields.length; i++) {
-                    if (featureArray[0].fields[i].type === "esriFieldTypeDate") {
-                        attributeNames.push(featureArray[0].fields[i].name);
+            var attributeNames = [], i, key, e, t, n;
+            //loop featureArray to change the format
+            for (n = 0; n < featureArray.length; n++) {
+                //loop featureArray to fetch the field from layer
+                for (i = 0; i < featureArray[n].fields.length; i++) {
+                    //check if field type is equal to "esriFieldTypeDate"
+                    if (featureArray[n].fields[i].type === "esriFieldTypeDate") {
+                        attributeNames.push(featureArray[n].fields[i].name);
                     }
                 }
-                for (key in featureArray[0].attr.attributes) {
-                    if (featureArray[0].attr.attributes.hasOwnProperty(key)) {
+                //loop featureArray to fetch the attributes from layer
+                for (key in featureArray[n].attr.attributes) {
+                    if (featureArray[n].attr.attributes.hasOwnProperty(key)) {
+                        //loop for attributeNames to fetch the name
                         for (e = 0; e < attributeNames.length; e++) {
                             if (attributeNames[e] === key) {
+                                //loop for event layers to fetch the each layer infomation
                                 for (t = 0; t < dojo.configData.EventSearchSettings.length; t++) {
-                                    if (featureArray[0].layerTitle === dojo.configData.EventSearchSettings[t].Title && featureArray[0].layerId === dojo.configData.EventSearchSettings[t].QueryLayerId) {
-                                        featureArray[0].attr.attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureArray[0].attr.attributes[key]), { datePattern: dojo.configData.EventSearchSettings[t].DisplayDateFormat, selector: "date" });
+                                    if (featureArray[n].layerTitle === dojo.configData.EventSearchSettings[t].Title && featureArray[n].layerId === dojo.configData.EventSearchSettings[t].QueryLayerId) {
+                                        featureArray[n].attr.attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureArray[n].attr.attributes[key]), { datePattern: dojo.configData.EventSearchSettings[t].DisplayDateFormat, selector: "date" });
                                     }
                                 }
-                                if (featureArray[0].layerTitle === dojo.configData.ActivitySearchSettings[0].Title && featureArray[0].layerId === dojo.configData.ActivitySearchSettings[0].QueryLayerId) {
-                                    featureArray[0].attr.attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureArray[0].attr.attributes[key]), { datePattern: dojo.configData.ActivitySearchSettings[0].DisplayDateFormat, selector: "date" });
+                                if (featureArray[n].layerTitle === dojo.configData.ActivitySearchSettings[0].Title && featureArray[n].layerId === dojo.configData.ActivitySearchSettings[0].QueryLayerId) {
+                                    featureArray[n].attr.attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureArray[n].attr.attributes[key]), { datePattern: dojo.configData.ActivitySearchSettings[0].DisplayDateFormat, selector: "date" });
                                 }
                             }
                         }
                     }
                 }
-            } else {
-                topic.publish("hideProgressIndicator");
             }
+
             return featureArray;
         },
 
@@ -694,7 +718,7 @@ define([
         },
 
         /**
-        * generate layer URL for infoWindow
+       * generate layer URL for infoWindow
         * @param {Layer} operationalLayers Contains service layer URL
         * @memberOf widgets/mapSettings/mapSettings
         */
@@ -703,15 +727,23 @@ define([
             infoWindowSettings = dojo.configData.InfoWindowSettings;
             searchSettings = dojo.configData.ActivitySearchSettings;
             eventSearchSettings = dojo.configData.EventSearchSettings;
+            //loop for the operational layer
             for (i = 0; i < operationalLayers.length; i++) {
+                //check if webMapId is not configured then layer is  directly load from operational layer
                 if (dojo.configData.WebMapId && lang.trim(dojo.configData.WebMapId).length !== 0) {
                     str = operationalLayers[i].url.split('/');
                     layerTitle = operationalLayers[i].title;
                     layerId = str[str.length - 1];
+                    //loop for searchSetting fetch each layer
                     for (index = 0; index < searchSettings.length; index++) {
+                        //check Title and QueryLayerId both are having in activitySearchSetting
                         if (searchSettings[index].Title && searchSettings[index].QueryLayerId) {
+                            //check  layer Title and layer QueryLayerId from activitySearchSetting
                             if (layerTitle === searchSettings[index].Title && layerId === searchSettings[index].QueryLayerId) {
                                 searchSettings[index].QueryURL = str.join("/");
+                                searchSettings[index].ObjectID = this._getObjectId(operationalLayers[i].layerObject.fields);
+                                searchSettings[index].DateField = this._getDateField(operationalLayers[i].layerObject.fields);
+                                //check if CommentsSettings is configured
                                 if (searchSettings[index].CommentsSettings && searchSettings[index].CommentsSettings.QueryLayerId) {
                                     commentLayerURL = searchSettings[index].QueryURL.split('/');
                                     commentLayerURL[commentLayerURL.length - 1] = searchSettings[index].CommentsSettings.QueryLayerId;
@@ -720,29 +752,49 @@ define([
                             }
                         }
                     }
-                    for (infoIndex = 0; infoIndex < infoWindowSettings.length; infoIndex++) {
-                        if (infoWindowSettings[infoIndex].Title && infoWindowSettings[infoIndex].QueryLayerId) {
-                            if (layerTitle === infoWindowSettings[infoIndex].Title && layerId === infoWindowSettings[infoIndex].QueryLayerId) {
-                                infoWindowSettings[infoIndex].InfoQueryURL = str.join("/");
+                    //check if infoWindowSettings is configured.
+                    if (infoWindowSettings) {
+                        //loop for infoWindowSettings fetch each layer
+                        for (infoIndex = 0; infoIndex < infoWindowSettings.length; infoIndex++) {
+                            //check Title and QueryLayerId both are having in  infoWindowSettings
+                            if (infoWindowSettings[infoIndex].Title && infoWindowSettings[infoIndex].QueryLayerId) {
+                                //check  layer Title and layer QueryLayerId from infoWindowSettings
+                                if (layerTitle === infoWindowSettings[infoIndex].Title && layerId === infoWindowSettings[infoIndex].QueryLayerId) {
+                                    infoWindowSettings[infoIndex].InfoQueryURL = str.join("/");
+                                    eventSearchSettings[eventIndex].ObjectID = this._getObjectId(operationalLayers[i].layerObject.fields);
+                                    eventSearchSettings[eventIndex].DateField = this._getDateField(operationalLayers[i].layerObject.fields);
+                                }
                             }
                         }
                     }
+                    //loop for event layers to fetch the each layer infomation
                     for (eventIndex = 0; eventIndex < eventSearchSettings.length; eventIndex++) {
+                        //check Title and QueryLayerId both are having in  eventSearchSettings
                         if (eventSearchSettings[eventIndex].Title && eventSearchSettings[eventIndex].QueryLayerId) {
+                            //check  layer Title and layer QueryLayerId from eventSearchSettings
                             if (layerTitle === eventSearchSettings[eventIndex].Title && layerId === eventSearchSettings[eventIndex].QueryLayerId) {
                                 eventSearchSettings[eventIndex].QueryURL = str.join("/");
+                                eventSearchSettings[eventIndex].ObjectID = this._getObjectId(operationalLayers[i].layerObject.fields);
+                                eventSearchSettings[eventIndex].DateField = this._getDateField(operationalLayers[i].layerObject.fields);
                             }
                         }
                     }
                 } else {
+                    //check if webMapId is configured
                     if (operationalLayers[i].ServiceURL) {
                         str = operationalLayers[i].ServiceURL.split('/');
                         layerTitle = str[str.length - 3];
                         layerId = str[str.length - 1];
+                        //loop for searchSetting fetch each layer
                         for (index = 0; index < searchSettings.length; index++) {
+                            //check Title and QueryLayerId both are having in activitysearchSetting
                             if (searchSettings[index].Title && searchSettings[index].QueryLayerId) {
+                                //check  layer Title and layer QueryLayerId from activitySearchSetting
                                 if (layerTitle === searchSettings[index].Title && layerId === searchSettings[index].QueryLayerId) {
                                     searchSettings[index].QueryURL = str.join("/");
+                                    searchSettings[index].ObjectID = this._getObjectId(operationalLayers[i].layerObject.fields);
+                                    searchSettings[index].DateField = this._getDateField(operationalLayers[i].layerObject.fields);
+                                    //check if CommentsSettings is configured
                                     if (searchSettings[index].CommentsSettings && searchSettings[index].CommentsSettings.QueryLayerId) {
                                         commentLayerURL = searchSettings[index].QueryURL.split('/');
                                         commentLayerURL[commentLayerURL.length - 1] = searchSettings[index].CommentsSettings.QueryLayerId;
@@ -751,17 +803,28 @@ define([
                                 }
                             }
                         }
-                        for (infoIndex = 0; infoIndex < infoWindowSettings.length; infoIndex++) {
-                            if (infoWindowSettings[infoIndex].Title && infoWindowSettings[infoIndex].QueryLayerId) {
-                                if (layerTitle === infoWindowSettings[infoIndex].Title && layerId === infoWindowSettings[infoIndex].QueryLayerId) {
-                                    infoWindowSettings[infoIndex].InfoQueryURL = str.join("/");
+                        //check if infoWindowSettings is configured.
+                        if (infoWindowSettings) {
+                            //loop for infoWindowSettings fetch each layer
+                            for (infoIndex = 0; infoIndex < infoWindowSettings.length; infoIndex++) {
+                                //check Title and QueryLayerId both are having in  infoWindowSettings
+                                if (infoWindowSettings[infoIndex].Title && infoWindowSettings[infoIndex].QueryLayerId) {
+                                    if (layerTitle === infoWindowSettings[infoIndex].Title && layerId === infoWindowSettings[infoIndex].QueryLayerId) {
+                                        infoWindowSettings[infoIndex].InfoQueryURL = str.join("/");
+                                    }
                                 }
                             }
+
                         }
+                        //loop for event layers to fetch the each layer infomation
                         for (eventIndex = 0; eventIndex < eventSearchSettings.length; eventIndex++) {
+                            //check Title and QueryLayerId both are having in  eventSearchSettings
                             if (eventSearchSettings[eventIndex].Title && eventSearchSettings[eventIndex].QueryLayerId) {
+                                //check  layer Title and layer QueryLayerId from eventSearchSettings
                                 if (layerTitle === eventSearchSettings[eventIndex].Title && layerId === eventSearchSettings[eventIndex].QueryLayerId) {
                                     eventSearchSettings[eventIndex].QueryURL = str.join("/");
+                                    eventSearchSettings[eventIndex].ObjectID = this._getObjectId(operationalLayers[i].layerObject.fields);
+                                    eventSearchSettings[eventIndex].DateField = this._getDateField(operationalLayers[i].layerObject.fields);
                                 }
                             }
                         }
@@ -777,13 +840,12 @@ define([
         */
         _addHomeButton: function () {
             var home;
-            topic.publish("extentSetValue", true);
-            topic.publish("isSharedLink");
             home = new HomeButton({
                 map: this.map
             }, domConstruct.create("div", {}, null));
             return home;
         },
+
 
         /**
         * Initialize the object of baseMapGallery
@@ -831,6 +893,7 @@ define([
                 });
                 this.map.addLayer(featureLayer);
                 this.operationalLayers.push(featureLayer);
+                //check if service type is dynamic
             } else if (layerInfo.LoadAsServiceType.toLowerCase() === "dynamic") {
                 this._addDynamicLayerService(layerInfo);
             }
@@ -845,6 +908,7 @@ define([
             clearTimeout(this.stagedSearch);
             str = layerInfo.ServiceURL.split('/');
             lastIndex = str[str.length - 1];
+            //check layer is  dynamic service type with last index
             if (isNaN(lastIndex) || lastIndex === "") {
                 if (lastIndex === "") {
                     layerTitle = str[str.length - 3];
@@ -870,6 +934,7 @@ define([
             imageParams = new ImageParameters();
             lastIndex = layerURL.lastIndexOf('/');
             dynamicLayerId = layerURL.substr(lastIndex + 1);
+            //check if dynamic layer configured in config file contains layer Index
             if (isNaN(dynamicLayerId) || dynamicLayerId === "") {
                 if (isNaN(dynamicLayerId)) {
                     dynamicLayer = layerURL + "/";
@@ -904,6 +969,7 @@ define([
 
         /**
         * initialize the object of legend box
+        * @return {legendObject} returns the legend Object
         * @memberOf widgets/mapSettings/mapSettings
         */
         _addLegendBox: function () {
@@ -922,8 +988,10 @@ define([
         _addLayerLegend: function () {
             var mapServerArray, legendObject, i;
             mapServerArray = [];
+            //loop for the operation layer to load on map
             for (i = 0; i < dojo.configData.OperationalLayers.length; i++) {
                 if (dojo.configData.OperationalLayers[i]) {
+                    //check whether service URL is in the operation layer or not
                     if (dojo.configData.OperationalLayers[i].ServiceURL) {
                         mapServerArray.push(dojo.configData.OperationalLayers[i].ServiceURL);
                     }
@@ -939,15 +1007,17 @@ define([
         */
         _addLayerLegendWebmap: function (webMapLayers, webmapLayerList) {
             var mapServerArray = [], i, j, legendObject, layer;
+            //loop for webmap layer
             for (j = 0; j < webMapLayers.length; j++) {
                 if (webMapLayers[j].layerObject) {
+                    //check whether the data is having in the layer
                     if (webMapLayers[j].layerObject.layerInfos) {
+                        //loop for layer details to fetch the rach layer information
                         for (i = 0; i < webMapLayers[j].layerObject.layerInfos.length; i++) {
                             layer = webMapLayers[j].url + "/" + webMapLayers[j].layerObject.layerInfos[i].id;
                             mapServerArray.push(layer);
                         }
                     } else {
-
                         mapServerArray.push(webMapLayers[j].url);
                     }
                 } else {
@@ -966,6 +1036,43 @@ define([
         */
         getMapInstance: function () {
             return this.map;
+        },
+        /**
+        * Get object id from the layer
+        * @param {object} object of layer
+        * @return {objectId} returns the objectId
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _getObjectId: function (response) {
+            var objectId, j;
+            //loop for the json response and store the objectId in esriFieldTypeOID
+            for (j = 0; j < response.length; j++) {
+                //check whether objectId type feild from layer is equal to "esriFieldTypeOID"
+                if (response[j].type === "esriFieldTypeOID") {
+                    objectId = response[j].name;
+                    break;
+                }
+            }
+            return objectId;
+        },
+
+        /**
+        * Get date field from layer
+        * @param {object} object of layer
+        * @return {dateFieldArray} returns the date field array
+        * @memberOf widgets/eventPlanner/eventPlanner
+        */
+        _getDateField: function (response) {
+            var j, dateFieldArray = [], dateField;
+            //loop for the json response and push the datefeild in dateFieldArray
+            for (j = 0; j < response.length; j++) {
+                //check whether date type feild from layer is equal to "esriFieldTypeDate"
+                if (response[j].type === "esriFieldTypeDate") {
+                    dateField = response[j].name;
+                    dateFieldArray.push(dateField);
+                }
+            }
+            return dateFieldArray;
         }
     });
 });

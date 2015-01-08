@@ -23,8 +23,9 @@ define([
     "dojo/topic",
     "dojo/_base/lang",
     "dijit/_WidgetBase",
-    "dojo/i18n!application/js/library/nls/localizedStrings"
-], function (declare, domConstruct, on, topic, lang, _WidgetBase, sharedNls) {
+    "dojo/i18n!application/js/library/nls/localizedStrings",
+    "dijit/a11yclick"
+], function (declare, domConstruct, on, topic, lang, _WidgetBase, sharedNls, a11yclick) {
 
     //========================================================================================================================//
 
@@ -39,7 +40,7 @@ define([
         */
         postCreate: function () {
             this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.helpTooltips, "class": "esriCTHelpImg" }, null);
-            this.own(on(this.domNode, "click", lang.hitch(this, function () {
+            this.own(on(this.domNode, a11yclick, lang.hitch(this, function () {
 
                 /**
                 * minimize other open header panel widgets and show help

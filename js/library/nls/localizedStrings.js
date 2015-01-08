@@ -18,9 +18,9 @@
 define({
     root: {
         showNullValue: "N/A",
+        showApproxString: " Approx",
         buttons: {
             okButtonText: "OK",
-            link: "Link",
             email: "Email",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
             Facebook: "Facebook",  // Shown next to icon for sharing the current map extents via a Facebook post; works with shareViaFacebook tooltip
             Twitter: "Twitter",
@@ -28,37 +28,33 @@ define({
         },
         tooltips: {
             searchTooltips: "Search",
-            routeTooltips: "Route",
+            routeTooltips: "Driving Directions",
             locateTooltips: "Locate",
             shareTooltips: "Share",
             helpTooltips: "Help",
-            eventsTooltips: "Events",
+            eventsTooltips: "My List",
             clearEntryTooltips: "Clear",
             hidePanelTooltips: "Hide panel",
             showPanelTooltips: "Show panel",
             printButtonooltips: "Print",
             closeTooltips: "Close",
             clearEntry: "Clear",
-            search: "Search"
+            search: "Search",
+            routeForListTooltips: "Driving Directions - List Items",
+            addToCalanderForListTooltips: "Add to Calendar - List Items",
+            printForListTooltips: "Print - List Items",
+            deleteFromListTooltips: "Delete from List",
+            addToCalanderTooltips: "Add to Calander"
         },
         titles: {
-            directionsDisplayText: "Area of Interest",
-            informationPanelTitle: "Information for current map view",
             webpageDisplayText: "Copy/Paste HTML into your web page",
-            numberOfFeaturesFoundNearAddress: "Found ${0} facility(ies) near the address",
-            splashScreenContent: "Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
             serchResultText: "SEARCH RESULT",
             directionText: "DIRECTIONS TO",
             galleryText: "GALLERY",
             commentText: "COMMENT",
-            facitilyPanelAccessFeeText: "Access Fee:",
-            facitilyPanelHoursOpenForText: "Hours Open For:",
-            facitilyPanelManagementUnitText: "Management Unit:",
-            facitilyPanelMarinaText: "Facility Type:",
             directionCurrentLocationText: "My Location",
             directionTextDistance: "Distance:",
             directionTextTime: "Duration:",
-            activityTabName: "Events",
             activityListTabName: "My List",
             fromDateText: "From Date",
             toDateText: "To Date",
@@ -69,18 +65,20 @@ define({
             backButton: "Back",
             submitButton: "Submit",
             postCommentText: "Enter comment",
-            loadingText: "Loading...",
             galleryInfoTitle: "Gallery",
             informationTitle: "Information",
             commentInfoTitle: "Comments",
             backToMapText: "BACK TO MAP",
             orderByDate: "Order by Date",
             carouselUtilitiesText: "utilities",
-            eventsINMylist: "Events in MyList",
+            numberOfFeaturesFoundNearAddress: "Found ${0} facility(ies) near the address",
             numberOfFoundFeatureNearAddress: "Found ${0} facility(ies)",
             numberOfFoundEventsNearAddress: "Found ${0} Event",
             addToListTitle: "Add to list",
-            directionFromText: "DIRECTIONS from "
+            unifiedSearchTabText: "Search",
+            activitySearchTabText: "Activity",
+            eventSearchTabText: "Events",
+            carouselPodToggleButtonText: "Result"
         },
         errorMessages: {
             invalidSearch: "No results found",
@@ -90,8 +88,6 @@ define({
             widgetNotLoaded: "Unable to load widgets.",
             shareLoadingFailed: "Unable to shorten URL, Bit.ly failed to load.",
             shareFailed: "Unable to share.",
-            invalidBasemapQuery: "Invalid BasemapQuery",
-            noBasemap: "No Basemap Found",
             imageDoesNotFound: "No photos available.",
             facilitydoestfound: "No facilities found in buffer area.",
             noCommentAvaiable: "No comments available.",
@@ -106,18 +102,18 @@ define({
             addedActivities: "All activities within specified date range are already added to the My List.",
             activitySerachGeolocationText: "Geolocation is not supported in selected browser.",
             portalUrlNotFound: "Portal URL cannot be empty",
-            activityAlreadyadded: "Activity is already added",
+            activityAlreadyadded: "This feature is already added to list",
             errorInQueringLayer: "Failed to query Comment layer",
             loadingText: "Loading...",
-            noLegend: "No Legend Available."
+            noLegend: "No Legend Available.",
+            noBasemap: "No Basemap Found",
+            feildNotconfigure: "Feilds are not configured.",
+            geolocationWidgetNotFoundMessage: "Geolocation widget is not configured."
         },
         //end of shared nls
 
          //App nls
         appErrorMessage: {
-            layerTitleError: "Title and/or QueryLayerId parameters in SearchSettings do not match with configured operational layers.",
-            titleNotMatching: "Title and/or QueryLayerId parameters in the InfoWindowSettings and SearchSettings do not match.",
-            lengthDoNotMatch: "The number of objects in InfoWindowSettings and SearchSettings do not match.",
             webmapTitleError: "Title and/or QueryLayerId parameters in SearchSettings do not match with configured webmap"
         }
         //End of App nls

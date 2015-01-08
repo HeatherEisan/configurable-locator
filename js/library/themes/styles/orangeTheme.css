@@ -169,10 +169,12 @@
 {
     background-image: url("../images/img24x24/activityPlannerOrange24.png");
 }
+
 .esriCTInfoAddlistText
 {
     color: #808080;
 }
+
 .esriCTFacebook
 {
     background-image: url("../images/img24x24/imgFacebookOrange24.png");
@@ -220,14 +222,11 @@
     background-image: url("../images/searchOrange.png") !important;
 }
 
-
 /* Application Header */
 .galleryTab, .commentsTab, .esriCTTabs div.esriCTGetDir, .esriCTTabs div.esriCTInfoClose, .esriCTApplicationHeader
 {
     border-color: #d15706;
 }
-
-
 
 .esriCTApplicationHeaderTextTD
 {
@@ -239,6 +238,7 @@
 {
     background-color: #fff;
 }
+
 .esriCTTxtAddress
 {
     border: #DFDFDF solid 1px;
@@ -278,43 +278,20 @@ input
     color: #d15706;
 }
 
-.esriCTActivityPanelSelected
+.esriCTActivityPanelSelected, .esriCTEventsPanelSelected, .esriCTDivSearchPanel
 {
     color: #d15706;
-    border-left: 1px solid #FAFAFA;
-    border-right: 1px solid #fff;
 }
 
-.esriCTActivityPanel
+.esriCTActivityPanel, .esriCTSearchPanelSelected, .esriCTEventsPanel
 {
-    border-bottom: 1px solid #d15706;
+    border-color: #d15706;
     color: #d15706;
-    border-right: 1px solid #FAFAFA;
-    border-left: 1px solid #d15706;
 }
 
-.esriCTSearchPanelSelected
-{
-    border-bottom: 1px solid #d15706;
-    color: #d15706;
-    border-right: 1px solid #d15706;
-    border-left: 1px solid #FAFAFA;
-}
-
-.esriCTDivSearchPanel
+.esriCTActivityPanel, .esriCTSearchPanel, .esriCTEventsPanelSelected
 {
     color: #d15706;
-    border-left: 1px solid #fff;
-    border-right: 1px solid #FAFAFA;
-}
-.esriCTTickMark
-{
-    color: #d15706;
-}
-.esriCTUtilityImgSelect
-{
-    border: 1px solid #d15706;
-    background: #d15706;
 }
 
 .esriCTDivAppHolder, .esriCTDivShareContainer, .esriCTDivActivityAppHoldern
@@ -329,7 +306,6 @@ input
 {
     border: 1px solid #d15706;
 }
-
 
 .esriCTShareBorder
 {
@@ -353,8 +329,6 @@ input
 {
     color: Black;
 }
-
-
 
 /* End of Route */
 
@@ -445,14 +419,17 @@ input
 {
     color: #d15706;
 }
+
 .esriCTInfoAddToListIcon
 {
     background-image: url("../images/addToListOrange.png") !important;
 }
+
 .esriCTTabs div.esriCTInfoSelectedTab
 {
     background: #d15706;
 }
+
 .esriCTInfoBackButton, .esriCTInfoSubmitButton, .esriCTInfoPostButton
 {
     background: #d15706;
@@ -466,6 +443,7 @@ input
         color: #d15706;
     }
 }
+
 /* Loading indicator Styles */
 
 .esriCTSplashScreen
@@ -521,6 +499,7 @@ input
 {
     border-bottom: 1px solid #d15706;
 }
+
 .esriCTDivLegendBoxContent
 {
     border: 1px solid #d15706 !important;
@@ -602,7 +581,6 @@ input
     color: #d15706;
 }
 
-
 /*Activity planner*/
 
 .esriCTEventListTab
@@ -627,8 +605,6 @@ input
     border-right: 1px solid #d15706;
     border-left: 1px solid #FAFAFA;
 }
-
-
 
 .esriCTMyListHeaderText
 {
@@ -737,18 +713,22 @@ input
 {
     color: #d15706;
 }
+
 .esriCTInfoAddToListIcon
 {
     background-image: url("../images/addToListOrange.png") !important;
 }
+
 .esriCTTabs div, .esriCTInfoAddToListText, .esriCTCloseDivMobile
 {
     color: #d15706;
 }
+
 .esriCTDivActivityAppContainer
 {
     border: 1px solid #d15706;
 }
+
 .esriCTHeaderDirectionAcitivityList
 {
     background-image: url("../images/directionOrange.png") !important;
@@ -758,7 +738,34 @@ input
 {
     background-image: url("../images/addActivityListOrange.png") !important;
 }
+
 .esriCTHeaderPrintAcitivityList
 {
     background-image: url("../images/printOrange.png") !important;
+}
+
+.esriCTTPaginationList
+{
+    color: #d15706;
+}
+
+.esriCTTPaginationPrev
+{
+    float: left;
+    background-image: url("../images/leftArrowPageOrange.png");
+    margin: 0 5px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.esriCTTPaginationNext
+{
+    float: left;
+    background-image: url("../images/rightArrowPageOrange.png");
+    color: #d15706;
+    margin: 0 5px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
 }
