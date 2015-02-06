@@ -276,32 +276,39 @@ input
     border-right: 1px solid #DFDFDF;
     border-bottom: 1px solid #DFDFDF;
 }
+
 .esriCTResultColor
 {
     color: #5C2E6F;
 }
+
 .esriCTActivityPanelSelected, .esriCTEventsPanelSelected, .esriCTDivSearchPanel
 {
     color: #5C2E6F;
 }
+
 .esriCTActivityPanel, .esriCTSearchPanelSelected, .esriCTEventsPanel
 {
     border-color: #5C2E6F;
     color: #5C2E6F;
 }
+
 .esriCTActivityPanel, .esriCTSearchPanel, .esriCTEventsPanelSelected
 {
     color: #5C2E6F;
 }
+
 .esriCTTickMark
 {
     color: #5C2E6F;
 }
+
 .esriCTUtilityImgSelect
 {
     border: 1px solid #5C2E6F;
     background: #5C2E6F;
 }
+
 .esriCTDivAppHolder, .esriCTDivShareContainer, .esriCTDivActivityAppHolder
 {
     background-color: #fff;
@@ -420,23 +427,34 @@ input
 {
     background: url("../images/rightArrowPurple.png");
 }
+
 .esriCTCalloutText
 {
     color: #5C2E6F;
 }
+
 .esriCTInfoAddToListIcon
 {
     background-image: url("../images/addToListPurple.png") !important;
 }
+
 .esriCTTabs div.esriCTInfoSelectedTab
 {
     background: #5C2E6F;
 }
+
 .esriCTInfoBackButton, .esriCTInfoSubmitButton, .esriCTInfoPostButton
 {
     background: #5C2E6F;
     color: #fff;
 }
+
+.esriCTinfoWindowHyperlink
+{
+    color: #5C2E6F;
+    text-decoration: none;
+}
+
 @media screen and (max-width:767px)
 {
     .esriCTInfoSubmitButton, .esriCTInfoPostButton, .esriCTInfoBackButton, .esriCTCloseDivMobile
@@ -530,7 +548,6 @@ input
     color: #5C2E6F;
 }
 
-
 .esriCTSpanFeatureListContainer
 {
     color: #808080;
@@ -577,10 +594,12 @@ input
 {
     background: url("../images/printPurple.png") no-repeat center center !important;
 }
+
 .esriCTCarouselUtilitiesHeader
 {
     color: #5C2E6F;
 }
+
 .esriCTDivHighlightFacility
 {
     padding: 10px 25px 10px 0px;
@@ -728,6 +747,7 @@ input
 {
     background-image: url("../images/addToListPurple.png") !important;
 }
+
 .esriCTTabs div, .esriCTInfoAddToListText
 {
     color: #5C2E6F;
@@ -772,9 +792,58 @@ input
 {
     float: left;
     background-image: url("../images/rightArrowPagePurple.png");
-    color: #d15706;
+    color: #5C2E6F;
     margin: 0 5px;
     width: 18px;
     height: 18px;
     cursor: pointer;
+}
+/*add infotabImg*/
+
+.esriCTInfoTabImage
+{
+    color: #5C2E6F;
+    background: url("../images/info-purple.png");
+}
+
+.esriCTInfoTabImageSelect
+{
+    color: #5C2E6F;
+    background: url("../images/info-select.png");
+}
+
+.esriCTGalleryTabImage
+{
+    color: #5C2E6F;
+    background: url("../images/gallery-purple.png");
+}
+
+.esriCTGalleryTabImageSelect
+{
+    color: #5C2E6F;
+    background: url("../images/gallery-select.png");
+}
+
+.esriCTCommentsTabImage
+{
+    color: #5C2E6F;
+    background: url("../images/comment-purple.png");
+}
+
+.esriCTCommentsTabImageselect
+{
+    color: #5C2E6F;
+    background: url("../images/comment-select.png");
+}
+
+.addtoListTabImage
+{
+    color: #5C2E6F;
+    background: url("../images/img24x24/activityPlannerPurple24.png");
+}
+
+.addtoListTabImageSelect
+{
+    background-color: #5C2E6F;
+    background-image: url("../images/activityPlannerSelect24.png");
 }

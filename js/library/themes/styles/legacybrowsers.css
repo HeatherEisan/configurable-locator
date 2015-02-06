@@ -3,13 +3,11 @@ body
     scrollbar-arrow-color: #ddd;
 }
 
-
 .esriGovtLoadingIndicator, .esriCTLoadingIndicator
 {
     background-color: #000;
     filter: alpha(opacity = 40);
 }
-
 
 .divSplashContainer
 {
@@ -22,15 +20,21 @@ body
     filter: progid:DXImageTransform.Microsoft.Glow(color='#8EAE21', Strength='4');
 }
 
-.esriCTDirectionResultContent, .esriCTInfoPanel, .esriCTInfoWindoContainer, .esriCTDirectionMainContainer div.esriCTAddressList, .esriCTDirectionResultContent
+.esriCTDirectionResultContent, .esriCTInfoPanel, .esriCTInfoWindoContainer, .esriCTDirectionResultContent
 {
     height: 85%;
+}
+
+.esriCTDirectionMainContainer div.esriCTAddressList
+{
+    height: 55%;
 }
 
 .esriCTCommentContainer
 {
     height: 75%;
 }
+
 .esriCTActivityMainContainer
 {
     height: 70%;

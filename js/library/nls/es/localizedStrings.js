@@ -35,7 +35,7 @@ define({
         clearEntryTooltips: "@es@ Clear",
         hidePanelTooltips: "@es@ Hide panel",
         showPanelTooltips: "@es@ Show panel",
-        printButtonooltips: "@es@ Print",
+        printButtonTooltips: "@es@ Print",
         closeTooltips: "@es@ Close",
         clearEntry: "@es@ Clear",
         search: "@es@ Search",
@@ -43,42 +43,40 @@ define({
         addToCalanderForListTooltips: "@es@ Add to Calendar - List Items",
         printForListTooltips: "@es@ Print - List Items",
         deleteFromListTooltips: "@es@ Delete from List",
-        addToCalanderTooltips: "@es@ Add to Calander"
+        addToCalanderTooltips: "@es@ Add to Calendar",
+        galleryInfoTooltips: "@es@ Gallery",
+        informationTooltips: "@es@ Information",
+        commentInfoTooltips: "@es@ Comments",
+        addToListTooltips: "@es@ Add to My List"
     },
     titles: {
         webpageDisplayText: "@es@ Copy/Paste HTML into your web page",
-        serchResultText: "@es@ SEARCH RESULT",
-        directionText: "@es@ DIRECTIONS TO",
-        galleryText: "@es@ GALLERY",
-        commentText: "@es@ COMMENT",
+        searchResultText: "@es@ Search Result",
+        directionText: "@es@ Directions to",
+        galleryText: "@es@ Gallery",
+        commentText: "@es@ Comment",
         directionCurrentLocationText: "@es@ My Location",
         directionTextDistance: "@es@ Distance:",
         directionTextTime: "@es@ Duration:",
         activityListTabName: "@es@ My List",
         fromDateText: "@es@ From Date",
         toDateText: "@es@ To Date",
-        gobuttonText: "@es@ Go",
-        noLegendAvailable: "@es@ No Legend Available.",
-        galleryInfoTitle: "@es@ Gallery",
-        informationTitle: "@es@ Information",
-        commentInfoTitle: "@es@ Comments",
-        backToMapText: "@es@ BACK TO MAP",
+        goButtonText: "@es@ Go",
+        noLegendAvailable: "@es@ No Legend Available",
+        backToMapText: "@es@ Back to Map",
         orderByDate: "@es@ Order by Date",
-        carouselUtilitiesText: "@es@ utilities",
-        addToListTitle: "@es@ Add to list",
-        unifiedSearchTabText: "@es@Search",
-        activitySearchTabText: "@es@Activity",
-        eventSearchTabText: "@es@Events",
+        carouselUtilitiesText: "@es@ Utilities",
+        addToListTitle: "@es@ Add to List",
         postComment: "@es@ Post Comment",
-        rating: "@es@ rating",
+        rating: "@es@ Rating",
         backButton: "@es@ Back",
         submitButton: "@es@ Submit",
-        postCommentText: "@es@ Enter comment",
+        postCommentText: "@es@ Enter Comment",
         numberOfFeaturesFoundNearAddress: "@es@ Found ${0} facility(ies) near the address",
         numberOfFoundFeatureNearAddress: "@es@ Found ${0} facility(ies)",
         numberOfFoundEventsNearAddress: "@es@ Found ${0} Event",
-        facilityInfo: "@es@ facility info",
-        carouselPodToggleButtonText: "@es@ Result"
+        facilityInfo: "@es@ Facility Info",
+        infoWindowTextURL: "@es@ More info"
     },
     errorMessages: {
         invalidSearch: "No hay resultados",
@@ -108,18 +106,20 @@ define({
         noLegend: "@es@ No Legend Available.",
         noBasemap: "@es@ No Basemap Found",
         feildNotconfigure: "@es@ Feilds are not configured.",
-        geolocationWidgetNotFoundMessage: "@es@ Geolocation widget is not configured."
+        geolocationWidgetNotFoundMessage: "@es@ Geolocation widget is not configured.",
+        routeDoesNotCreate: "@es@ Unable to route to these addresses",
+        enablePodSettingsInConfig: "@es@ Please enable the PodSettings in Config."
     },
     notUsed: {
         addressDisplayText: "@es@ Address",
-        backToMap: "@es@ Back to map"
+        backToMap: "@es@ Back to Map"
     }, //end of shared nls
 
     //end of shared nls
 
     //App nls
     appErrorMessage: {
-        webmapTitleError: "@es Title and/or QueryLayerId parameters in SearchSettings do not match with configured webmap"
+        webmapTitleError: "@es@ Title and/or QueryLayerId parameters in SearchSettings do not match with configured webmap"
     }
     //End of App nls
 });

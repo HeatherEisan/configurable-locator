@@ -422,6 +422,11 @@ input
     background-image: url("../images/addToListBlue.png") !important;
 }
 
+.esriCTinfoWindowHyperlink
+{
+    color: #007ac2;
+    text-decoration: none;
+}
 /* Loading indicator Styles */
 
 /*grouped address*/
@@ -461,7 +466,6 @@ input
 }
 
 /*legends */
-
 .esriCTLegendChangePositionUp
 {
     border-bottom: 1px solid #007AC2;
@@ -476,11 +480,9 @@ input
 {
     border: 1px solid #007AC2 !important;
 }
-
 /* End of legends */
 
 /*CarouselboxContainer*/
-
 .esriCTBoxContainer
 {
     border: 1px solid #007ac2;
@@ -548,13 +550,13 @@ input
 {
     background: url("../images/printBlue.png") no-repeat center center !important;
 }
+
 .esriCTCarouselUtilitiesHeader
 {
     color: #007AC2;
 }
 
 /*Activity planner*/
-
 .esriCTEventListTabSelected
 {
     color: #007AC2;
@@ -761,4 +763,52 @@ input
     width: 18px;
     height: 18px;
     cursor: pointer;
+}
+
+/*add infotabImg*/
+
+.esriCTInfoTabImage
+{
+    color: #007AC2;
+    background: url("../images/info-blue.png");
+}
+
+.esriCTInfoTabImageSelect
+{
+    color: #007AC2;
+    background: url("../images/info-select.png");
+}
+.esriCTGalleryTabImage
+{
+    color: #007AC2;
+    background: url("../images/gallery-blue.png");
+}
+
+.esriCTGalleryTabImageSelect
+{
+    color: #007AC2;
+    background: url("../images/gallery-select.png");
+}
+
+.esriCTCommentsTabImage
+{
+    color: #007AC2;
+    background: url("../images/comment-blue.png");
+}
+
+.esriCTCommentsTabImageselect
+{
+    color: #007AC2;
+    background: url("../images/comment-select.png");
+}
+
+.addtoListTabImage
+{
+    color: #007AC2;
+    background: url("../images/img24x24/activityPlannerBlue24.png");
+}
+.addtoListTabImageSelect
+{
+    background-color: #007AC2;
+    background-image: url("../images/activityPlannerSelect24.png");
 }

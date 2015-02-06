@@ -35,10 +35,7 @@ define([
     "esri/geometry",
     "esri/graphic",
     "esri/geometry/Point",
-    "dojo/text!./templates/searchSettingTemplate.html",
     "dijit/_WidgetBase",
-    "dijit/_TemplatedMixin",
-    "dijit/_WidgetsInTemplateMixin",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
     "esri/tasks/BufferParameters",
@@ -46,21 +43,19 @@ define([
     "esri/tasks/GeometryService",
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol",
-    "esri/symbols/SimpleMarkerSymbol",
-    "../carouselContainer/carouselContainer"
+    "esri/symbols/SimpleMarkerSymbol"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol, CarouselContainer) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, _WidgetBase, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol) {
     // ========================================================================================================================//
 
-    return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
-        templateString: template,                                  // Variable for template string
+    return declare([_WidgetBase], {
         sharedNls: sharedNls,                                      // Variable for shared NLS
 
         /**
         * careate buffer around pushpin
-        * @param {map point}mapPoint Contains the map point on map
-        * @param {widgetName}widgetName Contains the name of the functionality from where buffer is created.
-        * @memberOf widgets/searchResult/locatorHelper
+        * @param {object}mapPoint Contains the map point on map
+        * @param {data}widgetName Contains the name of the functionality from where buffer is created.
+        * @memberOf widgets/commonHelper/locatorHelper
         */
         createBuffer: function (mapPoint, widgetName) {
             var params, geometryService;
@@ -91,8 +86,8 @@ define([
         /**
         * show buffer on map
         * @param {object} geometries of mapPoint
-        * @param {map point}mapPoint Contains the map point
-        * @memberOf widgets/searchResult/locatorHelper
+        * @param {object} mapPoint Contains the map point
+        * @memberOf widgets/commonHelper/locatorHelper
         */
         showBuffer: function (geometries, mapPoint, widgetName) {
             var bufferSymbol;
@@ -113,7 +108,7 @@ define([
 
         /**
         * clear buffer from map
-        * @memberOf widgets/searchResult/locatorHelper
+        * @memberOf widgets/commonHelper/locatorHelper
         */
         _clearBuffer: function () {
             this.map.getLayer("tempBufferLayer").clear();
@@ -125,8 +120,8 @@ define([
         * add graphic layer on map of buffer and set expand
         * @param {object} layer Contains feature layer
         * @param {object} symbol Contains graphic
-        * @param {map point}point Contains the map point
-        * @memberOf widgets/searchResult/locatorHelper
+        * @param {object}point Contains the map point
+        * @memberOf widgets/commonHelper/locatorHelper
         */
         _addGraphic: function (layer, symbol, point) {
             var graphic;
@@ -149,9 +144,9 @@ define([
         * query layer URL
         * create an object of graphic
         * @param {object} geometry of graphic
-        * @param {map point}mapPoint Contains the map point
-        * @param {widget}name of the functionality from query layer is called.
-        * @memberOf widgets/searchResult/locatorHelper
+        * @param {object}mapPoint Contains the map point
+        * @param {object}widget name of the functionality from query layer is called.
+        * @memberOf widgets/commonHelper/locatorHelper
         */
         _queryLayer: function (geometry, mapPoint, widget) {
             var layerobject, i, deferredArray = [], result = [];
@@ -176,15 +171,15 @@ define([
         },
 
         /**
-        * query layer URL for facilty
+        * query layer for getting facilty
         * finding route from start point to the nearest feature
-        * @param {layerobject} contains the layer information
-        * @param {widget} contains name of the functionality from query is called.
-        * @param {geometry} contains the geometry
-        * @param {deferredArray} contains deffered array for further operation
-        * @param {map point}mapPoint Contains the map point
-        * @param {result} result array to contain feature data
-        * @memberOf widgets/searchResult/locatorHelper
+        * @param {object} layerobject contains the layer information
+        * @param {object} widget contains name of the functionality from query is called.
+        * @param {object} geometry contains the geometry
+        * @param {object} deferredArray contains deffered array for further operation
+        * @param {object}mapPoint Contains the map point
+        * @param {object} result array to contain feature data
+        * @memberOf widgets/commonHelper/locatorHelper
         */
         _queryLayerForFacility: function (layerobject, widget, geometry, deferredArray, mapPoint, result) {
             var queryTask, queryLayer, featuresWithinBuffer = [], dist, featureSet, i, widgetName, deferredListResult, isDistanceFound, layerObject, j, k, routeObject;
@@ -222,7 +217,7 @@ define([
                     // loopint the result for getting records and pusing it in a variable for further query
                     for (j = 0; j < result.length; j++) {
                         if (result.length > 0) {
-                            this.dateFieldArray = this._getDateField(result[j].records);
+                            this.dateFieldArray = this.getDateField(result[j].records);
                             for (k = 0; k < result[j].records.features.length; k++) {
                                 featuresWithinBuffer.push(result[j].records.features[k]);
                             }
@@ -255,7 +250,7 @@ define([
                         }));
                         this.highlightFeature(featureSet[0].geometry);
                         // Changing date formate for feature if date field is available.
-                        featureSet = this._changeDateFormatForActivity(featureSet);
+                        featureSet = this.changeDateFormatForActivity(featureSet);
                         routeObject = { "StartPoint": mapPoint, "EndPoint": featureSet, "Index": 0, "WidgetName": widgetName, "QueryURL": layerobject.QueryURL, "activityData": result };
                         //Calling route function to create route
                         this.showRoute(routeObject);
@@ -265,14 +260,16 @@ define([
                         alert(sharedNls.errorMessages.facilitydoestfound);
                         dojo.eventInfoWindowData = null;
                         dojo.infoRoutePoint = null;
+                        this.removeRouteGraphichOfDirectionWidget();
                         this.removeHighlightedCircleGraphics();
                         if (widgetName !== "unifiedSearch") {
                             this.removeLocatorPushPin();
                         }
-                        this.carouselContainer.hideCarouselContainer();
-                        this.carouselContainer._setLegendPositionDown();
+                        if (this.carouselContainer) {
+                            this.carouselContainer.hideCarouselContainer();
+                            this.carouselContainer._setLegendPositionDown();
+                        }
                     }
-
                 }));
                 topic.publish("hideProgressIndicator");
             }

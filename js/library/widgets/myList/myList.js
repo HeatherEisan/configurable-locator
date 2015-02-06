@@ -1,4 +1,4 @@
-﻿/*global define,dojo,alert,console*/
+﻿/*global define,dojoConfig,dojo,alert,console,Modernizr,dijit*/
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -83,51 +83,68 @@ define([
             dom.byId("esriCTParentDivContainer").appendChild(this.applicationHeaderActivityContainer);
 
             /** Subscribe functions for calling them from other widget */
-            // Subscring for shoing myList container.
+            // subscribing for shoing myList container.
             topic.subscribe("showActivityPlannerContainer", lang.hitch(this, function () {
                 this._showMyListContainer();
             }));
 
-            // Subscring to store feature set searched from event search in eventPlannerHelper.js file.
+            // subscribing to store feature set searched from event search in eventPlannerHelper.js file.
             topic.subscribe("setEventFeatrueSet", lang.hitch(this, function (value) {
                 this.featureSet = value;
             }));
 
-            // Subscring to refresh myList panel data from other file.
+            // subscribing to refresh myList panel data from other file.
             topic.subscribe("refreshMyList", lang.hitch(this, function (eventObject, widgetName) {
                 this._refreshMyList(eventObject, widgetName);
             }));
 
-            // Subscring to show route from list
+            // subscribing to show route from list
             topic.subscribe("eventForListForShare", lang.hitch(this, function () {
                 this._drawRouteForListItem();
             }));
 
-            // Subscring for storing myList data from other file
+            // subscribing for storing myList data from other file
             topic.subscribe("getMyListData", lang.hitch(this, function (value) {
                 this.myListStore = value;
             }));
 
-            // Subscring for replacing class
+            // subscribing for storing myList data from other file
+            topic.subscribe("infowWindowClick", lang.hitch(this, function () {
+                this.infowWindowClick = true;
+            }));
+            // subscribing for replacing class
             topic.subscribe("replaceClassForMyList", lang.hitch(this, function () {
                 this._replaceClassForMyList();
             }));
 
-            // Subscring for call sort my list function from other file
+            // subscribing for call sort my list function from other file
             topic.subscribe("sortMyList", lang.hitch(this, function (ascendingFlag, featureSet) {
                 this.sortedList = this._sortMyList(ascendingFlag, featureSet);
                 topic.publish("sortMyListData", this.sortedList);
             }));
 
-            // Subscring for replacing class for application header container.
+            // subscribing for replacing class for application header container.
             topic.subscribe("replaceApplicationHeaderContainer", lang.hitch(this, function () {
                 domClass.replace(this.applicationHeaderActivityContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
             }));
 
-            // Subscring for getting widget name
+            /** Subscribe functions for calling them from other widget
+            *  subscribing to execute query for event for list.
+            */
+            topic.subscribe("eventForListClick", lang.hitch(this, function (featureSetObject) {
+                this._executeQueryForEventForList(featureSetObject);
+            }));
+
+            // subscribing for getting widget name
             topic.subscribe("showWidgetName", lang.hitch(this, function (widgetName) {
                 this.widgetName = widgetName;
             }));
+
+            // subscribing for add To List Features Data
+            topic.subscribe("addToListFeaturesData", lang.hitch(this, function (value) {
+                this.addToListFeatures = value;
+            }));
+
             /** End for subscribe function for calling them from other widget */
 
             /** On click functions */
@@ -178,6 +195,11 @@ define([
                 this._showDataForCalendar();
             }));
             /** End of On click functions */
+
+            //check if getDirection is enable then add the class"esriCTHeaderDirectionAcitivityListDisable"
+            if (dojo.configData.DrivingDirectionSettings.GetDirections) {
+                domClass.add(this.directionForEvents, "esriCTHeaderDirectionAcitivityListDisable");
+            }
         },
 
         /**
@@ -208,7 +230,7 @@ define([
         * @memberOf widgets/myList/myList
         */
         _refreshMyList: function (eventObject, widgetName) {
-            var myListContainer, searchSetting, evenObjectID, featureArray = [], startDateAttribute, isDateFound = false, startDateFeild, AddressField, myListTable, myListRow, myListLeft = [], myListRight, myListIcons, eventDate, name, address, objectIdField, myListDeleteIcon = [], splitedField,
+            var myListContainer, searchSetting, evenObjectID, featureArray = [], startDateAttribute, isDateFound = false, startDateFeild, AddressField, myListTable, myListRow, myListLeft = [], myListRight, myListIcons, eventDate, name, address, objectIdField, myListDeleteIcon = [], splitedField, finalText,
                 directionAcitivityList = [], addToCalender = [], layerId, layerTitle, n;
             topic.publish("showProgressIndicator");
             dojo.addToListEvents = eventObject;
@@ -242,7 +264,7 @@ define([
                     splitedField = searchSetting[myListEvent.eventSettingsIndex].SearchDisplaySubFields.split(',');
                     startDateFeild = splitedField[0];
                     AddressField = splitedField[1];
-                    startDateAttribute = this._getKeyValue(startDateFeild);
+                    startDateAttribute = this.getKeyValue(startDateFeild);
                     name = string.substitute(searchSetting[myListEvent.eventSettingsIndex].SearchDisplayFields, myListEvent.value);
                     eventDate = myListEvent.value[myListEvent.startDateField];
                     address = string.substitute(AddressField, myListEvent.value);
@@ -251,7 +273,6 @@ define([
                 } else {
                     name = string.substitute(searchSetting[0].SearchDisplayFields, myListEvent.value);
                     eventDate = sharedNls.showNullValue;
-                    address = sharedNls.showNullValue;
                     layerId = searchSetting[0].QueryLayerId;
                     layerTitle = searchSetting[0].Title;
 
@@ -268,9 +289,10 @@ define([
                 if (!address) {
                     address = sharedNls.showNullValue;
                 }
+                finalText = eventDate + (address === sharedNls.showNullValue ? "" : "," + " " + address);
                 // Checking if eventDate field has no value then do not set event date and address
                 if (eventDate !== sharedNls.showNullValue) {
-                    domConstruct.create("div", { "class": "esriCTMyListDates", "innerHTML": eventDate + "," + " " + address }, myListLeft[j]);
+                    domConstruct.create("div", { "class": "esriCTMyListDates", "innerHTML": finalText }, myListLeft[j]);
                 }
                 myListRight = domConstruct.create("div", { "class": "esriCTMyListRight" }, myListRow);
                 myListIcons = domConstruct.create("div", { "class": "esriCTMyListIcons" }, myListRight);
@@ -280,7 +302,10 @@ define([
                 on(myListLeft[j], a11yclick, lang.hitch(this, function (event) {
                     this._clickOnMyListRow(event);
                 }));
-                directionAcitivityList[j] = domConstruct.create("div", { "title": sharedNls.tooltips.routeTooltips, "class": "esriCTDirectionEventList", "value": myListEvent.value }, myListIcons);
+                directionAcitivityList[j] = domConstruct.create("div", { "title": sharedNls.tooltips.routeTooltips, "class": "esriCTDirectionEventListWithoutImage", "value": myListEvent.value }, myListIcons);
+                if (dojo.configData.DrivingDirectionSettings.GetDirections) {
+                    domClass.replace(directionAcitivityList[j], "esriCTDirectionEventList", "esriCTDirectionEventListWithoutImage");
+                }
                 domAttr.set(directionAcitivityList[j], "ObjectID", objectIdField);
                 domAttr.set(directionAcitivityList[j], "LayerId", layerId);
                 domAttr.set(directionAcitivityList[j], "LayerTitle", layerTitle);
@@ -338,6 +363,14 @@ define([
                 domClass.replace(this.orderByDateImage, "esriCTImgOrderByDateDisable", "esriCTImgOrderByDateUp");
             }
             topic.publish("hideProgressIndicator");
+            if (window.location.toString().split("$eventRouteforList=").length > 1) {
+                if (this.myListStore.length === Number(window.location.toString().split("$eventRouteforList=")[1].split("$")[0])) {
+                    //Checking for event for list to be called only one time
+                    if (!eventObject.eventForOrder) {
+                        topic.publish("eventForListForShare");
+                    }
+                }
+            }
         },
 
         /**
@@ -360,6 +393,7 @@ define([
                     break;
                 }
             }
+            //object of infowindow parameter
             infoWindowParameter = {
                 "mapPoint": featureData.geometry,
                 "attribute": featureData.attributes,
@@ -374,7 +408,7 @@ define([
             topic.publish("extentFromPoint", mapPoint);
             dojo.mapClickedPoint = mapPoint;
             topic.publish("createInfoWindowContent", infoWindowParameter);
-            this.setZoomAndCenterAt(featureData.geometry);
+            topic.publish("setZoomAndCenterAt", featureData.geometry);
         },
 
         /**
@@ -497,29 +531,45 @@ define([
         * @memberOf widgets/myList/myList
         */
         _clickOnMyListDeleteIcon: function (event, myListDeleteIcon, myListLeft, eventObject) {
-            var eventIndex, searchSetting, infoWindowArray = null, objId, eventIndexArray = null, infoWindowArrayActivity, objectID, eventObjectToRefresh, m, settingsName, startDate;
+            var eventIndex, searchSetting, infoWindowArray = null, objId, eventIndexArray = null, infoWindowArrayActivity, objectID, eventObjectToRefresh, m, settingsName, startDate, i, objectIdFeild, indexForData;
             topic.publish("extentSetValue", true);
             eventIndex = array.indexOf(myListDeleteIcon, event.currentTarget);
             settingsName = domAttr.get(event.currentTarget, "SettingsName");
             objectID = domAttr.get(event.currentTarget, "ObjectID");
-
             startDate = domAttr.get(event.currentTarget, "StartDate");
+            //verify the layer is event or activity
             if (settingsName === "eventsettings") {
                 searchSetting = dojo.configData.EventSearchSettings;
             } else {
                 searchSetting = dojo.configData.ActivitySearchSettings;
             }
+            //loop for feature which is added on myList
+            for (i = 0; i < this.addToListFeatures.length; i++) {
+                //"getObjectIdFromAddToList" returns the objectId feilds
+                objectIdFeild = this.getObjectIdFromAddToList(this.addToListFeatures[i]);
+                if (this.addToListFeatures[i].value.attributes[objectIdFeild] === Number(objectID)) {
+                    indexForData = i;
+                }
+                //"splice" is use to delete feature from Mylist
+                this.addToListFeatures.splice(indexForData, 1);
+
+            }
+            topic.publish("addToListFeaturesUpdate", this.addToListFeatures);
+            //dojo.eventInfoWindowAttribute(array) is store the event objectID which added from Infowindow and bottom pod
             if (dojo.eventInfoWindowAttribute) {
                 infoWindowArray = dojo.eventInfoWindowAttribute.split(",");
             }
+            //dojo.eventInfoWindowIdActivity(array) is store the activity objectID which added from Infowindow and bottom pod
             if (dojo.eventInfoWindowIdActivity) {
                 infoWindowArrayActivity = dojo.eventInfoWindowIdActivity.split(",");
             }
+            //dojo.eventIndex(array) is store the event objectID which is search from datePicker
             if (dojo.eventIndex) {
                 eventIndexArray = dojo.eventIndex.split(",");
             }
             dojo.eventInfoWindowAttribute = null;
             dojo.eventIndex = null;
+            // looping for deleting events and activity from the myList
             for (m = 0; m < this.myListStore.length; m++) {
                 objId = this.myListStore[m].value[this.myListStore[m].key].toString();
                 if (infoWindowArray) {
@@ -550,7 +600,9 @@ define([
             eventIndex = array.indexOf(myListDeleteIcon, event.currentTarget);
             this.myListStore.splice(eventIndex, 1);
             if ((this.myListStore.length === 0)) {
-                domClass.replace(this.directionForEvents, "esriCTHeaderDirectionAcitivityListDisable", "esriCTHeaderDirectionAcitivityList");
+                if (dojo.configData.DrivingDirectionSettings.GetDirections) {
+                    domClass.replace(this.directionForEvents, "esriCTHeaderDirectionAcitivityListDisable", "esriCTHeaderDirectionAcitivityList");
+                }
                 domClass.replace(this.calenderForEvent, "esriCTHeaderAddAcitivityListDisable", "esriCTHeaderAddAcitivityList");
                 domClass.replace(this.printEventList, "esriCTHeaderPrintAcitivityListDisable", "esriCTHeaderPrintAcitivityList");
                 domClass.replace(this.orderByDateList, "esriCTMyListHeaderTextDisable", "esriCTMyListHeaderText");
@@ -570,24 +622,22 @@ define([
         * @memberOf widgets/myList/myList
         */
         _createICSFile: function (featureData) {
-            var calStartDate, calEndDate, searchSetting, calLocation, calSummary, calDescription, calOrganizer, sd, sd1, ed, ed1, startDateAttr, endDateAttr, summary, description, organizerAttr, addToCalendarSettings, firstFeild, secondField, thirdField, locationFirstValue, locationSecondValue, locationThirdValue;
+            var calStartDate, calEndDate, keyField, searchSetting, calLocation, addToCalendarSettingsItemArray = [], calSummary, calDescription, calOrganizer, sd, sd1, ed, ed1, startDateAttr, endDateAttr, summary, description, organizerAttr, addToCalendarSettings;
             // Loop through the feature data for getting feature data items
             array.forEach(featureData, lang.hitch(this, function (featureDataItem, o) {
-                var locationFirstValueString, locationSecondValueString, locationThirdValueString, tempString1 = "", tempString2 = "", tempString3 = "";
                 if (featureDataItem.settingsName === "eventsettings") {
                     searchSetting = dojo.configData.EventSearchSettings[featureDataItem.eventSettingsIndex];
                     organizerAttr = searchSetting.AddToCalendarSettings[0].Organizer;
-                    startDateAttr = this._getKeyValue(searchSetting.AddToCalendarSettings[0].StartDate);
-                    endDateAttr = this._getKeyValue(searchSetting.AddToCalendarSettings[0].EndDate);
+                    startDateAttr = this.getKeyValue(searchSetting.AddToCalendarSettings[0].StartDate);
+                    endDateAttr = this.getKeyValue(searchSetting.AddToCalendarSettings[0].EndDate);
                     addToCalendarSettings = searchSetting.AddToCalendarSettings[0].Location.split(',');
-                    firstFeild = addToCalendarSettings[0];
-                    secondField = addToCalendarSettings[1];
-                    thirdField = addToCalendarSettings[2];
-                    locationFirstValue = this._getKeyValue(firstFeild);
-                    locationSecondValue = this._getKeyValue(secondField);
-                    locationThirdValue = this._getKeyValue(thirdField);
-                    summary = this._getKeyValue(searchSetting.AddToCalendarSettings[0].Summary);
-                    description = this._getKeyValue(searchSetting.AddToCalendarSettings[0].Description);
+                    addToCalendarSettingsItemArray.length = 0;
+                    array.forEach(addToCalendarSettings, lang.hitch(this, function (addToCalendarSettingsItem, indexOFCalendar) {
+                        keyField = this.getKeyValue(addToCalendarSettingsItem);
+                        addToCalendarSettingsItemArray.push(featureDataItem.featureSet.attributes[keyField]);
+                    }));
+                    summary = this.getKeyValue(searchSetting.AddToCalendarSettings[0].Summary);
+                    description = this.getKeyValue(searchSetting.AddToCalendarSettings[0].Description);
                 }
                 // Checking for start date
                 if (startDateAttr === "") {
@@ -595,53 +645,21 @@ define([
                 } else {
                     calStartDate = featureDataItem.featureSet.attributes[startDateAttr];
                     sd = new Date(calStartDate);
-                    sd1 = sd.getFullYear() + this._getMonth(sd) + sd.getDate() + "T020000Z";
+                    sd1 = sd.getFullYear() + this._getMonth(sd) + this._getDate(sd) + "T020000Z";
                 }
                 if (endDateAttr === "") {
                     ed1 = "";
                 } else {
                     calEndDate = featureDataItem.featureSet.attributes[endDateAttr];
                     ed = new Date(calEndDate);
-                    ed1 = ed.getFullYear() + this._getMonth(ed) + ed.getDate() + "T100000Z";
+                    ed1 = ed.getFullYear() + this._getMonth(ed) + this._getDate(ed) + "T100000Z";
                 }
-                locationFirstValueString = featureDataItem.featureSet.attributes[locationFirstValue].toString();
-                locationSecondValueString = featureDataItem.featureSet.attributes[locationSecondValue].toString();
-                locationThirdValueString = featureDataItem.featureSet.attributes[locationThirdValue].toString();
-                // Checks the null value for location's settings first value
-                if (locationFirstValueString !== sharedNls.showNullValue) {
-                    tempString1 = locationFirstValueString;
-                } else {
-                    tempString1 = sharedNls.showNullValue;
-                }
-                // Checks the null value for location's settings second value
-                if (locationSecondValueString !== sharedNls.showNullValue) {
-                    if (locationFirstValueString !== "") {
-                        tempString2 = "," + locationSecondValueString;
-                    }
-                } else {
-                    tempString2 = sharedNls.showNullValue;
-                }
-                // Checks the null value for location's settings third value
-                if (locationThirdValueString !== sharedNls.showNullValue) {
-
-                    if (locationSecondValueString !== "" || locationFirstValueString !== "") {
-                        tempString3 = "," + locationThirdValueString;
-                    } else {
-                        tempString3 = locationThirdValueString;
-                    }
-                } else {
-                    if (locationSecondValueString !== "" || locationFirstValueString !== "") {
-                        tempString3 = "," + sharedNls.showNullValue;
-                    } else {
-                        tempString3 = sharedNls.showNullValue;
-                    }
-                }
-                calLocation = tempString1 + tempString2 + tempString3;
+                calLocation = addToCalendarSettingsItemArray.join(",");
                 calSummary = featureDataItem.featureSet.attributes[summary];
                 calDescription = featureDataItem.featureSet.attributes[description];
                 calOrganizer = organizerAttr;
                 // Open Ics file for add to calendar
-                window.open("ICalendar.ashx?startDate=" + sd1.toString() + "&endDate=" + ed1.toString() + "&location=" + calLocation + "&summary=" + calSummary + "&description=" + calDescription + "&organizer=" + calOrganizer + "&filename=" + calSummary);
+                window.open(dojoConfig.baseURL + "/js/library/widgets/myList/ICalendar.ashx?startDate=" + sd1.toString() + "&endDate=" + ed1.toString() + "&summary=" + calSummary + "&description=" + calDescription + "&organizer=" + calOrganizer + "&filename=" + calSummary + "&location=" + calLocation);
             }));
         },
 
@@ -656,11 +674,10 @@ define([
             sortResult = this._sortDate(this.ascendingFlag);
             for (t = 0; t < sortResult.length; t++) {
                 startDateFound = false;
-                // Looping fro getting date field
+                // Looping for getting date field
                 for (sortedDataKey in sortResult[t].value) {
                     if (sortResult[t].value.hasOwnProperty(sortedDataKey)) {
                         if (sortedDataKey === sortResult[t].startDateField) {
-
                             startDateFound = true;
                             break;
                         }
@@ -686,12 +703,23 @@ define([
             return month < 10 ? '0' + month : month; // ('' + month) for string result
         },
 
+        /*
+        * Function to get a month from a date.
+        * @memberOf widgets/myList/myList
+        */
+        _getDate: function (date) {
+            date = date.getDate();
+            return date < 10 ? '0' + date : date; // ('' + date) for string result
+        },
+
         /**
         * replace class for my list container
         * @memberOf widgets/myList/myList
         */
         _replaceClassForMyList: function () {
-            domClass.replace(this.directionForEvents, "esriCTHeaderDirectionAcitivityList", "esriCTHeaderDirectionAcitivityListDisable");
+            if (dojo.configData.DrivingDirectionSettings.GetDirections) {
+                domClass.replace(this.directionForEvents, "esriCTHeaderDirectionAcitivityList", "esriCTHeaderDirectionAcitivityListDisable");
+            }
             domClass.replace(this.calenderForEvent, "esriCTHeaderAddAcitivityList", "esriCTHeaderAddAcitivityListDisable");
             domClass.replace(this.printEventList, "esriCTHeaderPrintAcitivityList", "esriCTHeaderPrintAcitivityListDisable");
             domClass.replace(this.orderByDateList, "esriCTMyListHeaderText", "esriCTMyListHeaderTextDisable");
@@ -708,6 +736,7 @@ define([
         _sortMyList: function (ascendingFlag, featureSet) {
             var sortResult;
             this.ascendingFlag = ascendingFlag;
+            dojo.eventOrderInMyList = ascendingFlag.toString() + "," + this.myListStore.length;
             topic.publish("getMyListStoreData", this.myListStore);
             // Checking for order for data
             if (ascendingFlag) {
@@ -731,7 +760,7 @@ define([
         * @memberOf widgets/myList/myList
         */
         _sortDate: function (ascendingFlag) {
-            var sortResult = [], sortedEventData = [], sortedActivityData = [], t, startDateFound, p, q, sortedDataKey, sortedDateArray;
+            var sortResult = [], sortedEventData = [], sortedActivityData = [], t, startDateFound, p, q, sortedDataKey, sortedDateArray, nameFieldA, nameFieldB;
             // Checking for order of data and sorting.
             if (ascendingFlag) {
                 sortResult = this.myListStore.sort(lang.hitch(this, function (a, b) {
@@ -769,6 +798,18 @@ define([
                     sortedActivityData.push(sortResult[t]);
                 }
             }
+            //sorting the activity from name
+            sortedActivityData = sortedActivityData.sort(function (a, b) {
+                nameFieldA = string.substitute(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields, a.value).toLowerCase();
+                nameFieldB = string.substitute(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields, b.value).toLowerCase();
+                if (nameFieldA < nameFieldB) { //sort string ascending
+                    return -1;
+                }
+                if (nameFieldA > nameFieldB) {
+                    return 1;
+                }
+                return 0; //default return value (no sorting)
+            });
             sortResult.length = 0;
             for (p = 0; p < sortedEventData.length; p++) {
                 sortResult.push(sortedEventData[p]);
@@ -784,12 +825,14 @@ define([
         * @param {data} keyField value with $ sign
         * @memberOf widgets/myList/myList
         */
-        _getKeyValue: function (data) {
-            var firstPlace, secondPlace, keyValue;
-            firstPlace = data.indexOf("{");
-            secondPlace = data.indexOf("}");
-            keyValue = data.substring(Number(firstPlace) + 1, secondPlace);
-            return keyValue;
+        getKeyValue: function (data) {
+            if (data) {
+                var firstPlace, secondPlace, keyValue;
+                firstPlace = data.indexOf("{");
+                secondPlace = data.indexOf("}");
+                keyValue = data.substring(Number(firstPlace) + 1, secondPlace);
+                return keyValue;
+            }
         },
 
         /**
@@ -838,13 +881,22 @@ define([
                 }));
                 if (!isIndexFound) {
                     dojo.eventRoutePoint = null;
+                    dojo.activitySearch = null;
+                    dojo.searchFacilityIndex = null;
+                    dojo.addressLocation = null;
+                    dojo.addressLocationDirectionActivity = null;
                     dojo.infoRoutePoint = Number(objectidOfEvents);
                 }
             } else {
+                dojo.eventRoutePoint = null;
+                dojo.activitySearch = null;
+                dojo.searchFacilityIndex = null;
+                dojo.addressLocation = null;
+                dojo.addressLocationDirectionActivity = null;
                 dojo.infoRoutePoint = Number(objectidOfEvents);
             }
             domClass.replace(this.applicationHeaderActivityContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
-            topic.publish("getExecuteQueryForFeatures", featureArray, queryURL, widgetName);
+            topic.publish("executeQueryForFeatures", featureArray, queryURL, widgetName);
         },
 
         /**
@@ -874,7 +926,6 @@ define([
         _drawRouteForListItem: function () {
             var eventListArrayList, q, sortResult;
             topic.publish("hideInfoWindow");
-            dojo.eventForListClicked = "true";
             dojo.eventRoutePoint = null;
             dojo.addressLocation = null;
             dojo.infowindowDirection = null;
@@ -890,6 +941,7 @@ define([
                 eventListArrayList.push(sortResult[q].featureSet);
             }
             if (eventListArrayList.length > 0) {
+                dojo.eventForListClicked = eventListArrayList.length;
                 topic.publish("eventForListClick", eventListArrayList);
             } else {
                 topic.publish("hideInfoWindow");
@@ -932,12 +984,12 @@ define([
                 if (sortResult[l].settingsName === "eventsettings") {
                     searchSetting = dojo.configData.EventSearchSettings;
                     displayDateFormat = searchSetting[sortResult[l].eventSettingsIndex].DisplayDateFormat;
-                    nameField = this._getKeyValue(searchSetting[sortResult[l].eventSettingsIndex].SearchDisplayFields);
+                    nameField = this.getKeyValue(searchSetting[sortResult[l].eventSettingsIndex].SearchDisplayFields);
                     splitedField = searchSetting[sortResult[l].eventSettingsIndex].SearchDisplaySubFields.split(',');
-                    AddressField = this._getKeyValue(splitedField[1]);
+                    AddressField = this.getKeyValue(splitedField[1]);
                 } else {
                     searchSetting = dojo.configData.ActivitySearchSettings;
-                    activityNameField = this._getKeyValue(searchSetting[sortResult[l].eventSettingsIndex].SearchDisplayFields);
+                    activityNameField = this.getKeyValue(searchSetting[sortResult[l].eventSettingsIndex].SearchDisplayFields);
                 }
                 // If date found then set address and start date field.
                 if (isDataFound) {
@@ -984,6 +1036,97 @@ define([
                 }
             }
             return featureObject;
+        },
+
+        /**
+        * get the feature within buffer and sort it in ascending order.
+        * @param {object} featureset Contains information of feature within buffer
+        * @param {object} geometry Contains geometry service of route
+        * @param {mapPoint} map point
+        * @memberOf widgets/searchSettings/activitySearch
+        */
+        _executeQueryForEventForList: function (featureSetObject) {
+            var isZoomToGeolocation;
+            this.featureSetWithoutNullValue = this._removeNullValue(featureSetObject);
+            isZoomToGeolocation = this.setZoomForGeolocation();
+            // If modrnizr is  supporting geolocation then procced other wise show message.
+            if (Modernizr.geolocation) {
+                // If geolocation widget is configured
+                if (dijit.registry.byId("geoLocation")) {
+                    // Call show current location.
+                    dijit.registry.byId("geoLocation").showCurrentLocation(false, isZoomToGeolocation);
+                    // Call back of geolocation complete
+                    dijit.registry.byId("geoLocation").onGeolocationComplete = lang.hitch(this, function (mapPoint, isPreLoaded) {
+                        // If mappoint is found then clean graphics
+                        if (mapPoint) {
+                            // If it is not comming from geolocation widget
+                            if (!isPreLoaded) {
+                                var routeObject = { "StartPoint": mapPoint, "EndPoint": this.featureSetWithoutNullValue, WidgetName: "routeForList" };
+                                topic.publish("routeForListFunction", routeObject);
+                            } else {
+                                // if it is comming from geolocation widget
+                                topic.publish("hideProgressIndicator");
+                                topic.publish("extentSetValue", true);
+                                topic.publish("hideInfoWindow");
+                                dojo.eventForListClicked = null;
+                                topic.publish("removeRouteGraphichOfDirectionWidget");
+                                dojo.searchFacilityIndex = -1;
+                                topic.publish("createBuffer", mapPoint, "geolocation");
+                                dojo.addressLocation = null;
+                                dojo.sharedGeolocation = mapPoint;
+                            }
+                        }
+                    });
+                } else {
+                    // when geolocation is not found
+                    topic.publish("hideProgressIndicator");
+                    alert(sharedNls.errorMessages.activitySerachGeolocationText);
+                }
+                // Call back when error is found after geolocation
+                dijit.registry.byId("geoLocation").onGeolocationError = lang.hitch(this, function (error, isPreLoaded) {
+                    if (isPreLoaded) {
+                        topic.publish("extentSetValue", true);
+                        topic.publish("hideInfoWindow");
+                        topic.publish("removeHighlightedCircleGraphics");
+                        topic.publish("removeLocatorPushPin");
+                        topic.publish("removeBuffer");
+                        if (this.carouselContainer) {
+                            this.carouselContainer.hideCarouselContainer();
+                            this.carouselContainer._setLegendPositionDown();
+                        }
+                    }
+                    // If it is not commign from geolocation
+                    if (!isPreLoaded) {
+                        topic.publish("removeLocatorPushPin");
+                        topic.publish("hideInfoWindow");
+                        topic.publish("hideProgressIndicator");
+                    }
+                });
+            } else {
+                // calling error message when geoloation widget is not configured.
+                topic.publish("hideProgressIndicator");
+                alert(sharedNls.errorMessages.geolocationWidgetNotFoundMessage);
+            }
+        },
+
+        /**
+        * Setting value to change for extent
+        * @memberOf widgets/searchResult/commonHelper
+        */
+        setZoomForGeolocation: function () {
+            var isZoomToLocation = false;
+            // checking if application in share url, If it is a share url then do not set extent, else set extent
+            if (window.location.href.toString().split("$extentChanged=").length > 1) {
+                // checking if application in share url, If it is a share url then do not set extent, else set extent
+                if (this.isExtentSet) {
+                    isZoomToLocation = true;
+                } else {
+                    isZoomToLocation = false;
+                }
+            } else {
+                isZoomToLocation = true;
+            }
+            return isZoomToLocation;
         }
     });
 });

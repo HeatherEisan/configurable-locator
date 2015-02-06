@@ -48,9 +48,10 @@
         width: auto;
         height: 61px;
     }
+
     .commentsTab
     {
-        padding: 9px;
+        padding: 9px 0 9px 0;
     }
 }
 
@@ -127,18 +128,19 @@
         padding: 7px;
     }
 
-    .esriCTTabInfo
+    .esriCTTabsLeftFlexi
     {
-        width: 33.2%;
+        height: 35px;
     }
 
     .esriCTTabs div.esriCTTabsRight
     {
         margin-left: -2px;
     }
+
     .commentsTab
     {
-        padding: 9px;
+        padding: 9px 0 9px 0;
     }
 }
 
@@ -210,9 +212,9 @@
         padding: 7px;
     }
 
-    .esriCTTabInfo
+    .esriCTTabsLeftFlexi
     {
-        width: 33.2%;
+        height: 35px;
     }
 
     .esriCTTabs div.esriCTTabsRight
@@ -222,7 +224,7 @@
 
     .commentsTab
     {
-        padding: 9px;
+        padding: 9px 0 9px 0;
     }
 
     .esriCTResultContent
@@ -233,6 +235,11 @@
     .esriCTDirectionResultContent
     {
         height: calc(100% - 100px);
+    }
+
+    .esriCTDivTime
+    {
+        padding: 0 5px;
     }
 }
 
@@ -262,6 +269,7 @@
     {
         font-size: 14px !important;
     }
+
     .esriCTTxtAddress
     {
         font-size: 14px !important;
@@ -326,6 +334,7 @@
         top: 61px;
         width: 100% !important;
     }
+
     .esriCTDivAppContainer, .esriCTDivSearchResultHolder
     {
         top: 61px;
@@ -357,6 +366,7 @@
         top: 61px !important;
         width: 100% !important;
     }
+
     .esriCTBottomBorder
     {
         height: 40px;
@@ -578,7 +588,7 @@
     .esriCTInfoSubmitButton, .esriCTInfoPostButton
     {
         background: none repeat scroll 0 0 #fff;
-        bottom: 1px !important;
+        bottom: 1px;
         position: absolute !important;
         right: 1px !important;
         z-index: 1001;
@@ -588,9 +598,9 @@
     .esriCTInfoBackButton
     {
         background: none repeat scroll 0 0 #fff;
-        bottom: 1px !important;
-        position: fixed !important;
-        left: 1px !important;
+        bottom: 1px;
+        position: absolute !important;
+        left: 1px;
         z-index: 1001;
         padding: 8px 16px;
     }
@@ -623,7 +633,7 @@
 
     .commentsTab
     {
-        padding: 9px;
+        padding: 9px 0 9px 0;
     }
 
     .esriCTCommentContainer
@@ -671,9 +681,82 @@
         bottom: 0px !important;
         margin-left: 0px !important;
     }
+
+    .esriCTTabsLeftFlexi
+    {
+        height: 35px;
+    }
 }
 
+@media (max-height : 300px)
+{
+    .esriCTActivityTable
+    {
+        height: 120px;
+    }
 
+    .esriCTActivityMainContainer
+    {
+        height: -webkit-calc(100% - 182px);
+    }
+
+    .esriCTAddressList
+    {
+        height: 130px;
+    }
+
+    .esriCTEventPlannerContainer
+    {
+        height: 100px;
+    }
+
+    .esriCTActiviyDateContainer
+    {
+        margin: 7px 10px 5px 10px;
+    }
+
+    .esriCTMyListContainer
+    {
+        height: 140px;
+    }
+}
+
+@media (max-height : 214px)
+{
+    .esriCTBottomPanelHeight
+    {
+        height: 210px;
+    }
+}
+
+@media (max-height : 120px)
+{
+    .esriCTInfoBackButton
+    {
+        left: 400px !important;
+        bottom: 34px;
+        padding: 0px;
+    }
+
+    .esriCTInfoSubmitButton
+    {
+        bottom: 33px;
+        padding: 0px;
+    }
+}
+
+@media (max-height : 80px)
+{
+    .esriCTInfoBackButton
+    {
+        bottom: 13px;
+    }
+
+    .esriCTInfoSubmitButton
+    {
+        bottom: 12px;
+    }
+}
 /* Portrait */
 @media screen and (max-width: 320px)
 {
@@ -691,6 +774,7 @@
     {
         font-size: 14px !important;
     }
+
     .esriCTDirectionContainer .esriCTRouteInformationContainer, .esriCTTextAreaContainer
     {
         font-size: 14px !important;
@@ -1074,9 +1158,9 @@
     .esriCTInfoBackButton
     {
         background: none repeat scroll 0 0 #fff;
-        bottom: 1px !important;
+        bottom: 1px;
         position: absolute !important;
-        left: 0 !important;
+        left: 0px;
         z-index: 1000;
         padding: 8px 16px;
     }
@@ -1118,7 +1202,7 @@
 
     .commentsTab
     {
-        padding: 9px;
+        padding: 9px 0 9px 0;
     }
 
     .esriCTCommentContainer
@@ -1146,6 +1230,11 @@
         margin-left: 0px;
         z-index: 996;
         position: fixed;
+    }
+
+    .esriCTTabsLeftFlexi
+    {
+        height: 35px;
     }
 }
 /* Landscape */

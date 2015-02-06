@@ -20,7 +20,7 @@ define({
     showApproxString: "@fr@ Approx",
     buttons: {
         okButtonText: "@fr@ OK",
-        email: "Email",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
+        email: "@fr@ Email",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
         Facebook: "Facebook",  // Shown next to icon for sharing the current map extents via a Facebook post; works with shareViaFacebook tooltip
         Twitter: "Twitter",
         embedding: "Embedding"// Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
@@ -28,57 +28,55 @@ define({
     tooltips: {
         searchTooltips: "Rechercher",
         routeTooltips: "@fr@ Driving Directions",
-        locateTooltips: "@fr@ Emplacement actuel",
-        shareTooltips: "@fr@ Partager",
+        locateTooltips: "Emplacement actuel",
+        shareTooltips: "Partager",
         helpTooltips: "Aide",
         eventsTooltips: "@fr@ My List",
         clearEntryTooltips: "@fr@ Clear",
         hidePanelTooltips: "@fr@ Hide panel",
         showPanelTooltips: "@fr@ Show panel",
-        printButtonooltips: "@fr@ Print",
+        printButtonTooltips: "@fr@ Print",
         closeTooltips: "@fr@ Close",
         clearEntry: "@fr@ Clear",
         search: "@fr@ Search",
-        routeForListTooltips: "@fr@ DDriving Directions - List Items",
+        routeForListTooltips: "@fr@ Driving Directions - List Items",
         addToCalanderForListTooltips: "@fr@ Add to Calendar - List Items",
         printForListTooltips: "@fr@ Print - List Items",
         deleteFromListTooltips: "@fr@ Delete from List",
-        addToCalanderTooltips: "@fr@ Add to Calander"
+        addToCalanderTooltips: "@fr@ Add to Calendar",
+        galleryInfoTooltips: "@fr@ Gallery",
+        informationTooltips: "@fr@ Information",
+        commentInfoTooltips: "@fr@ Comments",
+        addToListTooltips: "@fr@ Add to My List"
     },
     titles: {
         webpageDisplayText: "@fr@ Copy/Paste HTML into your web page",
-        serchResultText: "@fr@ SEARCH RESULT",
-        directionText: "@fr@ DIRECTIONS TO",
-        galleryText: "@fr@ GALLERY",
-        commentText: "@fr@ COMMENT",
+        searchResultText: "@fr@ Search Result",
+        directionText: "@fr@ Directions to",
+        galleryText: "@fr@ Gallery",
+        commentText: "@fr@ Comment",
         directionCurrentLocationText: "@fr@ My Location",
         directionTextDistance: "@fr@ Distance:",
         directionTextTime: "@fr@ Duration:",
         activityListTabName: "@fr@ My List",
         fromDateText: "@fr@ From Date",
         toDateText: "@fr@ To Date",
-        gobuttonText: "@fr@ Go",
-        noLegendAvailable: "@fr@ No Legend Available.",
-        galleryInfoTitle: "@fr@ Gallery",
-        informationTitle: "@fr@ Information",
-        commentInfoTitle: "@fr@ Comments",
-        backToMapText: "@fr@ BACK TO MAP",
+        goButtonText: "@fr@ Go",
+        noLegendAvailable: "@fr@ No Legend Available",
+        backToMapText: "@fr@ Back to Map",
         orderByDate: "@fr@ Order by Date",
-        carouselUtilitiesText: "@fr@ utilities",
-        addToListTitle: "@fr@ Add to list",
-        unifiedSearchTabText: "@fr@Search",
-        activitySearchTabText: "@fr@Activity",
-        eventSearchTabText: "@fr@Events",
+        carouselUtilitiesText: "@fr@ Utilities",
+        addToListTitle: "@fr@ Add to List",
         postComment: "@fr@ Post Comment",
-        rating: "@fr@ rating",
+        rating: "@fr@ Rating",
         backButton: "@fr@ Back",
         submitButton: "@fr@ Submit",
-        postCommentText: "@fr@ Enter comment",
+        postCommentText: "@fr@ Enter Comment",
         numberOfFeaturesFoundNearAddress: "@es@ Found ${0} facility(ies) near the address",
         numberOfFoundFeatureNearAddress: "@fr@ Found ${0} facility(ies)",
         numberOfFoundEventsNearAddress: "@fr@ Found ${0} Event",
-        facilityInfo: "@fr@ facility info",
-        carouselPodToggleButtonText: "@fr@ Result"
+        facilityInfo: "@fr@ Facility Info",
+        infoWindowTextURL: "@fr@ More info"
 
     },
     errorMessages: {
@@ -109,17 +107,19 @@ define({
         noLegend: "@fr@ No Legend Available.",
         noBasemap: "@fr@ No Basemap Found",
         feildNotconfigure: "@fr@ Feilds are not configured.",
-        geolocationWidgetNotFoundMessage: "@fr@ Geolocation widget is not configured."
+        geolocationWidgetNotFoundMessage: "@fr@ Geolocation widget is not configured.",
+        routeDoesNotCreate: "@fr@ Unable to route to these addresses",
+        enablePodSettingsInConfig: "@fr@ Please enable the PodSettings in Config."
     },
     notUsed: {
         addressDisplayText: "@fr@ Address",
-        backToMap: "@fr@ Back to map"
+        backToMap: "@fr@ Back to Map"
     },
     //end of shared nls
 
     //App nls
     appErrorMessage: {
-        webmapTitleError: "@fr Title and/or QueryLayerId parameters in SearchSettings do not match with configured webmap"
+        webmapTitleError: "@fr@ Title and/or QueryLayerId parameters in SearchSettings do not match with configured webmap"
     }
     //End of App nls
 });

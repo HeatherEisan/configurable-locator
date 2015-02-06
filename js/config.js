@@ -85,12 +85,24 @@ define([], function () {
         },
 
         // Set the application theme. Supported theme keys are blueTheme and greenTheme, orangeTheme, purpleTheme.
-        ThemeColor: "js/library/themes/styles/greenTheme.css",
+        ThemeColor: "js/library/themes/styles/blueTheme.css",
 
 
         // Initial map extent. Use comma (,) to separate values and don't delete the last comma
         // The coordinates must be specified in the basemap's coordinate system, usually WKID:102100, unless a custom basemap is used
         DefaultExtent: "-9991781.18961914, 4083344.0852194074, -9160146.321876464, 4494881.045506775",
+
+        // Set the bottom Pod Toggle Button Text
+        BottomPanelToggleButtonText: "Result",
+
+        // Set the Search Panel Title
+        SearchPanelTitle: "Search",
+
+        // Set the Activity Panel Title
+        ActivityPanelTitle: "Activity",
+
+        // Set the Event Panel Title
+        EventPanelTitle: "Event",
 
         // Set sequence for info pods in the bottom panel
         PodSettings: [{
@@ -161,7 +173,7 @@ define([], function () {
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
-            DisplayDateFormat: "MMM dd, yyyy",
+            DisplayDateFormat: "MMMM dd, yyyy",
             //Activities to be displayed in activity search and info window for a feature
             ActivityList: [{
                 FieldName: "FOURWHEEL",
@@ -234,7 +246,7 @@ define([], function () {
                 ForeignKeyFieldForActivity: "id",
                 RankField: "${RANK}",
                 SubmissionDateField: "${SUBMITDT}",
-                DisplayDateFormat: "MMM dd, yyyy",
+                DisplayDateFormat: "MMMM dd, yyyy",
                 CommentField: "${COMMENTS}"
             }
         }],
@@ -296,25 +308,6 @@ define([], function () {
 
         // Minimum width should be 330 for the info-popup in pixels
         InfoPopupWidth: 350,
-
-        // ------------------------------------------------------------------------------------------------------------------------
-        // INFO-WINDOW SETTINGS
-        // ------------------------------------------------------------------------------------------------------------------------
-        // Configure info-popup settings. The Title and QueryLayerId fields should be the same as configured in "Title" and "QueryLayerId" fields in SearchSettings.
-        // Title: In case of webmap implementations, it must match layer name specified in webmap and in case of operational layers
-        //        it should be the name of Map/Feature Service.
-        // QueryLayerId: Layer index used for performing queries.
-        // InfoWindowHeader: Specify field for the info window header
-        // InfoWindowContent: Specify field to be displayed in callout bubble for mobile devices
-        // ShowAllFields: When set to true, infowindow will display all fields from layer and InfoWindowData section is ignored
-        //                When set to false, only fields configured in InfoWindowData section will be displayed
-        // InfoWindowData: Set the content to be displayed in the info-Popup. Define labels and field values.
-        //                    These fields should be present in the layer referenced by 'QueryLayerId' specified under section 'SearchSettings'
-        // DisplayText: Caption to be displayed instead of field alias names. Set this to empty string ("") if you wish to display field alias names as captions.
-        // FieldName: Field used for displaying the value
-        // Info-popup is a popup dialog that gets displayed on selecting a feature
-        // Set the content to be displayed on the info-Popup. Define labels, field values, field types and field formats
-        //   InfoWindowSettings: [],
 
         // ------------------------------------------------------------------------------------------------------------------------
         // GEOLOCATION SETTINGS
@@ -382,12 +375,14 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
         // DRIVING DIRECTIONS SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
+        // GetDirections: if variable is set to false directions cannot be enabled
         // RouteServiceURL: Set URL for routing service
         // RouteColor: Set color for route
         // RouteWidth: Set width for route
         // Transparency: Set transparency for route
         // RouteUnit: Set unit for route, units supported by Direction widget are “MILES”, “METERS”, “KILOMETERS”, “NAUTICAL_MILES”. If there is a Typo error in any of these four units then the unit will be displayed in “KILOMETERS”. If the unit is specified other than these four units then unit will be displayed in “MILES”
         DrivingDirectionSettings: {
+            GetDirections: true,
             RouteServiceURL: "http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World",
             RouteColor: "0,0,225",
             RouteWidth: 6,
@@ -409,7 +404,7 @@ define([], function () {
 
         //------------------------------------------------------------------------------------------------------------------------
         // Header Widget Settings
-        //-------------------default-----------------------------------------------------------------------------------------------------
+        //-------------------default----------------------------------------------------------------------------------------------
         // Set widgets settings such as widget  widgetPath, mapInstanceRequired to be displayed in header panel
         // WidgetPath: path of the widget respective to the widgets package.
 

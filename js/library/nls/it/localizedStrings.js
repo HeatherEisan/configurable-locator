@@ -20,7 +20,7 @@ define({
     showApproxString: "@it@ Approx",
     buttons: {
         okButtonText: "@it@ OK",
-        email: "e-mail",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
+        email: "@it@ Email",  // Shown next to icon for sharing the current map extents via email; works with shareViaEmail tooltip
         Facebook: "Facebook",  // Shown next to icon for sharing the current map extents via a Facebook post; works with shareViaFacebook tooltip
         Twitter: "Twitter",
         embedding: "Embedding"  // Shown next to icon for sharing the current map extents via a Twitter tweet; works with shareViaTwitter tooltip
@@ -35,7 +35,7 @@ define({
         clearEntryTooltips: "@it@ Clear",
         hidePanelTooltips: "@it@ Hide panel",
         showPanelTooltips: "@it@ Show panel",
-        printButtonooltips: "@it@ Print",
+        printButtonTooltips: "@it@ Print",
         closeTooltips: "@it@ Close",
         clearEntry: "@it@ Clear",
         search: "@it@ Search",
@@ -45,41 +45,40 @@ define({
         addToCalanderForListTooltips: "@it@ Add to Calendar - List Items",
         printForListTooltips: "@it@ Print - List Items",
         deleteFromListTooltips: "@it@ Delete from List",
-        addToCalanderTooltips: "@it@ Add to Calander"
+        addToCalanderTooltips: "@it@ Add to Calendar",
+        galleryInfoTooltips: "@it@ Gallery",
+        informationTooltips: "@it@ Information",
+        commentInfoTooltips: "@it@ Comments",
+        addToListTooltips: "@it@ Add to My List"
     },
     titles: {
         webpageDisplayText: "@it@ Copy/Paste HTML into your web page",
-        serchResultText: "@it@ SEARCH RESULT",
-        directionText: "@it@ DIRECTIONS TO",
-        galleryText: "@it@ GALLERY",
-        commentText: "@it@ COMMENT",
+        searchResultText: "@it@ Search Result",
+        directionText: "@it@ Directions to",
+        galleryText: "@it@ Gallery",
+        commentText: "@it@ Comment",
         directionCurrentLocationText: "@it@ My Location",
         directionTextDistance: "@it@ Distance:",
         directionTextTime: "@it@ Duration:",
         activityListTabName: "@it@ My List",
         fromDateText: "@it@ From Date",
         toDateText: "@it@ To Date",
-        gobuttonText: "@it@ Go",
-        noLegendAvailable: "@it@ No Legend Available.",
-        galleryInfoTitle: "@it@ Gallery",
-        informationTitle: "@it@ Information",
-        commentInfoTitle: "@it@ Comments",
-        backToMapText: "@it@ BACK TO MAP",
+        goButtonText: "@it@ Go",
+        facilityInfo: "@it@ Facility Info",
+        noLegendAvailable: "@it@ No Legend Available",
+        backToMapText: "@it@ Back to Map",
         orderByDate: "@it@ Order by Date",
-        carouselUtilitiesText: "@it@ utilities",
-        addToListTitle: "@it@ Add to list",
-        unifiedSearchTabText: "@it@Search",
-        activitySearchTabText: "@it@Activity",
-        eventSearchTabText: "@it@Events",
+        carouselUtilitiesText: "@it@ Utilities",
+        addToListTitle: "@it@ Add to List",
         postComment: "@it@ Post Comment",
-        rating: "@it@ rating",
+        rating: "@it@ Rating",
         backButton: "@it@ Back",
         submitButton: "@it@ Submit",
-        postCommentText: "@it@ Enter comment",
+        postCommentText: "@it@ Enter Comment",
         numberOfFeaturesFoundNearAddress: "@it@ Found ${0} facility(ies) near the address",
         numberOfFoundFeatureNearAddress: "@it@ Found ${0} facility(ies)",
         numberOfFoundEventsNearAddress: "@it@ Found ${0} Event",
-        carouselPodToggleButtonText: "@it@ Result"
+        infoWindowTextURL: "@it@ More info"
     },
     errorMessages: {
         invalidSearch: "Nessun risultato trovato.",
@@ -109,11 +108,13 @@ define({
         noLegend: "@it@ No Legend Available.",
         noBasemap: "@it@ No Basemap Found",
         feildNotconfigure: "@it@ Feilds are not configured.",
-        geolocationWidgetNotFoundMessage: "@it@ Geolocation widget is not configured."
+        geolocationWidgetNotFoundMessage: "@it@ Geolocation widget is not configured.",
+        routeDoesNotCreate: "@it@ Unable to route to these addresses",
+        enablePodSettingsInConfig: "@it@ Please enable the PodSettings in Config."
     },
     notUsed: {
         addressDisplayText: "@it@ Address",
-        backToMap: "@it@ Back to map"
+        backToMap: "@it@ Back to Map"
     },
     //end of shared nls
 

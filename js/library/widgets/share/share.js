@@ -35,8 +35,9 @@ define([
     "dijit/_WidgetsInTemplateMixin",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
-    "dijit/a11yclick"
-], function (declare, domConstruct, lang, domAttr, on, dom, domClass, domGeom, domStyle, string, esriRequest, html, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, a11yclick) {
+    "dijit/a11yclick",
+    "widgets/share/commonShare"
+], function (declare, domConstruct, lang, domAttr, on, dom, domClass, domGeom, domStyle, string, esriRequest, html, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, a11yclick, commonShare) {
 
     //========================================================================================================================//
 
@@ -50,7 +51,6 @@ define([
         * @name widgets/share/share
         */
         postCreate: function () {
-
             var applicationHeaderDiv;
 
             /**
@@ -92,6 +92,12 @@ define([
             on(this.imgEmbedding, a11yclick, lang.hitch(this, function () {
                 this._showEmbeddingContainer();
             }));
+            /**
+                * add event handlers to sharing options
+                */
+            on(this.tdFacebook, a11yclick, lang.hitch(this, function () { this._share("facebook"); }));
+            on(this.tdTwitter, a11yclick, lang.hitch(this, function () { this._share("twitter"); }));
+            on(this.tdMail, a11yclick, lang.hitch(this, function () { this._share("email"); }));
         },
 
         /**
@@ -100,6 +106,7 @@ define([
         */
         _showEmbeddingContainer: function () {
             var height;
+            // Get the margin-box size of a node
             if (domGeom.getMarginBox(this.divShareContainer).h > 1) {
                 domClass.add(this.divShareContainer, "esriCTShareBorder");
                 domClass.replace(this.divShareContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
@@ -112,8 +119,13 @@ define([
             this._setShareContainerHeight(height);
         },
 
+        /**
+        * set embedding container height
+        * @memberOf widgets/share/share
+        */
         _setShareContainerHeight: function (embContainerHeight) {
             var contHeight = domStyle.get(this.divAppHolder, "height");
+            //calulate height if a node with id="this.divShareContainer" has class="esriCTShowContainerHeight" present
             if (domClass.contains(this.divShareContainer, "esriCTShowContainerHeight")) {
                 if (embContainerHeight) {
                     contHeight += embContainerHeight;
@@ -123,128 +135,11 @@ define([
             }
             domStyle.set(this.divAppContainer, "height", contHeight + 60 + "px");
         },
-        /**
-        * display sharing panel
-        * @param {array} dojo.configData.MapSharingOptions Sharing option settings specified in configuration file
-        * @memberOf widgets/share/share
-        */
-        _shareLink: function () {
-            var mapExtent, url, urlStr, encodedUri, clickCoords, eventIndex, geolocationCoords;
-            /**
-            * get current map extent to be shared
-            */
-            if (domGeom.getMarginBox(this.divShareContainer).h <= 1) {
-                domClass.add(this.divShareContainer, "esriCTShareBorder");
-            }
-            this.divShareCodeContent.value = "<iframe width='100%' height='100%' src='" + location.href + "'></iframe> ";
-            domAttr.set(this.divShareCodeContainer, "innerHTML", sharedNls.titles.webpageDisplayText);
-            mapExtent = this._getMapExtent();
-            url = esri.urlToObject(window.location.toString());
-            urlStr = encodeURI(url.path) + "?extent=" + mapExtent;
-
-            if (dojo.addressLocation) {
-                urlStr += "$address=" + dojo.addressLocation;
-            }
-            if (dojo.mapClickedPoint) {
-                clickCoords = dojo.mapClickedPoint.x + "," + dojo.mapClickedPoint.y + "," + dojo.screenPoint;
-                urlStr += "$mapClickPoint=" + clickCoords;
-            }
-            if (dojo.infowindowDirection) {
-                urlStr += "$infowindowDirection=" + dojo.infowindowDirection.toString();
-            }
-            if (dojo.activitySearch) {
-                urlStr += "$activitySearch=" + dojo.activitySearch.join(",");
-            }
-            if (dojo.isShowPod && dojo.isShowPod.toString() === "false") {
-                urlStr += "$isShowPod=" + dojo.isShowPod.toString();
-            }
-            if (dojo.doQuery) {
-                urlStr += "$doQuery=" + dojo.doQuery.toString();
-            }
-            if (dojo.searchFacilityIndex >= 0) {
-                urlStr += "$selectedSearchResult=" + dojo.searchFacilityIndex;
-            }
-            if (dojo.selectedBasemapIndex !== null) {
-                urlStr += "$selectedBasemapIndex=" + dojo.selectedBasemapIndex;
-            }
-            if (dojo.addressLocationDirectionActivity) {
-                urlStr += "$addressLocationDirectionActivity=" + dojo.addressLocationDirectionActivity.toString();
-            }
-            if (dojo.sharedGeolocation) {
-                if (dojo.sharedGeolocation === "false") {
-                    geolocationCoords = dojo.sharedGeolocation.toString();
-                } else {
-                    geolocationCoords = dojo.sharedGeolocation.geometry.x.toString() + "," + dojo.sharedGeolocation.geometry.y.toString();
-                }
-                urlStr += "$sharedGeolocation=" + geolocationCoords;
-            }
-            if (dojo.addressLocationDirection) {
-                urlStr += "$addressLocationDirection=" + dojo.addressLocationDirection.toString();
-            }
-            if (dojo.eventInfoWindowData) {
-                urlStr += "$eventInfoWindowData=" + dojo.eventInfoWindowData.x.toString() + "," + dojo.eventInfoWindowData.y.toString();
-            }
-            if (dojo.eventInfoWindowAttribute) {
-                urlStr += "$eventInfoWindowAttribute=" + dojo.eventInfoWindowAttribute;
-            }
-            if (dojo.eventInfoWindowIdActivity) {
-                urlStr += "$eventInfoWindowIdActivity=" + dojo.eventInfoWindowIdActivity;
-            }
-            if (dojo.infoRoutePoint) {
-                urlStr += "$infoRoutePoint=" + dojo.infoRoutePoint.toString();
-            }
-            if (dojo.eventForListClicked) {
-                urlStr += "$eventRouteforList=" + dojo.eventForListClicked.toString();
-            }
-            if (dojo.eventRoutePoint) {
-                urlStr += "$eventRoutePoint=" + dojo.eventRoutePoint.toString();
-            }
-            if (dojo.eventIndex && dojo.eventPlannerQuery === undefined) {
-                urlStr += "$eventIndex=" + dojo.eventIndex.toString();
-            }
-            if (dojo.eventPlannerQuery) {
-                eventIndex = "";
-                if (dojo.eventIndex) {
-                    eventIndex = dojo.eventIndex.toString();
-                }
-                if (dojo.eventForListClicked) {
-                    urlStr += "$eventRouteforList=" + dojo.eventForListClicked.toString();
-                }
-                urlStr += "$eventplanner=" + "true" + "$startDate=" + dojo.eventPlannerQuery.split(",")[0].replace(new RegExp(" ", 'g'), ",").toString() + "$endDate=" + dojo.eventPlannerQuery.split(",")[1].replace(new RegExp(" ", 'g'), ",").toString() + "$eventIndex=" + eventIndex;
-            }
-            urlStr += "$extentChanged=true";
-            try {
-                /**
-                * call tinyurl service to generate share URL
-                */
-                encodedUri = encodeURIComponent(urlStr);
-                url = string.substitute(dojo.configData.MapSharingOptions.TinyURLServiceURL, [encodedUri]);
-                esriRequest({
-                    url: url
-                }, {
-                    useProxy: true
-                }).then(lang.hitch(this, function (response) {
-                    var tinyUrl, tinyResponse;
-                    tinyResponse = response.data;
-                    if (tinyResponse) {
-                        tinyUrl = tinyResponse.url;
-                    }
-                    this._displayShareContainer(tinyUrl, urlStr);
-                }), lang.hitch(this, function (error) {
-                    alert(sharedNls.errorMessages.shareLoadingFailed);
-                    this._displayShareContainer(null, urlStr);
-                }));
-            } catch (err) {
-                alert(sharedNls.errorMessages.shareLoadingFailed);
-                this._displayShareContainer(null, urlStr);
-            }
-
-        },
 
         /* show and hide share container
         * @memberOf widgets/share/share
         */
-        _showHideShareContainer: function (tinyUrl, urlStr) {
+        _showHideShareContainer: function () {
             if (html.coords(this.divAppContainer).h > 0) {
                 /**
                 * when user clicks on share icon in header panel, close the sharing panel if it is open
@@ -263,36 +158,124 @@ define([
         },
 
         /**
-        * share container
-        * @memberOf widgets/share/share
-        */
-        _displayShareContainer: function (tinyUrl, urlStr) {
-
-            /**
-            * remove event handlers from sharing options
-            */
-            if (this.facebookHandle) {
-                this.facebookHandle.remove();
-                this.twitterHandle.remove();
-                this.emailHandle.remove();
-            }
-            /**
-            * add event handlers to sharing options
-            */
-            this.facebookHandle = on(this.tdFacebook, a11yclick, lang.hitch(this, function () { this._share("facebook", tinyUrl, urlStr); }));
-            this.twitterHandle = on(this.tdTwitter, a11yclick, lang.hitch(this, function () { this._share("twitter", tinyUrl, urlStr); }));
-            this.emailHandle = on(this.tdMail, a11yclick, lang.hitch(this, function () { this._share("email", tinyUrl, urlStr); }));
-        },
-
-        /**
         * return current map extent
         * @return {string} Current map extent
         * @memberOf widgets/share/share
         */
         _getMapExtent: function () {
-            var extents;
-            extents = Math.round(this.map.extent.xmin).toString() + "," + Math.round(this.map.extent.ymin).toString() + "," + Math.round(this.map.extent.xmax).toString() + "," + Math.round(this.map.extent.ymax).toString();
+            var extents = Math.round(this.map.extent.xmin).toString() + "," + Math.round(this.map.extent.ymin).toString() + "," + Math.round(this.map.extent.xmax).toString() + "," + Math.round(this.map.extent.ymax).toString();
             return extents;
+        },
+
+        /**
+          * display sharing panel
+          * @param {array} dojo.configData.MapSharingOptions Sharing option settings specified in configuration file
+          * @memberOf widgets/share/share
+          */
+        _shareLink: function () {
+            var mapExtent, url, urlStr, clickCoords, eventIndex, geolocationCoords;
+            /**
+            * get current map extent to be shared
+            */
+            if (domGeom.getMarginBox(this.divShareContainer).h <= 1) {
+                domClass.add(this.divShareContainer, "esriCTShareBorder");
+            }
+            this.divShareCodeContent.value = "<iframe width='100%' height='100%' src='" + location.href + "'></iframe> ";
+            domAttr.set(this.divShareCodeContainer, "innerHTML", sharedNls.titles.webpageDisplayText);
+            mapExtent = this._getMapExtent();
+            url = esri.urlToObject(window.location.toString());
+            urlStr = encodeURI(url.path) + "?extent=" + mapExtent;
+            //dojo.addressLocation variable is use to store the address geometry in unified search and append in shared URL
+            if (dojo.addressLocation) {
+                urlStr += "$address=" + dojo.addressLocation;
+            }
+            //dojo.mapClickedPoint variable is use to store infowindow Point(geometry)and append in shared URL
+            if (dojo.mapClickedPoint) {
+                clickCoords = dojo.mapClickedPoint.x + "," + dojo.mapClickedPoint.y + "," + dojo.screenPoint;
+                urlStr += "$mapClickPoint=" + clickCoords;
+            }
+            //dojo.infowindowDirection variable is use to store the infowindow direction geometry and append in shared URL
+            if (dojo.infowindowDirection) {
+                urlStr += "$infowindowDirection=" + dojo.infowindowDirection.toString();
+            }
+            //dojo.activitySearch variable is use to store the activity name and append in shared URL
+            if (dojo.activitySearch) {
+                urlStr += "$activitySearch=" + dojo.activitySearch.join(",");
+            }
+            //dojo.isShowPod variable is use to store minimize and maximize state of carousel pod and append in shared URL
+            if (dojo.isShowPod && dojo.isShowPod.toString() === "false") {
+                urlStr += "$isShowPod=" + dojo.isShowPod.toString();
+            }
+            //dojo.doQuery variable is use for maintain the activity state and append in shared URL
+            if (dojo.doQuery) {
+                urlStr += "$doQuery=" + dojo.doQuery.toString();
+            }
+            //dojo.searchFacilityIndex variable is use to store the index of facility and append in shared URL
+            if (dojo.searchFacilityIndex >= 0) {
+                urlStr += "$selectedSearchResult=" + dojo.searchFacilityIndex;
+            }
+            //dojo.selectedBasemapIndex variable is use to store the index of Basemap and append in shared URL
+            if (dojo.selectedBasemapIndex !== null) {
+                urlStr += "$selectedBasemapIndex=" + dojo.selectedBasemapIndex;
+            }
+            //dojo.addressLocationDirectionActivity variable is use to store direction geometry in bottom pod and append in shared URL
+            if (dojo.addressLocationDirectionActivity) {
+                urlStr += "$addressLocationDirectionActivity=" + dojo.addressLocationDirectionActivity.toString();
+            }
+            //dojo.sharedGeolocation variable is use to store Geolocation geometry and append in shared URL
+            if (dojo.sharedGeolocation) {
+                if (dojo.sharedGeolocation === "false") {
+                    geolocationCoords = dojo.sharedGeolocation.toString();
+                } else {
+                    geolocationCoords = dojo.sharedGeolocation.geometry.x.toString() + "," + dojo.sharedGeolocation.geometry.y.toString();
+                }
+                urlStr += "$sharedGeolocation=" + geolocationCoords;
+            }
+            //dojo.addressLocationDirection variable is use to store address direction geometry and append in shared URL
+            if (dojo.addressLocationDirection) {
+                urlStr += "$addressLocationDirection=" + dojo.addressLocationDirection.toString();
+            }
+            if (dojo.eventOrderInMyList) {
+                urlStr += "$eventOrderInMyList=" + dojo.eventOrderInMyList;
+            }
+            //dojo.eventInfoWindowIdActivity variable is use to store event array of ObjectID for add to list and append in shared URL
+            if (dojo.eventInfoWindowData) {
+                urlStr += "$eventInfoWindowData=" + dojo.eventInfoWindowData.x.toString() + "," + dojo.eventInfoWindowData.y.toString();
+            }
+            //dojo.eventInfoWindowAttribute variable is use to store mapPoint(geometry)for add to list and append in shared URL
+            if (dojo.eventInfoWindowAttribute) {
+                urlStr += "$eventInfoWindowAttribute=" + dojo.eventInfoWindowAttribute;
+            }
+            //dojo.eventInfoWindowIdActivity variable is use to store array of ObjectID for add to list and append in shared URL
+            if (dojo.eventInfoWindowIdActivity) {
+                urlStr += "$eventInfoWindowIdActivity=" + dojo.eventInfoWindowIdActivity;
+            }
+            //dojo.infoRoutePoint variable is use to store direction Point(geomerty) for add to list and append in shared URL
+            if (dojo.infoRoutePoint) {
+                urlStr += "$infoRoutePoint=" + dojo.infoRoutePoint.toString();
+            }
+            //dojo.eventForListClicked variable is use to store Activity array of ObjectID for add to list and append in shared URL
+            if (dojo.eventForListClicked) {
+                urlStr += "$eventRouteforList=" + dojo.eventForListClicked.toString();
+            }
+            //dojo.eventRoutePoint variable is use to store event route Point(geometry) and append in shared URL
+            if (dojo.eventRoutePoint) {
+                urlStr += "$eventRoutePoint=" + dojo.eventRoutePoint.toString();
+            }
+            //dojo.eventIndex variable is use to store event objectId search from datePicker and append in shared URL
+            if (dojo.eventIndex && dojo.eventPlannerQuery === undefined) {
+                urlStr += "$eventIndex=" + dojo.eventIndex.toString();
+            }
+            //dojo.eventIndex variable is use to store true/false if search the event from datePicker and append in shared URL
+            if (dojo.eventPlannerQuery) {
+                eventIndex = "";
+                if (dojo.eventIndex) {
+                    eventIndex = dojo.eventIndex.toString();
+                }
+                urlStr += "$eventplanner=" + "true" + "$startDate=" + dojo.eventPlannerQuery.split(",")[0].replace(new RegExp(" ", 'g'), ",").toString() + "$endDate=" + dojo.eventPlannerQuery.split(",")[1].replace(new RegExp(" ", 'g'), ",").toString() + "$eventIndex=" + eventIndex;
+            }
+            urlStr += "$extentChanged=true";
+            this.getTinyUrl = commonShare.getTinyLink(urlStr, dojo.configData.MapSharingOptions.TinyURLServiceURL);
         },
 
         /**
@@ -302,44 +285,17 @@ define([
         * @param {string} urlStr Long URL for sharing
         * @memberOf widgets/share/share
         */
-        _share: function (site, tinyUrl, urlStr) {
+        _share: function (site) {
             /*
             * hide share panel once any of the sharing options is selected
             */
+            domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMediaSelected");
             if (html.coords(this.divAppContainer).h > 0) {
                 domClass.replace(this.divAppContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
                 domClass.add(this.divAppContainer, "esriCTZeroHeight");
             }
-            try {
-                if (tinyUrl) {
-                    this._shareOptions(site, tinyUrl);
-                } else {
-                    this._shareOptions(site, urlStr);
-                }
-            } catch (err) {
-                alert(sharedNls.errorMessages.shareFailed);
-            }
-        },
-
-        /**
-        * generate sharing URL and share with selected share option
-        * @param {string} site Selected share option
-        * @param {string} url URL for sharing
-        * @memberOf widgets/share/share
-        */
-        _shareOptions: function (site, url) {
-            domClass.replace(this.domNode, "esriCTImgSocialMedia", "esriCTImgSocialMediaSelected");
-            switch (site) {
-            case "facebook":
-                window.open(string.substitute(dojo.configData.MapSharingOptions.FacebookShareURL, [url]));
-                break;
-            case "twitter":
-                window.open(string.substitute(dojo.configData.MapSharingOptions.TwitterShareURL, [url]));
-                break;
-            case "email":
-                parent.location = string.substitute(dojo.configData.MapSharingOptions.ShareByMailLink, [url]);
-                break;
-            }
+            //Do the share
+            commonShare.share(this.getTinyUrl, dojo.configData.MapSharingOptions, site);
         }
     });
 });
