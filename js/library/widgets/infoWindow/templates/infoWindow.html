@@ -7,18 +7,29 @@
                         <div class="esriCTTabsRight">
                             <div data-dojo-attach-point="divClose" class="esriCTInfoClose">
                                 <a id="close" class="esriCTClose" title="${sharedNls.tooltips.closeTooltips}">&nbsp;</a></div>
-                            <div data-dojo-attach-point="esriCTGetDir" class="esriCTGetDir">
-                                <a data-dojo-attach-point="getDirselect" class="esriCTImageTab" title="${sharedNls.tooltips.routeTooltips}">
-                                    &nbsp;</a></div>
                         </div>
                         <div class="esriCTTabsLeft">
                             <div class="esriCTTabsLeftFlexi">
                                 <div style="border: none;" class="esriCTTabInfo esriCTInfoSelectedTab" data-dojo-attach-point="informationTab">
-                                    <a>${sharedNls.titles.informationTitle}</a></div>
+                                    <a data-dojo-attach-point="infoSelect" title="${sharedNls.tooltips.informationTooltips}"
+                                        class="esriCTInfoTabImageSelect">&nbsp;</a>
+                                </div>
                                 <div data-dojo-attach-point="galleryTab" class="galleryTab">
-                                    <a>${sharedNls.titles.galleryInfoTitle}</a></div>
+                                    <a data-dojo-attach-point="gallerySelect" title="${sharedNls.tooltips.galleryInfoTooltips}"
+                                        class="esriCTGalleryTabImage">&nbsp;</a>
+                                </div>
                                 <div data-dojo-attach-point="commentsTab" class="commentsTab">
-                                    <a>${sharedNls.titles.commentInfoTitle}</a></div>
+                                    <a data-dojo-attach-point="commentSelect" title="${sharedNls.tooltips.commentInfoTooltips}"
+                                        class="esriCTCommentsTabImage">&nbsp;</a>
+                                </div>
+                                <div data-dojo-attach-point="esriCTGetDir" class="esriCTGetDir">
+                                    <a data-dojo-attach-point="getDirselect" class="esriCTImageTab" title="${sharedNls.tooltips.routeTooltips}">
+                                        &nbsp;</a>
+                                </div>
+                                <div data-dojo-attach-point="addtoListTab" class="addtoListTab">
+                                    <a data-dojo-attach-point="addtoListSelect" title="${sharedNls.tooltips.addToListTooltips}"
+                                        class="addtoListTabImage">&nbsp;</a>
+                                </div>
                             </div>
                         </div>
                     </div>

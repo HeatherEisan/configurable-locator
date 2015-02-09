@@ -436,6 +436,12 @@ input
     color: #fff;
 }
 
+.esriCTinfoWindowHyperlink
+{
+    color: #d15706;
+    text-decoration: none;
+}
+
 @media screen and (max-width:767px)
 {
     .esriCTInfoSubmitButton, .esriCTInfoPostButton, .esriCTInfoBackButton, .esriCTCloseDivMobile
@@ -768,4 +774,53 @@ input
     width: 18px;
     height: 18px;
     cursor: pointer;
+}
+/*add infotabImg*/
+
+.esriCTInfoTabImage
+{
+    color: #d15706;
+    background: url("../images/info-orange.png");
+}
+
+.esriCTInfoTabImageSelect
+{
+    color: #d15706;
+    background: url("../images/info-select.png");
+}
+
+.esriCTGalleryTabImage
+{
+    color: #d15706;
+    background: url("../images/gallery-orange.png");
+}
+
+.esriCTGalleryTabImageSelect
+{
+    color: #d15706;
+    background: url("../images/gallery-select.png");
+}
+
+.esriCTCommentsTabImage
+{
+    color: #d15706;
+    background: url("../images/comment-orange.png");
+}
+
+.esriCTCommentsTabImageselect
+{
+    color: #d15706;
+    background: url("../images/comment-select.png");
+}
+
+.addtoListTabImage
+{
+    color: #d15706;
+    background: url("../images/img24x24/activityPlannerOrange24.png");
+}
+
+.addtoListTabImageSelect
+{
+    background-color: #d15706;
+    background-image: url("../images/activityPlannerSelect24.png");
 }

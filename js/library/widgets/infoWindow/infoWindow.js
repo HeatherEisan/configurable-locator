@@ -1,4 +1,4 @@
-﻿/*global define,dojo,alert */
+﻿/*global define,dojo,alert,dijit */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -43,9 +43,10 @@ define([
         InfoShow: true,
         widgetName: null,
         isTabEnabled: true,
-        galaryObject : null,
+        galaryObject: null,
 
         postCreate: function () {
+            var infoTab;
             this.infoWindowContainer = domConstruct.create("div", {}, dom.byId("esriCTParentDivContainer"));
             this.infoWindowContainer.appendChild(this.domNode);
             this._anchor = domConstruct.create("div", { "class": "esriCTDivTriangle" }, this.domNode);
@@ -78,6 +79,10 @@ define([
                 this.directionObject = value;
             }));
 
+            topic.subscribe("addToListObject", lang.hitch(this, function (value) {
+                this.addToListObject = value;
+            }));
+
             this.own(on(this.divClose, a11yclick, lang.hitch(this, function () {
                 this.InfoShow = true;
                 domUtils.hide(this.domNode);
@@ -94,24 +99,70 @@ define([
             })));
             this.own(on(this.informationTab, a11yclick, lang.hitch(this, function () {
                 this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
-                domClass.remove(this.getDirselect, "esriCTImageTabSelected");
-                domClass.add(this.getDirselect, "esriCTImageTab");
+                domClass.add(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
+                domClass.replace(this.infoSelect, "esriCTInfoTabImageSelect", "esriCTInfoTabImage");
+                domClass.replace(this.gallerySelect, "esriCTGalleryTabImage", "esriCTGalleryTabImageSelect");
+                domClass.replace(this.commentSelect, "esriCTCommentsTabImage", "esriCTCommentsTabImageselect");
+                domClass.replace(this.addtoListSelect, "addtoListTabImage", "addtoListTabImageSelect");
+                domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
+                if (dojo.window.getBox().w < 767) {
+                    this._displayBackToMapText();
+                }
             })));
             this.own(on(this.galleryTab, a11yclick, lang.hitch(this, function () {
                 this._showInfoWindowTab(this.galleryTab, dojo.byId("galleryTabContainer"));
-                domClass.remove(this.getDirselect, "esriCTImageTabSelected");
-                domClass.add(this.getDirselect, "esriCTImageTab");
+                domClass.replace(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
+                domClass.replace(this.infoSelect, "esriCTInfoTabImage", "esriCTInfoTabImageSelect");
+                domClass.replace(this.gallerySelect, "esriCTGalleryTabImageSelect", "esriCTGalleryTabImage");
+                domClass.replace(this.commentSelect, "esriCTCommentsTabImage", "esriCTCommentsTabImageselect");
+                domClass.replace(this.addtoListSelect, "addtoListTabImage", "addtoListTabImageSelect");
+                domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
+                if (dojo.window.getBox().w < 767) {
+                    this._displayBackToMapText();
+                }
             })));
             this.own(on(this.commentsTab, a11yclick, lang.hitch(this, function () {
                 this._showInfoWindowTab(this.commentsTab, dojo.byId("commentsTabContainer"));
-                domClass.remove(this.getDirselect, "esriCTImageTabSelected");
-                domClass.add(this.getDirselect, "esriCTImageTab");
+                domClass.replace(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
+                domClass.replace(this.infoSelect, "esriCTInfoTabImage", "esriCTInfoTabImageSelect");
+                domClass.replace(this.gallerySelect, "esriCTGalleryTabImage", "esriCTGalleryTabImageSelect");
+                domClass.replace(this.commentSelect, "esriCTCommentsTabImageselect", "esriCTCommentsTabImage");
+                domClass.replace(this.addtoListSelect, "addtoListTabImage", "addtoListTabImageSelect");
+                domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
+                if (dojo.window.getBox().w < 767) {
+                    this._displayBackText();
+                }
             })));
             this.own(on(this.esriCTGetDir, a11yclick, lang.hitch(this, function () {
-                this._showInfoWindowTab(this.esriCTGetDir, dojo.byId("getDirContainer"));
-                domClass.add(this.getDirselect, "esriCTImageTabSelected");
-                domClass.remove(this.getDirselect, "esriCTImageTab");
                 topic.publish("showDirection", this.directionObject);
+                topic.publish("extentSetValue", true);
+                this._showInfoWindowTab(this.esriCTGetDir, dojo.byId("getDirContainer"));
+                domClass.replace(this.getDirselect, "esriCTImageTabSelected", "esriCTImageTab");
+                domClass.replace(this.infoSelect, "esriCTInfoTabImage", "esriCTInfoTabImageSelect");
+                domClass.replace(this.gallerySelect, "esriCTGalleryTabImage", "esriCTGalleryTabImageSelect");
+                domClass.replace(this.commentSelect, "esriCTCommentsTabImage", "esriCTCommentsTabImageselect");
+                domClass.replace(this.addtoListSelect, "addtoListTabImage", "addtoListTabImageSelect");
+                domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
+                // Setting the back to map text
+                if (dojo.window.getBox().w < 767) {
+                    this._displayBackToMapText();
+                }
+            })));
+            this.own(on(this.addtoListTab, a11yclick, lang.hitch(this, function () {
+                infoTab = query('.esriCTInfoSelectedTab')[0];
+                if (infoTab) {
+                    domClass.remove(infoTab, "esriCTInfoSelectedTab");
+                }
+                domClass.add(this.addtoListTab, "esriCTInfoSelectedTab");
+                domClass.replace(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
+                domClass.replace(this.infoSelect, "esriCTInfoTabImage", "esriCTInfoTabImageSelect");
+                domClass.replace(this.gallerySelect, "esriCTGalleryTabImage", "esriCTGalleryTabImageSelect");
+                domClass.replace(this.commentSelect, "esriCTCommentsTabImage", "esriCTCommentsTabImageselect");
+                domClass.replace(this.addtoListSelect, "addtoListTabImageSelect", "addtoListTabImage");
+                topic.publish("addToListFromInfoWindow", this.addToListObject);
+                if (dojo.window.getBox().w < 767) {
+                    this._displayBackToMapText();
+                }
             })));
         },
 
@@ -125,15 +176,26 @@ define([
             if (infoTab) {
                 domClass.remove(infoTab, "esriCTInfoSelectedTab");
             }
-            domClass.remove(this.getDirselect, "esriCTImageTabSelected");
-            domClass.add(this.getDirselect, "esriCTImageTab");
+            domClass.replace(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
+            domClass.replace(this.infoSelect, "esriCTInfoTabImageSelect", "esriCTInfoTabImage");
+            domClass.replace(this.gallerySelect, "esriCTGalleryTabImage", "esriCTGalleryTabImageSelect");
+            domClass.replace(this.commentSelect, "esriCTCommentsTabImage", "esriCTCommentsTabImageselect");
+            domClass.replace(this.addtoListSelect, "addtoListTabImage", "addtoListTabImageSelect");
+            domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
             domClass.add(tabNode, "esriCTInfoSelectedTab");
             domClass.add(containerNode, "displayBlock");
+            if (dijit.registry.byId("myList")) {
+                domStyle.set(this.addtoListTab, "display", "table-cell");
+            } else {
+                domStyle.set(this.addtoListTab, "display", "none");
+            }
         },
 
         show: function (screenPoint) {
             var iscommentsPodEnabled = this.getPodStatus("CommentsPod"), tabName, tabEnabled = 0, isdirectionsPodEnabled, isgalleryPodEnabled, isfacilityInformationPodEnabled, faclityInfo;
-            isdirectionsPodEnabled = this.getPodStatus("DirectionsPod");
+            if (dojo.configData.DrivingDirectionSettings.GetDirections) {
+                isdirectionsPodEnabled = this.getPodStatus("DirectionsPod");
+            }
             isgalleryPodEnabled = this.getPodStatus("GalleryPod");
             isfacilityInformationPodEnabled = this.getPodStatus("FacilityInformationPod");
 
@@ -165,7 +227,7 @@ define([
                 domStyle.set(this.commentsTab, "display", "none");
             } else if (this.widgetName.toLowerCase() === "infoactivity") {
                 if (iscommentsPodEnabled) {
-                    domStyle.set(this.commentsTab, "display", "block");
+                    domStyle.set(this.commentsTab, "display", "table-cell");
                 } else {
                     domStyle.set(this.commentsTab, "display", "none");
                 }
@@ -183,19 +245,18 @@ define([
                     this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
                 } else if (tabName === "DirectionsPod") {
                     this._showInfoWindowTab(this.esriCTGetDir, dojo.byId("getDirContainer"));
-                    domClass.add(this.getDirselect, "esriCTImageTabSelected");
-                    domClass.remove(this.getDirselect, "esriCTImageTab");
+                    domClass.replace(this.getDirselect, "esriCTImageTabSelected", "esriCTImageTab");
                 } else {
                     this.isTabEnabled = false;
                     domClass.remove(this.divInfoContainer, "displayBlock");
-                    alert("Please enable the PodSettings in Config.");
+                    alert(sharedNls.errorMessages.enablePodSettingsInConfig);
                 }
             }
             if (tabName) {
                 if (tabName === "CommentsPod" && this.widgetName.toLowerCase() === "infoevent" && tabEnabled === 1) {
                     this.isTabEnabled = false;
                     domClass.remove(this.divInfoContainer, "displayBlock");
-                    alert("Please enable the PodSettings in Config.");
+                    alert(sharedNls.errorMessages.enablePodSettingsInConfig);
                 } else if (tabName && this.widgetName.toLowerCase() === "infoactivity") {
                     this.setLocation(screenPoint);
                 } else {
@@ -297,6 +358,7 @@ define([
         * @memberOf widgets/infoWindow/infoWindow
         */
         _openInfowindow: function () {
+            domClass.add(this.informationTab, "esriCTInfoTabImageSelect");
             domClass.remove(query(".esriCTCloseDivMobile")[0], "scrollbar_footerVisible");
             domClass.add(query(".esriCTInfoContent")[0], "esriCTShowInfoContent");
             domClass.add(query(".esriCTInfoMobileContent")[0], "divHideInfoMobileContent");
@@ -340,6 +402,41 @@ define([
                 }
             }
             return isEnabled;
+        },
+
+        /**
+        * Display 'Back to Map' text in mobile Phones
+        * @memberOf widgets/infoWindow/infoWindow
+        */
+        _displayBackToMapText: function () {
+            var backToMapHide, backButton, backToMap;
+            backToMapHide = query('.esriCTCloseDivMobile')[0];
+            backButton = query('.esriCTInfoBackButton')[0];
+            backToMap = domStyle.get(backToMapHide, "display");
+            if (backToMap === "none") {
+                domStyle.set(backToMapHide, "display", "block");
+                domStyle.set(backButton, "display", "none");
+            }
+        },
+
+        /**
+        * Display 'Back' text in mobile Phones
+        * @memberOf widgets/infoWindow/infoWindow
+        */
+        _displayBackText: function () {
+            var backToMapHide, backButton, PostCommentContainer, PostCommentContainerDisplay;
+            backToMapHide = query('.esriCTCloseDivMobile')[0];
+            backButton = query('.esriCTInfoBackButton')[0];
+            PostCommentContainer = query('.esriCTCommentInfoOuterContainer')[0];
+            if (PostCommentContainer) {
+                PostCommentContainerDisplay = domStyle.get(PostCommentContainer, "display");
+                if (PostCommentContainerDisplay === "none") {
+                    domStyle.set(backToMapHide, "display", "none");
+                    domStyle.set(backButton, "display", "table-cell");
+                } else {
+                    domStyle.set(backToMapHide, "display", "block");
+                }
+            }
         }
     });
 });

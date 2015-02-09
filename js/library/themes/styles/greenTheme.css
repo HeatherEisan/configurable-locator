@@ -272,19 +272,23 @@ input
     border-right: 1px solid #DFDFDF;
     border-bottom: 1px solid #DFDFDF;
 }
+
 .esriCTResultColor
 {
     color: #028D6A;
 }
+
 .esriCTActivityPanelSelected, .esriCTEventsPanelSelected, .esriCTDivSearchPanel
 {
     color: #028D6A;
 }
+
 .esriCTActivityPanel, .esriCTSearchPanelSelected, .esriCTEventsPanel
 {
     border-color: #028D6A;
     color: #028D6A;
 }
+
 .esriCTActivityPanel, .esriCTSearchPanel, .esriCTEventsPanelSelected
 {
     color: #028D6A;
@@ -294,10 +298,12 @@ input
 {
     border-color: #028D6A;
 }
+
 .esriCTTickMark
 {
     color: #028D6A;
 }
+
 .esriCTUtilityImgSelect
 {
     border: 1px solid #028D6A;
@@ -444,6 +450,11 @@ input
     background: #028D6A;
 }
 
+.esriCTinfoWindowHyperlink
+{
+    color: #028D6A;
+    text-decoration: none;
+}
 /*grouped address*/
 
 .esriCTBottomBorder
@@ -763,4 +774,54 @@ input
     {
         color: #028D6A;
     }
+}
+
+/*add infotabImg*/
+
+.esriCTInfoTabImage
+{
+    color: #028D6A;
+    background: url("../images/info-green.png");
+}
+
+.esriCTInfoTabImageSelect
+{
+    color: #028D6A;
+    background: url("../images/info-select.png");
+}
+
+.esriCTGalleryTabImage
+{
+    color: #028D6A;
+    background: url("../images/gallery-green.png");
+}
+
+.esriCTGalleryTabImageSelect
+{
+    color: #028D6A;
+    background: url("../images/gallery-select.png");
+}
+
+.esriCTCommentsTabImage
+{
+    color: #028D6A;
+    background: url("../images/comment-green.png");
+}
+
+.esriCTCommentsTabImageselect
+{
+    color: #028D6A;
+    background: url("../images/comment-select.png");
+}
+
+.addtoListTabImage
+{
+    color: #028D6A;
+    background: url("../images/img24x24/activityPlannerGreen24.png");
+}
+
+.addtoListTabImageSelect
+{
+    background-color: #028D6A;
+    background-image: url("../images/activityPlannerSelect24.png");
 }

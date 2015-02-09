@@ -99,7 +99,7 @@ define([
         addPod: function (content) {
             var i = 0;
             // Checking condition if pod is added in container
-            if (this.resultboxPanelContent && content.length > 0) {
+            if (this.resultboxPanelContent && content && content.length > 0) {
                 for (i; i < content.length; i++) {
                     this.isPodCreated++;
                     this.resultboxPanelContent.appendChild(content[i]);
@@ -285,6 +285,7 @@ define([
         _setLegendPositionUp: function () {
             var legendChangePositionDownContainer, mapLogoPostionDown;
             legendChangePositionDownContainer = query('.esriCTDivLegendBox')[0];
+            // Checking for legend position
             if (legendChangePositionDownContainer) {
                 domClass.add(legendChangePositionDownContainer, "esriCTDivLegendBoxUp");
             }

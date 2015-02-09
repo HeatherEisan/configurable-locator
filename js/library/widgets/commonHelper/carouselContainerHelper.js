@@ -29,29 +29,36 @@ define([
     "dojo/string",
     "esri/tasks/query",
     "esri/units",
-    "dojo/text!./templates/searchSettingTemplate.html",
     "dijit/_WidgetBase",
-    "dijit/_TemplatedMixin",
-    "dijit/_WidgetsInTemplateMixin",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
     "dijit/a11yclick",
-    "dojo/_base/array"
+    "dojo/_base/array",
+    "widgets/carouselContainer/carouselContainer"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, dom, domClass, query, string, Query, units, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, a11yclick, array) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, dom, domClass, query, string, Query, units, _WidgetBase, sharedNls, topic, a11yclick, array, CarouselContainer) {
     // ========================================================================================================================//
 
-    return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
-        templateString: template,                            // Variable for template string
+    return declare([_WidgetBase], {
         sharedNls: sharedNls,                                // Variable for shared NLS
 
         /**
         * This file creats bottom pod data search from any layer
         */
 
+
+        /**
+        * create carousel Container
+        * @memberOf widgets/commonHelper/carouselContainerHelper
+        */
+        _createCarouselContainer: function () {
+            this.carouselContainer = new CarouselContainer();
+            this.carouselContainer.createPod(dom.byId("esriCTParentDivContainer"), dojo.configData.BottomPanelToggleButtonText);
+        },
+
         /**
         * create carousel pod and set it content
-        * @memberOf widgets/searchSettings/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         createCarouselPod: function () {
             var divCarouselPod, divGallerycontent, divPodInfoContainer, divcommentcontent, divHeader, divsearchcontent, i, key, carouselPodKey;
@@ -71,6 +78,11 @@ define([
                                     carouselPodKey = "default";
                                 }
                             }
+                            if (!dojo.configData.DrivingDirectionSettings.GetDirections) {
+                                if (dojo.configData.PodSettings[i].DirectionsPod) {
+                                    carouselPodKey = "default";
+                                }
+                            }
                         } else {
                             // In else scenario set key to default.
                             carouselPodKey = "default";
@@ -80,7 +92,7 @@ define([
                             // If it is a search pod
                         case "searchresultpod":
                             divHeader = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
-                            domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.serchResultText }, divHeader);
+                            domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.searchResultText }, divHeader);
                             divsearchcontent = domConstruct.create("div", { "class": "esriCTResultContent" }, divHeader);
                             domConstruct.create("div", { "class": "esriCTDivSearchResulContent" }, divsearchcontent);
                             break;
@@ -92,8 +104,10 @@ define([
                             break;
                         case "directionspod":
                             // If it is a direction pod
-                            this.directionContainer = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
-                            domConstruct.create("div", { "class": "esriCTDivDirectioncontent" }, this.directionContainer);
+                            if (dojo.configData.DrivingDirectionSettings.GetDirections) {
+                                this.directionContainer = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
+                                domConstruct.create("div", { "class": "esriCTDivDirectioncontent" }, this.directionContainer);
+                            }
                             break;
                         case "gallerypod":
                             // If it is a gallery pod
@@ -129,7 +143,7 @@ define([
         * @param {boolean} isBufferNeeded
         * @param {object} queryURL contains Layer URL
         * @param {string} widgetName contains name of widgets
-        * @memberOf widgets/searchResult/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         setSearchContent: function (result, isBufferNeeded, queryURL, widgetName, activityData) {
             var isPodEnabled = this.getPodStatus("SearchResultPod"), subStringRouteUnit, searchContenTitle, searchedFacilityObject, divHeaderContent, resultcontent = [], milesCalulatedData, searchContenData, g, l, serchSetting, intialSearchSettingData;
@@ -152,7 +166,6 @@ define([
                     this.spanFeatureListContainer = domConstruct.create("div", { "class": "esriCTSpanFeatureListContainer", "innerHTML": string.substitute(searchContenTitle, [result.length]) }, divHeaderContent[0]);
                     // looping for result for showing data in pod
                     array.forEach(result, lang.hitch(this, function (resultData, i) {
-                        //for (i = 0; i < result.length; i++) {
                         if (!isBufferNeeded && result[i].distance) {
                             subStringRouteUnit = this._getSubStringUnitData();
                             milesCalulatedData = " (" + parseFloat(result[i].distance).toFixed(2) + subStringRouteUnit + sharedNls.showApproxString + ")";
@@ -187,10 +200,15 @@ define([
                                 domAttr.set(resultcontent[i], "value", i);
                                 searchedFacilityObject = { "FeatureData": result, "SelectedRow": resultcontent[i], "IsBufferNeeded": isBufferNeeded, "QueryLayer": queryURL, "WidgetName": widgetName, "searchedFacilityIndex": i, "activityData": activityData };
                                 this.own(on(resultcontent[i], a11yclick, lang.hitch(this, function (event) {
+                                    topic.publish("extentSetValue", true);
                                     this._clickOnSearchedFacility(searchedFacilityObject, event);
                                 })));
                                 // If it is comming from share url then show data in search pod
                                 if (window.location.href.toString().split("$selectedSearchResult=").length > 1 && Number(window.location.href.toString().split("$selectedSearchResult=")[1].split("$")[0]) === i) {
+                                    // Checking when it is not a shared link
+                                    if (this.isExtentSet === true) {
+                                        return;
+                                    }
                                     queryURL = domAttr.get(resultcontent[i], "QueryURL");
                                     searchedFacilityObject = { "FeatureData": result, "SelectedRow": resultcontent[i], "IsBufferNeeded": isBufferNeeded, "QueryLayer": queryURL, "WidgetName": widgetName, "searchedFacilityIndex": i, "activityData": activityData };
                                     domClass.add(resultcontent[i], "esriCTDivHighlightFacility");
@@ -234,9 +252,70 @@ define([
         },
 
         /**
+        * call all the function when click on search result data
+        * @param {object} searchedFacilityObject contains route result, features in buffer area, search address,mapPoint, comment layer info
+        * @memberOf widgets/commonHelper/carouselContainerHelper
+        */
+        _clickOnSearchedFacility: function (searchedFacilityObject, event) {
+            var pushPinGemotery, widgetName, routeObject, queryObject, highlightedDiv, queryURL, rowIndex;
+            topic.publish("hideInfoWindow");
+            // If feature data has some items
+            if (searchedFacilityObject.FeatureData.length > 1) {
+                // If event is available then get tuery URL and row index from event.
+                if (event !== null) {
+                    queryURL = domAttr.get(event.currentTarget, "QueryURL");
+                    rowIndex = domAttr.get(event.currentTarget, "value");
+                }
+                // If event is not available then get tuery URL and row index from event.
+                if (event === null) {
+                    queryURL = searchedFacilityObject.QueryLayer;
+                    rowIndex = searchedFacilityObject.searchedFacilityIndex;
+                }
+                // query for getting highlighed div
+                highlightedDiv = query('.esriCTDivHighlightFacility')[0];
+                if (highlightedDiv) {
+                    domClass.replace(highlightedDiv, "esriCTSearchResultInfotext", "esriCTDivHighlightFacility");
+                }
+                // If event is not available then change the selected row.
+                if (event !== null) {
+                    domClass.replace(event.currentTarget, "esriCTDivHighlightFacility", "esriCTSearchResultInfotext");
+                }
+                dojo.searchFacilityIndex = Number(rowIndex);
+                // If it is comming from activity search pod then remove buffer layer.
+                if (searchedFacilityObject.WidgetName.toLowerCase() === "activitysearch") {
+                    this.removeBuffer();
+                }
+                widgetName = "SearchedFacility";
+                topic.publish("showProgressIndicator");
+                this.removeHighlightedCircleGraphics();
+                // If any point is ther on map related to geolocation settings else it is locator settings.
+                if (this.map.getLayer(this.geoLocationGraphicsLayerID) && this.map.getLayer(this.geoLocationGraphicsLayerID).graphics.length > 0) {
+                    pushPinGemotery = this.map.getLayer(this.geoLocationGraphicsLayerID).graphics;
+                } else if (this.map.getLayer(this.locatorGraphicsLayerID).graphics.length > 0) {
+                    pushPinGemotery = this.map.getLayer(this.locatorGraphicsLayerID).graphics;
+                } else {
+                    pushPinGemotery = [this.selectedGraphic];
+                }
+                // If data is found then call show route function.
+                if (pushPinGemotery[0]) {
+                    routeObject = { "StartPoint": pushPinGemotery[0], "EndPoint": searchedFacilityObject.FeatureData, "Index": Number(rowIndex), "WidgetName": widgetName, "QueryURL": queryURL, "activityData": searchedFacilityObject.activityData };
+                    this.showRoute(routeObject);
+                } else if (this.selectedGraphic) {
+                    routeObject = { "StartPoint": this.selectedGraphic, "EndPoint": searchedFacilityObject.FeatureData, "Index": Number(rowIndex), "WidgetName": widgetName, "QueryURL": queryURL, "activityData": searchedFacilityObject.activityData };
+                    this.showRoute(routeObject);
+                } else {
+                    // Else call query comment layer.
+                    queryObject = { "FeatureData": searchedFacilityObject.FeatureData, "SolveRoute": null, "Index": Number(rowIndex), "QueryURL": queryURL, "WidgetName": widgetName, "Address": null, "IsRouteCreated": false };
+                    topic.publish("showProgressIndicator");
+                    this.queryCommentLayer(queryObject);
+                }
+            }
+        },
+
+        /**
         * set the content in (Facility) carousel pod if user click on search result data
         * @param {object} facilityObject contans feature, widget name, selected facility, Layer URL
-        * @memberOf widgets/searchResult/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         setFacility: function (facilityObject) {
             var divHeaderContent, layerId, layerTitle, facilityContenTitle, infoPodAddtoList, isEventSearched = false, infowWindowData, divHeader, facilityDiv, divFacilityContainer, divFacilityContent, k, j, m, p, activityImageDiv, SearchSettingsLayers, isPodEnabled, divFacilityImages,
@@ -300,45 +379,48 @@ define([
                         infoPodAddtoList = domConstruct.create("div", { "class": "esriCTInfoAddToList" }, spanHeaderAddToList);
                         domAttr.set(infoPodAddtoList, "LayerId", layerId);
                         domAttr.set(infoPodAddtoList, "LayerTitle", layerTitle);
-                        domConstruct.create("div", { "class": "esriCTInfoAddToListIcon" }, infoPodAddtoList);
-                        domConstruct.create("div", { "class": "esriCTInfoAddToListText", "innerHTML": sharedNls.titles.addToListTitle }, infoPodAddtoList);
-                        // On click for add to list item
-                        this.own(on(infoPodAddtoList, a11yclick, function (event) {
-                            layerId = domAttr.get(event.currentTarget, "LayerId");
-                            layerTitle = domAttr.get(event.currentTarget, "LayerTitle");
-                            array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
-                                if (settings.QueryLayerId === layerId && settings.Title === layerTitle) {
-                                    objectIDField = settings.ObjectID;
-                                }
-                            }));
-                            // Looping for activity search setting for getting object id
-                            array.forEach(dojo.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
-                                if (settings.QueryLayerId === layerId && settings.Title === layerTitle) {
-                                    objectIDField = settings.ObjectID;
-                                }
-                            }));
-                            isAlreadyAdded = false;
-                            // If my store has data
-                            if (_self.myListStoreData && _self.myListStoreData.length > 0) {
-                                // looping for my list data
-                                for (listData = 0; listData < _self.myListStoreData.length; listData++) {
-                                    // Comparing object id for my list and facility object id value
-                                    if (_self.myListStoreData[listData].value[_self.myListStoreData[listData].key] === facilityObject.Feature[facilityObject.SelectedItem.value].attributes[objectIDField]) {
-                                        alert(sharedNls.errorMessages.activityAlreadyadded);
-                                        isAlreadyAdded = true;
-                                        break;
+                        if (dijit.registry.byId("myList")) {
+                            domConstruct.create("div", { "class": "esriCTInfoAddToListIcon" }, infoPodAddtoList);
+                            domConstruct.create("div", { "class": "esriCTInfoAddToListText", "innerHTML": sharedNls.titles.addToListTitle }, infoPodAddtoList);
+
+                            // On click for add to list item
+                            this.own(on(infoPodAddtoList, a11yclick, function (event) {
+                                layerId = domAttr.get(event.currentTarget, "LayerId");
+                                layerTitle = domAttr.get(event.currentTarget, "LayerTitle");
+                                array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
+                                    if (settings.QueryLayerId === layerId && settings.Title === layerTitle) {
+                                        objectIDField = settings.ObjectID;
+                                    }
+                                }));
+                                // Looping for activity search setting for getting object id
+                                array.forEach(dojo.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
+                                    if (settings.QueryLayerId === layerId && settings.Title === layerTitle) {
+                                        objectIDField = settings.ObjectID;
+                                    }
+                                }));
+                                isAlreadyAdded = false;
+                                // If my store has data
+                                if (_self.myListStore && _self.myListStore.length > 0) {
+                                    // looping for my list data
+                                    for (listData = 0; listData < _self.myListStore.length; listData++) {
+                                        // Comparing object id for my list and facility object id value
+                                        if (_self.myListStore[listData].value[_self.myListStore[listData].key] === facilityObject.Feature[facilityObject.SelectedItem.value].attributes[objectIDField]) {
+                                            alert(sharedNls.errorMessages.activityAlreadyadded);
+                                            isAlreadyAdded = true;
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                            // If activity is not added then add to my list
-                            if (!isAlreadyAdded) {
-                                if (query(".esriCTEventsImg")[0]) {
-                                    topic.publish("toggleWidget", "myList");
-                                    topic.publish("showActivityPlannerContainer");
+                                // If activity is not added then add to my list
+                                if (!isAlreadyAdded) {
+                                    if (query(".esriCTEventsImg")[0]) {
+                                        topic.publish("toggleWidget", "myList");
+                                        topic.publish("showActivityPlannerContainer");
+                                    }
+                                    topic.publish("addToMyList", facilityObject.Feature[facilityObject.SelectedItem.value], facilityObject.WidgetName, layerId, layerTitle);
                                 }
-                                topic.publish("addToMyList", facilityObject.Feature[facilityObject.SelectedItem.value], facilityObject.WidgetName, layerId, layerTitle);
-                            }
-                        }));
+                            }));
+                        }
                         divFacilityContainer = domConstruct.create("div", { "class": "esriCTResultContent" }, divHeaderContent[0]);
                         divFacilityContent = domConstruct.create("div", {}, divFacilityContainer);
                         if (infowWindowData.length === 0) {
@@ -349,7 +431,9 @@ define([
                             facilityDiv = domConstruct.create("div", { "class": "esriCTInfoText" }, divFacilityContent);
                             if (string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes).substring(0, 4) === "http") {
                                 facilityDiv.innerHTML = infowWindowData[j].DisplayText + " ";
-                                domConstruct.create("a", { "href": string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "innerHTML": string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes) }, facilityDiv);
+                                domConstruct.create("a", { "class": "esriCTinfoWindowHyperlink", "href": string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "title": string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "innerHTML": sharedNls.titles.infoWindowTextURL, "target": "_blank" }, facilityDiv);
+                            } else if (string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes).substring(0, 3) === "www") {
+                                domConstruct.create("a", { "class": "esriCTinfoWindowHyperlink", "href": "http://" + string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "title": "http://" + string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "innerHTML": sharedNls.titles.infoWindowTextURL, "target": "_blank" }, facilityDiv);
                             } else {
                                 facilityDiv.innerHTML = infowWindowData[j].DisplayText + " " + string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes);
                             }
@@ -384,7 +468,7 @@ define([
         * set the content in (Direction) carousel pod if user click on search result data
         * @param {object} directionObject contains widget name, solve route results, selected facility
         * @param {boolean} isInfoWindowClick
-        * @memberOf widgets/searchResult/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         setDirection: function (directionObject, isInfoWindowClick) {
             var isPodEnabled = this.getPodStatus("DirectionsPod"), divHeaderContent, directionTitle, serchSetting, divHeader, divDirectionContainer, divDrectionContent, distanceAndDuration, printButton, j, divDrectionList, printmapData, ConvertedTime, minutes, g, l;
@@ -437,7 +521,7 @@ define([
                         //set start location text
                         directionObject.SolveRoute[0].directions.features[0].attributes.text = directionObject.SolveRoute[0].directions.features[0].attributes.text.replace('Location 1', directionObject.Address);
                         if (directionObject.WidgetName.toLowerCase() !== "infoactivity" && directionObject.WidgetName.toLowerCase() !== "infoevent") {
-                            printButton = domConstruct.create("div", { "class": "esriCTDivPrint", "title": sharedNls.tooltips.printButtonooltips }, divHeader);
+                            printButton = domConstruct.create("div", { "class": "esriCTDivPrint", "title": sharedNls.tooltips.printButtonTooltips }, divHeader);
                             minutes = directionObject.SolveRoute[0].directions.totalDriveTime;
                             ConvertedTime = this.convertMinToHr(minutes);
                             printmapData = {
@@ -473,10 +557,36 @@ define([
         * set the images in (Gallery) carousel pod
         * @param {object} selectedFeature contains the information of search result
         * @param {object} resultcontent store the value of the click of search result
-        * @memberOf widgets/searchResult/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         setGallery: function (selectedFeature, resultcontent) {
-            var isPodEnabled = this.getPodStatus("GalleryPod"), divHeaderContent, layerID;
+            var isPodEnabled = this.getPodStatus("GalleryPod"), divHeaderContent, layerID, isAttachmentFound = false, serchSetting, g, l;
+            serchSetting = this.getSearchSetting(selectedFeature.QueryURL);
+            if (selectedFeature.WidgetName.toLowerCase() === "searchedfacility") {
+                if (selectedFeature.activityData) {
+                    for (g = 0; g < selectedFeature.activityData.length; g++) {
+                        // Looping for features
+                        for (l = 0; l < selectedFeature.activityData[g].records.features.length; l++) {
+                            if (selectedFeature.activityData[g].records.features[l].distance === selectedFeature.FeatureData[resultcontent.value].distance) {
+                                serchSetting = this.getSearchSetting(selectedFeature.activityData[g].queryURL);
+                            }
+                        }
+                    }
+                } else {
+                    serchSetting = this.getSearchSetting(selectedFeature.QueryURL);
+                }
+            }
+            if (selectedFeature.WidgetName.toLowerCase() === "unifiedsearch" || selectedFeature.WidgetName.toLowerCase() === "geolocation") {
+                // Looping for activity data featched from unified search
+                for (g = 0; g < selectedFeature.activityData.length; g++) {
+                    // Looping for features
+                    for (l = 0; l < selectedFeature.activityData[g].records.features.length; l++) {
+                        if (selectedFeature.activityData[g].records.features[l].distance === selectedFeature.FeatureData[resultcontent.value].distance) {
+                            serchSetting = this.getSearchSetting(selectedFeature.activityData[g].queryURL);
+                        }
+                    }
+                }
+            }
             // IF pod is enabled
             if (isPodEnabled) {
                 divHeaderContent = query('.esriCTDivGalleryContent');
@@ -489,12 +599,16 @@ define([
                     for (layerID in this.map._layers) {
                         if (this.map._layers.hasOwnProperty(layerID)) {
                             // If map has layr id than query on the basis of object id for getting attachments.
-                            if (this.map._layers[layerID].url && this.map._layers[layerID].hasAttachments && (this.map._layers[layerID].url === dojo.configData.ActivitySearchSettings[0].QueryURL)) {
-                                this.map._layers[layerID].queryAttachmentInfos(selectedFeature[resultcontent.value].attributes[this.map._layers[layerID].objectIdField], lang.hitch(this, this.setAttachments), this.logError);
+                            if (this.map._layers[layerID].url && this.map._layers[layerID].hasAttachments && (this.map._layers[layerID].url === serchSetting.QueryURL)) {
+                                this.map._layers[layerID].queryAttachmentInfos(selectedFeature.FeatureData[resultcontent.value].attributes[this.map._layers[layerID].objectIdField], lang.hitch(this, this.setAttachments), this.logError);
+                                isAttachmentFound = true;
                                 break;
                             }
                         }
                     }
+                }
+                if (!isAttachmentFound) {
+                    domConstruct.create("div", { "class": "esriCTGalleryBox", "innerHTML": sharedNls.errorMessages.imageDoesNotFound }, divHeaderContent[0]);
                 }
             }
         },
@@ -502,7 +616,7 @@ define([
         /**
         * query on attachment and show the images on carousel pod
         * @param {object} response contain the images which are in the feature layer
-        * @memberOf widgets/searchResult/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         setAttachments: function (response) {
             topic.publish("showProgressIndicator");
@@ -534,7 +648,7 @@ define([
         * change the image when click on previous arrow of image
         * @param {object} response contain the images which are in the feature layer
         * @param {node} divAttchmentInfo is domNode
-        * @memberOf widgets/searchResult/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         _previousImage: function (response, divAttchment) {
             this.imageCount--;
@@ -548,7 +662,7 @@ define([
         * change the image when click on next arrow of image
         * @param {object} response contain the images which are in the feature layer
         * @param {node} divAttchmentInfo is domNode
-        * @memberOf widgets/searchResult/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         _nextImage: function (response, divAttchment) {
             this.imageCount++;
@@ -560,7 +674,7 @@ define([
 
         /**
         * show error in console
-        * @memberOf widgets/searchResult/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         logError: function (error) {
             console.log(error);
@@ -571,18 +685,18 @@ define([
         * @param {object} feature contains feature
         * @param {object} result contains features array
         * @param {object} resultcontent store the value of the click of search result
-        * @memberOf widgets/searchResult/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         setComment: function (feature, result, resultcontent) {
-            var isPodEnabled = this.getPodStatus("CommentsPod"), divHeaderContent, isActivityLayerFound = false, j, index, divHeaderStar, divStar, commentAttribute, utcMilliseconds, l, isCommentFound, rankFieldAttribute, esriCTCommentDateStar, divCommentRow;
+            var isPodEnabled = this.getPodStatus("CommentsPod"), divHeaderContent, isActivityLayerFound = false, j, index, divHeaderStar, divStar, commentAttribute, utcMilliseconds, l, isCommentFound, rankFieldAttribute, esriCTCommentDateStar, divCommentRow, updatedCommentAttribute;
             // If pod is enabled
             //  this.removeCommentPod();
             if (isPodEnabled) {
                 // looping in activity search for setting comment data
                 for (index = 0; index < dojo.configData.ActivitySearchSettings.length; index++) {
-                // Checking for search setting to enable and disable comment pod
+                    // Checking for search setting to enable and disable comment pod
                     if (this.searchSettingData) {
-                    // Checking with layer id and lyer title for comment pod and setting boolean value for activity sarch layer
+                        // Checking with layer id and lyer title for comment pod and setting boolean value for activity sarch layer
                         if (this.searchSettingData.QueryLayerId === dojo.configData.ActivitySearchSettings[0].QueryLayerId) {
                             if (this.searchSettingData.Title === dojo.configData.ActivitySearchSettings[0].Title) {
                                 isActivityLayerFound = true;
@@ -591,7 +705,7 @@ define([
                     }
                     // If comment setting is set enable and if it is an Activity layer setting than do further things
                     if (dojo.configData.ActivitySearchSettings[index].CommentsSettings.Enabled && isActivityLayerFound) {
-                    // Add comment pod for activity layer
+                        // Add comment pod for activity layer
                         this.addCommentPod();
                         divHeaderContent = query('.esriCTDivCommentContent');
                         // If length is equal to 0
@@ -615,8 +729,9 @@ define([
                             for (l = 0; l < result.length; l++) {
                                 rankFieldAttribute = string.substitute(dojo.configData.ActivitySearchSettings[index].CommentsSettings.RankField, result[l].attributes);
                                 commentAttribute = string.substitute(dojo.configData.ActivitySearchSettings[index].CommentsSettings.CommentField, result[l].attributes);
+                                updatedCommentAttribute = this._getFormattedCommentText(commentAttribute);
                                 if (feature[resultcontent.value].attributes[this.objectIdForCommentLayer] === Number(result[l].attributes.id)) {
-                                    if (commentAttribute) {
+                                    if (updatedCommentAttribute) {
                                         divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
                                         isCommentFound = true;
                                         esriCTCommentDateStar = domConstruct.create("div", { "class": "esriCTCommentDateStar" }, divCommentRow);
@@ -633,7 +748,7 @@ define([
                                         } else {
                                             utcMilliseconds = Number(dojo.string.substitute(dojo.configData.ActivitySearchSettings[index].CommentsSettings.SubmissionDateField, result[l].attributes));
                                         }
-                                        domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": commentAttribute }, divCommentRow);
+                                        domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": updatedCommentAttribute }, divCommentRow);
                                         if (utcMilliseconds === sharedNls.showNullValue) {
                                             domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": sharedNls.showNullValue }, esriCTCommentDateStar);
                                         } else {
@@ -659,7 +774,7 @@ define([
         /**
         * initialize the object of printMap Widget
         * @param {object} directions contains solve route result
-        * @memberOf widgets/searchResult/commonHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         print: function (directions) {
             topic.publish("showProgressIndicator");
@@ -670,7 +785,7 @@ define([
         /**
         * get the setting name by passing query layer
         * @ return search setting Data
-        * @memberOf widgets/searchResult/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         getSearchSetting: function (queryURL) {
             var settingData;
@@ -692,7 +807,7 @@ define([
         /**
         * get the Unit text from confing file after removing esri text
         * @ return route unit name
-        * @memberOf widgets/searchResult/carouselContainerHelper
+        * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         _getSubStringUnitData: function () {
             var routeUnitString, unitsValue, unitName, defaultUnit = "Miles";

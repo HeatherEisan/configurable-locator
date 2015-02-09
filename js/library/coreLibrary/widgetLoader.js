@@ -57,10 +57,6 @@ define([
             basemapDeferred = new Deferred();
             this._fetchBasemapCollection(basemapDeferred);
             basemapDeferred.then(lang.hitch(this, function (baseMapLayers) {
-                if (baseMapLayers.length === 0) {
-                    alert(sharedNls.errorMessages.noBasemap);
-                    return;
-                }
                 dojo.configData.BaseMapLayers = baseMapLayers;
                 if (dojo.configData.SplashScreen) {
                     splashScreen = new SplashScreen();

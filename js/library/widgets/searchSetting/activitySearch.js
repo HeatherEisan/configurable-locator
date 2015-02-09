@@ -58,78 +58,8 @@ define([
         */
 
         /**
-        * function for getting comment layer information like object id.
-        * @memberOf widgets/searchSettings/activitySearch
-        */
-        getLayerInformaition: function () {
-            var commentLayerRequestData;
-            // Setting object id field for activity layer.
-            this.objectIdForActivityLayer = dojo.configData.ActivitySearchSettings[0].ObjectID;
-            // Calling query layer for activity search comment layer for getting object id field.
-            commentLayerRequestData = this._queryLayerForLayerInformation(dojo.configData.ActivitySearchSettings[0].CommentsSettings.QueryURL);
-            // If comment layer request data is found.
-            if (commentLayerRequestData) {
-                // If comment layer request data is found.
-                commentLayerRequestData.then(lang.hitch(this, function (response) {
-                    topic.publish("showProgressIndicator");
-                    this.objectIdForCommentLayer = this._getObjectId(response);
-                    topic.publish("hideProgressIndicator");
-                }), function (error) {
-                    console.log("Error: ", error.message);
-                    topic.publish("hideProgressIndicator");
-                });
-            }
-            // Calling function if geolocation is clicked from widget.
-            this._geolocationClicked();
-        },
-
-        /**
-        * fire when geolocation widget is clicked, show buffer and route and direction
-        * @memberOf widgets/searchSettings/activitySearch
-        */
-        _geolocationClicked: function () {
-            // If geolocation is click then this function will be called.
-            if (dijit.registry.byId("geoLocation")) {
-                // On complete of geolocation widget.
-                dijit.registry.byId("geoLocation").onGeolocationComplete = lang.hitch(this, function (mapPoint, isPreLoaded) {
-                    // If it is comming from geolocation widget then remove graphics and create buffer.
-                    if (mapPoint && isPreLoaded) {
-                        this.removeLocatorPushPin();
-                        topic.publish("extentSetValue", true);
-                        topic.publish("hideInfoWindow");
-                        dojo.addressLocation = null;
-                        dojo.doQuery = "false";
-                        dojo.infowindowDirection = null;
-                        dojo.searchFacilityIndex = -1;
-                        dojo.addressLocationDirectionActivity = null;
-                        dojo.addressLocation = null;
-                        dojo.sharedGeolocation = mapPoint;
-                        this.removeRouteGraphichOfDirectionWidget();
-                        this.removeBuffer();
-                        this.createBuffer(mapPoint, "geolocation");
-                    }
-                });
-            }
-            // If geolocation widget
-            if (dijit.registry.byId("geoLocation")) {
-                // If any error is got after clicking on geolocation widget, hide carausel container and remove all graphics.
-                dijit.registry.byId("geoLocation").onGeolocationError = lang.hitch(this, function (error, isPreLoaded) {
-                    if (!this.widgetName && isPreLoaded) {
-                        topic.publish("extentSetValue", true);
-                        topic.publish("hideInfoWindow");
-                        this.removeHighlightedCircleGraphics();
-                        this.removeBuffer();
-                        this.removeLocatorPushPin();
-                        this.carouselContainer.hideCarouselContainer();
-                        this.carouselContainer._setLegendPositionDown();
-                    }
-                });
-            }
-        },
-
-        /**
         * show Activity result tap
-        * @memberOf widgets/searchSettings/activitySearch
+        * @memberOf widgets/searchSetting/activitySearch
         */
         _showActivityTab: function () {
             domStyle.set(this.divActivityContainer, "display", "block");
@@ -143,7 +73,7 @@ define([
 
         /**
         * show/hide locator widget and set default search text
-        * @memberOf widgets/searchSettings/activitySearch
+        * @memberOf widgets/searchSetting/activitySearch
         */
         _showLocateContainer: function () {
             if (domGeom.getMarginBox(this.divSearchContainer).h > 1) {
@@ -163,17 +93,16 @@ define([
 
         /**
         * display search by address tab
-        * @memberOf widgets/searchSettings/activitySearch
+        * @memberOf widgets/searchSetting/activitySearch
         */
         _showAddressSearchView: function () {
             if (domStyle.get(this.imgSearchLoader, "display") === "block") {
                 return;
             }
         },
-
         /**
         * show search result tap
-        * @memberOf widgets/searchSettings/activitySearch
+        * @memberOf widgets/searchSetting/activitySearch
         */
         _showSearchTab: function () {
             domStyle.set(this.divActivityContainer, "display", "none");
@@ -187,10 +116,10 @@ define([
 
         /**
         * create activity search panel with selected activity
-        * @memberOf widgets/searchSettings/activitySearch
+        * @memberOf widgets/searchSetting/activitySearch
         */
         _showActivitySearchContainer: function () {
-            var activitySearchMainContainer, activitySearchContent = [], activityTickMark, activityImageDiv = [], i, activitySearchMainContent, activitySearchGoButton, SearchSettingsLayers, c, activityimgSpan = [];
+            var activitySearchMainContainer, tempDiv, activitySearchContent = [], activityTickMark, activityImageDiv = [], i, activitySearchMainContent, activitySearchGoButton, SearchSettingsLayers, c, activityimgSpan = [];
             activitySearchMainContainer = domConstruct.create("div", { "class": "esriCTActivityMainContainer" }, this.divActivityContainer);
             activitySearchMainContent = domConstruct.create("div", { "class": "esriCTActivityTable" }, activitySearchMainContainer);
             SearchSettingsLayers = dojo.configData.ActivitySearchSettings[0];
@@ -206,7 +135,8 @@ define([
             }
             // Looping for activity list icon for showing image in div
             for (i = 0; i < SearchSettingsLayers.ActivityList.length; i++) {
-                activitySearchContent[i] = domConstruct.create("div", { "class": "esriCTActivityRow", "index": i }, activitySearchMainContent);
+                tempDiv = domConstruct.create("div", { "class": "esriCTActivityPaneldiv" }, activitySearchMainContent);
+                activitySearchContent[i] = domConstruct.create("div", { "class": "esriCTActivityRow", "index": i }, tempDiv);
                 activityImageDiv[i] = domConstruct.create("div", { "class": "esriCTActivityImage" }, activitySearchContent[i]);
                 activityimgSpan[i] = domConstruct.create("span", { "class": "esriCTActivitySpanImg" }, activityImageDiv[i]);
                 domConstruct.create("img", { "src": SearchSettingsLayers.ActivityList[i].Image }, activityimgSpan[i]);
@@ -228,7 +158,7 @@ define([
                 }
                 domConstruct.create("div", { "class": "esriCTActivityText", "innerHTML": SearchSettingsLayers.ActivityList[i].Alias }, activityTickMark);
             }
-            activitySearchGoButton = domConstruct.create("div", { "class": "esriCTActivitySearchGoButton", "innerHTML": sharedNls.titles.gobuttonText }, this.divActivityContainer);
+            activitySearchGoButton = domConstruct.create("div", { "class": "esriCTActivitySearchGoButton", "innerHTML": sharedNls.titles.goButtonText }, this.divActivityContainer);
             this.own(on(activitySearchGoButton, a11yclick, lang.hitch(this, this._queryForSelectedActivityInList)));
             // If in share url activity searh is clicked then query for layer
             if (window.location.href.toString().split("$activitySearch=").length > 1 && window.location.href.toString().split("$activitySearch=")[1].substring(0, 5) !== "false" && window.location.href.toString().split("$activitySearch=")[1].substring(0, 5) !== "error") {
@@ -244,7 +174,7 @@ define([
         * set the select and unselect in activity serach.
         * param {object} activityTickMark is domNode
         * param {object} activityimgSpan is domNode
-        * @memberOf widgets/searchSettings/activitySearch
+        * @memberOf widgets/searchSetting/activitySearch
         */
         _selectActivity: function (activityTickMark, activityimgSpan) {
             // If activity tick mark is  found
@@ -259,20 +189,18 @@ define([
 
         /**
         * This funciton qurey for selected acitivity in list
-        * @memberOf widgets/searchSettings/activitySearch
+        * @memberOf widgets/searchSetting/activitySearch
         */
         _queryForSelectedActivityInList: function () {
             var activityArray = [], infoActivity, selectedRow, j, i, selectedFeatureText, SearchSettingsLayers, selectedActivityArray = [];
             dojo.doQuery = "true";
-            this.removeHighlightedCircleGraphics();
-            this.removeBuffer();
+            topic.publish("removeHighlightedCircleGraphics");
+            topic.publish("removeBuffer");
             this._showLocateContainer();
             dojo.searchFacilityIndex = -1;
             topic.publish("hideInfoWindow");
-            // removing carausel container
-            this.carouselContainer.removeAllPod();
             // Setting carousel pod data
-            this.carouselContainer.addPod(this.carouselPodData);
+            topic.publish("getCarouselContainerData");
             this.locatorAddress = "";
             topic.publish("showProgressIndicator");
             domClass.replace(this.domNode, "esriCTHeaderSearch", "esriCTHeaderSearchSelected");
@@ -303,12 +231,12 @@ define([
                     dojo.addressLocation = null;
                     this._queryForSelectedActivityInLayer(selectedRow);
                 } else {
-                    dojo.activitySearch = ["error"];
+                    dojo.doQuery = "false";
                     dojo.sharedGeolocation = null;
                     dojo.infowindowDirection = null;
                     alert(sharedNls.errorMessages.activityNotSelected);
-                    this._clearGraphicsAndCarousel();
-                    this.removeRouteGraphichOfDirectionWidget();
+                    topic.publish("clearGraphicsAndCarousel");
+                    topic.publish("removeRouteGraphichOfDirectionWidget");
                     topic.publish("hideProgressIndicator");
                 }
             }
@@ -317,7 +245,7 @@ define([
         /**
         * This funciton qurey for selected acitivity in Layer
         * @param{object}selectedRow contains the selected feature
-        * @memberOf widgets/searchSettings/activitySearch
+        * @memberOf widgets/searchSetting/activitySearch
         */
         _queryForSelectedActivityInLayer: function (selectedRow) {
             var activityQueryString, queryTask, queryForActivity, i, activity, widgetName;
@@ -336,11 +264,11 @@ define([
             }
             // If query string is not found or created then show error message.
             if (activityQueryString === "") {
-                dojo.activitySearch = ["error"];
+                dojo.doQuery = "false";
                 dojo.sharedGeolocation = null;
                 alert(sharedNls.errorMessages.activityNotSelected);
-                this._clearGraphicsAndCarousel();
-                this.removeRouteGraphichOfDirectionWidget();
+                topic.publish("clearGraphicsAndCarousel");
+                topic.publish("removeRouteGraphichOfDirectionWidget");
                 dojo.infowindowDirection = null;
                 topic.publish("hideProgressIndicator");
                 return;
@@ -355,439 +283,26 @@ define([
             queryTask.execute(queryForActivity, lang.hitch(this, function (relatedRecords) {
                 // If related records are found then set date and time according to formate
                 if (relatedRecords && relatedRecords.features && relatedRecords.features.length > 0) {
-                    this.dateFieldArray = this._getDateField(relatedRecords);
+                    this.dateFieldArray = this.getDateField(relatedRecords);
                     // Call execute query on feature
-                    this._executeQueryForFeatures(relatedRecords.features, dojo.configData.ActivitySearchSettings[0].QueryURL, widgetName);
+                    topic.publish("executeQueryForFeatures", relatedRecords.features, dojo.configData.ActivitySearchSettings[0].QueryURL, widgetName);
                 } else {
                     alert(sharedNls.errorMessages.invalidSearch);
-                    dojo.activitySearch = ["error"];
+                    dojo.doQuery = "false";
+                    dojo.infoRoutePoint = null;
                     dojo.infowindowDirection = null;
-                    this._clearGraphicsAndCarousel();
-                    this.removeRouteGraphichOfDirectionWidget();
+                    topic.publish("clearGraphicsAndCarousel");
+                    topic.publish("removeRouteGraphichOfDirectionWidget");
                     topic.publish("hideProgressIndicator");
                 }
             }), function (error) {
-                dojo.activitySearch = ["error"];
+                dojo.doQuery = "false";
+                dojo.infoRoutePoint = null;
                 dojo.infowindowDirection = null;
                 topic.publish("hideProgressIndicator");
-                this.removeRouteGraphichOfDirectionWidget();
+                topic.publish("removeRouteGraphichOfDirectionWidget");
                 alert(error);
             });
-        },
-
-        /**
-        * Get date field from layer
-        * @param {object} object of layer
-        * @return array containing date attribute
-        * @memberOf widgets/eventPlanner/eventPlanner
-        */
-        _getDateField: function (response) {
-            var j, dateFieldArray = [], dateField;
-            // Looping for response file for getting date field.
-            for (j = 0; j < response.fields.length; j++) {
-                if (response.fields[j].type === "esriFieldTypeDate") {
-                    dateField = response.fields[j].name;
-                    dateFieldArray.push(dateField);
-                }
-            }
-            return dateFieldArray;
-        },
-
-        /**
-        * change the date format
-        * @memberOf widgets/eventPlanner/eventPlanner
-        */
-        _changeDateFormatForActivity: function (featureSet) {
-            var displayDateFormat = dojo.configData.ActivitySearchSettings[0].DisplayDateFormat, i, key, k;
-            // If feature set is found and date and time field array is found.
-            if (featureSet && this.dateFieldArray) {
-                // Looping for date field array
-                for (i = 0; i < this.dateFieldArray.length; i++) {
-                    // Looping for feature set for changing date value formate.
-                    for (k = 0; k < featureSet.length; k++) {
-                        for (key in featureSet[k].attributes) {
-                            if (featureSet[k].attributes.hasOwnProperty(key)) {
-                                // If key is mached with date attribute
-                                if (key === this.dateFieldArray[i]) {
-                                    if (featureSet[k].attributes[key] !== sharedNls.showNullValue) {
-                                        featureSet[k].attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureSet[k].attributes[key]), { datePattern: displayDateFormat, selector: "date" });
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return featureSet;
-        },
-
-        /**
-        * Function for clearing graphics and Carousel pod data.
-        * @memberOf widgets/searchSettings/activitySearch
-        */
-        _clearGraphicsAndCarousel: function () {
-            this.locatorAddress = "";
-            this.removeHighlightedCircleGraphics();
-            this.removeBuffer();
-            this.removeGeolocationPushPin();
-            this.removeLocatorPushPin();
-            this.carouselContainer.hideCarouselContainer();
-            this.carouselContainer._setLegendPositionDown();
-        },
-
-        /**
-        * get the feature within buffer and sort it in ascending order.
-        * @param {object} featureSetObject Contains Feature
-        * @param {object} QueryURL Contains layer URL
-        * @param {string} widgetName Contains name of widget
-        * @memberOf widgets/searchSettings/activitySearch
-        */
-        _executeQueryForFeatures: function (featureSetObject, QueryURL, widgetName) {
-            var featureSet, i, dist, isDistanceFound, isZoomToGeolocation;
-            // Calling function for removing null value from feature
-            this.featureSetWithoutNullValue = this.removeNullValue(featureSetObject);
-            // Calling function to change date attribute formate
-            this.featureSetWithoutNullValue = this._changeDateFormatForActivity(featureSetObject);
-            featureSet = [];
-            isDistanceFound = false;
-            isZoomToGeolocation = this.setZoomForGeolocation();
-            // If modrnizr is  supporting geolocation then procced other wise show message.
-            if (Modernizr.geolocation) {
-                // If geolocation widget is configured
-                if (dijit.registry.byId("geoLocation")) {
-                    // Call show current location.
-                    dijit.registry.byId("geoLocation").showCurrentLocation(false, isZoomToGeolocation);
-                    // Call back of geolocation complete
-                    dijit.registry.byId("geoLocation").onGeolocationComplete = lang.hitch(this, function (mapPoint, isPreLoaded) {
-                        // If mappoint is found then clean graphics
-                        if (mapPoint) {
-                            this._clearBuffer();
-                            this.removeLocatorPushPin();
-                            // If it is not comming from geolocation widget
-                            if (!isPreLoaded) {
-                                // Looping for features
-                                for (i = 0; i < this.featureSetWithoutNullValue.length; i++) {
-                                    // If mapoint has geometry calculate distance
-                                    if (mapPoint.geometry) {
-                                        dist = this.getDistance(mapPoint.geometry, this.featureSetWithoutNullValue[i].geometry);
-                                        isDistanceFound = true;
-                                    }
-                                    try {
-                                        featureSet[i] = this.featureSetWithoutNullValue[i];
-                                        this.featureSetWithoutNullValue[i].distance = dist.toString();
-                                    } catch (err) {
-                                        alert(sharedNls.errorMessages.falseConfigParams);
-                                    }
-                                }
-                                // If distance is found then sort feature basic of distance
-                                if (isDistanceFound) {
-                                    featureSet.sort(function (a, b) {
-                                        return parseFloat(a.distance) - parseFloat(b.distance);
-                                    });
-                                    this.featureSetWithoutNullValue = featureSet;
-                                    this.highlightFeature(featureSet[0].geometry);
-                                    var routeObject = { "StartPoint": mapPoint, "EndPoint": this.featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL };
-                                    this.showRoute(routeObject);
-                                } else {
-                                    // If point is not found then show message
-                                    alert(sharedNls.errorMessages.invalidProjection);
-                                    // Function for creating bottom pod without geolocation point, setting first feature in bottom pod as selected and others in search pod
-                                    this.executeWithoutGeolocation(this.featureSetWithoutNullValue, QueryURL, widgetName, 0);
-                                }
-                            } else {
-                                // if it is comming from geolocation widget
-                                dojo.doQuery = "false";
-                                dojo.addressLocationDirectionActivity = null;
-                                dojo.searchFacilityIndex = -1;
-                                dojo.addressLocation = null;
-                                dojo.sharedGeolocation = mapPoint;
-                                topic.publish("extentSetValue", true);
-                                topic.publish("hideInfoWindow");
-                                dojo.eventRoutePoint = null;
-                                this.removeRouteGraphichOfDirectionWidget();
-                                this.createBuffer(mapPoint, "geolocation");
-                            }
-                        } else {
-                            // Function for creating bottom pod without geolocation point, setting first feature in bottom pod as selected and others in search pod
-                            this.removeLocatorPushPin();
-                            this.executeWithoutGeolocation(this.featureSetWithoutNullValue, QueryURL, widgetName, 0);
-                        }
-                    });
-                    dijit.registry.byId("geoLocation").onGeolocationError = lang.hitch(this, function (error, isPreLoaded) {
-                        if (isPreLoaded) {
-                            dojo.eventRoutePoint = null;
-                            topic.publish("extentSetValue", true);
-                            topic.publish("hideInfoWindow");
-                            this.removeHighlightedCircleGraphics();
-                            this.removeLocatorPushPin();
-                            this.removeBuffer();
-                            this.carouselContainer.hideCarouselContainer();
-                            this.carouselContainer._setLegendPositionDown();
-                        }
-                        if (!isPreLoaded) {
-                            dojo.eventRoutePoint = null;
-                            this.removeLocatorPushPin();
-                            topic.publish("hideProgressIndicator");
-                            topic.publish("hideInfoWindow");
-                            this.executeWithoutGeolocation(this.featureSetWithoutNullValue, QueryURL, widgetName, 0);
-                        }
-                    });
-                } else {
-                    // calling error message when geoloation widget is not configured.
-                    topic.publish("hideProgressIndicator");
-                    alert(sharedNls.errorMessages.geolocationWidgetNotFoundMessage);
-                }
-            } else {
-                // Calling error message when geolocation is not supported
-                topic.publish("hideProgressIndicator");
-                alert(sharedNls.errorMessages.activitySerachGeolocationText);
-            }
-        },
-
-        /**
-        * Execute when geolocaiton is not found.
-        * @param {object} featureset Contains information of feature
-        * @param {object} Query Url of the layer
-        * @param {string} widget name
-        * @memberOf widgets/searchSettings/activitySearch
-        */
-        executeWithoutGeolocation: function (featureSetWithoutNullValue, QueryURL, widgetName, index) {
-            var facilityObject, resultcontent, queryObject, locatorParamsForEventContainer, divDirectioncontent, divHeader, eventMapPoint, routeObject, searchContenData;
-            dojo.addressLocationDirectionActivity = null;
-            // If qurey is comming from event layer
-            if (widgetName.toLowerCase() === "event") {
-                dojo.doQuery = "false";
-                this.removeCommentPod();
-                // Removing null value from features
-                featureSetWithoutNullValue = this.removeNullValue(featureSetWithoutNullValue);
-                this.removeHighlightedCircleGraphics();
-                topic.publish("showProgressIndicator");
-                this.carouselContainer.showCarouselContainer();
-                // If it is comming from share url then maintain the pod state.
-                if (window.location.toString().split("isShowPod=").length > 1 && window.location.toString().split("isShowPod=")[1].toString().split("$")[0] === "false") {
-                    this.carouselContainer.collapseDown();
-                } else {
-                    this.carouselContainer.collapseUP();
-                }
-                // Highligh feature
-                this.highlightFeature(featureSetWithoutNullValue[index].geometry);
-                // Set it in center
-                this.setCenterAt(featureSetWithoutNullValue[index].geometry);
-                // Creating search content box
-                this.setSearchContent(featureSetWithoutNullValue, false, QueryURL, widgetName);
-                dojo.sharedGeolocation = "false";
-                resultcontent = { "value": index };
-                facilityObject = { "Feature": featureSetWithoutNullValue, "SelectedItem": resultcontent, "QueryURL": QueryURL, "WidgetName": widgetName };
-                // Setting facility pod in bootom pod
-                this.setFacility(facilityObject);
-                divDirectioncontent = query(".esriCTDivDirectioncontent")[0];
-                // If direction pod is not created then show direction tab
-                if (divDirectioncontent) {
-                    domConstruct.empty(divDirectioncontent);
-                    locatorParamsForEventContainer = {
-                        defaultAddress: dojo.configData.LocatorSettings.LocatorDefaultAddress,
-                        preLoaded: false,
-                        parentDomNode: divDirectioncontent,
-                        map: this.map,
-                        graphicsLayerId: this.locatorGraphicsLayerID,
-                        locatorSettings: dojo.configData.LocatorSettings,
-                        configSearchSettings: dojo.configData.SearchSettings
-                    };
-                    // Getting search display field from layer
-                    searchContenData = this.getKeyValue(dojo.configData.EventSearchSettings[0].SearchDisplayFields);
-                    divHeader = domConstruct.create("div", {}, divDirectioncontent);
-                    domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + featureSetWithoutNullValue[0].attributes[searchContenData] }, divHeader);
-                    locatorParamsForEventContainer = new LocatorTool(locatorParamsForEventContainer);
-                    eventMapPoint = this.map.getLayer(locatorParamsForEventContainer.graphicsLayerId);
-                    // Calling candidate click function for showing route and data in bottom pod
-                    locatorParamsForEventContainer.candidateClicked = lang.hitch(this, function (graphic) {
-                        dojo.addressLocationDirectionActivity = locatorParamsForEventContainer.selectedGraphic.geometry.x.toString() + "," + locatorParamsForEventContainer.selectedGraphic.geometry.y.toString();
-                        if (graphic && graphic.attributes && graphic.attributes.address) {
-                            this.locatorAddress = graphic.attributes.address;
-                        }
-                        dojo.doQuery = "false";
-                        topic.publish("hideInfoWindow");
-                        this.removeGeolocationPushPin();
-                        routeObject = { "StartPoint": eventMapPoint.graphics[0], "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL };
-                        this.showRoute(routeObject);
-                    });
-                }
-                // Calling function for setting gallery
-                this.setGallery(featureSetWithoutNullValue, resultcontent);
-                setTimeout(lang.hitch(this, function () {
-                    // If it is a share url and direction is calcualted from bottom pod then show route for the same.
-                    if (window.location.href.toString().split("$addressLocationDirectionActivity=").length > 1 && window.location.href.toString().split("$addressLocationDirectionActivity=")[1].substring(0, 18) !== "$sharedGeolocation") {
-                        var mapPoint = new Point(window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[0], window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
-                        locatorParamsForEventContainer._locateAddressOnMap(mapPoint, true);
-                        routeObject = { "StartPoint": eventMapPoint.graphics[0], "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL };
-                        this.showRoute(routeObject);
-                    }
-                }, 20000));
-                topic.publish("hideProgressIndicator");
-            } else {
-                // If it comming from other then event layer then query comment layer, becaue in event layer we do not have comment layer settings.
-                dojo.eventRoutePoint = null;
-                dojo.sharedGeolocation = null;
-                queryObject = { "FeatureData": featureSetWithoutNullValue, "SolveRoute": null, "Index": index, "QueryURL": QueryURL, "WidgetName": widgetName, "Address": null, "IsRouteCreated": false };
-                topic.publish("showProgressIndicator");
-                this.queryCommentLayer(queryObject);
-            }
-        },
-
-        /**
-        * call all the function when click on search result data
-        * @param {object} searchedFacilityObject contains route result, features in buffer area, search address,mapPoint, comment layer info
-        * @memberOf widgets/searchResult/activitySearch
-        */
-        _clickOnSearchedFacility: function (searchedFacilityObject, event) {
-            var pushPinGemotery, widgetName, routeObject, queryObject, highlightedDiv, queryURL, rowIndex;
-            topic.publish("extentSetValue", true);
-            topic.publish("hideInfoWindow");
-            // If feature data has some items
-            if (searchedFacilityObject.FeatureData.length > 1) {
-            // If event is available then get tuery URL and row index from event.
-                if (event !== null) {
-                    queryURL = domAttr.get(event.currentTarget, "QueryURL");
-                    rowIndex = domAttr.get(event.currentTarget, "value");
-                }
-                // If event is not available then get tuery URL and row index from event.
-                if (event === null) {
-                    queryURL = searchedFacilityObject.QueryLayer;
-                    rowIndex = searchedFacilityObject.searchedFacilityIndex;
-                }
-                // query for getting highlighed div
-                highlightedDiv = query('.esriCTDivHighlightFacility')[0];
-                domClass.replace(highlightedDiv, "esriCTSearchResultInfotext", "esriCTDivHighlightFacility");
-                // If event is not available then change the selected row.
-                if (event !== null) {
-                    domClass.replace(event.currentTarget, "esriCTDivHighlightFacility", "esriCTSearchResultInfotext");
-                }
-                dojo.searchFacilityIndex = Number(rowIndex);
-                // If it is comming from activity search pod then remove buffer layer.
-                if (searchedFacilityObject.WidgetName.toLowerCase() === "activitysearch") {
-                    this.removeBuffer();
-                }
-                widgetName = "SearchedFacility";
-                topic.publish("showProgressIndicator");
-                this.removeHighlightedCircleGraphics();
-                // If any point is ther on map related to geolocation settings else it is locator settings.
-                if (this.map.getLayer(this.geoLocationGraphicsLayerID).graphics.length > 0) {
-                    pushPinGemotery = this.map.getLayer(this.geoLocationGraphicsLayerID).graphics;
-                } else {
-                    pushPinGemotery = this.map.getLayer(this.locatorGraphicsLayerID).graphics;
-                }
-                // If data is found then call show route function.
-                if (pushPinGemotery[0]) {
-                    routeObject = { "StartPoint": pushPinGemotery[0], "EndPoint": searchedFacilityObject.FeatureData, "Index": Number(rowIndex), "WidgetName": widgetName, "QueryURL": queryURL, "activityData": searchedFacilityObject.activityData };
-                    this.showRoute(routeObject);
-                } else {
-                    // Else call query comment layer.
-                    queryObject = { "FeatureData": searchedFacilityObject.FeatureData, "SolveRoute": null, "Index": Number(rowIndex), "QueryURL": queryURL, "WidgetName": widgetName, "Address": null, "IsRouteCreated": false };
-                    topic.publish("showProgressIndicator");
-                    this.queryCommentLayer(queryObject);
-                }
-            }
-        },
-
-        /**
-        * Get the layer information after doing json call
-        * @param {data} layer url
-        * @return layer request
-        * @memberOf widgets/activitySearch/activitySearch
-        */
-        _queryLayerForLayerInformation: function (QueryURL) {
-            var layersRequest = esriRequest({
-                url: QueryURL,
-                content: { f: "json" },
-                handleAs: "json"
-            });
-            return layersRequest;
-        },
-
-        /**
-        * Get object id from the layer
-        * @param {object} object of layer
-        * @memberOf widgets/eventPlanner/eventPlanner
-        */
-        _getObjectId: function (response) {
-            var objectId, j;
-            // Looping through response for getting date field
-            for (j = 0; j < response.fields.length; j++) {
-                if (response.fields[j].type === "esriFieldTypeOID") {
-                    objectId = response.fields[j].name;
-                    break;
-                }
-            }
-            return objectId;
-        },
-
-        /**
-        * get the feature within buffer and sort it in ascending order.
-        * @param {object} featureset Contains information of feature within buffer
-        * @param {object} geometry Contains geometry service of route
-        * @param {mapPoint} map point
-        * @memberOf widgets/searchSettings/activitySearch
-        */
-        _executeQueryForEventForList: function (featureSetObject) {
-            var isZoomToGeolocation;
-            this.featureSetWithoutNullValue = this.removeNullValue(featureSetObject);
-            isZoomToGeolocation = this.setZoomForGeolocation();
-            // If modrnizr is  supporting geolocation then procced other wise show message.
-            if (Modernizr.geolocation) {
-                // If geolocation widget is configured
-                if (dijit.registry.byId("geoLocation")) {
-                    // Call show current location.
-                    dijit.registry.byId("geoLocation").showCurrentLocation(false, isZoomToGeolocation);
-                    // Call back of geolocation complete
-                    dijit.registry.byId("geoLocation").onGeolocationComplete = lang.hitch(this, function (mapPoint, isPreLoaded) {
-                        // If mappoint is found then clean graphics
-                        if (mapPoint) {
-                            // If it is not comming from geolocation widget
-                            if (!isPreLoaded) {
-                                var routeObject = { "StartPoint": mapPoint, "EndPoint": this.featureSetWithoutNullValue, WidgetName: "routeForList" };
-                                this._showRouteForList(routeObject);
-                            } else {
-                                // if it is comming from geolocation widget
-                                topic.publish("hideProgressIndicator");
-                                topic.publish("extentSetValue", true);
-                                topic.publish("hideInfoWindow");
-                                dojo.eventForListClicked = null;
-                                this.removeRouteGraphichOfDirectionWidget();
-                                dojo.searchFacilityIndex = -1;
-                                this.createBuffer(mapPoint, "geolocation");
-                                dojo.addressLocation = null;
-                                dojo.sharedGeolocation = mapPoint;
-                            }
-                        }
-                    });
-                } else {
-                    // when geolocation is not found
-                    topic.publish("hideProgressIndicator");
-                    alert(sharedNls.errorMessages.activitySerachGeolocationText);
-                }
-                // Call back when error is found after geolocation
-                dijit.registry.byId("geoLocation").onGeolocationError = lang.hitch(this, function (error, isPreLoaded) {
-                    if (isPreLoaded) {
-                        topic.publish("extentSetValue", true);
-                        topic.publish("hideInfoWindow");
-                        this.removeHighlightedCircleGraphics();
-                        this.removeLocatorPushPin();
-                        this.removeBuffer();
-                        this.carouselContainer.hideCarouselContainer();
-                        this.carouselContainer._setLegendPositionDown();
-                    }
-                    // If it is not commign from geolocation
-                    if (!isPreLoaded) {
-                        this.removeLocatorPushPin();
-                        topic.publish("hideInfoWindow");
-                        topic.publish("hideProgressIndicator");
-                    }
-                });
-            } else {
-                // calling error message when geoloation widget is not configured.
-                topic.publish("hideProgressIndicator");
-                alert(sharedNls.errorMessages.geolocationWidgetNotFoundMessage);
-            }
         }
     });
 });
