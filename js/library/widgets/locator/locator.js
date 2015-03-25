@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig,alert,esri,locatorParams */
+﻿/*global define,dojo,dojoConfig,alert,esri,locatorParams,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
 | Copyright 2013 Esri
@@ -18,7 +18,6 @@
 //============================================================================================================================//
 define([
     "dojo/_base/array",
-    "dojo/_base/Color",
     "dojo/_base/declare",
     "dojo/_base/lang",
     "dojo/dom",
@@ -37,18 +36,17 @@ define([
     "dijit/_WidgetBase",
     "dijit/_WidgetsInTemplateMixin",
     "dojo/Deferred",
-    "dojo/DeferredList",
-    "esri/geometry",
+    "dojo/promise/all",
     "esri/geometry/Point",
-    "esri/geometry/webMercatorUtils",
     "esri/graphic",
     "esri/layers/GraphicsLayer",
+    "esri/symbols/PictureMarkerSymbol",
     "esri/tasks/GeometryService",
     "esri/tasks/locator",
     "esri/tasks/query",
     "esri/tasks/QueryTask",
     "dijit/a11yclick"
-], function (Array, Color, declare, lang, dom, domAttr, domClass, domConstruct, domGeom, domStyle, sharedNls, on, query, string, template, topic, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, Deferred, DeferredList, Geometry, Point, webMercatorUtils, Graphic, GraphicsLayer, GeometryService, Locator, Query, QueryTask, a11yclick) {
+], function (Array, declare, lang, dom, domAttr, domClass, domConstruct, domGeom, domStyle, sharedNls, on, query, string, template, topic, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, Deferred, all, Point, Graphic, GraphicsLayer, PictureMarkerSymbol, GeometryService, Locator, Query, QueryTask, a11yclick) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -58,10 +56,9 @@ define([
         stagedSearch: null,                                      // Variable for staged search
         preLoaded: true,                                         // Variable for loading the locator widget
         isShowDefaultPushPin: true,                              // Variable to show the default pushpin on map
-        selectedGraphic: null,                                   // Variable  for selected graphic
-        graphicsLayerId: null,                                   // Variable for graphic layet Id
+        selectedGraphic: null,                                   // Variable for selected graphic
+        graphicsLayerId: null,                                   // Variable for storing search settings
         configSearchSettings: null,
-
 
         /**
         * display locator widget
@@ -99,13 +96,13 @@ define([
                     topic.publish("toggleWidget", "locator");
                     this._showHideLocateContainer();
                 })));
-                this.locatorSettings = dojo.configData.LocatorSettings;
+                this.locatorSettings = appGlobals.configData.LocatorSettings;
                 this.defaultAddress = this.locatorSettings.LocatorDefaultAddress;
                 domConstruct.place(this.divAddressContainer, this.parentDomNode);
             } else {
                 domConstruct.place(this.divAddressContainer.children[0], this.parentDomNode);
             }
-            // varify the graphic layer
+            // verify the graphic layer
             if (!this.graphicsLayerId) {
                 this.graphicsLayerId = "locatorGraphicsLayer";
                 if (Array.indexOf(this.map.graphicsLayerIds, this.graphicsLayerId) !== -1) {
@@ -119,29 +116,26 @@ define([
             this.txtAddress.value = domAttr.get(this.txtAddress, "defaultAddress");
             this.lastSearchString = lang.trim(this.txtAddress.value);
             this._attachLocatorEvents();
-            // Subscribe function to set Default textbox Value from any another widget
-            topic.subscribe("setDefaultTextboxValue", this._setDefaultTextboxValue);
-            // Subscribe function to clear Graphics from any another widget
+            // Subscribe function to clear graphics from map
             topic.subscribe("clearLocatorGraphicsLayer", this._clearGraphics);
         },
 
         /**
-        * set the searchSettings as per the layers availavle on map
+        * Store search settings in an array if the layer url for that particular setting is available
         * @memberOf widgets/locator/locator
         */
         _setSearchSettings: function () {
             var i;
             this.configSearchSettings = [];
-            for (i = 0; i < dojo.configData.SearchSettings.length; i++) {
-                if (dojo.configData.SearchSettings[i].QueryURL) {
-                    this.configSearchSettings.push(dojo.configData.SearchSettings[i]);
+            for (i = 0; i < appGlobals.configData.SearchSettings.length; i++) {
+                if (appGlobals.configData.SearchSettings[i].QueryURL) {
+                    this.configSearchSettings.push(appGlobals.configData.SearchSettings[i]);
                 }
             }
         },
 
         /**
-        * set default value of locator textbox as specified in configuration file
-        * @memberOf widgets/locator/locator
+        * Set default value in search textbox as specified in configuration file
         * @param {node} node
         * @param {object} attribute
         * @param {string} value
@@ -152,25 +146,22 @@ define([
         },
 
         /**
-        * attach locator events in this function
+        * Attach locator events in this function
         * @memberOf widgets/locator/locator
         */
         _attachLocatorEvents: function () {
             domAttr.set(this.imgSearchLoader, "src", dojoConfig.baseURL + "/js/library/themes/images/loader.gif");
-            this.own(on(this.divSearch, a11yclick, lang.hitch(this, function (evt) {
+            this.own(on(this.divSearch, a11yclick, lang.hitch(this, function () {
                 this._toggleTexBoxControls(true);
                 this._locateAddress(true);
             })));
             this.own(on(this.txtAddress, "keyup", lang.hitch(this, function (evt) {
-                domStyle.set(this.close, "display", "block");
                 this._submitAddress(evt);
             })));
             this.own(on(this.txtAddress, "paste", lang.hitch(this, function (evt) {
-                domStyle.set(this.close, "display", "block");
                 this._submitAddress(evt, true);
             })));
             this.own(on(this.txtAddress, "cut", lang.hitch(this, function (evt) {
-                domStyle.set(this.close, "display", "block");
                 this._submitAddress(evt, true);
             })));
             this.own(on(this.txtAddress, "dblclick", lang.hitch(this, function (evt) {
@@ -180,9 +171,6 @@ define([
                 this._replaceDefaultText(evt);
             })));
             this.own(on(this.txtAddress, "focus", lang.hitch(this, function () {
-                if (domStyle.get(this.imgSearchLoader, "display") === "none") {
-                    domStyle.set(this.close, "display", "block");
-                }
                 domClass.add(this.txtAddress, "esriCTColorChange");
             })));
             this.own(on(this.close, a11yclick, lang.hitch(this, function () {
@@ -191,7 +179,7 @@ define([
         },
 
         /**
-        * handler for locate button click
+        * Handle locate button click
         * @memberOf widgets/locator/locator
         */
         onLocateButtonClick: function () {
@@ -200,7 +188,7 @@ define([
         },
 
         /**
-        * hide the text from search container
+        * Hide value from search textbox
         * @memberOf widgets/locator/locator
         */
         _hideText: function () {
@@ -212,19 +200,17 @@ define([
         },
 
         /**
-        * show/hide locator widget and set default search text
+        * Show/hide locator widget and set default search text
         * @memberOf widgets/locator/locator
         */
         _showHideLocateContainer: function () {
             this.txtAddress.blur();
             if (domGeom.getMarginBox(this.divAddressContainer).h > 1) {
-
                 /**
                 * when user clicks on locator icon in header panel, close the search panel if it is open
                 */
                 this._hideAddressContainer();
             } else {
-
                 /**
                 * when user clicks on locator icon in header panel, open the search panel if it is closed
                 */
@@ -238,7 +224,7 @@ define([
         },
 
         /**
-        * search address on every key press
+        * Search address on every key press
         * @param {object} evt Keyup event
         * @param {string} locatorText
         * @memberOf widgets/locator/locator
@@ -250,7 +236,7 @@ define([
                 }), 100);
                 return;
             }
-            //check the keypress event
+            // check the keypress event
             if (evt) {
                 /**
                 * Enter key immediately starts search
@@ -278,18 +264,19 @@ define([
                 /**
                 * call locator service if search text is not empty
                 */
-                this._toggleTexBoxControls(true);
+
                 this._locateAddress(false);
             }
         },
 
         /**
-        * perform search by address if search type is address search
+        * Perform search by address if search type is address search
         * @memberOf widgets/locator/locator
         */
         _locateAddress: function (launchImmediately) {
-            var searchText = lang.trim(this.txtAddress.value);
+            var searchText = lang.trim(this.txtAddress.value).replace(/'/g, "''");
             if (launchImmediately || this.lastSearchString !== searchText) {
+                this._toggleTexBoxControls(true);
                 this.lastSearchString = searchText;
 
                 // Clear any staged search
@@ -304,7 +291,7 @@ define([
                 this.stagedSearch = setTimeout(lang.hitch(this, function () {
                     var thisSearchTime;
 
-                    // Replace search type-in box' clear X with a busy cursor
+                    // Replace the close button in search textbox with search loader icon
                     this._toggleTexBoxControls(false);
                     // Launch a search after recording when the search began
                     this.lastSearchTime = thisSearchTime = (new Date()).getTime();
@@ -314,14 +301,13 @@ define([
         },
 
         /**
-        * call locator service and get search results
+        * Query geocoder service and store search results in an array
         * @memberOf widgets/locator/locator
-        * @method _searchLocation
         */
         _searchLocation: function (searchText, thisSearchTime) {
             var nameArray = {}, locatorSettings, locator, searchFieldName, addressField, baseMapExtent,
                 options, searchFields, addressFieldValues, s, deferredArray,
-                locatorDef, deferred, resultLength, deferredListResult, index, resultAttributes, key, order;
+                locatorDef, deferred, resultLength, index, resultAttributes, key, order;
             // Discard searches made obsolete by new typing from user
             if (thisSearchTime < this.lastSearchTime) {
                 return;
@@ -332,7 +318,6 @@ define([
                 this._toggleTexBoxControls(true);
                 this.mapPoint = null;
                 this._locatorErrBack(true);
-
             } else {
                 nameArray[this.locatorSettings.DisplayText] = [];
                 domAttr.set(this.txtAddress, "defaultAddress", searchText);
@@ -388,48 +373,50 @@ define([
                     this._locatorErrBack(true);
                 });
                 deferredArray.push(locatorDef);
-                deferredListResult = new DeferredList(deferredArray);
-                deferredListResult.then(lang.hitch(this, function (result) {
+                all(deferredArray).then(lang.hitch(this, function (result) {
                     var num, results;
                     // Discard searches made obsolete by new typing from user
                     if (thisSearchTime < this.lastSearchTime) {
                         return;
                     }
-
-                    dojo.lastSearchAddress = this.lastSearchString;
                     if (result) {
                         if (result.length > 0) {
                             for (num = 0; num < result.length; num++) {
-                                if (result[num][0] === true) {
-                                    if (this.configSearchSettings[num] && this.configSearchSettings[num].UnifiedSearch.toLowerCase() === "true") {
-                                        key = this.configSearchSettings[num].SearchDisplayTitle;
+                                if (result[num]) {
+                                    if (result[num].layerSearchSettings) {
+                                        key = result[num].layerSearchSettings.SearchDisplayTitle;
                                         nameArray[key] = [];
-                                        if (result[num][1].features) {
-                                            for (order = 0; order < result[num][1].features.length; order++) {
-                                                resultAttributes = result[num][1].features[order].attributes;
+                                        if (result[num].featureSet && result[num].featureSet.features) {
+                                            for (order = 0; order < result[num].featureSet.features.length; order++) {
+                                                resultAttributes = result[num].featureSet.features[order].attributes;
                                                 for (results in resultAttributes) {
                                                     if (resultAttributes.hasOwnProperty(results)) {
                                                         if (!resultAttributes[results]) {
-                                                            resultAttributes[results] = sharedNls.showNullValue;
+                                                            resultAttributes[results] = appGlobals.configData.ShowNullValueAs;
                                                         }
                                                     }
                                                 }
                                                 if (nameArray[key].length < this.locatorSettings.MaxResults) {
                                                     nameArray[key].push({
-                                                        name: string.substitute(this.configSearchSettings[num].SearchDisplayFields, resultAttributes),
+                                                        name: string.substitute(result[num].layerSearchSettings.SearchDisplayFields, resultAttributes),
                                                         attributes: resultAttributes,
-                                                        fields: result[num][1].fields,
-                                                        layer: this.configSearchSettings[num],
-                                                        geometry: result[num][1].features[order].geometry
+                                                        fields: result[num].featureSet.fields,
+                                                        layer: result[num].layerSearchSettings,
+                                                        geometry: result[num].featureSet.features[order].geometry
                                                     });
                                                 }
                                             }
-
                                         }
-                                    } else {
-                                        this._addressResult(result[num][1], nameArray, searchFields);
+                                    } else if (result[num].length) {
+                                        this._addressResult(result[num], nameArray, searchFields);
                                     }
-                                    resultLength = result[num][1].length;
+                                    if (result[num].length) {
+                                        //result length in case of address
+                                        resultLength = result[num].length;
+                                    } else if (result[num].featureSet && result[num].featureSet.features.length > 0) {
+                                        //result length in case of features
+                                        resultLength = result[num].featureSet.features.length;
+                                    }
                                 }
                             }
                             this._showLocatedAddress(searchText, nameArray, resultLength);
@@ -440,39 +427,46 @@ define([
                     }
                 }));
             }
-
         },
 
         /**
-        * query the layer which we are giving the input in search box
+        * Query the layers having search settings configured in the config file
         * @param {array} deferredArray
         * @param {object} layerobject
         * @memberOf widgets/locator/locator
         */
         _layerSearchResults: function (searchText, deferredArray, layerobject) {
-            var queryTask, queryLayer, deferred, currentTime;
+            var queryTask, queryLayer, deferred, currentTime, featureObject;
             this._toggleTexBoxControls(true);
             if (layerobject.QueryURL) {
-                currentTime = new Date();
-                queryTask = new QueryTask(layerobject.QueryURL);
-                queryLayer = new Query();
-                queryLayer.where = string.substitute(layerobject.SearchExpression, [searchText.toUpperCase()]) + " AND " + currentTime.getTime().toString() + "=" + currentTime.getTime().toString();
-                queryLayer.outSpatialReference = this.map.spatialReference;
-                queryLayer.returnGeometry = true;
-                queryLayer.outFields = ["*"];
                 deferred = new Deferred();
-                queryTask.execute(queryLayer, lang.hitch(this, function (featureSet) {
-                    deferred.resolve(featureSet);
-                }), function (err) {
-                    alert(err.message);
-                    deferred.reject();
-                });
+                if (layerobject.UnifiedSearch.toLowerCase() === "true") {
+                    currentTime = new Date();
+                    queryTask = new QueryTask(layerobject.QueryURL);
+                    queryLayer = new Query();
+                    queryLayer.where = string.substitute(layerobject.SearchExpression, [searchText.toUpperCase()]) + " AND " + currentTime.getTime().toString() + "=" + currentTime.getTime().toString();
+                    queryLayer.outSpatialReference = this.map.spatialReference;
+                    queryLayer.returnGeometry = layerobject.ObjectID ? false : true;
+                    queryLayer.outFields = ["*"];
+                    queryTask.execute(queryLayer, lang.hitch(this, function (featureSet) {
+                        featureObject = {
+                            "featureSet": featureSet,
+                            "layerSearchSettings": layerobject
+                        };
+                        deferred.resolve(featureObject);
+                    }), function (err) {
+                        alert(err.message);
+                        deferred.resolve();
+                    });
+                } else {
+                    deferred.resolve();
+                }
                 deferredArray.push(deferred);
             }
         },
 
         /**
-        *
+        * Grouping search results
         * @param {object} candidates contains the search data
         * @param {array} nameArray
         * @param {field} searchFields
@@ -499,10 +493,10 @@ define([
         },
 
         /**
-        * filter valid results from results returned by locator service
-        * @memberOf widgets/locator/locator
+        * Filter valid results from results returned by locator service
         * @param {object} candidates contains results from locator service
         * @param {} resultLength
+        * @memberOf widgets/locator/locator
         */
         _showLocatedAddress: function (searchText, candidates, resultLength) {
             var addrListCount = 0, noResultCount = 0, candidatesCount = 0, addrList = [], candidateArray, divAddressCounty, candidate, listContainer, i, divAddressSearchCell;
@@ -557,10 +551,9 @@ define([
             }
         },
 
-
         /**
-        * show and hide address list
-        * @param {arrray} addressList
+        * Show and hide address list
+        * @param {array} addressList
         * @param {index} idx
         * @memberOf widgets/locator/locator
         */
@@ -580,15 +573,15 @@ define([
         },
 
         /**
-        * display valid result in search panel
-        * @memberOf widgets/locator/locator
+        * Display valid results in search panel
         * @param {object} candidate Contains valid result to be displayed in search panel
         * @param {number} index
         * @param {array} candidateArray
         * @param {node} listContainer
+        * @memberOf widgets/locator/locator
         */
         _displayValidLocations: function (candidate, index, candidateArray, listContainer) {
-            var _this = this, candidateAddress, divAddressRow, layer, infoIndex;
+            var candidateAddress, divAddressRow, layer, infoIndex;
             divAddressRow = domConstruct.create("div", { "class": "esriCTCandidateList" }, listContainer);
             candidateAddress = domConstruct.create("div", { "class": "esriCTContentBottomBorder esriCTCursorPointer" }, divAddressRow);
             domAttr.set(candidateAddress, "index", index);
@@ -609,34 +602,60 @@ define([
 
             /**
             * candidate on click of result
-            * @method onclick
             * @param {node} listContainer
             */
-            candidateAddress.onclick = function () {
+            on(candidateAddress, a11yclick, lang.hitch(this, function (evt) {
+                var target;
                 topic.publish("showProgressIndicator");
-                _this.txtAddress.value = this.innerHTML;
-                domAttr.set(_this.txtAddress, "defaultAddress", _this.txtAddress.value);
-                _this._hideAddressContainer();
-                if (_this.isShowDefaultPushPin) {
+                this.txtAddress.value = candidateAddress.innerHTML;
+                domAttr.set(this.txtAddress, "defaultAddress", this.txtAddress.value);
+                this._hideAddressContainer();
+                if (this.isShowDefaultPushPin) {
                     if (candidate.attributes.location) {
-                        _this.mapPoint = new Point(domAttr.get(this, "x"), domAttr.get(this, "y"), _this.map.spatialReference);
-                        _this._locateAddressOnMap(_this.mapPoint);
+                        target = evt.currentTarget || evt.srcElement;
+                        this.mapPoint = new Point(Number(domAttr.get(target, "x")), Number(domAttr.get(target, "y")), this.map.spatialReference);
+                        this._locateAddressOnMap(this.mapPoint);
+                        this.candidateClicked(candidate);
                     } else {
                         if (candidateArray[domAttr.get(candidateAddress, "index", index)]) {
-                            layer = candidateArray[domAttr.get(candidateAddress, "index", index)].layer.QueryURL;
-                            for (infoIndex = 0; infoIndex < _this.configSearchSettings.length; infoIndex++) {
-                                if (_this.configSearchSettings[infoIndex] && _this.configSearchSettings[infoIndex].QueryURL === layer) {
-                                    _this._showFeatureResultsOnMap(candidate);
-                                    topic.publish("hideProgressIndicator");
+                            layer = candidateArray[domAttr.get(candidateAddress, "index", index)].layer;
+                            for (infoIndex = 0; infoIndex < this.configSearchSettings.length; infoIndex++) {
+                                if (this.configSearchSettings[infoIndex] && this.configSearchSettings[infoIndex].QueryURL === layer.QueryURL) {
+                                    if (!candidate.geometry) {
+                                        this._getSelectedCandidateGeometry(layer, candidate);
+                                    } else {
+                                        this._showFeatureResultsOnMap(candidate);
+                                        topic.publish("hideProgressIndicator");
+                                        this.candidateClicked(candidate);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                _this.candidateClicked(candidate);
-            };
+            }));
         },
 
+        _getSelectedCandidateGeometry: function (layerobject, candidate) {
+            var queryTask, queryLayer, currentTime;
+            if (layerobject.QueryURL) {
+                currentTime = new Date();
+                queryTask = new QueryTask(layerobject.QueryURL);
+                queryLayer = new Query();
+                queryLayer.where = layerobject.ObjectID + " =" + candidate.attributes[layerobject.ObjectID] + " AND " + currentTime.getTime().toString() + "=" + currentTime.getTime().toString();
+                queryLayer.outSpatialReference = this.map.spatialReference;
+                queryLayer.returnGeometry = true;
+                queryTask.execute(queryLayer, lang.hitch(this, function (featureSet) {
+                    this._showFeatureResultsOnMap(candidate);
+                    candidate.geometry = featureSet.features[0].geometry;
+                    this.candidateClicked(candidate);
+                    topic.publish("hideProgressIndicator");
+                }), function (err) {
+                    alert(err.message);
+                    topic.publish("hideProgressIndicator");
+                });
+            }
+        },
 
         /**
         * handler for candidate address click
@@ -649,19 +668,15 @@ define([
 
         /**
         * show the feature result on map
-        * @method _showFeatureResultsOnMap
         * @param {object} candidate
         * @memberOf widgets/locator/locator
         */
         _showFeatureResultsOnMap: function (candidate) {
-            this._toggleTexBoxControls(true);
             this.txtAddress.value = candidate.name;
         },
 
-
         /**
-        * handle the textBox in
-        * @method _showFeatureResultsOnMap
+        * Show/hide the close icon and search loader icon present in search textbox
         * @param {boolean} isShow
         * @memberOf widgets/locator/locator
         */
@@ -673,26 +688,25 @@ define([
                 domStyle.set(this.imgSearchLoader, "display", "none");
                 domStyle.set(this.close, "display", "block");
             }
-
         },
         /**
-        * add the pushpin on graphic
-        * @memberOf widgets/locator/locator
+        * Add the pushpin to graphics layer
         * @param {object} mapPoint
+        * @memberOf widgets/locator/locator
         */
         _locateAddressOnMap: function (mapPoint) {
             var geoLocationPushpin, locatorMarkupSymbol;
             this._clearGraphics();
             geoLocationPushpin = dojoConfig.baseURL + this.locatorSettings.DefaultLocatorSymbol;
-            locatorMarkupSymbol = new esri.symbol.PictureMarkerSymbol(geoLocationPushpin, this.locatorSettings.MarkupSymbolSize.width, this.locatorSettings.MarkupSymbolSize.height);
-            this.selectedGraphic = new esri.Graphic(mapPoint, locatorMarkupSymbol, {}, null);
+            locatorMarkupSymbol = new PictureMarkerSymbol(geoLocationPushpin, this.locatorSettings.MarkupSymbolSize.width, this.locatorSettings.MarkupSymbolSize.height);
+            this.selectedGraphic = new Graphic(mapPoint, locatorMarkupSymbol, {}, null);
             this.map.getLayer(this.graphicsLayerId).add(this.selectedGraphic);
             topic.publish("hideProgressIndicator");
             this.onGraphicAdd();
         },
 
         /**
-        * clear graphics from map
+        * Clear graphics from map
         * @memberOf widgets/locator/locator
         */
         _clearGraphics: function () {
@@ -703,7 +717,7 @@ define([
         },
 
         /**
-        * handler for adding graphic on map
+        * Handler for adding graphic on map
         * @memberOf widgets/locator/locator
         */
         onGraphicAdd: function () {
@@ -711,7 +725,7 @@ define([
         },
 
         /**
-        * hide search panel
+        * Hide search panel
         * @memberOf widgets/locator/locator
         */
         _hideAddressContainer: function () {
@@ -721,7 +735,7 @@ define([
         },
 
         /**
-        * display error message if locator service fails or does not return any results
+        * Display error message if locator service fails or does not return any results
         * @memberOf widgets/locator/locator
         */
         _locatorErrBack: function (showMessage) {
@@ -736,9 +750,8 @@ define([
         },
 
         /**
-        * clear default value from search textbox
-        * @memberOf widgets/locator/locator
-        * @param {object} evt Dblclick event
+        * Clear default value from search textbox
+        * @param {object} evt double click event
         * @memberOf widgets/locator/locator
         */
         _clearDefaultText: function (evt) {
@@ -753,8 +766,7 @@ define([
         },
 
         /**
-        * set default value to search textbox
-        * @memberOf widgets/locator/locator
+        * Set default value to search textbox
         * @param {event} evt Blur event
         * @memberOf widgets/locator/locator
         */
@@ -767,7 +779,7 @@ define([
         },
 
         /**
-        * set default value to search textbox
+        * Set default value to search textbox
         * @param {object} target Textbox dom element
         * @param {string} title Default value
         * @memberOf widgets/locator/locator

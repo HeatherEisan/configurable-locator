@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig,esri,alert,selectedBasemap */
+﻿/*global define,dojo,dojoConfig,esri,alert,selectedBasemap,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
 | Copyright 2013 Esri
@@ -30,9 +30,12 @@ define([
     "dijit/_WidgetsInTemplateMixin",
     "esri/layers/ArcGISTiledMapServiceLayer",
     "esri/layers/OpenStreetMapLayer",
-    "dijit/a11yclick"
-], function (declare, domConstruct, array, lang, on, dom, query, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, ArcGISTiledMapServiceLayer, OpenStreetMapLayer, a11yclick) {
-
+    "dijit/a11yclick",
+    "esri/layers/ArcGISDynamicMapServiceLayer",
+    "esri/layers/ArcGISImageServiceLayer",
+    "esri/layers/ImageParameters",
+    "esri/layers/ImageServiceParameters"
+], function (declare, domConstruct, array, lang, on, dom, query, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, ArcGISTiledMapServiceLayer, OpenStreetMapLayer, a11yclick, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageParameters, ImageServiceParameters) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -45,7 +48,7 @@ define([
         * @name widgets/baseMapGallery/baseMapGallery
         */
         postCreate: function () {
-            if (dojo.configData.BaseMapLayers) {
+            if (appGlobals.configData.BaseMapLayers) {
                 dom.byId("esriCTParentDivContainer").appendChild(this.esriCTDivLayerContainer);
                 this.layerList.appendChild(this._createBaseMapElement());
                 this._loadSharedBasemap();
@@ -58,10 +61,10 @@ define([
         */
         _createBaseMapElement: function () {
             var divContainer, imgThumbnail, thumbnailPath, basemap;
-            if (dojo.selectedBasemapIndex === dojo.configData.BaseMapLayers.length - 1) {
-                basemap = dojo.configData.BaseMapLayers[0];
+            if (appGlobals.shareOptions.selectedBasemapIndex === appGlobals.configData.BaseMapLayers.length - 1) {
+                basemap = appGlobals.configData.BaseMapLayers[0];
             } else {
-                basemap = dojo.configData.BaseMapLayers[dojo.selectedBasemapIndex + 1];
+                basemap = appGlobals.configData.BaseMapLayers[appGlobals.shareOptions.selectedBasemapIndex + 1];
             }
 
             if (basemap.length) {
@@ -73,7 +76,7 @@ define([
             imgThumbnail = domConstruct.create("img", { "class": "esriCTBasemapThumbnail", "src": thumbnailPath }, null);
             on(imgThumbnail, a11yclick, lang.hitch(this, function () {
                 if (this.enableToggling) {
-                    dojo.selectedBasemapIndex++;
+                    appGlobals.shareOptions.selectedBasemapIndex++;
                     this._changeBasemapThumbnail();
                 }
             }));
@@ -87,13 +90,13 @@ define([
         */
         _changeBaseMap: function (preLayerIndex) {
             var basemap, basemapLayers, basemapLayerId = "defaultBasemap";
-            basemapLayers = dojo.configData.BaseMapLayers[preLayerIndex];
+            basemapLayers = appGlobals.configData.BaseMapLayers[preLayerIndex];
             this.enableToggling = false;
-            this.map.onLayerRemove = lang.hitch(this, function () {
+            this.map.on("layer-remove", lang.hitch(this, function (layer) {
                 if (this.enableToggling) {
                     this._addBasemapLayerOnMap(basemapLayerId);
                 }
-            });
+            }));
 
             if (basemapLayers.length) {
                 array.forEach(basemapLayers, lang.hitch(this, function (layer, index) {
@@ -119,11 +122,11 @@ define([
         * @memberOf widgets/baseMapGallery/baseMapGallery
         */
         _addBasemapLayerOnMap: function (basemapLayerId) {
-            var layer, basemapLayers = dojo.configData.BaseMapLayers[dojo.selectedBasemapIndex];
+            var layer, params, basemapLayers = appGlobals.configData.BaseMapLayers[appGlobals.shareOptions.selectedBasemapIndex], imageParameters;
 
-            this.map.onLayerAdd = lang.hitch(this, function () {
+            this.map.on("layer-add", lang.hitch(this, function (layer) {
                 this.enableToggling = true;
-            });
+            }));
             if (basemapLayers.length) {
                 array.forEach(basemapLayers, lang.hitch(this, function (basemap, index) {
                     this.enableToggling = false;
@@ -134,6 +137,19 @@ define([
                 this.enableToggling = false;
                 if (basemapLayers.layerType === "OpenStreetMap") {
                     layer = new OpenStreetMapLayer({ id: basemapLayerId, visible: true });
+                } else if (basemapLayers.layerType === "ArcGISMapServiceLayer") {
+                    imageParameters = new ImageParameters();
+                    layer = new ArcGISDynamicMapServiceLayer(basemapLayers.MapURL, {
+                        "imageParameters": imageParameters,
+                        id: basemapLayerId
+                    });
+                } else if (basemapLayers.layerType === "ArcGISImageServiceLayer") {
+                    params = new ImageServiceParameters();
+                    layer = new ArcGISImageServiceLayer(basemapLayers.MapURL, {
+                        imageServiceParameters: params,
+                        id: basemapLayerId,
+                        opacity: 0.75
+                    });
                 } else {
                     layer = new ArcGISTiledMapServiceLayer(basemapLayers.MapURL, { id: basemapLayerId, visible: true });
                 }
@@ -147,8 +163,8 @@ define([
         */
         _loadSharedBasemap: function () {
             if (window.location.toString().split("$selectedBasemapIndex=").length > 1) {
-                var preLayerIndex = dojo.selectedBasemapIndex;
-                dojo.selectedBasemapIndex = parseInt(window.location.toString().split("$selectedBasemapIndex=")[1].split("$")[0], 10);
+                var preLayerIndex = appGlobals.shareOptions.selectedBasemapIndex;
+                appGlobals.shareOptions.selectedBasemapIndex = parseInt(window.location.toString().split("$selectedBasemapIndex=")[1].split("$")[0], 10);
                 this._changeBasemapThumbnail(preLayerIndex);
             }
         },
@@ -159,28 +175,27 @@ define([
         */
         _changeBasemapThumbnail: function (preIndex) {
             var baseMapURLCount, presentThumbNail, preLayerIndex, thumbnailPath;
-            baseMapURLCount = dojo.configData.BaseMapLayers.length;
-            preLayerIndex = dojo.selectedBasemapIndex - 1;
+            baseMapURLCount = appGlobals.configData.BaseMapLayers.length;
+            preLayerIndex = appGlobals.shareOptions.selectedBasemapIndex - 1;
 
-            if (dojo.selectedBasemapIndex === baseMapURLCount) {
-                dojo.selectedBasemapIndex = 0;
+            if (appGlobals.shareOptions.selectedBasemapIndex === baseMapURLCount) {
+                appGlobals.shareOptions.selectedBasemapIndex = 0;
             }
-            if (dojo.selectedBasemapIndex === 0) {
+            if (appGlobals.shareOptions.selectedBasemapIndex === 0) {
                 preLayerIndex = baseMapURLCount - 1;
             }
-            presentThumbNail = dojo.selectedBasemapIndex + 1;
-            if (dojo.selectedBasemapIndex === baseMapURLCount - 1) {
+            presentThumbNail = appGlobals.shareOptions.selectedBasemapIndex + 1;
+            if (appGlobals.shareOptions.selectedBasemapIndex === baseMapURLCount - 1) {
                 presentThumbNail = 0;
             }
             if (preIndex) {
                 preLayerIndex = preIndex;
             }
             this._changeBaseMap(preLayerIndex);
-            if (dojo.configData.BaseMapLayers[presentThumbNail].length) {
-                thumbnailPath = dojo.configData.BaseMapLayers[presentThumbNail][0].ThumbnailSource;
+            if (appGlobals.configData.BaseMapLayers[presentThumbNail].length) {
+                thumbnailPath = appGlobals.configData.BaseMapLayers[presentThumbNail][0].ThumbnailSource;
             } else {
-                thumbnailPath = dojo.configData.BaseMapLayers[presentThumbNail].ThumbnailSource;
-
+                thumbnailPath = appGlobals.configData.BaseMapLayers[presentThumbNail].ThumbnailSource;
             }
             query('.esriCTBasemapThumbnail')[0].src = thumbnailPath;
         }

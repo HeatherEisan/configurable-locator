@@ -1,20 +1,20 @@
 ﻿/*global define,alert */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
- | Copyright 2013 Esri
- |
- | Licensed under the Apache License, Version 2.0 (the "License");
- | you may not use this file except in compliance with the License.
- | You may obtain a copy of the License at
- |
- |    http://www.apache.org/licenses/LICENSE-2.0
- |
- | Unless required by applicable law or agreed to in writing, software
- | distributed under the License is distributed on an "AS IS" BASIS,
- | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- | See the License for the specific language governing permissions and
- | limitations under the License.
- */
+| Copyright 2013 Esri
+|
+| Licensed under the Apache License, Version 2.0 (the "License");
+| you may not use this file except in compliance with the License.
+| You may obtain a copy of the License at
+|
+|    http://www.apache.org/licenses/LICENSE-2.0
+|
+| Unless required by applicable law or agreed to in writing, software
+| distributed under the License is distributed on an "AS IS" BASIS,
+| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+| See the License for the specific language governing permissions and
+| limitations under the License.
+*/
 //============================================================================================================================//
 define([
     "dojo/_base/declare",
@@ -30,11 +30,11 @@ define([
     CommonShare = declare("js.CommonShare", null, {
         sharedNls: sharedNls,
         /**
-         * Create the tiny url
-         * @param {string} urlStr is url to shrink
-         * @param {string} tinyURLServiceURL is Bitly service
-         * @memberOf widgets/share/commonShare
-         */
+        * Create the tiny url
+        * @param {string} urlStr is url to shrink
+        * @param {string} tinyURLServiceURL is Bitly service
+        * @memberOf widgets/share/commonShare
+        */
         getTinyLink: function (urlStr, tinyURLServiceURL) {
             var encodedUri, shareUrl, deferred;
 
@@ -66,24 +66,25 @@ define([
 
 
         /**
-         * share application detail with selected share option
-         * @param {Deferred} waitForUrl is deferred for shrinking url to share
-         * @param {object} mapSharingOptions sharing site urls
-         * @param {string} site Selected share option
-         * return CommonShare instance
-         * @memberOf widgets/share/commonShare
-         */
+        * share application detail with selected share option
+        * @param {Deferred} waitForUrl is deferred for shrinking url to share
+        * @param {object} mapSharingOptions sharing site urls
+        * @param {string} site Selected share option
+        * return CommonShare instance
+        * @memberOf widgets/share/commonShare
+        */
         share: function (waitForUrl, mapSharingOptions, site) {
+            var windowObj = (site === "facebook" || site === "twitter") ? window.open('', '_blank') : null;
             waitForUrl.then(function (urlToShare) {
                 switch (site) {
                 case "facebook":
-                    window.open(string.substitute(mapSharingOptions.FacebookShareURL, [urlToShare]));
+                    windowObj.location.href = string.substitute(mapSharingOptions.FacebookShareURL, [urlToShare]);
                     break;
                 case "twitter":
-                    window.open(string.substitute(mapSharingOptions.TwitterShareURL, [urlToShare]));
+                    windowObj.location.href = string.substitute(mapSharingOptions.TwitterShareURL, [urlToShare]);
                     break;
                 case "email":
-                    parent.location = string.substitute(mapSharingOptions.ShareByMailLink, [urlToShare]);
+                    parent.location.href = string.substitute(mapSharingOptions.ShareByMailLink, [urlToShare]);
                     break;
                 }
             });

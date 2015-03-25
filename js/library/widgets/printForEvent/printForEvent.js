@@ -33,7 +33,6 @@ require([
     */
 
     var eventInfoData, i;
-    //  printmap = new esri.Map("mapPrint", {});
     document.title = config.ApplicationName;
     /**
     * function to add polygon and graphics in the print map window when it gets open
@@ -41,9 +40,9 @@ require([
     */
     eventInfoData = window.opener.mapData.eventData;
     //Print Directions on Page
-    dom.byId("title").innerHTML = "My List";
+    dom.byId("title").innerHTML = eventInfoData[0].Title;
     for (i = 0; i < eventInfoData.length; i++) {
-        domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": eventInfoData[i].Name + "<br>" + (eventInfoData[i].StartDate === "" ? eventInfoData[i].StartDate : eventInfoData[i].StartDate + ", ") + eventInfoData[i].Address }, dom.byId("directionsList"));
+        domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": eventInfoData[i].Name + "<br>" + eventInfoData[i].BottomText }, dom.byId("directionsList"));
     }
     // Set time out for window print
     setTimeout(function () {

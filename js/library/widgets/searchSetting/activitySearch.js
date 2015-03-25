@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig:true,alert,console,esri,Modernizr,dijit */
+﻿/*global define,dojo,dojoConfig:true,alert,console,esri,Modernizr,dijit,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -24,29 +24,19 @@ define([
     "dojo/_base/lang",
     "dojo/on",
     "dojo/dom-geometry",
-    "dojo/dom",
-    "dojo/_base/array",
     "dojo/dom-class",
     "dojo/query",
-    "dojo/string",
-    "esri/tasks/locator",
     "esri/tasks/query",
     "esri/tasks/QueryTask",
-    "esri/geometry",
-    "esri/graphic",
     "dojo/text!./templates/searchSettingTemplate.html",
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
-    "../carouselContainer/carouselContainer",
-    "widgets/locator/locator",
-    "esri/request",
-    "esri/geometry/Point",
     "dijit/a11yclick"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, QueryTask, Geometry, Graphic, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, CarouselContainer, LocatorTool, esriRequest, Point, a11yclick) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, domClass, query, Query, QueryTask, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, a11yclick) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -54,7 +44,7 @@ define([
         sharedNls: sharedNls,                     // Variable for shared NLS
 
         /**
-        * file for creating activity search panel and getting start point from geolocaiton and calculateing route for activity search.
+        * file for creating activity search panel and getting start point from geolocation and calculating route for activity search.
         */
 
         /**
@@ -100,6 +90,7 @@ define([
                 return;
             }
         },
+
         /**
         * show search result tap
         * @memberOf widgets/searchSetting/activitySearch
@@ -122,12 +113,12 @@ define([
             var activitySearchMainContainer, tempDiv, activitySearchContent = [], activityTickMark, activityImageDiv = [], i, activitySearchMainContent, activitySearchGoButton, SearchSettingsLayers, c, activityimgSpan = [];
             activitySearchMainContainer = domConstruct.create("div", { "class": "esriCTActivityMainContainer" }, this.divActivityContainer);
             activitySearchMainContent = domConstruct.create("div", { "class": "esriCTActivityTable" }, activitySearchMainContainer);
-            SearchSettingsLayers = dojo.configData.ActivitySearchSettings[0];
+            SearchSettingsLayers = appGlobals.configData.ActivitySearchSettings[0];
             if (window.location.href.toString().split("$activitySearch=").length > 1) {
                 // Looping for activity search setting for getting selected activity icon
                 for (c = 0; c < SearchSettingsLayers.ActivityList.length; c++) {
                     SearchSettingsLayers.ActivityList[c].IsSelected = false;
-                    // If comming from share app and found activity search then set selected icon from share url
+                    // If coming from share app and found activity search then set selected icon from share url
                     if (window.location.href.toString().split("$activitySearch=")[1].split("$")[0].split(SearchSettingsLayers.ActivityList[c].FieldName.toString()).length > 1) {
                         SearchSettingsLayers.ActivityList[c].IsSelected = true;
                     }
@@ -158,9 +149,9 @@ define([
                 }
                 domConstruct.create("div", { "class": "esriCTActivityText", "innerHTML": SearchSettingsLayers.ActivityList[i].Alias }, activityTickMark);
             }
-            activitySearchGoButton = domConstruct.create("div", { "class": "esriCTActivitySearchGoButton", "innerHTML": sharedNls.titles.goButtonText }, this.divActivityContainer);
+            activitySearchGoButton = domConstruct.create("div", { "class": "esriCTActivitySearchGoButton", "innerHTML": sharedNls.buttons.goButtonText }, this.divActivityContainer);
             this.own(on(activitySearchGoButton, a11yclick, lang.hitch(this, this._queryForSelectedActivityInList)));
-            // If in share url activity searh is clicked then query for layer
+            // If in share url activity search is clicked then query for layer
             if (window.location.href.toString().split("$activitySearch=").length > 1 && window.location.href.toString().split("$activitySearch=")[1].substring(0, 5) !== "false" && window.location.href.toString().split("$activitySearch=")[1].substring(0, 5) !== "error") {
                 if (window.location.href.toString().split("$doQuery=")[1].split("$")[0] === "true") {
                     this._queryForSelectedActivityInList();
@@ -171,7 +162,7 @@ define([
         },
 
         /**
-        * set the select and unselect in activity serach.
+        * set the select and unselect in activity search.
         * param {object} activityTickMark is domNode
         * param {object} activityimgSpan is domNode
         * @memberOf widgets/searchSetting/activitySearch
@@ -188,24 +179,24 @@ define([
         },
 
         /**
-        * This funciton qurey for selected acitivity in list
+        * Query for selected activity in list
         * @memberOf widgets/searchSetting/activitySearch
         */
         _queryForSelectedActivityInList: function () {
             var activityArray = [], infoActivity, selectedRow, j, i, selectedFeatureText, SearchSettingsLayers, selectedActivityArray = [];
-            dojo.doQuery = "true";
+            appGlobals.shareOptions.doQuery = "true";
             topic.publish("removeHighlightedCircleGraphics");
             topic.publish("removeBuffer");
             this._showLocateContainer();
-            dojo.searchFacilityIndex = -1;
+            appGlobals.shareOptions.searchFacilityIndex = -1;
             topic.publish("hideInfoWindow");
             // Setting carousel pod data
             topic.publish("getCarouselContainerData");
             this.locatorAddress = "";
             topic.publish("showProgressIndicator");
             domClass.replace(this.domNode, "esriCTHeaderSearch", "esriCTHeaderSearchSelected");
-            //
-            SearchSettingsLayers = dojo.configData.ActivitySearchSettings[0];
+
+            SearchSettingsLayers = appGlobals.configData.ActivitySearchSettings[0];
             infoActivity = SearchSettingsLayers.ActivityList;
             // Looping for info activity.
             for (i = 0; i < infoActivity.length; i++) {
@@ -227,13 +218,13 @@ define([
                             }
                         }
                     }
-                    dojo.activitySearch = selectedActivityArray;
-                    dojo.addressLocation = null;
+                    appGlobals.shareOptions.activitySearch = selectedActivityArray;
+                    appGlobals.shareOptions.addressLocation = null;
                     this._queryForSelectedActivityInLayer(selectedRow);
                 } else {
-                    dojo.doQuery = "false";
-                    dojo.sharedGeolocation = null;
-                    dojo.infowindowDirection = null;
+                    appGlobals.shareOptions.doQuery = "false";
+                    appGlobals.shareOptions.sharedGeolocation = null;
+                    appGlobals.shareOptions.infowindowDirection = null;
                     alert(sharedNls.errorMessages.activityNotSelected);
                     topic.publish("clearGraphicsAndCarousel");
                     topic.publish("removeRouteGraphichOfDirectionWidget");
@@ -243,7 +234,7 @@ define([
         },
 
         /**
-        * This funciton qurey for selected acitivity in Layer
+        * Query for selected activity in Layer
         * @param{object}selectedRow contains the selected feature
         * @memberOf widgets/searchSetting/activitySearch
         */
@@ -264,45 +255,56 @@ define([
             }
             // If query string is not found or created then show error message.
             if (activityQueryString === "") {
-                dojo.doQuery = "false";
-                dojo.sharedGeolocation = null;
+                appGlobals.shareOptions.doQuery = "false";
+                appGlobals.shareOptions.sharedGeolocation = null;
                 alert(sharedNls.errorMessages.activityNotSelected);
                 topic.publish("clearGraphicsAndCarousel");
                 topic.publish("removeRouteGraphichOfDirectionWidget");
-                dojo.infowindowDirection = null;
+                appGlobals.shareOptions.infowindowDirection = null;
                 topic.publish("hideProgressIndicator");
                 return;
             }
-            // creating query task for firing query on layer.
-            queryTask = new esri.tasks.QueryTask(dojo.configData.ActivitySearchSettings[0].QueryURL);
-            queryForActivity = new esri.tasks.Query();
-            queryForActivity.where = activityQueryString;
-            queryForActivity.outFields = ["*"];
-            queryForActivity.returnGeometry = true;
-            // Execute query on layer.
-            queryTask.execute(queryForActivity, lang.hitch(this, function (relatedRecords) {
-                // If related records are found then set date and time according to formate
-                if (relatedRecords && relatedRecords.features && relatedRecords.features.length > 0) {
-                    this.dateFieldArray = this.getDateField(relatedRecords);
-                    // Call execute query on feature
-                    topic.publish("executeQueryForFeatures", relatedRecords.features, dojo.configData.ActivitySearchSettings[0].QueryURL, widgetName);
-                } else {
-                    alert(sharedNls.errorMessages.invalidSearch);
-                    dojo.doQuery = "false";
-                    dojo.infoRoutePoint = null;
-                    dojo.infowindowDirection = null;
-                    topic.publish("clearGraphicsAndCarousel");
-                    topic.publish("removeRouteGraphichOfDirectionWidget");
+            if (appGlobals.configData.ActivitySearchSettings[0].QueryURL) {
+                // creating query task for firing query on layer.
+                queryTask = new QueryTask(appGlobals.configData.ActivitySearchSettings[0].QueryURL);
+                queryForActivity = new Query();
+                queryForActivity.where = activityQueryString;
+                queryForActivity.outFields = ["*"];
+                queryForActivity.returnGeometry = true;
+                // Execute query on layer.
+                queryTask.execute(queryForActivity, lang.hitch(this, function (relatedRecords) {
+                    // If related records are found then set date and time according to format
+                    if (relatedRecords && relatedRecords.features && relatedRecords.features.length > 0) {
+                        this.dateFieldArray = this.getDateField(relatedRecords);
+                        topic.publish("hideProgressIndicator");
+                        // Call execute query on feature
+                        topic.publish("executeQueryForFeatures", relatedRecords.features, appGlobals.configData.ActivitySearchSettings[0].QueryURL, widgetName);
+                    } else {
+                        alert(sharedNls.errorMessages.invalidSearch);
+                        appGlobals.shareOptions.doQuery = "false";
+                        appGlobals.shareOptions.infoRoutePoint = null;
+                        appGlobals.shareOptions.infowindowDirection = null;
+                        topic.publish("clearGraphicsAndCarousel");
+                        topic.publish("removeRouteGraphichOfDirectionWidget");
+                        topic.publish("hideProgressIndicator");
+                    }
+                }), function (error) {
+                    appGlobals.shareOptions.doQuery = "false";
+                    appGlobals.shareOptions.infoRoutePoint = null;
+                    appGlobals.shareOptions.infowindowDirection = null;
                     topic.publish("hideProgressIndicator");
-                }
-            }), function (error) {
-                dojo.doQuery = "false";
-                dojo.infoRoutePoint = null;
-                dojo.infowindowDirection = null;
-                topic.publish("hideProgressIndicator");
+                    topic.publish("removeRouteGraphichOfDirectionWidget");
+                    alert(error);
+                });
+            } else {
+                appGlobals.shareOptions.doQuery = "false";
+                appGlobals.shareOptions.infoRoutePoint = null;
+                appGlobals.shareOptions.infowindowDirection = null;
+                topic.publish("clearGraphicsAndCarousel");
                 topic.publish("removeRouteGraphichOfDirectionWidget");
-                alert(error);
-            });
+                topic.publish("hideProgressIndicator");
+                alert(sharedNls.errorMessages.activityLayerNotconfigured);
+            }
         }
     });
 });

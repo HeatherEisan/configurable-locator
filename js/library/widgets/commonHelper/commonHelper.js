@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig:true,alert,console,esri,Modernizr,dijit */
+﻿/*global define,dojo,dojoConfig:true,alert,console,esri,Modernizr,dijit,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -23,36 +23,30 @@ define([
     "dojo/dom-attr",
     "dojo/_base/lang",
     "dojo/on",
-    "dojo/dom-geometry",
-    "dojo/dom",
     "dojo/_base/array",
     "dojo/dom-class",
-    "dojo/query",
-    "dojo/string",
-    "esri/tasks/locator",
-    "esri/tasks/query",
-    "esri/tasks/QueryTask",
-    "esri/geometry",
     "esri/graphic",
     "dijit/_WidgetBase",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
     "../carouselContainer/carouselContainer",
-    "widgets/locator/locator",
-    "esri/request",
     "esri/geometry/Point",
+    "esri/geometry/Polyline",
+    "esri/geometry/Polygon",
     "dijit/a11yclick",
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleMarkerSymbol",
+    "esri/symbols/SimpleFillSymbol",
     "dojo/_base/Color",
-    "dojo/Deferred",
-    "dojo/DeferredList"
+    "dojo/query"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, QueryTask, Geometry, Graphic, _WidgetBase, sharedNls, topic, CarouselContainer, LocatorTool, esriRequest, Point, a11yclick, SimpleLineSymbol, SimpleMarkerSymbol, Color, Deferred, DeferredList) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, Graphic, _WidgetBase, sharedNls, topic, CarouselContainer, Point, Polyline, Polygon, a11yclick, SimpleLineSymbol, SimpleMarkerSymbol, SimpleFillSymbol, Color, query) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase], {
         sharedNls: sharedNls,                            // Variable for shared NLS
+
+        /** This file has some common function which is used in intire project **/
 
         /**
         * remove highlighted symbol graphics from map
@@ -116,7 +110,7 @@ define([
             var i;
             // checking the direction widget's stop graphics
             if (dirctionWidgetObject.stopGraphics) {
-                // Looping for direction widget stop graphich for disabaling info window
+                // Looping for direction widget stop graphic for disabling info window
                 for (i = 0; i < dirctionWidgetObject.stopGraphics.length; i++) {
                     dirctionWidgetObject.stopGraphics[i].infoTemplate = null;
                 }
@@ -140,23 +134,20 @@ define([
         /**
         * Remove null value from the attribute.
         * @param {object} featureObject is object for feature
-        * @return {object} feature set after removing null value
+        * @return {object} featureObject of object for feature without null value
         * @memberOf widgets/commonHelper/commonHelper
         */
         removeNullValue: function (featureObject) {
             var i, j;
             // Checking the feature object
             if (featureObject) {
-                // Looping feature object setting null value to N\A(Taking from NLS file)
+                // Looping through the feature attributes and setting text configured in NLS file (showNullValue) for attributes with null value
                 for (i = 0; i < featureObject.length; i++) {
                     for (j in featureObject[i].attributes) {
                         if (featureObject[i].attributes.hasOwnProperty(j)) {
-                            if (!featureObject[i].attributes[j]) {
-                                featureObject[i].attributes[j] = sharedNls.showNullValue;
-                            }
-                            // Checking the null value in feature layer data
-                            if (dojo.isString(featureObject[i].attributes[j]) && lang.trim(featureObject[i].attributes[j]) === "") {
-                                featureObject[i].attributes[j] = sharedNls.showNullValue;
+                            // Assigning text configured in NLS file (showNullValue) to attributes with no value
+                            if ((!featureObject[i].attributes[j]) && (featureObject[i].attributes[j] !== 0 || lang.trim(String(featureObject[i].attributes[j])) === "")) {
+                                featureObject[i].attributes[j] = appGlobals.configData.ShowNullValueAs;
                             }
                         }
                     }
@@ -166,76 +157,75 @@ define([
         },
 
         /**
-        * hide Carousel Container
+        * hide carousel container
         * @memberOf widgets/commonHelper/commonHelper
         */
         hideCarouselContainer: function () {
-            // If  Carousel Container is created then collapse it down
+            // If carousel container is created then collapse it down
             if (this.carouselContainer) {
-                this.carouselContainer.collapseDown();
+                this.carouselContainer.collapseCarousel();
             }
         },
 
         /**
-        * log error message
-        * @param{error} error contains error message
-        * @memberOf widgets/commonHelper/commonHelper
-        */
-        showError: function (error) {
-            console.log("Error: ", error.message);
-            topic.publish("hideProgressIndicator");
-        },
-
-        /**
-        * highlight the nearest feature on the amp
+        * highlight the nearest feature on the map
         * @param{object} featureGeometry contains feature
         * @memberOf widgets/commonHelper/commonHelper
         */
         highlightFeature: function (featureGeometry) {
-            var symbol;
+            var symbol, graphics;
             // Clear the previous highlighted layer graphics
             this.removeHighlightedCircleGraphics();
             // Checks the geometry and setting highlighted symbol on map
             if (featureGeometry) {
-                symbol = new esri.symbol.SimpleMarkerSymbol(esri.symbol.SimpleMarkerSymbol.STYLE_CIRCLE, dojo.configData.LocatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(dojo.configData.RippleColor.split(",")[0], 10), parseInt(dojo.configData.RippleColor.split(",")[1], 10), parseInt(dojo.configData.RippleColor.split(",")[2], 10)]), 4), new dojo.Color([0, 0, 0, 0]));
-                this.map.getLayer("highlightLayerId").add(new esri.Graphic(featureGeometry, symbol, {}, null));
+                if (featureGeometry.type === "polygon") {
+                    symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(appGlobals.configData.RippleColor.split(",")[0], 10), parseInt(appGlobals.configData.RippleColor.split(",")[1], 10), parseInt(appGlobals.configData.RippleColor.split(",")[2], 10)]), 4), new Color([0, 0, 0, 0]));
+                    graphics = new Graphic(new Polygon(featureGeometry), symbol);
+                } else if (featureGeometry.type === "polyline") {
+                    symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(appGlobals.configData.RippleColor.split(",")[0], 10), parseInt(appGlobals.configData.RippleColor.split(",")[1], 10), parseInt(appGlobals.configData.RippleColor.split(",")[2], 10)]), 4);
+                    graphics = new Graphic(new Polyline(featureGeometry), symbol);
+                } else {
+                    symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, appGlobals.configData.LocatorRippleSize, new esri.symbol.SimpleLineSymbol(esri.symbol.SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(appGlobals.configData.RippleColor.split(",")[0], 10), parseInt(appGlobals.configData.RippleColor.split(",")[1], 10), parseInt(appGlobals.configData.RippleColor.split(",")[2], 10)]), 4), new Color([0, 0, 0, 0]));
+                    graphics = new Graphic(new Point(featureGeometry), symbol);
+                }
+                this.map.getLayer("highlightLayerId").add(graphics);
             }
         },
 
         /**
-        * Setting extent for gemetry on center
+        * Center at the specified geometry
         * @memberOf widgets/commonHelper/commonHelper
         */
-        setCenterAt: function (gemetry) {
+        setCenterAt: function (geometry) {
             // checking if application in share url, If it is a share url then do not set extent, else set extent
             if (window.location.href.toString().split("$extentChanged=").length > 1) {
                 // checking if application in share url, If it is a share url then do not set extent, else set extent
                 if (this.isExtentSet) {
-                    this.map.centerAt(gemetry);
+                    this.map.centerAt(geometry);
                 }
             } else {
-                this.map.centerAt(gemetry);
+                this.map.centerAt(geometry);
             }
         },
 
         /**
-        * Setting extent for gemetry on center
+        * Center and zoom to the specified geometry
         * @memberOf widgets/commonHelper/commonHelper
         */
-        setZoomAndCenterAt: function (gemetry) {
+        setZoomAndCenterAt: function (geometry) {
             // checking if application in share url, If it is a share url then do not set extent, else set extent
             if (window.location.href.toString().split("$extentChanged=").length > 1) {
                 // checking if application in share url, If it is a share url then do not set extent, else set extent
                 if (this.isExtentSet) {
-                    this.map.centerAndZoom(gemetry, dojo.configData.ZoomLevel);
+                    this.map.centerAndZoom(geometry, appGlobals.configData.ZoomLevel);
                 }
             } else {
-                this.map.centerAndZoom(gemetry, dojo.configData.ZoomLevel);
+                this.map.centerAndZoom(geometry, appGlobals.configData.ZoomLevel);
             }
         },
 
         /**
-        * calculate the distance between the puspin(start point) and nearest feature(end point)
+        * calculate the distance between the pushpin(start point) and nearest feature(end point)
         * @param {object} startPoint is pushpin on map
         * @param {object} endPoint is search result
         * @memberOf widgets/commonHelper/commonHelper
@@ -314,18 +304,18 @@ define([
 
         /**
         * Returns the pod enabled status from config file.
-        * @param {string} Key name mensioned in config file
+        * @param {string} Key name mentioned in config file
         * @memberOf widgets/commonHelper/commonHelper
         */
         getPodStatus: function (keyValue) {
             var isEnabled, i, key;
             isEnabled = false;
             // looping the podSetting in config file
-            for (i = 0; i < dojo.configData.PodSettings.length; i++) {
-                for (key in dojo.configData.PodSettings[i]) {
-                    if (dojo.configData.PodSettings[i].hasOwnProperty(key)) {
+            for (i = 0; i < appGlobals.configData.PodSettings.length; i++) {
+                for (key in appGlobals.configData.PodSettings[i]) {
+                    if (appGlobals.configData.PodSettings[i].hasOwnProperty(key)) {
                         // Checking the pod setting variable, if it is set true then show pod
-                        if (key === keyValue && dojo.configData.PodSettings[i][key].Enabled) {
+                        if (key === keyValue && appGlobals.configData.PodSettings[i][key].Enabled) {
                             isEnabled = true;
                             break;
                         }
@@ -333,6 +323,27 @@ define([
                 }
             }
             return isEnabled;
+        },
+
+        /**
+        * get query url from unified search data
+        * @param {object} activityData contains unified search data with layer information
+        * @param {object} result contains unified search data only
+        * @memberOf widgets/commonHelper/commonHelper
+        */
+        getQueryURLWithUnifiedSearch: function (activityData, result) {
+            var g, l, queryURL = "";
+            if (activityData) {
+                for (g = 0; g < activityData.length; g++) {
+                    // Looping for features
+                    for (l = 0; l < activityData[g].records.features.length; l++) {
+                        if (activityData[g].records.features[l].distance === result) {
+                            queryURL = activityData[g].queryURL;
+                        }
+                    }
+                }
+            }
+            return queryURL;
         },
 
         /**
@@ -349,7 +360,7 @@ define([
             } else if (convertMinutes === 0) {
                 displayTime = hours + 'hrs';
             } else {
-                displayTime = hours + 'hrs' + ":" + convertMinutes + 'min';
+                displayTime = hours + 'hrs' + " " + convertMinutes + 'min';
             }
             return displayTime;
         },
@@ -360,13 +371,22 @@ define([
         * @memberOf widgets/commonHelper/commonHelper
         */
         previousButtonClick: function (featureCount) {
-            var rowNumber, infoWindowParameter;
+            var rowNumber, point, infoWindowParameter;
             if (Number(this.divPaginationCount.innerHTML.split("/")[0]) > 1) {
                 this.divPaginationCount.innerHTML = Number(this.divPaginationCount.innerHTML.split("/")[0]) - 1 + "/" + featureCount;
                 rowNumber = Number(this.divPaginationCount.innerHTML.split("/")[0]) - 1;
+
+                if (this.infoWindowFeatureData[rowNumber].attr.geometry.type === "polygon") {
+                    point = this.infoWindowFeatureData[rowNumber].attr.geometry.getCentroid();
+                } else if (this.infoWindowFeatureData[rowNumber].attr.geometry.type === "polyline") {
+                    point = this.infoWindowFeatureData[rowNumber].attr.geometry.getPoint(0, 0);
+                } else {
+                    point = this.infoWindowFeatureData[rowNumber].attr.geometry;
+                }
+
                 // Setting info window parameter for showing info window on map
                 infoWindowParameter = {
-                    "mapPoint": this.infoWindowFeatureData[rowNumber].attr.geometry,
+                    "mapPoint": point,
                     "attribute": this.infoWindowFeatureData[rowNumber].attr.attributes,
                     "layerId": this.infoWindowFeatureData[rowNumber].layerId,
                     "layerTitle": this.infoWindowFeatureData[rowNumber].layerTitle,
@@ -386,13 +406,20 @@ define([
         * @memberOf widgets/commonHelper/commonHelper
         */
         nextButtonClick: function (featureCount) {
-            var rowNumber, infoWindowParameter;
+            var rowNumber, point, infoWindowParameter;
             if (Number(this.divPaginationCount.innerHTML.split("/")[0]) < featureCount) {
                 this.divPaginationCount.innerHTML = Number(this.divPaginationCount.innerHTML.split("/")[0]) + 1 + "/" + featureCount;
                 rowNumber = Number(this.divPaginationCount.innerHTML.split("/")[0]) - 1;
+                if (this.infoWindowFeatureData[rowNumber].attr.geometry.type === "polygon") {
+                    point = this.infoWindowFeatureData[rowNumber].attr.geometry.getCentroid();
+                } else if (this.infoWindowFeatureData[rowNumber].attr.geometry.type === "polyline") {
+                    point = this.infoWindowFeatureData[rowNumber].attr.geometry.getPoint(0, 0);
+                } else {
+                    point = this.infoWindowFeatureData[rowNumber].attr.geometry;
+                }
                 // Setting info window parameter for showing info window on map
                 infoWindowParameter = {
-                    "mapPoint": this.infoWindowFeatureData[rowNumber].attr.geometry,
+                    "mapPoint": point,
                     "attribute": this.infoWindowFeatureData[rowNumber].attr.attributes,
                     "layerId": this.infoWindowFeatureData[rowNumber].layerId,
                     "layerTitle": this.infoWindowFeatureData[rowNumber].layerTitle,
@@ -414,13 +441,13 @@ define([
         getSearchSetting: function (queryURL) {
             var settingData;
             // Looping for getting object id from event search.
-            array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
+            array.forEach(appGlobals.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
                 if (settings.QueryURL === queryURL) {
                     settingData = settings;
                 }
             }));
             // Looping for getting object id from activity search.
-            array.forEach(dojo.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
+            array.forEach(appGlobals.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
                 if (settings.QueryURL === queryURL) {
                     settingData = settings;
                 }
@@ -438,7 +465,32 @@ define([
             // Looping for carousel pod data for removing comment pod from container
             for (i = 0; i < this.carouselPodData.length; i++) {
                 selectedPodName = domAttr.get(this.carouselPodData[i], "CarouselPodName");
+                // checking for comment pod for removing it from container
                 if (selectedPodName !== "CommentsPod") {
+                    // checking for gallery pod from settings for removal of gallery pod from settings
+                    if (!this.isGalleryPodEnabled) {
+                        if (selectedPodName !== "GalleryPod") {
+                            eventPodData.push(this.carouselPodData[i]);
+                        }
+                    } else {
+                        eventPodData.push(this.carouselPodData[i]);
+                    }
+                }
+            }
+            this.carouselContainer.addPod(eventPodData);
+        },
+
+        /**
+        * Remove Gallery Pod pod from container for event layer
+        * @memberOf widgets/commonHelper/commonHelper
+        */
+        removeGalleryPod: function () {
+            var selectedPodName, eventPodData = [], i;
+            this.carouselContainer.removeAllPod();
+            // Looping for carousel pod data for removing comment pod from container
+            for (i = 0; i < this.carouselPodData.length; i++) {
+                selectedPodName = domAttr.get(this.carouselPodData[i], "CarouselPodName");
+                if (selectedPodName !== "GalleryPod") {
                     eventPodData.push(this.carouselPodData[i]);
                 }
             }
@@ -462,6 +514,27 @@ define([
         },
 
         /**
+        * Add gallery pod from container for event layer
+        * @memberOf widgets/commonHelper/commonHelper
+        */
+        addGalleryPod: function () {
+            var selectedPodName, eventPodData = [], i, divHeaderContent;
+            // Looping for carousel pod data for adding comment pod from container
+            divHeaderContent = query('.esriCTDivGalleryContent');
+            if (divHeaderContent.length === 0) {
+                for (i = 0; i < this.carouselPodData.length; i++) {
+                    selectedPodName = domAttr.get(this.carouselPodData[i], "CarouselPodName");
+                    // Looping if gallery div has data
+                    if (selectedPodName === "GalleryPod") {
+                        eventPodData.push(this.carouselPodData[i]);
+                    }
+                }
+                this.carouselContainer.addPod(eventPodData);
+            }
+        },
+
+
+        /**
         * Setting value to change for extent
         * @memberOf widgets/commonHelper/commonHelper
         */
@@ -481,19 +554,18 @@ define([
             return isZoomToLocation;
         },
 
-
         /**
-        * Calculate offset point to show infow window
-        * @param {mapPoint}
+        * Calculate offset point to show infowindow
+        * @param {object} mapPoint
         * @memberOf widgets/commonHelper/commonHelper
         */
         calculateCustomMapExtent: function (mapPoint) {
             var width, infoWidth, height, diff, ratioHeight, ratioWidth, totalYPoint, xmin,
                 ymin, xmax, ymax;
             width = this.map.extent.getWidth();
-            infoWidth = (this.map.width / 2) + dojo.configData.InfoPopupWidth / 2 + 400;
+            infoWidth = (this.map.width / 2) + appGlobals.configData.InfoPopupWidth / 2 + 400;
             height = this.map.extent.getHeight();
-            //check if infoWindow width is grether than map width
+            // check if infoWindow width is greater than map width
             if (infoWidth > this.map.width) {
                 diff = infoWidth - this.map.width;
             } else {
@@ -501,9 +573,9 @@ define([
             }
             ratioHeight = height / this.map.height;
             ratioWidth = width / this.map.width;
-            totalYPoint = dojo.configData.InfoPopupHeight + 30 + 61;
+            totalYPoint = appGlobals.configData.InfoPopupHeight + 30 + 61;
             xmin = mapPoint.x - (width / 2);
-            //validate the width of window
+            // validate the width of window
             if (dojo.window.getBox().w >= 680) {
                 ymin = mapPoint.y - height + (ratioHeight * totalYPoint);
                 xmax = xmin + width + diff * ratioWidth;
@@ -524,11 +596,13 @@ define([
         */
         getInfowWindowIndex: function (layerTitle, layerId) {
             var index, i;
-            // looping for getting the feture Title and Layerid
-            for (i = 0; i < dojo.configData.InfoWindowSettings.length; i++) {
-                if (layerTitle === dojo.configData.InfoWindowSettings[i].Title && layerId === dojo.configData.InfoWindowSettings[i].QueryLayerId) {
-                    index = i;
-                    break;
+            // looping for getting the layer id
+            for (i = 0; i < appGlobals.operationLayerSettings.length; i++) {
+                if (appGlobals.operationLayerSettings[i].infoWindowData) {
+                    if (layerTitle === appGlobals.operationLayerSettings[i].layerTitle && layerId === appGlobals.operationLayerSettings[i].layerID) {
+                        index = i;
+                        break;
+                    }
                 }
             }
             return index;
@@ -542,9 +616,8 @@ define([
         */
         getObjectId: function (response) {
             var objectId, j;
-            //loop for the json response and store the objectId in esriFieldTypeOID
+            // loop through the layer fields to fetch field of the type 'esriFieldTypeOID'
             for (j = 0; j < response.length; j++) {
-                //check whether objectId type feild from layer is equal to "esriFieldTypeOID"
                 if (response[j].type === "esriFieldTypeOID") {
                     objectId = response[j].name;
                     break;
@@ -576,17 +649,20 @@ define([
         getQueryUrl: function (LayerId, LayerTitle) {
             var queryURL;
             // Looping for getting object id from event search.
-            array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
-                if (settings.QueryLayerId === LayerId && settings.Title === LayerTitle) {
+            array.forEach(appGlobals.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
+                if (parseInt(settings.QueryLayerId, 10) === LayerId && settings.Title === LayerTitle) {
                     queryURL = settings.QueryURL;
                 }
             }));
             // Looping for getting object id from activity search.
-            array.forEach(dojo.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
-                if (settings.QueryLayerId === LayerId && settings.Title === LayerTitle) {
+            array.forEach(appGlobals.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
+                if (parseInt(settings.QueryLayerId, 10) === LayerId && settings.Title === LayerTitle) {
                     queryURL = settings.QueryURL;
                 }
             }));
+            if (!queryURL) {
+                queryURL = "otherURL";
+            }
             return queryURL;
         },
 
@@ -599,15 +675,15 @@ define([
         */
         getInfowWindowWidgetName: function (layerTitle, layerId) {
             var widgetName = "", key, j;
-            for (key in dojo.configData) {
-                if (dojo.configData.hasOwnProperty(key)) {
+            for (key in appGlobals.configData) {
+                if (appGlobals.configData.hasOwnProperty(key)) {
                     if (key === "ActivitySearchSettings" || key === "EventSearchSettings") {
-                        if (dojo.configData.ActivitySearchSettings[0].Title === layerTitle && dojo.configData.ActivitySearchSettings[0].QueryLayerId === layerId) {
+                        if (appGlobals.configData.ActivitySearchSettings[0].Title === layerTitle && parseInt(appGlobals.configData.ActivitySearchSettings[0].QueryLayerId, 10) === layerId) {
                             widgetName = "InfoActivity";
                             break;
                         }
-                        for (j = 0; j < dojo.configData.EventSearchSettings.length; j++) {
-                            if (dojo.configData.EventSearchSettings[j].Title === layerTitle && dojo.configData.EventSearchSettings[j].QueryLayerId === layerId) {
+                        for (j = 0; j < appGlobals.configData.EventSearchSettings.length; j++) {
+                            if (appGlobals.configData.EventSearchSettings[j].Title === layerTitle && parseInt(appGlobals.configData.EventSearchSettings[j].QueryLayerId, 10) === layerId) {
                                 widgetName = "InfoEvent";
                                 break;
                             }
@@ -626,19 +702,38 @@ define([
         getAttachments: function (response) {
             var divAttchmentInfo, divPreviousImgInfo, divNextImgInfo;
             this.imageCountInfo = 0;
-            //check response length which contain the information of attachment
+            // check if number of attachments fetched is more than 1
             if (response.length > 1) {
                 divPreviousImgInfo = domConstruct.create("div", { "class": "esriCTImgPrev" }, this.galleryContainer);
                 divNextImgInfo = domConstruct.create("div", { "class": "esriCTImgNext" }, this.galleryContainer);
                 divAttchmentInfo = domConstruct.create("img", { "class": "esriCTDivAttchmentInfo" }, this.galleryContainer);
-                domAttr.set(divAttchmentInfo, "src", response[0].url);
-                this.own(on(divPreviousImgInfo, a11yclick, lang.hitch(this, this._previousImageInfo, response, divAttchmentInfo)));
-                this.own(on(divNextImgInfo, a11yclick, lang.hitch(this, this._nextImageInfo, response, divAttchmentInfo)));
-                // check if response(attchment) length is only 1
+                domAttr.set(divAttchmentInfo, "src", response[this.imageCountInfo].url);
+                this.own(on(divPreviousImgInfo, a11yclick, lang.hitch(this, function () {
+                    this.imageCountInfo--;
+                    if (this.imageCountInfo === 0) {
+                        domStyle.set(divPreviousImgInfo, "display", "none");
+                    } else {
+                        domStyle.set(divPreviousImgInfo, "display", "block");
+                    }
+                    domStyle.set(divNextImgInfo, "display", "block");
+                    domAttr.set(divAttchmentInfo, "src", response[this.imageCountInfo].url);
+                })));
+                this.own(on(divNextImgInfo, a11yclick, lang.hitch(this, function () {
+                    this.imageCountInfo++;
+                    if (this.imageCountInfo === response.length - 1) {
+                        domStyle.set(divNextImgInfo, "display", "none");
+                    } else {
+                        domStyle.set(divNextImgInfo, "display", "block");
+                    }
+                    domStyle.set(divPreviousImgInfo, "display", "block");
+                    domAttr.set(divAttchmentInfo, "src", response[this.imageCountInfo].url);
+                })));
+                // if number of attachments fetched is equal to 1
             } else if (response.length === 1) {
                 divAttchmentInfo = domConstruct.create("img", { "class": "esriCTDivAttchmentInfo" }, this.galleryContainer);
                 domAttr.set(divAttchmentInfo, "src", response[0].url);
             } else {
+                // if no attachments fetched
                 domConstruct.create("div", { "class": "esriCTGalleryBox", "innerHTML": sharedNls.errorMessages.imageDoesNotFound }, this.galleryContainer);
             }
         },
@@ -690,31 +785,57 @@ define([
 
         /**
         * function for adding item in my list panel
-        * @param {eventDataObject} contains the event object information
-        * @return {widgetName} contains the widget name
+        * @param {object} eventDataObject - contains the event object information
+        * @param {string} widgetName - contains the widget name
         * @memberOf widgets/commonHelper/commonHelper
         */
         addtoMyList: function (eventDataObject, widgetName) {
             topic.publish("showProgressIndicator");
-            var sortedMyList, eventObject, l, eventSearchSettingsIndex, listObject, settingName, order, sortedMyListData;
+            var sortedMyList, eventObject, l, eventSearchSettingsIndex, listObject, IsSearchsettingFound, LayerInfo, layerSearchSetting, orderEvent, queryLayerID, sortedMyListData;
             listObject = {};
             // Looping event search setting for getting event index, and event setting name for further query
-            array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
-                if (settings.QueryLayerId === eventDataObject.layerId && settings.Title === eventDataObject.layerTitle) {
-                    eventSearchSettingsIndex = eventSettingIndex;
-                    settingName = "eventsettings";
+            IsSearchsettingFound = false;
+            LayerInfo = [];
+            array.forEach(appGlobals.operationLayerSettings, lang.hitch(this, function (settings, eventSettingIndex) {
+                if (settings.layerTitle === eventDataObject.layerTitle && settings.layerID === eventDataObject.layerId) {
+                    LayerInfo.push(settings);
                 }
             }));
-            // Looping activity search setting for getting event index, and event setting name for further query
-            array.forEach(dojo.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
-                if (settings.QueryLayerId === eventDataObject.layerId && settings.Title === eventDataObject.layerTitle) {
-                    eventSearchSettingsIndex = activitySettingIndex;
-                    settingName = "activitysettings";
+            // looping through layer info for getting settings
+            array.forEach(LayerInfo, lang.hitch(this, function (settingsName, eventSettingIndexValue) {
+                if (!IsSearchsettingFound) {
+                    var key;
+                    for (key in settingsName) {
+                        if (settingsName.hasOwnProperty(key)) {
+                            if (key.toLowerCase() === "activitysearchsettings") {
+                                layerSearchSetting = [settingsName.activitySearchSettings];
+                                this.searchSettingsName = "activitysettings";
+                                IsSearchsettingFound = true;
+                                break;
+                            }
+                            if (key.toLowerCase() === "eventsearchsettings") {
+                                layerSearchSetting = [settingsName.eventSearchSettings];
+                                this.searchSettingsName = "eventsettings";
+                                IsSearchsettingFound = true;
+                                break;
+                            }
+                        }
+                    }
                 }
             }));
-
+            // Looping through layer search settings for gettings search settings data
+            array.forEach(layerSearchSetting, lang.hitch(this, function (settings, eventSettingIndex) {
+                queryLayerID = parseInt(settings.QueryLayerId, 10);
+                if (queryLayerID === eventDataObject.layerId && settings.Title === eventDataObject.layerTitle) {
+                    if (this.searchSettingsName === "eventsettings") {
+                        eventSearchSettingsIndex = eventSettingIndex;
+                    } else if (this.searchSettingsName === "activitysettings") {
+                        eventSearchSettingsIndex = eventSettingIndex;
+                    }
+                }
+            }));
             //add the selected event object to the memory store
-            listObject = { "key": eventDataObject.ObjectIDField, "value": eventDataObject.eventDetails, "featureSet": eventDataObject.featureSet, "startDateField": eventDataObject.StartDateField, "eventSettingsIndex": eventSearchSettingsIndex, "settingsName": settingName };
+            listObject = { "key": eventDataObject.ObjectIDField, "value": eventDataObject.eventDetails, "featureSet": eventDataObject.featureSet, "startDateField": eventDataObject.StartDateField, "eventSettingsIndex": eventSearchSettingsIndex, "settingsName": this.searchSettingsName };
             this.myListStore.push(listObject);
             topic.publish("getMyListData", this.myListStore);
             if (this.myListStore.length > 0) {
@@ -725,33 +846,35 @@ define([
             if (widgetName.toLowerCase() === "infoevent" || "event") {
                 sortedMyList = this.sortedList;
                 if (!eventDataObject.infoWindowClick) {
-                    eventObject = { "EventDeatils": eventDataObject.eventDetails, "SortedData": sortedMyList, "InfowindowClick": eventDataObject.infoWindowClick, "layerId": eventDataObject.layerId, "layerTitle": eventDataObject.layerTitle, "settingsName": settingName, "key": eventDataObject.ObjectIDField, "startDateField": eventDataObject.StartDateField };
+                    eventObject = { "EventDetails": eventDataObject.eventDetails, "SortedData": sortedMyList, "InfowindowClick": eventDataObject.infoWindowClick, "layerId": eventDataObject.layerId, "layerTitle": eventDataObject.layerTitle, "settingsName": this.searchSettingsName, "key": eventDataObject.ObjectIDField, "startDateField": eventDataObject.StartDateField };
                 } else {
-                    eventObject = { "EventDeatils": eventDataObject.eventDetails, "SortedData": sortedMyList, "InfowindowClick": eventDataObject.infoWindowClick, "layerId": eventDataObject.layerId, "layerTitle": eventDataObject.layerTitle, "settingsName": settingName, "key": eventDataObject.ObjectIDField, "startDateField": eventDataObject.StartDateField };
+                    eventObject = { "EventDetails": eventDataObject.eventDetails, "SortedData": sortedMyList, "InfowindowClick": eventDataObject.infoWindowClick, "layerId": eventDataObject.layerId, "layerTitle": eventDataObject.layerTitle, "settingsName": this.searchSettingsName, "key": eventDataObject.ObjectIDField, "startDateField": eventDataObject.StartDateField };
                 }
             } else {
-                eventObject = { "EventDeatils": eventDataObject.eventDetails, "SortedData": this.sortedList, "InfowindowClick": eventDataObject.infoWindowClick, "layerId": eventDataObject.layerId, "layerTitle": eventDataObject.layerTitle, "settingsName": settingName, "key": eventDataObject.ObjectIDField, "startDateField": eventDataObject.StartDateField };
+                eventObject = { "EventDetails": eventDataObject.eventDetails, "SortedData": this.sortedList, "InfowindowClick": eventDataObject.infoWindowClick, "layerId": eventDataObject.layerId, "layerTitle": eventDataObject.layerTitle, "settingsName": this.searchSettingsName, "key": eventDataObject.ObjectIDField, "startDateField": eventDataObject.StartDateField };
             }
             topic.publish("refreshMyList", eventObject, widgetName);
             if (!eventDataObject.infoWindowClick) {
-                dojo.eventIndex = null;
+                appGlobals.shareOptions.eventIndex = null;
             }
             // Looping my list store for adding object id in an array for share application
             for (l = 0; l < this.myListStore.length; l++) {
                 // check if event added from event search
                 if (!eventDataObject.infoWindowClick) {
-                    if (dojo.eventIndex) {
-                        dojo.eventIndex += "," + this.myListStore[l].value[this.myListStore[l].key].toString();
+                    if (appGlobals.shareOptions.eventIndex) {
+                        appGlobals.shareOptions.eventIndex += "," + this.myListStore[l].value[this.myListStore[l].key].toString();
                     } else {
-                        dojo.eventIndex = this.myListStore[l].value[this.myListStore[l].key].toString();
+                        appGlobals.shareOptions.eventIndex = this.myListStore[l].value[this.myListStore[l].key].toString();
                     }
                 }
             }
+            // function for share for odering even search data
             if (window.location.toString().split("$eventOrderInMyList=").length > 1) {
                 if (this.myListStore.length === Number(window.location.toString().split("$eventOrderInMyList=")[1].split(",")[1].split("$")[0])) {
-                    order = Boolean(window.location.toString().split("$eventOrderInMyList=")[1].split(",")[0]);
-                    sortedMyListData = this._sortDate(order);
-                    eventObject = { "EventDeatils": null, "SortedData": sortedMyListData, "InfowindowClick": false, "eventForOrder": true };
+                    orderEvent = window.location.toString().split("$eventOrderInMyList=")[1].split(",")[0] === "true" ? true : false;
+                    topic.publish("sortMyList", orderEvent);
+                    sortedMyListData = this._sortDate(orderEvent);
+                    eventObject = { "EventDetails": null, "SortedData": sortedMyListData, "InfowindowClick": false, "eventForOrder": true };
                     // show data in mylist panel after order by list.
                     topic.publish("refreshMyList", eventObject, widgetName);
                 }
@@ -761,13 +884,13 @@ define([
 
         /**
         * sort date by order
-        * @param string startDate contains date attribute
-        * @param string ascendingFlag contains boolean flag for ascending value
-        * @memberOf widgets/myList/myList
+        * @param {string} startDate contains date attribute
+        * @param {string} ascendingFlag contains boolean flag for ascending value
+        * @memberOf widgets/commonHelper/commonHelper
         */
         _sortDate: function (ascendingFlag) {
             var sortResult = [], sortedEventData = [], sortedActivityData = [], t, startDateFound, p, q, sortedDataKey, sortedDateArray, nameValue, nameData;
-            // Checking for order of data and sorting.
+            // Checking for order of data and sorting in assending order.
             if (ascendingFlag) {
                 sortResult = this.myListStore.sort(lang.hitch(this, function (a, b) {
                     if (b.value[b.startDateField] && a.value[a.startDateField]) {
@@ -777,6 +900,7 @@ define([
                     }
                     return sortedDateArray;
                 }));
+                // Checking for order of data and sorting in decending  order.
             } else {
                 sortResult = this.myListStore.sort(lang.hitch(this, function (a, b) {
                     if (a.value[a.startDateField] && b.value[b.startDateField]) {
@@ -804,6 +928,7 @@ define([
                     sortedActivityData.push(sortResult[t]);
                 }
             }
+            // sorting for activity data on the basic of name attribute
             sortedActivityData = sortedActivityData.sort(function (a, b) {
                 nameValue = a.value.NAME.toLowerCase();
                 nameData = b.value.NAME.toLowerCase();
@@ -815,6 +940,7 @@ define([
                 }
                 return 0; //default return value (no sorting)
             });
+            // fetching of event and activity data in two diffrent array and finally returning sorted data
             sortResult.length = 0;
             for (p = 0; p < sortedEventData.length; p++) {
                 sortResult.push(sortedEventData[p]);
@@ -823,35 +949,6 @@ define([
                 sortResult.push(sortedActivityData[q]);
             }
             return sortResult;
-        },
-
-        /**
-        * change the date format
-        * @return {object} feature object
-        * @memberOf widgets/commonHelper/commonHelper
-        */
-        changeDateFormatForActivity: function (featureSet) {
-            var displayDateFormat = dojo.configData.ActivitySearchSettings[0].DisplayDateFormat, i, key, k;
-            // If feature set is found and date and time field array is found.
-            if (featureSet && this.dateFieldArray) {
-                // Looping for date field array
-                for (i = 0; i < this.dateFieldArray.length; i++) {
-                    // Looping for feature set for changing date value formate.
-                    for (k = 0; k < featureSet.length; k++) {
-                        for (key in featureSet[k].attributes) {
-                            if (featureSet[k].attributes.hasOwnProperty(key)) {
-                                // If key is mached with date attribute
-                                if (key === this.dateFieldArray[i]) {
-                                    if (featureSet[k].attributes[key] !== sharedNls.showNullValue) {
-                                        featureSet[k].attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureSet[k].attributes[key]), { datePattern: displayDateFormat, selector: "date" });
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return featureSet;
         }
     });
 });

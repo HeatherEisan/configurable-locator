@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig:true,alert,esri,Modernizr,dijit */
+﻿/*global define,dojo,dojoConfig:true,alert,esri,Modernizr,dijit,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -30,7 +30,7 @@ define([
     "esri/tasks/locator",
     "esri/tasks/query",
     "dojo/Deferred",
-    "dojo/DeferredList",
+    "dojo/promise/all",
     "esri/tasks/QueryTask",
     "esri/geometry",
     "esri/graphic",
@@ -49,7 +49,7 @@ define([
     "esri/units",
     "widgets/locator/locator"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, _WidgetBase, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol, Directions, urlUtils, units, LocatorTool) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, query, string, Locator, Query, Deferred, all, QueryTask, Geometry, Graphic, Point, _WidgetBase, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol, Directions, urlUtils, units, LocatorTool) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase], {
@@ -62,25 +62,25 @@ define([
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         _createDirectionWidget: function () {
-            var address, queryObject, resultcontent, facilityObject, directionObject;
+            var address, queryObject, resultcontent, directionObject, queryURLLink;
             try {
                 //proxy setting for routeService
                 urlUtils.addProxyRule({
-                    urlPrefix: dojo.configData.DrivingDirectionSettings.RouteServiceURL,
-                    proxyUrl: dojo.configData.ProxyUrl
+                    urlPrefix: appGlobals.configData.DrivingDirectionSettings.RouteServiceURL,
+                    proxyUrl: appGlobals.configData.ProxyUrl
                 });
                 //proxy setting for GeometryService
                 urlUtils.addProxyRule({
-                    urlPrefix: dojo.configData.GeometryService,
-                    proxyUrl: dojo.configData.ProxyUrl
+                    urlPrefix: appGlobals.configData.GeometryService,
+                    proxyUrl: appGlobals.configData.ProxyUrl
                 });
                 //creating esriDirection widget.
                 this._esriDirectionsWidget = new Directions({
                     map: this.map,
-                    directionsLengthUnits: units[dojo.configData.DrivingDirectionSettings.RouteUnit.toUpperCase()],
+                    directionsLengthUnits: units[appGlobals.configData.DrivingDirectionSettings.RouteUnit.toUpperCase()],
                     showTrafficOption: false,
                     dragging: false,
-                    routeTaskUrl: dojo.configData.DrivingDirectionSettings.RouteServiceURL
+                    routeTaskUrl: appGlobals.configData.DrivingDirectionSettings.RouteServiceURL
                 });
                 //set geocoderOptions is autoComplete for ersiDirection widget
                 this._esriDirectionsWidget.options.geocoderOptions.autoComplete = true;
@@ -89,13 +89,13 @@ define([
                 //calling esriDirection widget
                 this._esriDirectionsWidget.startup();
                 // set the color of route in direction widget
-                this._esriDirectionsWidget.options.routeSymbol.color = new Color([parseInt(dojo.configData.DrivingDirectionSettings.RouteColor.split(",")[0], 10), parseInt(dojo.configData.DrivingDirectionSettings.RouteColor.split(",")[1], 10), parseInt(dojo.configData.DrivingDirectionSettings.RouteColor.split(",")[2], 10), parseFloat(dojo.configData.DrivingDirectionSettings.Transparency.split(",")[0], 10)]);
+                this._esriDirectionsWidget.options.routeSymbol.color = new Color([parseInt(appGlobals.configData.DrivingDirectionSettings.RouteColor.split(",")[0], 10), parseInt(appGlobals.configData.DrivingDirectionSettings.RouteColor.split(",")[1], 10), parseInt(appGlobals.configData.DrivingDirectionSettings.RouteColor.split(",")[2], 10), parseFloat(appGlobals.configData.DrivingDirectionSettings.Transparency.split(",")[0], 10)]);
                 //set the width of route in direction widget
-                this._esriDirectionsWidget.options.routeSymbol.width = parseInt(dojo.configData.DrivingDirectionSettings.RouteWidth, 10);
+                this._esriDirectionsWidget.options.routeSymbol.width = parseInt(appGlobals.configData.DrivingDirectionSettings.RouteWidth, 10);
                 // callback function for direction widget when route is started
                 this.own(on(this._esriDirectionsWidget, "directions-start", lang.hitch(this, function (a) {
-                    // setting length of geocoders to 0
-                    if (!Modernizr.geolocation) {
+                    // setting length of geocoders to 0 in the case of IE8 browser  because direction widget throwing error internally when it sort to geocoders.
+                    if (dojo.isIE === 8) {
                         a.target.geocoders.length = 0;
                     }
                 })));
@@ -104,7 +104,7 @@ define([
                     this.disableInfoPopupOfDirectionWidget(this._esriDirectionsWidget);
                     if (this.locatorAddress !== "") {
                         address = this.locatorAddress;
-                        //check is startpoint is there then set title
+                        //check is start point is there then set title
                     } else if (this.routeObject.StartPoint) {
                         address = sharedNls.titles.directionCurrentLocationText;
                     }
@@ -117,84 +117,81 @@ define([
                         } else {
                             this._esriDirectionsWidget.zoomToFullRoute();
                         }
-                        //swich case for widget name
+                        //switch case for widget name
                         switch (this.routeObject.WidgetName.toLowerCase()) {
                         case "activitysearch":
-                            dojo.sharedGeolocation = null;
-                            dojo.eventForListClicked = null;
-                            dojo.infowindowDirection = null;
-                            dojo.eventInfoWindowData = null;
-                            dojo.eventRoutePoint = null;
-                            dojo.eventForListClicked = null;
-                            dojo.infoRoutePoint = null;
+                            appGlobals.shareOptions.sharedGeolocation = null;
+                            appGlobals.shareOptions.eventForListClicked = null;
+                            appGlobals.shareOptions.infowindowDirection = null;
+                            appGlobals.shareOptions.eventInfoWindowData = null;
+                            appGlobals.shareOptions.eventRoutePoint = null;
+                            appGlobals.shareOptions.eventForListClicked = null;
+                            if (appGlobals.shareOptions.activitySearch) {
+                                appGlobals.shareOptions.infoRoutePoint = null;
+                            }
                             queryObject = { "FeatureData": this.routeObject.EndPoint, "SolveRoute": a.result.routeResults, "Index": this.routeObject.Index, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "Address": address, "IsRouteCreated": true };
                             topic.publish("showProgressIndicator");
                             this.removeBuffer();
                             this.queryCommentLayer(queryObject);
                             break;
                         case "searchedfacility":
-                            dojo.infowindowDirection = null;
-                            dojo.eventForListClicked = null;
+                            appGlobals.shareOptions.infowindowDirection = null;
+                            appGlobals.shareOptions.eventForListClicked = null;
                             queryObject = { "FeatureData": this.routeObject.EndPoint, "SolveRoute": a.result.routeResults, "Index": this.routeObject.Index, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "Address": address, "IsRouteCreated": true, "activityData": this.routeObject.activityData };
                             topic.publish("showProgressIndicator");
                             this.queryCommentLayer(queryObject);
                             break;
                         case "event":
-                            dojo.infowindowDirection = null;
-                            dojo.doQuery = "false";
-                            dojo.sharedGeolocation = "false";
-                            this.removeCommentPod();
-                            this.removeBuffer();
-                            this.routeObject.EndPoint = this.removeNullValue(this.routeObject.EndPoint);
-                            queryObject = { "FeatureData": this.routeObject.EndPoint, "SolveRoute": a.result.routeResults, "Index": this.routeObject.Index, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "Address": address };
-                            topic.publish("showProgressIndicator");
-                            this.carouselContainer.showCarouselContainer();
-                            this.setSearchContent(this.routeObject.EndPoint, false, this.routeObject.QueryURL, this.routeObject.WidgetName, this.routeObject.activityData);
-                            this.highlightFeature(this.routeObject.EndPoint[this.routeObject.Index].geometry);
-                            this.setCenterAt(this.routeObject.EndPoint[this.routeObject.Index].geometry);
-                            resultcontent = { "value": this.routeObject.Index };
-                            facilityObject = { "Feature": this.routeObject.EndPoint, "SelectedItem": resultcontent, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName };
-                            this.setFacility(facilityObject);
-                            directionObject = { "Feature": this.routeObject.EndPoint, "SelectedItem": resultcontent, "SolveRoute": a.result.routeResults, "Address": address, "WidgetName": this.routeObject.WidgetName, "QueryURL": this.routeObject.QueryURL };
-                            this.setDirection(directionObject);
-                            queryObject = { "FeatureData": this.routeObject.EndPoint, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "activityData": this.routeObject.activityData };
-                            this.setGallery(queryObject, resultcontent);
+                            this.showEventData(a, address);
                             topic.publish("hideProgressIndicator");
                             break;
                         case "unifiedsearch":
-                            dojo.infowindowDirection = null;
-                            dojo.eventForListClicked = null;
-                            dojo.addressLocationDirectionActivity = null;
-                            queryObject = { "FeatureData": this.routeObject.EndPoint, "SolveRoute": a.result.routeResults, "Index": this.routeObject.Index, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "Address": address, "IsRouteCreated": true, "activityData": this.routeObject.activityData };
-                            topic.publish("showProgressIndicator");
-                            this.queryCommentLayer(queryObject);
-                            dojo.sharedGeolocation = null;
+                            appGlobals.shareOptions.infowindowDirection = null;
+                            appGlobals.shareOptions.eventForListClicked = null;
+                            queryURLLink = this.getQueryURLWithUnifiedSearch(this.routeObject.activityData, this.routeObject.EndPoint[this.routeObject.Index].distance);
+                            queryURLLink = queryURLLink === "" ? this.routeObject.QueryURL : queryURLLink;
+                            if (queryURLLink === appGlobals.configData.ActivitySearchSettings[0].QueryURL) {
+                                queryObject = { "FeatureData": this.routeObject.EndPoint, "SolveRoute": a.result.routeResults, "Index": this.routeObject.Index, "QueryURL": queryURLLink, "WidgetName": this.routeObject.WidgetName, "Address": address, "IsRouteCreated": true, "activityData": this.routeObject.activityData };
+                                topic.publish("showProgressIndicator");
+                                this.queryCommentLayer(queryObject);
+                                appGlobals.shareOptions.sharedGeolocation = null;
+                            } else {
+                                this.showEventData(a, address);
+                            }
                             break;
                         case "geolocation":
-                            dojo.addressLocationDirectionActivity = null;
-                            dojo.eventForListClicked = null;
-                            dojo.eventInfoWindowData = null;
-                            dojo.infoRoutePoint = null;
-                            queryObject = { "FeatureData": this.routeObject.EndPoint, "SolveRoute": a.result.routeResults, "Index": this.routeObject.Index, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "Address": address, "IsRouteCreated": true, "activityData": this.routeObject.activityData };
-                            topic.publish("showProgressIndicator");
-                            this.queryCommentLayer(queryObject);
+                            appGlobals.shareOptions.addressLocationDirectionActivity = null;
+                            appGlobals.shareOptions.eventForListClicked = null;
+                            appGlobals.shareOptions.eventInfoWindowData = null;
+                            appGlobals.shareOptions.infoRoutePoint = null;
+
+                            queryURLLink = this.getQueryURLWithUnifiedSearch(this.routeObject.activityData, this.routeObject.EndPoint[this.routeObject.Index].distance);
+                            queryURLLink = queryURLLink === "" ? this.routeObject.QueryURL : queryURLLink;
+                            if (queryURLLink === appGlobals.configData.ActivitySearchSettings[0].QueryURL) {
+                                queryURLLink = this.getQueryURLWithUnifiedSearch(this.routeObject.activityData, this.routeObject.EndPoint[this.routeObject.Index].distance);
+                                queryObject = { "FeatureData": this.routeObject.EndPoint, "SolveRoute": a.result.routeResults, "Index": this.routeObject.Index, "QueryURL": queryURLLink, "WidgetName": this.routeObject.WidgetName, "Address": address, "IsRouteCreated": true, "activityData": this.routeObject.activityData };
+                                topic.publish("showProgressIndicator");
+                                this.queryCommentLayer(queryObject);
+                            } else {
+                                this.showEventData(a, address);
+                            }
                             break;
                         case "infoevent":
                             resultcontent = { "value": 0 };
                             this.removeBuffer();
-                            dojo.addressLocation = null;
-                            dojo.eventForListClicked = null;
-                            dojo.doQuery = "false";
-                            dojo.eventPlannerQuery = null;
+                            appGlobals.shareOptions.addressLocation = null;
+                            appGlobals.shareOptions.eventForListClicked = null;
+                            appGlobals.shareOptions.doQuery = "false";
+                            appGlobals.shareOptions.eventPlannerQuery = null;
                             directionObject = { "Feature": this.routeObject.EndPoint, "SelectedItem": resultcontent, "SolveRoute": a.result.routeResults, "Address": address, "WidgetName": this.routeObject.WidgetName, "QueryURL": this.routeObject.QueryURL };
                             this.setDirection(directionObject, true);
                             break;
                         case "infoactivity":
                             resultcontent = { "value": 0 };
                             this.removeBuffer();
-                            dojo.addressLocation = null;
-                            dojo.eventForListClicked = null;
-                            dojo.doQuery = "false";
+                            appGlobals.shareOptions.addressLocation = null;
+                            appGlobals.shareOptions.eventForListClicked = null;
+                            appGlobals.shareOptions.doQuery = "false";
                             directionObject = { "Feature": this.routeObject.EndPoint, "SelectedItem": resultcontent, "SolveRoute": a.result.routeResults, "Address": address, "WidgetName": this.routeObject.WidgetName, "QueryURL": this.routeObject.QueryURL };
                             this.setDirection(directionObject, true);
                             break;
@@ -213,14 +210,14 @@ define([
                             topic.publish("hideProgressIndicator");
                             this.isRouteCreated = false;
                         } else {
-                            dojo.eventForListClicked = null;
-                            alert(sharedNls.errorMessages.routeComment);
+                            appGlobals.shareOptions.eventForListClicked = null;
                             this._executeWhenRouteNotCalculated(this.routeObject);
                             topic.publish("hideProgressIndicator");
                             this.isRouteCreated = false;
                         }
                         topic.publish("hideProgressIndicator");
                     }
+                    topic.publish("hideProgressIndicator");
                     this._setCrouselContainerInSharedCase();
                 })));
                 topic.publish("hideProgressIndicator");
@@ -228,6 +225,40 @@ define([
                 alert(error);
                 topic.publish("hideProgressIndicator");
             }
+        },
+
+        /**
+        * function will show the event search
+        * @param {object} a contains route data
+        * @param {string} address contains address of the route
+        * @memberOf widgets/commonHelper/directionWidgetHelper
+        */
+        showEventData: function (a, address) {
+            var queryObject, resultcontent, facilityObject, directionObject;
+            appGlobals.shareOptions.infowindowDirection = null;
+            appGlobals.shareOptions.doQuery = "false";
+            this.removeCommentPod();
+            this.routeObject.EndPoint = this.removeNullValue(this.routeObject.EndPoint);
+            queryObject = { "FeatureData": this.routeObject.EndPoint, "SolveRoute": a.result.routeResults, "Index": this.routeObject.Index, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "Address": address, "activityData": this.routeObject.activityData };
+            topic.publish("showProgressIndicator");
+            this.carouselContainer.showCarouselContainer();
+            this.setSearchContent(this.routeObject.EndPoint, false, this.routeObject.QueryURL, this.routeObject.WidgetName, this.routeObject.activityData);
+            this.highlightFeature(this.routeObject.EndPoint[this.routeObject.Index].geometry);
+            this.setCenterAt(this.routeObject.EndPoint[this.routeObject.Index].geometry);
+            resultcontent = { "value": this.routeObject.Index };
+            facilityObject = { "Feature": this.routeObject.EndPoint, "SelectedItem": resultcontent, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "activityData": this.routeObject.activityData };
+            this.setFacility(facilityObject);
+            // checking for solve route if direction is not calculated then show address search box
+            if (queryObject.SolveRoute[0].directions && queryObject.SolveRoute[0].directions.totalLength <= 0) {
+                this._createAddressSearchTextBox(queryObject, resultcontent);
+            } else {
+                directionObject = { "Feature": this.routeObject.EndPoint, "SelectedItem": resultcontent, "SolveRoute": a.result.routeResults, "Address": address, "WidgetName": this.routeObject.WidgetName, "QueryURL": this.routeObject.QueryURL, "activityData": this.routeObject.activityData };
+                this.setDirection(directionObject);
+            }
+            queryObject = { "FeatureData": this.routeObject.EndPoint, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "activityData": this.routeObject.activityData };
+            this.setGallery(queryObject, resultcontent);
+            this.removeCommentPod();
+            this.carouselContainer.expandCarousel();
         },
 
         /**
@@ -239,6 +270,7 @@ define([
             var endPointGeometery, startPointGeometery, geoArray, queryObject;
             // if variable is set to false directions cannot be enabled
             topic.publish("showProgressIndicator");
+            routeObject.EndPoint = this.removeNullValue(routeObject.EndPoint);
             // Remove ripple only when routeObject's widgetName is neither InfoActivity nor InfoEvent
             if (routeObject.WidgetName !== "InfoActivity" && routeObject.WidgetName !== "InfoEvent") {
                 this.removeHighlightedCircleGraphics();
@@ -253,15 +285,27 @@ define([
             geoArray.push(endPointGeometery);
             this.routeObject = routeObject;
             // Updating two stops for direction widget.
-            if (dojo.configData.DrivingDirectionSettings.GetDirections) {
+            if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
                 // For clearing the direction from map and div.
                 this._esriDirectionsWidget.clearDirections();
+                // function for updating stops and getting direction from direction widget
                 this._esriDirectionsWidget.updateStops(geoArray).then(lang.hitch(this, function () {
-                    this._esriDirectionsWidget.getDirections();
-                }), function (err) {
-                    alert(sharedNls.errorMessages.routeDoesNotCreate);
+                    this._esriDirectionsWidget.getDirections().then(lang.hitch(this, function () {
+                        topic.publish("hideProgressIndicator");
+                    }), lang.hitch(this, function (err) {
+                        // when route is not calculated by direction widget then show alert message and show results in pod
+                        alert(sharedNls.errorMessages.routeComment);
+                        topic.publish("executeWhenRouteNotCalculated", this.routeObject);
+                        this.isRouteCreated = false;
+                        topic.publish("hideProgressIndicator");
+                    }));
+                }), lang.hitch(this, function (err) {
+                    // when route is not calculated by direction widget then show alert message and show results in pod
+                    alert(sharedNls.errorMessages.routeComment);
+                    topic.publish("executeWhenRouteNotCalculated", this.routeObject);
+                    this.isRouteCreated = false;
                     topic.publish("hideProgressIndicator");
-                });
+                }));
             } else {
                 queryObject = { "FeatureData": this.routeObject.EndPoint, "Index": this.routeObject.Index, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "activityData": this.routeObject.activityData };
                 this.queryCommentLayer(queryObject);
@@ -275,149 +319,194 @@ define([
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         queryCommentLayer: function (queryObject) {
-            var queryTask, esriQuery, deferredArray = [], deferredListResult, commentArray, k, j, resultcontent, featureId;
+            var queryTask, errorMessage, foreignKeyField, primaryKeyField, esriQuery, deferredArray = [], commentArray = [], k, j, featureId, i, searchSettingsData;
             try {
+                searchSettingsData = [];
+                for (i = 0; i < appGlobals.operationLayerSettings.length; i++) {
+                    if (appGlobals.operationLayerSettings[i].activitySearchSettings) {
+                        searchSettingsData.push(appGlobals.operationLayerSettings[i].activitySearchSettings);
+                        break;
+                    }
+                }
                 // looping activity search setting for getting comments
-                array.forEach(dojo.configData.ActivitySearchSettings, (lang.hitch(this, function (activitySearchSettings) {
-                    queryTask = new esri.tasks.QueryTask(activitySearchSettings.CommentsSettings.QueryURL);
-                    esriQuery = new esri.tasks.Query();
-                    esriQuery.outFields = ["*"];
-                    esriQuery.returnGeometry = true;
-                    // Checking if queryObject has feature data
-                    if (queryObject.FeatureData) {
-                        if (queryObject.WidgetName.toLowerCase() === "infoactivity") {
-                            esriQuery.where = dojo.configData.ActivitySearchSettings[0].CommentsSettings.ForeignKeyFieldForActivity + "=" + queryObject.FeatureData[this.objectIdForActivityLayer];
-                            featureId = queryObject.FeatureData[this.objectIdForActivityLayer];
-                        } else {
-                            esriQuery.where = dojo.configData.ActivitySearchSettings[0].CommentsSettings.ForeignKeyFieldForActivity + "=" + queryObject.FeatureData[queryObject.Index].attributes[this.objectIdForActivityLayer];
-                        }
-                        // Setting deferred array
-                        deferredArray.push(queryTask.execute(esriQuery, lang.hitch(this, this._executeQueryTask)));
-                        deferredListResult = new DeferredList(deferredArray);
-                        // Calling deferred array then to do further query.
-                        deferredListResult.then(lang.hitch(this, function (result) {
-                            commentArray = [];
-                            // If result is got from service call then push data in array for further query.
-                            if (result.length > 0) {
-                                for (j = 0; j < result.length; j++) {
-                                    if (result[j][0] && result[j][1].features) {
-                                        for (k = 0; k < result[j][1].features.length; k++) {
-                                            commentArray.push(result[j][1].features[k]);
+                array.forEach(searchSettingsData, (lang.hitch(this, function (SearchSettings) {
+                    if (appGlobals.configData.ActivitySearchSettings[0].CommentsSettings.QueryURL !== "") {
+                        queryTask = new esri.tasks.QueryTask(SearchSettings.CommentsSettings.QueryURL);
+                        primaryKeyField = this.getKeyValue(SearchSettings.PrimaryKeyForActivity) || "";
+                        foreignKeyField = this.getKeyValue(SearchSettings.CommentsSettings.ForeignKeyFieldForComment) || "";
+                        if (primaryKeyField !== "" && foreignKeyField !== "") {
+                            esriQuery = new esri.tasks.Query();
+                            esriQuery.outFields = ["*"];
+                            esriQuery.returnGeometry = true;
+                            // Checking if queryObject has feature data
+                            if (queryObject.FeatureData) {
+                                if (queryObject.WidgetName.toLowerCase() === "infoactivity") {
+                                    esriQuery.where = foreignKeyField + "=" + queryObject.FeatureData[primaryKeyField];
+                                    featureId = queryObject.FeatureData[primaryKeyField];
+                                } else {
+                                    esriQuery.where = foreignKeyField + "=" + queryObject.FeatureData[queryObject.Index].attributes[primaryKeyField];
+                                }
+                                // Setting deferred array
+                                deferredArray.push(queryTask.execute(esriQuery, lang.hitch(this, this._executeQueryTask)));
+                                // Calling deferred array then to do further query.
+                                all(deferredArray).then(lang.hitch(this, function (result) {
+                                    commentArray = [];
+                                    // If result is got from service call then push data in array for further query.
+                                    if (result.length > 0) {
+                                        for (j = 0; j < result.length; j++) {
+                                            if (result[j] && result[j].features) {
+                                                for (k = 0; k < result[j].features.length; k++) {
+                                                    commentArray.push(result[j].features[k]);
+                                                }
+                                            }
                                         }
+                                        // If comment array is created then sort data
+                                        if (commentArray.length > 0) {
+                                            commentArray.sort(lang.hitch(this, function (a, b) {
+                                                return b.attributes[this.objectIdForCommentLayer] - a.attributes[this.objectIdForCommentLayer];
+                                            }));
+                                        }
+                                        this._switchCaseForRoute(queryObject, commentArray, featureId);
                                     }
-                                }
-                                // If comment array is created then sort data
-                                if (commentArray) {
-                                    commentArray.sort(lang.hitch(this, function (a, b) {
-                                        return b.attributes[this.objectIdForCommentLayer] - a.attributes[this.objectIdForCommentLayer];
-                                    }));
-                                }
-                                // Switching for functionality name for doing further query,
-                                switch (queryObject.WidgetName.toLowerCase()) {
-                                    // If it is comming from activity search then set bottom pod's data
-                                case "activitysearch":
-                                    topic.publish("showProgressIndicator");
-                                    resultcontent = { "value": queryObject.Index };
-                                    this.carouselContainer.removeAllPod();
-                                    this.carouselContainer.addPod(this.carouselPodData);
-                                    this.carouselContainer.showCarouselContainer();
-                                    this.carouselContainer.collapseUP();
-                                    this.highlightFeature(queryObject.FeatureData[0].geometry);
-                                    if (!queryObject.IsRouteCreated) {
-                                        this.setCenterAt(queryObject.FeatureData[0].geometry);
-                                    }
-                                    this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName);
-                                    this._createCommonPods(queryObject, commentArray, resultcontent);
-                                    this._setCrouselContainerInSharedCase();
+                                }), function (err) {
+                                    commentArray = [];
+                                    errorMessage = sharedNls.errorMessages.errorInQueringLayer;
+                                    // Creating other pod if comment is unable to get, due to some issue.
+                                    this._switchCaseForRoute(queryObject, commentArray, featureId, errorMessage);
                                     topic.publish("hideProgressIndicator");
-                                    break;
-                                case "searchedfacility":
-                                    // If it is comming from click on search pod item then set bottom pod's data
-                                    topic.publish("showProgressIndicator");
-                                    this.highlightFeature(queryObject.FeatureData[queryObject.Index].geometry);
-                                    if (!queryObject.IsRouteCreated) {
-                                        this.setCenterAt(queryObject.FeatureData[queryObject.Index].geometry);
-                                    }
-                                    resultcontent = { "value": queryObject.Index };
-                                    this._createCommonPods(queryObject, commentArray, resultcontent, queryObject.activityData);
-                                    this._setCrouselContainerInSharedCase();
-                                    topic.publish("hideProgressIndicator");
-                                    break;
-                                case "unifiedsearch":
-                                    // If it is comming from unified search then set bottom pod's data
-                                    topic.publish("showProgressIndicator");
-                                    resultcontent = { "value": 0 };
-                                    this.carouselContainer.showCarouselContainer();
-                                    this.carouselContainer.collapseUP();
-                                    this.highlightFeature(queryObject.FeatureData[0].geometry);
-                                    if (!queryObject.IsRouteCreated) {
-                                        this.setCenterAt(queryObject.FeatureData[queryObject.Index].geometry);
-                                    }
-                                    this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName, queryObject.activityData);
-                                    this._createCommonPods(queryObject, commentArray, resultcontent, queryObject.activityData);
-                                    this._setCrouselContainerInSharedCase();
-                                    topic.publish("hideProgressIndicator");
-                                    this.widgetName = true;
-                                    break;
-                                case "geolocation":
-                                    // If it is comming from geolaction search widget then set bottom pod's data
-                                    topic.publish("showProgressIndicator");
-                                    resultcontent = { "value": 0 };
-                                    this.carouselContainer.showCarouselContainer();
-                                    this.carouselContainer.collapseUP();
-                                    this.highlightFeature(queryObject.FeatureData[0].geometry);
-                                    if (!queryObject.IsRouteCreated) {
-                                        this.setCenterAt(queryObject.FeatureData[queryObject.Index].geometry);
-                                    }
-                                    this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName, queryObject.activityData);
-                                    this._createCommonPods(queryObject, commentArray, resultcontent, queryObject.activityData);
-                                    this._setCrouselContainerInSharedCase();
-                                    topic.publish("hideProgressIndicator");
-                                    break;
-                                case "infoactivity":
-                                    // If it is comming from info window's direction widget  search then set bottom pod's data
-                                    resultcontent = { "value": 0 };
-                                    if (commentArray !== null) {
-                                        this._setInfoWindowComment(commentArray, resultcontent, featureId);
-                                    }
-                                    topic.publish("hideProgressIndicator");
-                                    break;
-                                case "default":
-                                    break;
-                                }
+                                });
                             }
-                        }), function (err) {
-                            // Creating other pod if comment is unable to get, due to some issue.
-                            this._createPodWithoutCommentLayer(queryObject);
-                            topic.publish("hideProgressIndicator");
-                        });
+                        } else {
+                            errorMessage = sharedNls.errorMessages.fieldNotConfigured;
+                            this._switchCaseForRoute(queryObject, commentArray, featureId, errorMessage);
+                        }
+                    } else {
+                        this._switchCaseForRoute(queryObject, commentArray, featureId, errorMessage);
                     }
                 })));
             } catch (error) {
                 // Creating other pod if comment is unable to get, due to some issue.
-                this._createPodWithoutCommentLayer(queryObject);
+                commentArray = [];
+                errorMessage = sharedNls.errorMessages.errorInQueringLayer;
+                this._switchCaseForRoute(queryObject, commentArray, featureId, errorMessage);
                 topic.publish("hideProgressIndicator");
             }
         },
 
+        /**
+        * this function calculates route bassed on wedget click
+        * @param {object} queryObject Contains FeatureData
+        * @param {array} commentArray Contains comments data
+        * @param {string} featureId Contains feature Id
+        * @memberOf widgets/commonHelper/directionWidgetHelper
+        */
+        _switchCaseForRoute: function (queryObject, commentArray, featureId, errorMessage) {
+            var resultcontent;
+            switch (queryObject.WidgetName.toLowerCase()) {
+            // If it is coming from activity search then set bottom pod's data
+            case "activitysearch":
+                topic.publish("showProgressIndicator");
+                resultcontent = { "value": queryObject.Index };
+                this.carouselContainer.removeAllPod();
+                this.carouselContainer.addPod(this.carouselPodData);
+                this.carouselContainer.showCarouselContainer();
+                this.carouselContainer.expandCarousel();
+                this.highlightFeature(queryObject.FeatureData[0].geometry);
+                if (!queryObject.IsRouteCreated) {
+                    this.setCenterAt(queryObject.FeatureData[0].geometry);
+                }
+                this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName);
+                this._createCommonPods(queryObject, commentArray, resultcontent);
+                if (errorMessage) {
+                    this.setCommentForError(errorMessage);
+                }
+                this._setCrouselContainerInSharedCase();
+                topic.publish("hideProgressIndicator");
+                break;
+            case "searchedfacility":
+                // If it is coming from click on search pod item then set bottom pod's data
+                topic.publish("showProgressIndicator");
+                this.highlightFeature(queryObject.FeatureData[queryObject.Index].geometry);
+                if (!queryObject.IsRouteCreated) {
+                    this.setCenterAt(queryObject.FeatureData[queryObject.Index].geometry);
+                }
+                resultcontent = { "value": queryObject.Index };
+                this._createCommonPods(queryObject, commentArray, resultcontent, queryObject.activityData);
+                if (errorMessage) {
+                    this.setCommentForError(errorMessage);
+                }
+                this._setCrouselContainerInSharedCase();
+                topic.publish("hideProgressIndicator");
+                break;
+            case "unifiedsearch":
+                // If it is coming from unified search then set bottom pod's data
+                topic.publish("showProgressIndicator");
+                resultcontent = { "value": 0 };
+                this.carouselContainer.removeAllPod();
+                this.carouselContainer.addPod(this.carouselPodData);
+                this.carouselContainer.showCarouselContainer();
+                this.carouselContainer.expandCarousel();
+                this.highlightFeature(queryObject.FeatureData[0].geometry);
+                if (!queryObject.IsRouteCreated) {
+                    this.setCenterAt(queryObject.FeatureData[queryObject.Index].geometry);
+                }
+                this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName, queryObject.activityData);
+                this._createCommonPods(queryObject, commentArray, resultcontent, queryObject.activityData);
+                if (errorMessage) {
+                    this.setCommentForError(errorMessage);
+                }
+                this._setCrouselContainerInSharedCase();
+                topic.publish("hideProgressIndicator");
+                this.widgetName = true;
+                break;
+            case "geolocation":
+                // If it is coming from geolocation search widget then set bottom pod's data
+                topic.publish("showProgressIndicator");
+                resultcontent = { "value": 0 };
+                this.carouselContainer.showCarouselContainer();
+                this.carouselContainer.expandCarousel();
+                this.highlightFeature(queryObject.FeatureData[0].geometry);
+                if (!queryObject.IsRouteCreated) {
+                    this.setCenterAt(queryObject.FeatureData[queryObject.Index].geometry);
+                }
+                this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName, queryObject.activityData);
+                this._createCommonPods(queryObject, commentArray, resultcontent, queryObject.activityData);
+                if (errorMessage) {
+                    this.setCommentForError(errorMessage);
+                }
+                this._setCrouselContainerInSharedCase();
+                topic.publish("hideProgressIndicator");
+                break;
+            case "infoactivity":
+                // If it is coming from info window's direction widget  search then set bottom pod's data
+                resultcontent = { "value": 0 };
+                if (commentArray !== null) {
+                    this._setInfoWindowComment(commentArray, featureId, queryObject, errorMessage);
+                }
+                topic.publish("hideProgressIndicator");
+                break;
+            case "default":
+                break;
+            }
+        },
 
         /**
-        * set the crousel container state (hide/show) in share case.
+        * set the carousel container state (hide/show) in share case.
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         _setCrouselContainerInSharedCase: function () {
-        // Checking for bottom pod's status in the case of share
+            // Checking for bottom pod's status in the case of share
             if (window.location.href.toString().split("$isShowPod=").length > 1) {
                 if (window.location.href.toString().split("$isShowPod=")[1].split("$")[0].toString() === "false") {
-                // collapsing down the carousel container
+                    // collapsing down the carousel container
                     if (this.carouselContainer) {
-                        this.carouselContainer.collapseDown();
+                        this.carouselContainer.collapseCarousel();
                     }
                 }
                 if (this.isExtentSet && this.carouselContainer) {
-                // Checking  for the widget name if it is not comming from info window direction
+                    // Checking  for the widget name if it is not coming from info window direction
                     if (this.routeObject.WidgetName.toLowerCase() !== "infoactivity" && this.routeObject.WidgetName.toLowerCase() !== "infoevent") {
-                        this.carouselContainer.collapseUP();
+                        this.carouselContainer.expandCarousel();
                     }
                 }
             }
@@ -432,7 +521,7 @@ define([
             var featureSet, i, deferred, features = [];
             deferred = new Deferred();
             featureSet = new esri.tasks.FeatureSet();
-            //check relatedRecords contain features or not
+            // check if relatedRecords contains features or not
             if (relatedRecords.features.length > 0) {
                 //loop for the features of comment layer and push the data into features
                 for (i = 0; i < relatedRecords.features.length; i++) {
@@ -446,10 +535,10 @@ define([
         },
 
         /**
-        * set the content in (Comments) carousel pod when error found
+        * set the error message in comments carousel pod in case of error
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
-        setCommentForError: function () {
+        setCommentForError: function (errorMessage) {
             var isPodEnabled = this.getPodStatus("CommentsPod"), divHeaderContent, divCommentRow;
             // If pod setting is true then remove div's item and set error message in pod.
             if (isPodEnabled) {
@@ -458,7 +547,7 @@ define([
                     domConstruct.empty(divHeaderContent[0]);
                 }
                 divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
-                domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.errorInQueringLayer }, divCommentRow);
+                domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": errorMessage }, divCommentRow);
             }
         },
 
@@ -468,18 +557,26 @@ define([
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         _executeWhenRouteNotCalculated: function (routeObject) {
-            //check widgetName is activitysearch
+            // check if widgetName is activitysearch
             if (routeObject.WidgetName.toLowerCase() === "activitysearch") {
                 this.removeBuffer();
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, 0);
             }
-            //check widgetName is searchedfacility
+            // check if widgetName is searchedfacility
             if (routeObject.WidgetName.toLowerCase() === "searchedfacility") {
                 this.removeBuffer();
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
             }
-            //check widgetName is event
+            // check if widgetName is event
             if (routeObject.WidgetName.toLowerCase() === "event") {
+                this.removeBuffer();
+                this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
+            }
+            if (routeObject.WidgetName.toLowerCase() === "unifiedsearch") {
+                this.removeBuffer();
+                this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
+            }
+            if (routeObject.WidgetName.toLowerCase() === "geolocation") {
                 this.removeBuffer();
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
             }
@@ -487,93 +584,125 @@ define([
 
         /**
         * Common bottom pod creation
-        * @param {object} queryObject contails  feature imformation
-        * @param {object} commentArray contails  feature imformation
-        * @param {object} resultcontent contails  information about the selected row
+        * @param {object} queryObject contains feature information
+        * @param {array} commentArray contains comment data
+        * @param {object} resultcontent contains information about the selected row
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         _createCommonPods: function (queryObject, commentArray, resultcontent) {
-            var directionObject, facilityObject, locatorParamsForCarouselContainer, locatorObjectForCarouselContainer, divDirectioncontent, activityMapPoint, routeObject, divHeader, searchContenData, mapPoint;
+            var directionObject, facilityObject;
             facilityObject = { "Feature": queryObject.FeatureData, "SelectedItem": resultcontent, "QueryURL": queryObject.QueryURL, "WidgetName": queryObject.WidgetName, "activityData": queryObject.activityData };
             this.setFacility(facilityObject);
-            //check whether the solve route is null
-            if (queryObject.SolveRoute === null) {
-                divDirectioncontent = query(".esriCTDivDirectioncontent")[0];
-                if (divDirectioncontent) {
-                    domConstruct.empty(divDirectioncontent);
-                    locatorParamsForCarouselContainer = {
-                        defaultAddress: dojo.configData.LocatorSettings.LocatorDefaultAddress,
-                        preLoaded: false,
-                        parentDomNode: divDirectioncontent,
-                        map: this.map,
-                        graphicsLayerId: this.locatorGraphicsLayerID,
-                        locatorSettings: dojo.configData.LocatorSettings,
-                        configSearchSettings: dojo.configData.SearchSettings
-                    };
-                    searchContenData = this.getKeyValue(dojo.configData.ActivitySearchSettings[0].SearchDisplayFields);
-                    divHeader = domConstruct.create("div", {}, divDirectioncontent);
-                    domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + queryObject.FeatureData[resultcontent.value].attributes[searchContenData] }, divHeader);
-                    activityMapPoint = this.map.getLayer(locatorParamsForCarouselContainer.graphicsLayerId);
-                    locatorObjectForCarouselContainer = new LocatorTool(locatorParamsForCarouselContainer);
-                    locatorObjectForCarouselContainer.candidateClicked = lang.hitch(this, function (graphic) {
-                        if (locatorObjectForCarouselContainer && locatorObjectForCarouselContainer.selectedGraphic) {
-                            dojo.addressLocationDirectionActivity = locatorObjectForCarouselContainer.selectedGraphic.geometry.x.toString() + "," + locatorObjectForCarouselContainer.selectedGraphic.geometry.y.toString();
-                        }
-                        // check grapic address
-                        if (graphic && graphic.attributes && graphic.attributes.address) {
-                            this.locatorAddress = graphic.attributes.address;
-                        }
-                        if (graphic && graphic.layer) {
-                            this.selectedLayerTitle = graphic.layer.SearchDisplayTitle;
-                        }
-                        this._clearBuffer();
-                        this.removeGeolocationPushPin();
-                        if (graphic && graphic.layer) {
-                            this.selectedGraphic = graphic;
-                            routeObject = { "StartPoint": graphic, "EndPoint": queryObject.FeatureData, "Index": queryObject.Index, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL };
-                            this.showRoute(routeObject);
-                            if (locatorObjectForCarouselContainer && locatorObjectForCarouselContainer.selectedGraphic === null) {
-                                dojo.addressLocationDirectionActivity = graphic.geometry.x.toString() + "," + graphic.geometry.y.toString();
-                            }
-                        } else {
-                            routeObject = { "StartPoint": activityMapPoint.graphics[0], "EndPoint": queryObject.FeatureData, "Index": queryObject.Index, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL };
-                            this.showRoute(routeObject);
-                        }
-                    });
+            // Checking for Driving direction setting is enabled
+            if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
+                //check whether the solve route is null
+                if (queryObject.SolveRoute === null) {
+                    this._createAddressSearchTextBox(queryObject, resultcontent);
+                } else {
+                    if (queryObject.SolveRoute[0].directions && queryObject.SolveRoute[0].directions.totalLength <= 0) {
+                        this._createAddressSearchTextBox(queryObject, resultcontent);
+                    } else {
+                        directionObject = { "Feature": queryObject.FeatureData, "SelectedItem": resultcontent, "SolveRoute": queryObject.SolveRoute, "Address": queryObject.Address, "WidgetName": queryObject.WidgetName, "activityData": queryObject.activityData, "QueryURL": queryObject.QueryURL };
+                        this.setDirection(directionObject);
+                    }
                 }
-            } else {
-                directionObject = { "Feature": queryObject.FeatureData, "SelectedItem": resultcontent, "SolveRoute": queryObject.SolveRoute, "Address": queryObject.Address, "WidgetName": queryObject.WidgetName, "activityData": queryObject.activityData, "QueryURL": queryObject.QueryURL };
-                this.setDirection(directionObject);
             }
             this.setGallery(queryObject, resultcontent);
-            //check if commnet is not null the calling the comment function
+            // if comment is not null, set comment in comment pod
             if (commentArray !== null) {
-                this.setComment(queryObject.FeatureData, commentArray, resultcontent);
+                this.setComment(queryObject.FeatureData, commentArray, resultcontent, queryObject.QueryURL);
+            } else {
+                this.removeCommentPod();
             }
-            //check if "addressLocationDirectionActivity" is there in share URL or not.
-            if (window.location.href.toString().split("$addressLocationDirectionActivity=").length > 1) {
-                mapPoint = new Point(window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[0], window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
-                locatorObjectForCarouselContainer._locateAddressOnMap(mapPoint);
-                routeObject = { "StartPoint": activityMapPoint.graphics[0], "EndPoint": queryObject.FeatureData, "Index": queryObject.Index, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL };
-                this.showRoute(routeObject);
+        },
+
+        /**
+        * Create address search text box when route is not calculated
+        * @param {object} queryObject contains feature information
+        * @param {object} resultcontent contains result item no
+        * @memberOf widgets/commonHelper/directionWidgetHelper
+        */
+        _createAddressSearchTextBox: function (queryObject, resultcontent) {
+            var searchContenData, searchSetting, activityMapPoint, locatorParamsForCarouselContainer, locatorObjectForCarouselContainer, routeObject, divDirectioncontent, divHeader, mapPoint;
+            divDirectioncontent = query(".esriCTDivDirectioncontent")[0];
+            if (divDirectioncontent) {
+                domConstruct.empty(divDirectioncontent);
+                locatorParamsForCarouselContainer = {
+                    defaultAddress: appGlobals.configData.LocatorSettings.LocatorDefaultAddress,
+                    preLoaded: false,
+                    parentDomNode: divDirectioncontent,
+                    map: this.map,
+                    graphicsLayerId: this.locatorGraphicsLayerID,
+                    locatorSettings: appGlobals.configData.LocatorSettings,
+                    configSearchSettings: appGlobals.configData.SearchSettings
+                };
+                // getting the key value from search display field from config file
+                searchSetting = this.getSearchSetting(queryObject.QueryURL);
+                searchContenData = this.getKeyValue(searchSetting.SearchDisplayFields);
+                divHeader = domConstruct.create("div", {}, divDirectioncontent);
+                domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + queryObject.FeatureData[resultcontent.value].attributes[searchContenData] }, divHeader);
+                activityMapPoint = this.map.getLayer(locatorParamsForCarouselContainer.graphicsLayerId);
+                locatorObjectForCarouselContainer = new LocatorTool(locatorParamsForCarouselContainer);
+                locatorObjectForCarouselContainer.candidateClicked = lang.hitch(this, function (graphic) {
+                    // checking for selectedGraphic from locator
+                    if (locatorObjectForCarouselContainer && locatorObjectForCarouselContainer.selectedGraphic) {
+                        appGlobals.shareOptions.addressLocationDirectionActivity = locatorObjectForCarouselContainer.selectedGraphic.geometry.x.toString() + "," + locatorObjectForCarouselContainer.selectedGraphic.geometry.y.toString();
+                    }
+                    // check graphic address
+                    if (graphic && graphic.attributes && graphic.attributes.address) {
+                        this.locatorAddress = graphic.attributes.address;
+                    }
+                    if (graphic && graphic.layer) {
+                        this.selectedLayerTitle = graphic.layer.SearchDisplayTitle;
+                    }
+                    this._clearBuffer();
+                    this.removeGeolocationPushPin();
+                    // checking for graphic layer for showing results in pod
+                    if (graphic && graphic.layer) {
+                        this.selectedGraphic = graphic;
+                        if (queryObject.WidgetName.toLowerCase() === "unifiedsearch" || queryObject.WidgetName.toLowerCase() === "geolocation") {
+                            routeObject = { "StartPoint": graphic, "EndPoint": queryObject.FeatureData, "Index": queryObject.Index, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL, "activityData": queryObject.activityData };
+                        } else {
+                            routeObject = { "StartPoint": graphic, "EndPoint": queryObject.FeatureData, "Index": queryObject.Index, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL };
+                        }
+                        this.showRoute(routeObject);
+                        if (locatorObjectForCarouselContainer && locatorObjectForCarouselContainer.selectedGraphic === null) {
+                            appGlobals.shareOptions.addressLocationDirectionActivity = graphic.geometry.x.toString() + "," + graphic.geometry.y.toString();
+                        }
+                    } else {
+                        if (queryObject.WidgetName.toLowerCase() === "unifiedsearch" || queryObject.WidgetName.toLowerCase() === "geolocation") {
+                            routeObject = { "StartPoint": activityMapPoint.graphics[0], "EndPoint": queryObject.FeatureData, "Index": queryObject.Index, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL, "activityData": queryObject.activityData };
+                        } else {
+                            routeObject = { "StartPoint": activityMapPoint.graphics[0], "EndPoint": queryObject.FeatureData, "Index": queryObject.Index, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL };
+                        }
+                        this.showRoute(routeObject);
+                    }
+                });
+                // check if "addressLocationDirectionActivity" is there in share URL or not.
+                if (window.location.href.toString().split("$addressLocationDirectionActivity=").length > 1) {
+                    mapPoint = new Point(window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[0], window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
+                    locatorObjectForCarouselContainer._locateAddressOnMap(mapPoint);
+                    routeObject = { "StartPoint": activityMapPoint.graphics[0], "EndPoint": queryObject.FeatureData, "Index": queryObject.Index, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL };
+                    this.showRoute(routeObject);
+                }
             }
         },
 
         /**
         * Create pod when comment layer fires some error
-        * @param {object} queryObject contails  feature imformation
+        * @param {object} queryObject contains feature information
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         _createPodWithoutCommentLayer: function (queryObject) {
             var resultcontent;
-            //check if widgetName is activitysearch.
+            // check if widgetName is activitysearch.
             if (queryObject.WidgetName.toLowerCase() === "activitysearch") {
                 topic.publish("showProgressIndicator");
                 resultcontent = { "value": 0 };
                 this.carouselContainer.removeAllPod();
                 this.carouselContainer.addPod(this.carouselPodData);
                 this.carouselContainer.showCarouselContainer();
-                this.carouselContainer.collapseUP();
+                this.carouselContainer.expandCarousel();
                 this.highlightFeature(queryObject.FeatureData[0].geometry);
                 this.setCenterAt(queryObject.FeatureData[0].geometry);
                 this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName);
@@ -614,11 +743,10 @@ define([
             // Calling update stops function for showing points on map and calculating direction
             this._esriDirectionsWidget.updateStops(geoArray).then(lang.hitch(this, function () {
                 this._esriDirectionsWidget.getDirections();
-            }),
-                function (err) {
-                    alert(err);
-                    topic.publish("hideProgressIndicator");
-                });
+            }), function (err) {
+                alert(sharedNls.errorMessages.routeComment);
+                topic.publish("hideProgressIndicator");
+            });
         },
 
         /**
@@ -628,16 +756,16 @@ define([
         * @param {string} widgetName Contains name of widget
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
-        _executeQueryForFeatures: function (featureSetObject, QueryURL, widgetName) {
+        _executeQueryForFeatures: function (featureSetObject, QueryURL, widgetName, featureClick) {
             var featureSet, i, dist, isDistanceFound, isZoomToGeolocation;
             // Calling function for removing null value from feature
             this.featureSetWithoutNullValue = this.removeNullValue(featureSetObject);
-            // Calling function to change date attribute formate
-            this.featureSetWithoutNullValue = this.changeDateFormatForActivity(featureSetObject);
+            // Calling function to change date attribute format
             featureSet = [];
             isDistanceFound = false;
             isZoomToGeolocation = this.setZoomForGeolocation();
-            // If modrnizr is  supporting geolocation then procced other wise show message.
+            this.featureClick = featureClick;
+            // If browser is supporting geolocation then proceed else show message.
             if (Modernizr.geolocation) {
                 // If geolocation widget is configured
                 if (dijit.registry.byId("geoLocation")) {
@@ -649,11 +777,11 @@ define([
                         if (mapPoint) {
                             this._clearBuffer();
                             this.removeLocatorPushPin();
-                            // If it is not comming from geolocation widget
+                            // If it is not coming from geolocation widget
                             if (!isPreLoaded) {
                                 // Looping for features
                                 for (i = 0; i < this.featureSetWithoutNullValue.length; i++) {
-                                    // If mapoint has geometry calculate distance
+                                    // If mappoint has geometry calculate distance
                                     if (mapPoint.geometry) {
                                         dist = this.getDistance(mapPoint.geometry, this.featureSetWithoutNullValue[i].geometry);
                                         isDistanceFound = true;
@@ -681,165 +809,210 @@ define([
                                     this.executeWithoutGeolocation(this.featureSetWithoutNullValue, QueryURL, widgetName, 0);
                                 }
                             } else {
-                                // if it is comming from geolocation widget
-                                dojo.doQuery = "false";
-                                dojo.addressLocationDirectionActivity = null;
-                                dojo.searchFacilityIndex = -1;
-                                dojo.addressLocation = null;
-                                dojo.sharedGeolocation = mapPoint;
+                                // if it is coming from geolocation widget
+                                this.selectedLayerTitle = null;
+                                appGlobals.shareOptions.doQuery = "false";
+                                appGlobals.shareOptions.addressLocationDirectionActivity = null;
+                                appGlobals.shareOptions.searchFacilityIndex = -1;
+                                appGlobals.shareOptions.addressLocation = null;
+                                appGlobals.shareOptions.sharedGeolocation = mapPoint;
                                 topic.publish("extentSetValue", true);
                                 topic.publish("hideInfoWindow");
-                                dojo.eventRoutePoint = null;
+                                appGlobals.shareOptions.eventRoutePoint = null;
                                 this.removeRouteGraphichOfDirectionWidget();
                                 this.createBuffer(mapPoint, "geolocation");
                             }
                         } else {
                             // Function for creating bottom pod without geolocation point, setting first feature in bottom pod as selected and others in search pod
                             this.removeLocatorPushPin();
+                            this.selectedLayerTitle = null;
                             this.executeWithoutGeolocation(this.featureSetWithoutNullValue, QueryURL, widgetName, 0);
                         }
                     });
                     dijit.registry.byId("geoLocation").onGeolocationError = lang.hitch(this, function (error, isPreLoaded) {
                         if (isPreLoaded) {
-                            dojo.eventRoutePoint = null;
+                            appGlobals.shareOptions.eventRoutePoint = null;
                             topic.publish("extentSetValue", true);
                             topic.publish("hideInfoWindow");
                             this.removeHighlightedCircleGraphics();
-                            this.removeLocatorPushPin();
-                            this.removeBuffer();
-                            // Checking for cauousel container for hiding carousel container and setting legend position
+                            // Checking for carousel container for hiding carousel container and setting legend position
                             if (this.carouselContainer) {
                                 this.carouselContainer.hideCarouselContainer();
                                 this.carouselContainer._setLegendPositionDown();
                             }
                         }
                         if (!isPreLoaded) {
-                            dojo.eventRoutePoint = null;
+                            // appGlobals.shareOptions.eventRoutePoint = null;
                             this.removeLocatorPushPin();
                             topic.publish("hideProgressIndicator");
+                            this.removeRouteGraphichOfDirectionWidget();
                             topic.publish("hideInfoWindow");
                             this.executeWithoutGeolocation(this.featureSetWithoutNullValue, QueryURL, widgetName, 0);
                         }
                     });
-                } else {
-                    //calling error message when geoloation widget is not configured.
+                } else { //calling error message when geoloation widget is not configured.
                     topic.publish("hideProgressIndicator");
                     alert(sharedNls.errorMessages.geolocationWidgetNotFoundMessage);
                 }
-            } else {
-                //calling error message when geolocation is not supported
+            } else { //calling error message when geolocation is not supported
                 topic.publish("hideProgressIndicator");
-                alert(sharedNls.errorMessages.activitySerachGeolocationText);
+                alert(sharedNls.errorMessages.activitySearchGeolocationText);
+                appGlobals.shareOptions.eventRoutePoint = null;
+                this.removeLocatorPushPin();
+                topic.publish("clearGraphicsAndCarousel");
+                topic.publish("removeRouteGraphichOfDirectionWidget");
+                topic.publish("hideProgressIndicator");
+                topic.publish("hideInfoWindow");
+                this.executeWithoutGeolocation(this.featureSetWithoutNullValue, QueryURL, widgetName, 0);
             }
         },
 
         /**
-        * Execute when geolocaiton is not found.
+        * Execute when geolocation is not found.
         * @param {object} featureset Contains information of feature
-        * @param {object} Query Url of the layer
+        * @param {object} Query URL of the layer
         * @param {string} widget name
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         executeWithoutGeolocation: function (featureSetWithoutNullValue, QueryURL, widgetName, index) {
-            var facilityObject, resultcontent, queryObject, searchSetting, locatorParamsForEventContainer, divDirectioncontent, divHeader, eventMapPoint, routeObject, searchContenData;
-            dojo.addressLocationDirectionActivity = null;
-            // If qurey is comming from event layer
+            var queryURLLink, queryObject;
+            appGlobals.shareOptions.addressLocationDirectionActivity = null;
+            // If query is coming from event layer
             if (widgetName.toLowerCase() === "event") {
-                dojo.doQuery = "false";
-                this.removeCommentPod();
-                // Removing null value from features
-                featureSetWithoutNullValue = this.removeNullValue(featureSetWithoutNullValue);
-                this.removeHighlightedCircleGraphics();
-                topic.publish("showProgressIndicator");
-                if (this.carouselContainer) {
-                    this.carouselContainer.showCarouselContainer();
-                }
-                // If it is comming from share url then maintain the pod state.
-                if (window.location.toString().split("isShowPod=").length > 1 && window.location.toString().split("isShowPod=")[1].toString().split("$")[0] === "false") {
-                    this.carouselContainer.collapseDown();
-                } else {
-                    this.carouselContainer.collapseUP();
-                }
-                // Highligh feature
-                this.highlightFeature(featureSetWithoutNullValue[index].geometry);
-                // Set it in center
-                this.setCenterAt(featureSetWithoutNullValue[index].geometry);
-                // Creating search content box
-                this.setSearchContent(featureSetWithoutNullValue, false, QueryURL, widgetName);
-                dojo.sharedGeolocation = "false";
-                resultcontent = { "value": index };
-                facilityObject = { "Feature": featureSetWithoutNullValue, "SelectedItem": resultcontent, "QueryURL": QueryURL, "WidgetName": widgetName };
-                // Setting facility pod in bootom pod
-                this.setFacility(facilityObject);
-                divDirectioncontent = query(".esriCTDivDirectioncontent")[0];
-                // If direction pod is not created then show direction tab
-                if (divDirectioncontent) {
-                    domConstruct.empty(divDirectioncontent);
-                    locatorParamsForEventContainer = {
-                        defaultAddress: dojo.configData.LocatorSettings.LocatorDefaultAddress,
-                        preLoaded: false,
-                        parentDomNode: divDirectioncontent,
-                        map: this.map,
-                        graphicsLayerId: this.locatorGraphicsLayerID,
-                        locatorSettings: dojo.configData.LocatorSettings,
-                        configSearchSettings: dojo.configData.SearchSettings
-                    };
-                    //Getting search display field from layer
-                    searchSetting = this.getSearchSetting(QueryURL);
-                    searchContenData = this.getKeyValue(searchSetting.SearchDisplayFields);
-                    divHeader = domConstruct.create("div", {}, divDirectioncontent);
-                    domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + featureSetWithoutNullValue[0].attributes[searchContenData] }, divHeader);
-                    locatorParamsForEventContainer = new LocatorTool(locatorParamsForEventContainer);
-                    eventMapPoint = this.map.getLayer(locatorParamsForEventContainer.graphicsLayerId);
-                    //Calling candidate click function for showing route and data in bottom pod
-                    locatorParamsForEventContainer.candidateClicked = lang.hitch(this, function (graphic) {
-                        if (locatorParamsForEventContainer && locatorParamsForEventContainer.selectedGraphic) {
-                            dojo.addressLocationDirectionActivity = locatorParamsForEventContainer.selectedGraphic.geometry.x.toString() + "," + locatorParamsForEventContainer.selectedGraphic.geometry.y.toString();
-                        }
-                        if (graphic && graphic.attributes && graphic.attributes.address) {
-                            this.locatorAddress = graphic.attributes.address;
-                        }
-                        if (graphic && graphic.layer) {
-                            this.selectedLayerTitle = graphic.layer.SearchDisplayTitle;
-                        }
-                        dojo.doQuery = "false";
-                        topic.publish("hideInfoWindow");
-                        this.removeGeolocationPushPin();
-                        // Checking for graphics for showing route
-                        if (graphic && graphic.layer) {
-                            routeObject = { "StartPoint": graphic, "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL };
-                            this.showRoute(routeObject);
-                            this.selectedEventGraphic = graphic;
-                            if (locatorParamsForEventContainer && locatorParamsForEventContainer.selectedGraphic === null) {
-                                dojo.addressLocationDirectionActivity = graphic.geometry.x.toString() + "," + graphic.geometry.y.toString();
-                            }
-                        } else {
-                            routeObject = { "StartPoint": eventMapPoint.graphics[0], "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL };
-                            this.showRoute(routeObject);
-                        }
-                    });
-                }
-                // Calling function for setting gallery
-                queryObject = { "FeatureData": featureSetWithoutNullValue, "WidgetName": widgetName, "QueryURL": QueryURL, "activityData": null };
-                this.setGallery(queryObject, resultcontent);
-                setTimeout(lang.hitch(this, function () {
-                    // If it is a share url and direction is calcualted from bottom pod then show route for the same.
-                    if (window.location.href.toString().split("$addressLocationDirectionActivity=").length > 1 && window.location.href.toString().split("$addressLocationDirectionActivity=")[1].substring(0, 18) !== "$sharedGeolocation") {
-                        var mapPoint = new Point(window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[0], window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
-                        locatorParamsForEventContainer._locateAddressOnMap(mapPoint, true);
-                        routeObject = { "StartPoint": eventMapPoint.graphics[0], "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL };
-                        this.showRoute(routeObject);
-                    }
-                }, 20000));
+                this.showEventSearchedDataInPod(featureSetWithoutNullValue, QueryURL, widgetName, index);
                 topic.publish("hideProgressIndicator");
+            } else if (widgetName.toLowerCase() === "unifiedsearch" || widgetName.toLowerCase() === "geolocation") {
+                appGlobals.shareOptions.eventRoutePoint = null;
+                topic.publish("showProgressIndicator");
+                queryURLLink = this.getQueryURLWithUnifiedSearch(this.routeObject.activityData, this.routeObject.EndPoint[this.routeObject.Index].distance);
+                queryURLLink = queryURLLink === "" ? this.routeObject.QueryURL : queryURLLink;
+                if (queryURLLink === appGlobals.configData.ActivitySearchSettings[0].QueryURL) {
+                    queryObject = { "FeatureData": this.routeObject.EndPoint, "SolveRoute": null, "Index": index, "QueryURL": queryURLLink, "WidgetName": widgetName, "Address": null, "IsRouteCreated": false, "activityData": this.routeObject.activityData };
+                    topic.publish("showProgressIndicator");
+                    this.queryCommentLayer(queryObject);
+                } else {
+                    topic.publish("showProgressIndicator");
+                    this.showEventSearchedDataInPod(this.routeObject.EndPoint, QueryURL, widgetName, index, this.routeObject.activityData);
+                }
             } else {
-                // If it comming from other then event layer then query comment layer, becaue in event layer we do not have comment layer settings.
-                dojo.eventRoutePoint = null;
-                dojo.sharedGeolocation = null;
+                // If it coming from other then event layer then query comment layer, because in event layer we do not have comment layer settings
+                appGlobals.shareOptions.eventRoutePoint = null;
+                appGlobals.shareOptions.sharedGeolocation = null;
                 queryObject = { "FeatureData": featureSetWithoutNullValue, "SolveRoute": null, "Index": index, "QueryURL": QueryURL, "WidgetName": widgetName, "Address": null, "IsRouteCreated": false };
                 topic.publish("showProgressIndicator");
                 this.queryCommentLayer(queryObject);
+                topic.publish("hideProgressIndicator");
             }
+        },
+
+        /**
+        * Execute when search for even in performed
+        * @param {object} featureSetWithoutNullValue Contains information of feature
+        * @param {object} Query URL of the layer
+        * @param {string} widget name
+        * @param {string} index contains the searched item count
+        * @param {object} activityData contains the unifed search data
+        * @memberOf widgets/commonHelper/directionWidgetHelper
+        */
+        showEventSearchedDataInPod: function (featureSetWithoutNullValue, QueryURL, widgetName, index, activityData) {
+            var facilityObject, resultcontent, queryObject, searchSetting, locatorParamsForEventContainer, divDirectioncontent, divHeader, eventMapPoint, routeObject, searchContenData;
+            appGlobals.shareOptions.doQuery = "false";
+            this.removeCommentPod();
+            // Removing null value from features
+            featureSetWithoutNullValue = this.removeNullValue(featureSetWithoutNullValue);
+            this.removeHighlightedCircleGraphics();
+            topic.publish("showProgressIndicator");
+            if (this.carouselContainer) {
+                this.carouselContainer.showCarouselContainer();
+            }
+            // If it is coming from share url then maintain the pod state.
+            if (window.location.toString().split("isShowPod=").length > 1 && window.location.toString().split("isShowPod=")[1].toString().split("$")[0] === "false") {
+                this.carouselContainer.collapseCarousel();
+            } else {
+                this.carouselContainer.expandCarousel();
+            }
+            // Highlight feature
+            this.highlightFeature(featureSetWithoutNullValue[index].geometry);
+            // Set it in center
+            this.setCenterAt(featureSetWithoutNullValue[index].geometry);
+            // Creating search content box
+            this.setSearchContent(featureSetWithoutNullValue, false, QueryURL, widgetName, activityData);
+            appGlobals.shareOptions.sharedGeolocation = "false";
+            resultcontent = { "value": index };
+            facilityObject = { "Feature": featureSetWithoutNullValue, "SelectedItem": resultcontent, "QueryURL": QueryURL, "WidgetName": widgetName, "activityData": activityData };
+            // Setting facility pod in bottom pod
+            this.setFacility(facilityObject);
+            divDirectioncontent = query(".esriCTDivDirectioncontent")[0];
+            // If direction pod is not created then show direction tab
+            if (divDirectioncontent) {
+                domConstruct.empty(divDirectioncontent);
+                locatorParamsForEventContainer = {
+                    defaultAddress: appGlobals.configData.LocatorSettings.LocatorDefaultAddress,
+                    preLoaded: false,
+                    parentDomNode: divDirectioncontent,
+                    map: this.map,
+                    graphicsLayerId: this.locatorGraphicsLayerID,
+                    locatorSettings: appGlobals.configData.LocatorSettings,
+                    configSearchSettings: appGlobals.configData.SearchSettings
+                };
+                // Getting search display field from layer
+                searchSetting = this.getSearchSetting(QueryURL);
+                searchContenData = this.getKeyValue(searchSetting.SearchDisplayFields);
+                divHeader = domConstruct.create("div", {}, divDirectioncontent);
+                domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + featureSetWithoutNullValue[0].attributes[searchContenData] }, divHeader);
+                locatorParamsForEventContainer = new LocatorTool(locatorParamsForEventContainer);
+                eventMapPoint = this.map.getLayer(locatorParamsForEventContainer.graphicsLayerId);
+                // Calling candidate click function for showing route and data in bottom pod
+                locatorParamsForEventContainer.candidateClicked = lang.hitch(this, function (graphic) {
+                    if (locatorParamsForEventContainer && locatorParamsForEventContainer.selectedGraphic) {
+                        appGlobals.shareOptions.addressLocationDirectionActivity = locatorParamsForEventContainer.selectedGraphic.geometry.x.toString() + "," + locatorParamsForEventContainer.selectedGraphic.geometry.y.toString();
+                    }
+                    if (graphic && graphic.attributes && graphic.attributes.address) {
+                        this.locatorAddress = graphic.attributes.address;
+                    }
+                    if (graphic && graphic.layer) {
+                        this.selectedLayerTitle = graphic.layer.SearchDisplayTitle;
+                    }
+                    appGlobals.shareOptions.doQuery = "false";
+                    topic.publish("hideInfoWindow");
+                    this.removeGeolocationPushPin();
+                    // Checking for graphics for showing route
+                    if (graphic && graphic.layer) {
+                        if (widgetName.toLowerCase() === "unifiedsearch" || widgetName.toLowerCase() === "geolocation") {
+                            routeObject = { "StartPoint": graphic, "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL, "activityData": activityData };
+                        } else {
+                            routeObject = { "StartPoint": graphic, "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL };
+                        }
+                        this.showRoute(routeObject);
+                        this.selectedEventGraphic = graphic;
+                        if (locatorParamsForEventContainer && locatorParamsForEventContainer.selectedGraphic === null) {
+                            appGlobals.shareOptions.addressLocationDirectionActivity = graphic.geometry.x.toString() + "," + graphic.geometry.y.toString();
+                        }
+                    } else {
+                        if (widgetName.toLowerCase() === "unifiedsearch" || widgetName.toLowerCase() === "geolocation") {
+                            routeObject = { "StartPoint": eventMapPoint.graphics[0], "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL, "activityData": activityData };
+                        } else {
+                            routeObject = { "StartPoint": eventMapPoint.graphics[0], "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL };
+                        }
+                        this.showRoute(routeObject);
+                    }
+                });
+            }
+            // Invoke function for setting content in gallery
+            queryObject = { "FeatureData": featureSetWithoutNullValue, "WidgetName": widgetName, "QueryURL": QueryURL, "activityData": null };
+            this.setGallery(queryObject, resultcontent);
+            this.removeCommentPod();
+            // function for share in the case of address searh from activity in bottom pod.
+            setTimeout(lang.hitch(this, function () {
+                // If it is a share url and direction is calculated from bottom pod then show route for the same
+                if (window.location.href.toString().split("$addressLocationDirectionActivity=").length > 1 && window.location.href.toString().split("$addressLocationDirectionActivity=")[1].substring(0, 18) !== "$sharedGeolocation") {
+                    var mapPoint = new Point(window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[0], window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
+                    locatorParamsForEventContainer._locateAddressOnMap(mapPoint, true);
+                    routeObject = { "StartPoint": eventMapPoint.graphics[0], "EndPoint": featureSetWithoutNullValue, "Index": 0, "WidgetName": widgetName, "QueryURL": QueryURL };
+                    this.showRoute(routeObject);
+                }
+            }, 20000));
+            topic.publish("hideProgressIndicator");
         }
     });
 });

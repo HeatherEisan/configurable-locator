@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig,Modernizr,alert */
+﻿/*global define,dojo,dojoConfig,Modernizr,alert,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
 | Copyright 2013 Esri
@@ -58,7 +58,7 @@ define([
             */
             if (this.preLoaded) {
                 if (Modernizr.geolocation) {
-                    this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.locateTooltips, "class": "esriCTTdGeolocation" }, null);
+                    this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.locateTooltip, "class": "esriCTTdGeolocation" }, null);
                     this.own(on(this.domNode, a11yclick, lang.hitch(this, function () {
                         /**
                         * minimize other open header panel widgets and call geolocation service
@@ -74,19 +74,19 @@ define([
                 this.map.addLayer(graphicsLayer);
             }
             if (!this.geoLocationSettings) {
-                this.geoLocationSettings = dojo.configData.GeoLocationSettings;
+                this.geoLocationSettings = appGlobals.configData.GeoLocationSettings;
             }
         },
 
         /**
         * get device location from geolocation service
-        * @param {string} dojo.configData.GeometryService Geometry service url specified in configuration file
+        * @param {string} appGlobals.configData.GeometryService Geometry service url specified in configuration file
         * @memberOf widgets/geoLocation/geoLocation
         */
 
         showCurrentLocation: function (preLoaded, centerAndZoom) {
             var mapPoint, self = this, currentBaseMap, geometryServiceUrl, geometryService, isPreLoaded = preLoaded;
-            geometryServiceUrl = dojo.configData.GeometryService;
+            geometryServiceUrl = appGlobals.configData.GeometryService;
             geometryService = new GeometryService(geometryServiceUrl);
             this.clearGeoLocationGraphic();
             /**
@@ -99,7 +99,7 @@ define([
                 }));
                 /**
                 * projects the device location on the map
-                * @param {string} dojo.configData.ZoomLevel Zoom level specified in configuration file
+                * @param {string} appGlobals.configData.ZoomLevel Zoom level specified in configuration file
                 * @param {object} mapPoint Map point of device location in spatialReference of wkid:4326
                 * @param {object} newPoint Map point of device location in spatialReference of map
                 */
@@ -117,7 +117,7 @@ define([
                     }
                     mapPoint = newPoint[0];
                     if (centerAndZoom) {
-                        self.map.centerAndZoom(mapPoint, dojo.configData.ZoomLevel);
+                        self.map.centerAndZoom(mapPoint, appGlobals.configData.ZoomLevel);
                     }
                     self._addGraphic(mapPoint, isPreLoaded);
                 }, function (err) {

@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig:true,alert,esri,console,Modernizr,dijit */
+﻿/*global define,dojo,dojoConfig:true,alert,esri,console,Modernizr,dijit,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -27,15 +27,9 @@ define([
     "dojo/dom",
     "dojo/_base/array",
     "dojo/dom-class",
-    "dojo/query",
-    "dojo/string",
-    "esri/tasks/locator",
     "esri/tasks/query",
     "dojo/Deferred",
-    "dojo/DeferredList",
     "esri/tasks/QueryTask",
-    "esri/geometry",
-    "esri/graphic",
     "esri/geometry/Point",
     "dojo/text!./templates/searchSettingTemplate.html",
     "dijit/_WidgetBase",
@@ -45,24 +39,14 @@ define([
     "dojo/topic",
     "esri/urlUtils",
     "../searchSetting/activitySearch",
-    "widgets/geoLocation/geoLocation",
-    "esri/tasks/RouteParameters",
-    "esri/tasks/FeatureSet",
-    "esri/SpatialReference",
-    "esri/tasks/RouteTask",
-    "esri/symbols/SimpleLineSymbol",
-    "esri/units",
     "esri/request",
-    "dojo/store/Memory",
-    "widgets/locator/locator",
     "../searchSetting/eventPlannerHelper",
-    "esri/dijit/Directions",
-    "dojo/_base/Color",
-    "esri/geometry/Extent",
+    "widgets/locator/locator",
     "dijit/a11yclick",
+    "dojo/string",
     "dojo/date/locale"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, urlUtils, ActivitySearch, GeoLocation, RouteParameters, FeatureSet, SpatialReference, RouteTask, SimpleLineSymbol, units, esriRequest, Memory, LocatorTool, EventPlannerHelper, Directions, Color, GeometryExtent, a11yclick, locale) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, Query, Deferred, QueryTask, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, urlUtils, ActivitySearch, esriRequest, EventPlannerHelper, LocatorTool, a11yclick, string, locale) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, ActivitySearch, EventPlannerHelper], {
@@ -71,7 +55,7 @@ define([
         acitivityListDiv: null,                                           // Variable store the activity list div
         locatorAddress: "",                                               // Variable for locator address
         isExtentSet: false,                                               // Variable for set the extent in share case
-        todayDate: new Date(),                                            // Variable for geting today's date
+        todayDate: new Date(),                                            // Variable for getting today's date
         widgetName: null,                                                 // Variable to store the widget name
         selectedLayerTitle: null,                                         // Variable for selected layer title
         myListStore: [],                                                  // Array to store myList data
@@ -84,13 +68,16 @@ define([
         * @name widgets/searchSetting/searchSetting
         */
         postCreate: function () {
-            var contHeight, locatorParams, locatorObject, mapPoint, isTrue = false;
+            var contHeight, locatorParams, locatorObject, routeObject, objectIDField, getSearchSettingsDetails, mapPoint, isTrue = false, settingsName, objectIDValue, index, URL, settings;
             this.myFromDate.constraints.min = this.todayDate;
             this.myToDate.constraints.min = this.todayDate;
             // Setting panel's title from config file
-            this.searchPanelTitle.innerHTML = dojo.configData.SearchPanelTitle;
-            this.activityPanelTitle.innerHTML = dojo.configData.ActivityPanelTitle;
-            this.eventsPanelTitle.innerHTML = dojo.configData.EventPanelTitle;
+            this.searchPanelTitle.innerHTML = appGlobals.configData.SearchPanelTitle;
+            this.activityPanelTitle.innerHTML = appGlobals.configData.ActivityPanelTitle;
+            this.eventsPanelTitle.innerHTML = appGlobals.configData.EventPanelTitle;
+            domAttr.set(this.searchPanelTitle, "title", appGlobals.configData.SearchPanelTitle);
+            domAttr.set(this.activityPanelTitle, "title", appGlobals.configData.ActivityPanelTitle);
+            domAttr.set(this.eventsPanelTitle, "title", appGlobals.configData.EventPanelTitle);
             /**
             * close locator widget if any other widget is opened
             * @param {string} widget Key of the newly opened widget
@@ -110,7 +97,7 @@ define([
             }));
             this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.search, "class": "esriCTHeaderSearch" }, null);
             // Looping for showing and hiding event search div
-            array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (EventSearchSetting) {
+            array.forEach(appGlobals.configData.EventSearchSettings, lang.hitch(this, function (EventSearchSetting) {
                 // Checking condition for event search setting enable tag
                 if (!EventSearchSetting.Enable) {
                     domStyle.set(this.divEventsPanel, "display", "none");
@@ -119,9 +106,9 @@ define([
                 }
             }));
             // If activity search is not enable
-            if (!dojo.configData.ActivitySearchSettings[0].Enable) {
+            if (!appGlobals.configData.ActivitySearchSettings[0].Enable) {
                 domStyle.set(this.divActivityPanel, "display", "none");
-                if (!dojo.configData.ActivitySearchSettings[0].Enable && dojo.configData.SearchPanelTitle !== "" && !isTrue) {
+                if (!appGlobals.configData.ActivitySearchSettings[0].Enable && appGlobals.configData.SearchPanelTitle !== "" && !isTrue) {
                     domClass.replace(this.divSearchPanel, "esriCTDivSearch", "esriCTDivSearchPanel");
                 }
             }
@@ -149,8 +136,8 @@ define([
             this.own(on(this.divActivityPanel, a11yclick, lang.hitch(this, function () {
                 this._showActivityTab();
             })));
-            // calling function for craete carousel pod is ActivitySearchSettings is enable
-            if (dojo.configData.ActivitySearchSettings[0].Enable) {
+            // calling function for create carousel pod is ActivitySearchSettings is enable
+            if (appGlobals.configData.ActivitySearchSettings[0].Enable) {
                 this._showActivitySearchContainer();
             }
             // click for unified search tab in search header panel
@@ -162,8 +149,9 @@ define([
                 this._showEventTab();
             })));
             //click on "GO" button in activity search
-            this.own(on(this.bottonGo, a11yclick, lang.hitch(this, function () {
+            this.own(on(this.buttonGo, a11yclick, lang.hitch(this, function () {
                 topic.publish("hideInfoWindow");
+                topic.publish("removeHighlightedCircleGraphics");
                 topic.publish("extentSetValue", true);
                 this.featureSet.length = 0;
                 this._activityPlannerDateValidation();
@@ -175,49 +163,67 @@ define([
             })));
             // proxy setting for route services
             urlUtils.addProxyRule({
-                urlPrefix: dojo.configData.DrivingDirectionSettings.RouteServiceURL,
-                proxyUrl: dojo.configData.ProxyUrl
+                urlPrefix: appGlobals.configData.DrivingDirectionSettings.RouteServiceURL,
+                proxyUrl: appGlobals.configData.ProxyUrl
             });
             // calling function to showing the search tab
             this._showSearchTab();
-            //locator object for unifeid search
+            //locator object for unified search
             locatorParams = {
-                defaultAddress: dojo.configData.LocatorSettings.LocatorDefaultAddress,
+                defaultAddress: appGlobals.configData.LocatorSettings.LocatorDefaultAddress,
                 preLoaded: false,
                 parentDomNode: this.divSearchContent,
                 map: this.map,
                 graphicsLayerId: this.locatorGraphicsLayerID,
-                locatorSettings: dojo.configData.LocatorSettings,
-                configSearchSettings: dojo.configData.SearchSettings
+                locatorSettings: appGlobals.configData.LocatorSettings,
+                configSearchSettings: appGlobals.configData.SearchSettings
             };
             locatorObject = new LocatorTool(locatorParams);
-            // Calback after adding graphics
+            // Callback after adding graphics
             locatorObject.onGraphicAdd = lang.hitch(this, function () {
-                dojo.addressLocation = locatorObject.selectedGraphic.geometry.x.toString() + "," + locatorObject.selectedGraphic.geometry.y.toString();
-                dojo.doQuery = "false";
-                topic.publish("createBuffer", locatorObject.selectedGraphic);
+                appGlobals.shareOptions.addressLocation = locatorObject.selectedGraphic.geometry.x.toString() + "," + locatorObject.selectedGraphic.geometry.y.toString();
+                appGlobals.shareOptions.doQuery = "false";
+                if (window.location.toString().split("$address=").length > 1) {
+                    if (window.location.toString().split("$settingsDetails=").length > 1) {
+                        settingsName = window.location.toString().split("$settingsDetails=")[1].split(",")[0];
+                        index = Number(window.location.toString().split("$settingsDetails=")[1].split(",")[1]);
+                        URL = this.getURLFromSettings(settingsName, index);
+                        settings = this.getSearchSettingByURL(URL);
+                        objectIDValue = Number(window.location.toString().split("$settingsDetails=")[1].split(",")[2].split("$")[0]);
+                        this._queryForActivityForAddressSearch(objectIDValue, settings);
+                    } else {
+                        topic.publish("createBuffer", locatorObject.selectedGraphic);
+                    }
+                }
             });
-            //locator candidate click for unifeid search
+            //locator candidate click for unified search
             locatorObject.candidateClicked = lang.hitch(this, function (candidate) {
                 this.selectedLayerTitle = null;
+                topic.publish("hideInfoWindow");
                 if (candidate && candidate.attributes && candidate.attributes.address) {
                     this.locatorAddress = candidate.attributes.address;
+                    appGlobals.shareOptions.searchSettingsDetails = null;
+                    topic.publish("createBuffer", locatorObject.selectedGraphic);
                 }
                 //calling function for locate container
                 this._showLocateContainer();
-                //calling function to remove the gelocation pushpin
+                //calling function to remove the geolocation pushpin
                 topic.publish("removeGeolocationPushPin");
                 if (candidate.geometry) {
                     locatorObject._toggleTexBoxControls(false);
                     locatorObject._locateAddressOnMap(candidate.geometry);
                 }
                 if (candidate && candidate.layer) {
+                    topic.publish("addCarouselPod");
                     this.selectedLayerTitle = candidate.layer.SearchDisplayTitle;
-                }
-                if (candidate && candidate.layer) {
-                    topic.publish("queryLayer", candidate.geometry, candidate, "unifiedsearch");
+                    routeObject = { "StartPoint": candidate, "EndPoint": [candidate], "Index": 0, "WidgetName": "unifiedsearch", "QueryURL": candidate.layer.QueryURL };
+                    topic.publish("showRoute", routeObject);
+                    getSearchSettingsDetails = this.getSearchSetting(candidate.layer.QueryURL);
+                    objectIDField = candidate.attributes[candidate.layer.ObjectID];
+                    appGlobals.shareOptions.searchSettingsDetails = getSearchSettingsDetails.settingName + "," + getSearchSettingsDetails.index + "," + objectIDField;
+                    //topic.publish("queryLayer", candidate.geometry, candidate, "unifiedsearch");
                     if (locatorObject && locatorObject.selectedGraphic === null) {
-                        dojo.addressLocation = candidate.geometry.x.toString() + "," + candidate.geometry.y.toString();
+                        appGlobals.shareOptions.addressLocation = candidate.geometry.x.toString() + "," + candidate.geometry.y.toString();
                     }
                 }
             });
@@ -225,18 +231,18 @@ define([
             topic.subscribe("getAcitivityListDiv", lang.hitch(this, function (value) {
                 this.acitivityListDiv = value;
             }));
-            // subscribing fuction getting carousel Container object
+            // subscribing function getting carousel Container object
             topic.subscribe("getCarouselContainer", lang.hitch(this, function (value, carouselPodData) {
                 this.carouselContainer = value;
                 this.carouselPodData = carouselPodData;
             }));
-            // Publish for getting caousel container data
+            // Publish for getting carousel container data
             topic.publish("getCarouselContainerData");
             // subscribing to store value of sortedList
             topic.subscribe("sortMyListData", lang.hitch(this, function (value) {
                 this.sortedList = value;
             }));
-            // subscribing fuction for setting myListStoreData
+            // subscribing function for setting myListStoreData
             topic.subscribe("getMyListStoreData", lang.hitch(this, function (value) {
                 this.myListStore = value;
             }));
@@ -245,7 +251,7 @@ define([
                 // check "address" is there in share URL
                 if (window.location.toString().split("$address=").length > 1) {
                     mapPoint = new Point(window.location.toString().split("$address=")[1].split("$")[0].split(",")[0], window.location.toString().split("$address=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
-                    dojo.addressLocation = window.location.toString().split("$address=")[1].split("$")[0];
+                    appGlobals.shareOptions.addressLocation = window.location.toString().split("$address=")[1].split("$")[0];
                     setTimeout(lang.hitch(this, function () {
                         locatorObject._locateAddressOnMap(mapPoint);
                     }, 5000));
@@ -262,10 +268,10 @@ define([
                             dijit.registry.byId("geoLocation").showCurrentLocation(true, isZoomToGeolocation);
                             dijit.registry.byId("geoLocation").onGeolocationComplete = lang.hitch(this, function (mapPoint, isPreLoaded) {
                                 //variable to stored the gelocation point for share URL
-                                dojo.sharedGeolocation = mapPoint;
+                                appGlobals.shareOptions.sharedGeolocation = mapPoint;
                                 if (mapPoint) {
                                     if (isPreLoaded) {
-                                        dojo.doQuery = "false";
+                                        appGlobals.shareOptions.doQuery = "false";
                                         topic.publish("createBuffer", mapPoint, "geolocation");
                                     }
                                 }
@@ -280,13 +286,13 @@ define([
                         }
                     } else {
                         topic.publish("hideProgressIndicator");
-                        alert(sharedNls.errorMessages.activitySerachGeolocationText);
+                        alert(sharedNls.errorMessages.activitySearchGeolocationText);
                     }
                 }
             }, 5000));
             // Function for share app
             setTimeout(lang.hitch(this, function () {
-                var startDate, endDate, formatedStartDate, formatedEndDate, eventObjectId, activityObjectId;
+                var startDate, endDate, formatedStartDate, formatedEndDate;
                 //check if eventplanner is there in share URL or not.
                 if (window.location.toString().split("$eventplanner=").length > 1) {
                     startDate = window.location.toString().split("$startDate=")[1].split("$endDate=")[0].replace(new RegExp(",", 'g'), " ");
@@ -298,54 +304,110 @@ define([
                     this.myToDate.value = this.utcTimestampFromMs(endDate);
                     this.myToDate.textbox.value = formatedEndDate;
                     this.myFromDate.textbox.value = formatedStartDate;
-                    dojo.eventPlannerQuery = this.myFromDate.value.toString() + "," + this.myToDate.value.toString();
+                    appGlobals.shareOptions.eventPlannerQuery = this.myFromDate.value.toString() + "," + this.myToDate.value.toString();
                     topic.publish("toggleWidget", "myList");
-                    topic.publish("showActivityPlannerContainer");
                     this.isEventShared = true;
-                }
-                //check if eventInfoWindowAttribute is there in share URL or not.Its store the event layer objectID.
-                if (window.location.toString().split("$eventInfoWindowAttribute=").length > 1) {
-                    eventObjectId = window.location.toString().split("eventInfoWindowAttribute=")[1].split("$")[0];
-                    this._queryForEventShare(eventObjectId);
-                    dojo.eventInfoWindowAttribute = eventObjectId;
-                }
-                //check if eventInfoWindowIdActivity is there in share URL or not.Its store the activity layer objectID.
-                if (window.location.toString().split("$eventInfoWindowIdActivity=").length > 1) {
-                    activityObjectId = window.location.toString().split("eventInfoWindowIdActivity=")[1].split("$")[0];
-                    this._queryForActivityShare(activityObjectId);
-                    dojo.eventInfoWindowIdActivity = activityObjectId;
                 }
             }), 3000);
         },
 
         /**
-        * change the date format with configured date format
-        * @param {object} featureSet of featuer set
-        * @param {object} eventSearchSettings of event search settings
+        * execute query for the layer
+        * @param {number} index of feature layer
+        * @param {object} mapPoint
+        * @param {array} onMapFeaturArray Contains array of feature layer URL
+        * @memberOf widgets/mapSettings/mapSettings
+        */
+        _executeQueryTask: function (index, mapPoint, onMapFeaturArray) {
+            var queryTask, queryLayer, currentDate = new Date().getTime().toString() + index, deferred;
+            queryTask = new QueryTask(appGlobals.operationLayerSettings[index].layerURL);
+            queryLayer = new Query();
+            queryLayer.where = currentDate + "=" + currentDate;
+            queryLayer.outSpatialReference = this.map.spatialReference;
+            queryLayer.returnGeometry = true;
+            queryLayer.maxAllowableOffset = 100;
+            queryLayer.geometry = mapPoint;
+            queryLayer.outFields = ["*"];
+            deferred = new Deferred();
+            queryTask.execute(queryLayer, lang.hitch(this, function (results) {
+                deferred.resolve(results);
+            }), function (err) {
+                alert(err.message);
+                deferred.resolve();
+            });
+            onMapFeaturArray.push(deferred);
+        },
+
+        /**
+        * get the setting name by passing query layer
+        * @param{string} queryURL contains the url
+        * @return search setting Data
         * @memberOf widgets/searchSetting/searchSetting
         */
-        _changeDateFormatForSharedEvents: function (featureSet, eventSearchSettings) {
-            var displayDateFormat = eventSearchSettings.DisplayDateFormat, i, key, j;
-            // Checking for feature set
-            if (featureSet) {
-                // Looping of event search settings date field
-                for (j = 0; j < eventSearchSettings.DateField.length; j++) {
-                    // Looping for feature set
-                    for (i = 0; i < featureSet.length; i++) {
-                        // Getting key value from feature attribute foe setting date formate.
-                        for (key in featureSet[i].attributes) {
-                            if (featureSet[i].attributes.hasOwnProperty(key)) {
-                                if (key === eventSearchSettings.DateField[j]) {
-                                    if (featureSet[i].attributes[key] !== sharedNls.showNullValue) {
-                                        featureSet[i].attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureSet[i].attributes[key]), { datePattern: displayDateFormat, selector: "date" });
-                                    }
-                                }
-                            }
-                        }
-                    }
+        getSearchSetting: function (queryURL) {
+            var settingData = {};
+            // Looping for getting object id from event search.
+            array.forEach(appGlobals.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
+                if (settings.QueryURL === queryURL) {
+                    settingData = { "settingName": "eventsetting", "index": eventSettingIndex };
                 }
+            }));
+            // Looping for getting object id from activity search.
+            array.forEach(appGlobals.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
+                if (settings.QueryURL === queryURL) {
+                    settingData = { "settingName": "activitysetting", "index": activitySettingIndex };
+                }
+            }));
+            return settingData;
+        },
+
+        /**
+        * get the url from settings
+        * @param{string} settingsName contains the settings name
+        * @param{string} index contains index number of settings
+        * @return URL of the search settings
+        * @memberOf widgets/searchSetting/searchSetting
+        */
+        getURLFromSettings: function (settingsName, index) {
+            var URL = "";
+            // Looping for event search settings to get url
+            if (settingsName === "eventsetting") {
+                array.forEach(appGlobals.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
+                    if (index === eventSettingIndex) {
+                        URL = settings.QueryURL;
+                    }
+                }));
+            } else {
+                // Looping for event search settings to get url
+                array.forEach(appGlobals.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
+                    if (index === activitySettingIndex) {
+                        URL = settings.QueryURL;
+                    }
+                }));
             }
-            return featureSet;
+            return URL;
+        },
+
+        /**
+        * get the setting name by passing query layer
+        * @ return search setting Data
+        * @memberOf widgets/commonHelper/commonHelper
+        */
+        getSearchSettingByURL: function (queryURL) {
+            var settingData;
+            // Looping for getting object id from event search.
+            array.forEach(appGlobals.configData.EventSearchSettings, lang.hitch(this, function (settings) {
+                if (settings.QueryURL === queryURL) {
+                    settingData = settings;
+                }
+            }));
+            // Looping for getting object id from activity search.
+            array.forEach(appGlobals.configData.ActivitySearchSettings, lang.hitch(this, function (settings) {
+                if (settings.QueryURL === queryURL) {
+                    settingData = settings;
+                }
+            }));
+            return settingData;
         },
 
         /**
@@ -390,7 +452,7 @@ define([
             var j, dateFieldArray = [], dateField;
             // Looping for getting date field name
             for (j = 0; j < response.fields.length; j++) {
-            // Checking for date field type
+                // Checking for date field type
                 if (response.fields[j].type === "esriFieldTypeDate") {
                     dateField = response.fields[j].name;
                     dateFieldArray.push(dateField);
@@ -405,22 +467,34 @@ define([
         * @return {object} object of event Search Settings
         * @memberOf widgets/searchSetting/searchSetting
         */
-        _changeDateFormat: function (featureSet, eventSearchSettings) {
-            var displayDateFormat = eventSearchSettings.DisplayDateFormat, i, key, k;
-            // Checking feature set
-            if (featureSet) {
-                // Looping event searc setting date field for changing date formate
-                for (i = 0; i < eventSearchSettings.DateField.length; i++) {
-                    //  Looping feature set feature
-                    for (k = 0; k < featureSet.features.length; k++) {
-                        // Looping feature set feature attribute
-                        for (key in featureSet.features[k].attributes) {
-                            if (featureSet.features[k].attributes.hasOwnProperty(key)) {
-                                // Checking date field and changing date field formate
-                                if (key === eventSearchSettings.DateField[i]) {
-                                    if (featureSet.features[k].attributes[key] !== sharedNls.showNullValue) {
-                                        featureSet.features[k].attributes[key] = dojo.date.locale.format(this.utcTimestampFromMs(featureSet.features[k].attributes[key]), { datePattern: displayDateFormat, selector: "date" });
-                                    }
+        _changeDateFormat: function (featureSet) {
+            var attributes, i, l, j, k, layerDetails, fieldValue, fieldName, fieldInfo;
+            for (k = 0; k < featureSet.features.length; k++) {
+                attributes = featureSet.features[k].attributes;
+
+                for (l in attributes) {
+                    if (attributes.hasOwnProperty(l)) {
+                        if ((!attributes[l]) && (attributes[l] !== 0 || lang.trim(String(attributes[l])) === "")) {
+                            attributes[l] = appGlobals.configData.ShowNullValueAs;
+                        }
+                    }
+                }
+                for (i = 0; i < appGlobals.operationLayerSettings.length; i++) {
+                    if (appGlobals.operationLayerSettings[i].layerDetails && appGlobals.operationLayerSettings[i].layerDetails.popupInfo) {
+                        layerDetails = appGlobals.operationLayerSettings[i].layerDetails;
+                        for (j = 0; j < layerDetails.popupInfo.fieldInfos.length; j++) {
+                            try {
+                                //get field value from feature attributes
+                                fieldValue = attributes[layerDetails.popupInfo.fieldInfos[j].fieldName];
+                            } catch (ex) {
+                                fieldValue = appGlobals.configData.ShowNullValueAs;
+                            }
+                            fieldName = layerDetails.popupInfo.fieldInfos[j].fieldName;
+                            fieldInfo = this.isDateField(fieldName, layerDetails.layerObject);
+                            if (fieldInfo) {
+                                if (fieldValue !== appGlobals.configData.ShowNullValueAs) {
+                                    fieldValue = this.setDateFormat(layerDetails.popupInfo.fieldInfos[j], fieldValue);
+                                    attributes[layerDetails.popupInfo.fieldInfos[j].fieldName] = fieldValue;
                                 }
                             }
                         }
@@ -466,11 +540,8 @@ define([
                 for (i = 0; i < featureObject.length; i++) {
                     for (j in featureObject[i].attributes) {
                         if (featureObject[i].attributes.hasOwnProperty(j)) {
-                            if (!featureObject[i].attributes[j]) {
-                                featureObject[i].attributes[j] = sharedNls.showNullValue;
-                            }
-                            if (dojo.isString(featureObject[i].attributes[j]) && lang.trim(featureObject[i].attributes[j]) === "NA") {
-                                featureObject[i].attributes[j] = sharedNls.showNullValue;
+                            if ((!featureObject[i].attributes[j]) && (featureObject[i].attributes[j] !== 0 || lang.trim(String(featureObject[i].attributes[j])) === "")) {
+                                featureObject[i].attributes[j] = appGlobals.configData.ShowNullValueAs;
                             }
                         }
                     }
@@ -498,6 +569,108 @@ define([
                 isZoomToLocation = true;
             }
             return isZoomToLocation;
+        },
+        /**
+        * check if field type is date
+        * @param{object} layerObj - layer data
+        * @param{string} fieldName - current field
+        * @memberOf widgets/commonHelper/InfoWindowHelper
+        */
+        isDateField: function (fieldName, layerObj) {
+            var i, isDateField = null;
+            for (i = 0; i < layerObj.fields.length; i++) {
+                if (layerObj.fields[i].name === fieldName && layerObj.fields[i].type === "esriFieldTypeDate") {
+                    isDateField = layerObj.fields[i];
+                    break;
+                }
+            }
+            return isDateField;
+        },
+
+        /**
+        * Format date value based on the format received from info popup
+        * @param{object} dateFieldInfo
+        * @param{string} dataFieldValue
+        * @memberOf widgets/commonHelper/InfoWindowHelper
+        */
+        setDateFormat: function (dateFieldInfo, dateFieldValue, widgetName) {
+            var isFormatedDate = false, formatedDate, dateObj, popupDateFormat;
+            formatedDate = Number(dateFieldValue);
+            if (formatedDate) {
+                dateFieldValue = Number(dateFieldValue);
+            } else {
+                isFormatedDate = true;
+            }
+            dateObj = new Date(dateFieldValue);
+            if (dateFieldInfo.format && dateFieldInfo.format.dateFormat) {
+                if (!isFormatedDate) {
+                    popupDateFormat = this._getDateFormat(dateFieldInfo.format.dateFormat);
+                    dateFieldValue = dojo.date.locale.format(dateObj, {
+                        datePattern: popupDateFormat,
+                        selector: "date"
+                    });
+                }
+            } else {
+                if (!isFormatedDate) {
+                    dateFieldValue = dateObj.toLocaleDateString();
+                }
+            }
+            return dateFieldValue;
+        },
+
+        /**
+        * This function is used to convert ArcGIS date format constants to readable date formats
+        * @memberOf widgets/commonHelper/InfoWindowHelper
+        */
+        _getDateFormat: function (type) {
+            var dateFormat;
+            switch (type) {
+            case "shortDate":
+                dateFormat = "MM/dd/yyyy";
+                break;
+            case "shortDateLE":
+                dateFormat = "dd/MM/yyyy";
+                break;
+            case "longMonthDayYear":
+                dateFormat = "MMMM dd, yyyy";
+                break;
+            case "dayShortMonthYear":
+                dateFormat = "dd MMM yyyy";
+                break;
+            case "longDate":
+                dateFormat = "EEEE, MMMM dd, yyyy";
+                break;
+            case "shortDateLongTime":
+                dateFormat = "MM/dd/yyyy hh:mm:ss a";
+                break;
+            case "shortDateLELongTime":
+                dateFormat = "dd/MM/yyyy hh:mm:ss a";
+                break;
+            case "shortDateShortTime":
+                dateFormat = "MM/dd/yyyy hh:mm a";
+                break;
+            case "shortDateLEShortTime":
+                dateFormat = "dd/MM/yyyy hh:mm a";
+                break;
+            case "shortDateShortTime24":
+                dateFormat = "MM/dd/yyyy HH:mm";
+                break;
+            case "shortDateLEShortTime24":
+                dateFormat = "dd/MM/yyyy HH:mm";
+                break;
+            case "longMonthYear":
+                dateFormat = "MMMM yyyy";
+                break;
+            case "shortMonthYear":
+                dateFormat = "MMM yyyy";
+                break;
+            case "year":
+                dateFormat = "yyyy";
+                break;
+            default:
+                dateFormat = "MMMM dd, yyyy";
+            }
+            return dateFormat;
         }
     });
 });

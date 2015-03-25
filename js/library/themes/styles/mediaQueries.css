@@ -15,302 +15,259 @@
 | See the License for the specific language governing permissions and
 | limitations under the License.
 */
-@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (-webkit-min-device-pixel-ratio: 2)
-{
-    .esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTTdGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTHelpImg, .esriCTHelpImg, .esriCTEventsImg, .esriCTEventsImgSelected
-    {
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (-webkit-min-device-pixel-ratio: 2) {
+    .esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTTdGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTHelpImg, .esriCTHelpImg, .esriCTEventsImg, .esriCTEventsImgSelected {
         height: 44px !important;
         width: 44px !important;
         background-size: 44px !important;
         margin: 8px 15px !important;
     }
 
-    .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding
-    {
+    .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding {
         height: 44px !important;
         width: 44px !important;
         padding: 8px 0 !important;
     }
 
-    .esriCTTabs div.esriCTInfoClose
-    {
+    .esriCTTabs div.esriCTInfoClose {
         padding: 7px;
     }
 
-    .esriCTResultContent
-    {
+    .esriCTResultContent {
         padding-left: 17px !important;
     }
 
-    .esriCTApplicationHeaderIcon img
-    {
+    .esriCTApplicationHeaderIcon img {
         float: left;
         width: auto;
         height: 61px;
     }
 
-    .commentsTab
-    {
+    .commentsTab {
         padding: 9px 0 9px 0;
+    }
+
+    .esriCTTPaginationList {
+        margin-top: 0px !important;
     }
 }
 
 @media only screen and (min-device-width : 768px) and (max-device-width : 1024px) /*if device wise @media only screen and (min-device-width : 1024px) and (max-device-width : 1280px)*/
 {
-    html, body
-    {
+    html, body {
         font-size: 14px !important;
     }
 
-    input
-    {
+    input {
         font-size: 14px !important;
     }
 
-    .esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTTdGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTHelpImg, .esriCTHelpImg, .esriCTEventsImg, .esriCTEventsImgSelected
-    {
+    .esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTTdGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTHelpImg, .esriCTHelpImg, .esriCTEventsImg, .esriCTEventsImgSelected {
         height: 44px !important;
         width: 44px !important;
         background-size: 44px !important;
         margin: 8px 15px !important;
     }
 
-    .esriCTApplicationHeader
-    {
+    .esriCTApplicationHeader {
         height: 61px;
     }
 
-    .esriCTApplicationHeaderIcon img
-    {
+    .esriCTApplicationHeaderIcon img {
         width: 61px;
         height: 61px;
     }
 
-    .esriCTDivActivityAppContainer, .esriCTDivAppContainer
-    {
+    .esriCTDivActivityAppContainer, .esriCTDivAppContainer {
         top: 61px;
     }
 
-    .esriCTDivAppContainer
-    {
+    .esriCTDivAppContainer {
         top: 61px;
     }
 
-    .esriCTTxtAddress
-    {
+    .esriCTTxtAddress {
         font-size: 14px !important;
     }
 
-    .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding
-    {
+    .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding {
         height: 44px !important;
         width: 44px !important;
         padding: 8px 0 !important;
     }
 
-    .esriCTApplicationHeaderTextTD
-    {
+    .esriCTApplicationHeaderTextTD {
         font-size: 30px;
     }
 
-    .esriCTDirectionContainer .esriCTRouteInformationContainer
-    {
-        font-size: 14px !important;
-    }
-
-    .esriCTCustomButtonInner
-    {
+    .esriCTCustomButtonInner {
         padding-top: 4px;
     }
 
-    .esriCTTabs div.esriCTInfoClose
-    {
+    .esriCTTabs div.esriCTInfoClose {
         padding: 7px;
     }
 
-    .esriCTTabsLeftFlexi
-    {
+    .esriCTTabsLeftFlexi {
         height: 35px;
     }
 
-    .esriCTTabs div.esriCTTabsRight
-    {
+    .esriCTTabs div.esriCTTabsRight {
         margin-left: -2px;
     }
 
-    .commentsTab
-    {
+    .commentsTab {
         padding: 9px 0 9px 0;
+    }
+
+    .esriCTTPaginationList {
+        margin-top: 0px !important;
     }
 }
 
 @media only screen and (min-width : 768px) and (max-width : 1024px) /*if device wise  @media only screen and (min-device-width : 768px) and (max-device-width : 1024px)*/
 {
-    html, body
-    {
+    html, body {
         font-size: 14px !important;
     }
 
-    input
-    {
+    input {
         font-size: 14px !important;
     }
 
-    .esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTTdGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTHelpImg, .esriCTHelpImg, .esriCTEventsImg, .esriCTEventsImgSelected
-    {
+    .esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTTdGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTHelpImg, .esriCTHelpImg, .esriCTEventsImg, .esriCTEventsImgSelected {
         height: 44px !important;
         width: 44px !important;
         background-size: 44px !important;
         margin: 8px 15px !important;
     }
 
-    .esriCTApplicationHeader
-    {
+    .esriCTApplicationHeader {
         height: 61px;
     }
 
-    .esriCTDivActivityAppContainer, .esriCTDivSearchResultHolder
-    {
+    .esriCTDivActivityAppContainer, .esriCTDivSearchResultHolder {
         top: 61px;
     }
 
-    .esriCTDivAppContainer
-    {
+    .esriCTDivAppContainer {
         top: 61px;
     }
 
-    .esriCTApplicationHeaderIcon img
-    {
+    .esriCTApplicationHeaderIcon img {
         width: 61px;
         height: 61px;
     }
 
-    .esriCTTxtAddress
-    {
+    .esriCTTxtAddress {
         font-size: 14px !important;
     }
 
-    .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding
-    {
+    .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding {
         height: 44px !important;
         width: 44px !important;
         padding: 8px 0 !important;
     }
 
-    .esriCTApplicationHeaderTextTD
-    {
+    .esriCTApplicationHeaderTextTD {
         font-size: 30px;
     }
 
-    .esriCTCustomButtonInner
-    {
+    .esriCTCustomButtonInner {
         padding-top: 4px;
     }
 
-    .esriCTTabs div.esriCTInfoClose
-    {
+    .esriCTTabs div.esriCTInfoClose {
         padding: 7px;
     }
 
-    .esriCTTabsLeftFlexi
-    {
+    .esriCTTabsLeftFlexi {
         height: 35px;
     }
 
-    .esriCTTabs div.esriCTTabsRight
-    {
+    .esriCTTabs div.esriCTTabsRight {
         margin-left: -2px;
     }
 
-    .commentsTab
-    {
+    .commentsTab {
         padding: 9px 0 9px 0;
     }
 
-    .esriCTResultContent
-    {
+    .esriCTResultContent {
         height: 86%;
     }
 
-    .esriCTDirectionResultContent
-    {
-        height: calc(100% - 100px);
+    .esriCTDivTime {
+        padding: 0 5px;
     }
 
-    .esriCTDivTime
-    {
-        padding: 0 5px;
+    .esriCTTPaginationList {
+        margin-top: 0px !important;
+    }
+
+    .esriCTGalleryInfoContainer div.esriCTImgPrev, .esriCTGalleryInfoContainer div.esriCTImgNext {
+        bottom: 39%;
+    }
+
+    .esriCTGalleryInfoContainer {
+        margin-right: 0px;
     }
 }
 
-@media screen and (min-width: 321px) and (max-width: 767px)
-{
-    html, body
-    {
+@media screen and (min-width: 321px) and (max-width: 767px) {
+    html, body {
         font-size: 14px !important;
     }
 
-    input
-    {
+    input {
         font-size: 14px !important;
     }
 
-    .esriCTInfoText span
-    {
+    .esriCTInfoText span {
         font-size: 14px !important;
     }
 
-    .esriCTSecondChild
-    {
+    .esriCTSecondChild {
         font-size: 14px !important;
     }
 
-    .esriPopup
-    {
+    .esriPopup {
         font-size: 14px !important;
     }
 
-    .esriCTTxtAddress
-    {
+    .esriCTTxtAddress {
         font-size: 14px !important;
     }
 
-    .esriCTDivAppHolder
-    {
+    .esriCTDivAppHolder {
         width: 100% !important;
     }
 
-    .esriCTDivshareContainer
-    {
+    .esriCTDivshareContainer {
         width: 100% !important;
     }
 
-    .divAppContent
-    {
+    .divAppContent {
         width: 287px;
         margin: 0 auto;
     }
 
-    .esriCTShareCursor, .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding
-    {
+    .esriCTShareCursor, .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding {
         height: 44px !important;
         width: 44px !important;
         padding: 8px 0 !important;
         background-size: 44px;
     }
 
-    .esriCTApplicationHeaderTextTD
-    {
+    .esriCTApplicationHeaderTextTD {
         display: none;
     }
 
-    .esriCTApplicationHeaderIcon
-    {
+    .esriCTApplicationHeaderIcon {
         display: none;
     }
 
-    .esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTTdGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTHelpImg, .esriCTHelpImg, .esriCTEventsImg, .esriCTEventsImgSelected
-    {
+    .esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTTdGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTHelpImg, .esriCTHelpImg, .esriCTEventsImg, .esriCTEventsImgSelected {
         height: 44px !important;
         width: 44px !important;
         background-size: 44px !important;
@@ -318,48 +275,40 @@
         margin: 8px 0 !important;
     }
 
-    .esriCTRightTab, .esriCTSpanHeader, .esriCTSpanHeaderInfoWindow
-    {
+    .esriCTRightTab, .esriCTSpanHeader, .esriCTSpanHeaderInfoWindow {
         width: 100%;
     }
 
-    .esriCTApplicationHeader
-    {
+    .esriCTApplicationHeader {
         height: 61px;
         z-index: 1000;
     }
 
-    .esriCTDivActivityAppContainer
-    {
+    .esriCTDivActivityAppContainer {
         top: 61px;
         width: 100% !important;
     }
 
-    .esriCTDivAppContainer, .esriCTDivSearchResultHolder
-    {
+    .esriCTDivAppContainer, .esriCTDivSearchResultHolder {
         top: 61px;
         width: 100% !important;
     }
 
-    .esriCTAddressContentHeight
-    {
+    .esriCTAddressContentHeight {
         width: 100% !important;
     }
 
-    .esriCTDivAppContainer, .esriCTShowContainerHeight, .esriCTInfoScrollContent
-    {
+    .esriCTDivAppContainer, .esriCTShowContainerHeight, .esriCTInfoScrollContent {
         width: 100% !important;
     }
 
-    .esriCTApplicationHeaderIcon
-    {
+    .esriCTApplicationHeaderIcon {
         display: none;
     }
 
     /* Address container */
 
-    .esriCTAddressHolder
-    {
+    .esriCTAddressHolder {
         z-index: 997;
         position: absolute;
         right: 0px;
@@ -367,101 +316,71 @@
         width: 100% !important;
     }
 
-    .esriCTBottomBorder
-    {
+    .esriCTBottomBorder {
         height: 40px;
     }
 
     /* End of Address container Styles */
 
-    .scrollbar_content
-    {
+    .scrollbar_content {
         width: 100% !important;
     }
 
-    .esriCTlayerList
-    {
+    .esriCTlayerList {
         display: none !important;
     }
 
-    .esriCTSearchClose
-    {
+    .esriCTSearchClose {
         right: 70px;
     }
 
-    .splashScreenscrollBarheight
-    {
-        height: 120px !important;
-    }
-
-    .mapLogo
-    {
+    .mapLogo {
         position: relative;
         right: 0px;
     }
 
-    .legendrightbox
-    {
-        display: none;
-    }
-
-    .divRightArrow
-    {
-        right: 0px;
-    }
-
-    .esriCTCustomButtonInner
-    {
+    .esriCTCustomButtonInner {
         padding-top: 4px;
     }
 
-    .esriCTDivTriangle
-    {
+    .esriCTDivTriangle {
         top: 30px;
     }
 
-    .esriCThidedivTriangle
-    {
+    .esriCThidedivTriangle {
         display: none;
     }
 
-    .esriCTInfoContent
-    {
+    .esriCTInfoContent {
         display: none;
         width: 100%;
     }
 
-    .esriCTInfoMobileContent
-    {
+    .esriCTInfoMobileContent {
         display: block !important;
     }
 
-    .esriCTShowInfoContent
-    {
+    .esriCTShowInfoContent {
         display: block;
     }
 
-    .divHideInfoMobileContent
-    {
+    .divHideInfoMobileContent {
         display: none !important;
     }
 
-    .esriCTinfoWindowHeightWidth
-    {
+    .esriCTinfoWindowHeightWidth {
         height: 100% !important;
         width: 100% !important;
         bottom: 0px !important;
         left: 0px !important;
     }
 
-    .infopanel
-    {
+    .infopanel {
         left: 0px;
         height: 93% !important;
     }
 
-    .esriCTCloseDivMobile
-    {
+    .esriCTCloseDivMobile {
         display: block;
         cursor: pointer;
         padding: 8px 0 8px 16px;
@@ -473,120 +392,98 @@
         text-align: left;
     }
 
-    .scrollbar_footerVisible
-    {
+    .scrollbar_footerVisible {
         display: none;
     }
 
-    .esriCTinfoWindow
-    {
+    .esriCTinfoWindow {
         z-index: 1001;
     }
 
-    .esriCTInfoScrollContent
-    {
+    .esriCTInfoScrollContent {
         height: 300px;
     }
 
-    .esriCTDivLegendContainer
-    {
+    .esriCTDivLegendContainer {
         width: 100% !important;
         margin-left: 3px;
     }
 
-    .esriCTdivHeadercontaine, .esriCTdivToggle, .esriCTDivCarouselContent
-    {
+    .esriCTdivHeadercontaine, .esriCTdivToggle, .esriCTDivCarouselContent {
         display: none !important;
     }
 
-    .esriCTDivMapPositionTop
-    {
-        bottom: 35px !important;
+    .esriCTDivMapPositionTop {
+        bottom: 45px !important;
     }
 
-    .esriCTActivityList, .esriCTEventPlannerListTable, .esriCTDivEventContainer, .esriCTActivityPlaner
-    {
+    .esriCTActivityList, .esriCTEventPlannerListTable, .esriCTDivEventContainer, .esriCTActivityPlaner {
         width: 100%;
     }
 
-    .esriCTMyListTable
-    {
+    .esriCTMyListTable {
         width: 100%;
     }
 
-    .esriCTMyListIcons
-    {
+    .esriCTMyListIcons {
         margin-right: 20px;
     }
 
-    .esriCTEventPlannerAddlist
-    {
+    .esriCTEventPlannerAddlist {
         margin-right: 30px;
         width: 100px;
         float: right;
     }
 
-    .esriCTActiviyDateContainer
-    {
+    .esriCTActiviyDateContainer {
         margin: 15px 10px 20px 10px;
     }
 
-    .dijitTextBox
-    {
+    .dijitTextBox {
         width: 130px !important;
     }
 
-    .esriCTDivFromDate, .esriCTDivToDate
-    {
+    .esriCTDivFromDate, .esriCTDivToDate {
         width: 135px !important;
     }
 
-    .scrollbar_footerVisible
-    {
+    .scrollbar_footerVisible {
         display: none;
     }
 
-    .esriCTShowInfoContent
-    {
+    .esriCTShowInfoContent {
         display: block !important;
     }
 
-    .divHideInfoMobileContent
-    {
+    .divHideInfoMobileContent {
         display: none !important;
     }
 
-    .esriCThidedivTriangle
-    {
+    .esriCThidedivTriangle {
         display: none !important;
     }
 
-    .esriCTinfoWindowHeightWidth
-    {
+    .esriCTinfoWindowHeightWidth {
         height: 100% !important;
         width: 100% !important;
         bottom: 0px !important;
         left: 0px !important;
     }
 
-    .esriCTInfoMobileContent
-    {
+    .esriCTInfoMobileContent {
         color: #6e6e6e;
         display: block;
     }
 
-    .esriCTCloseDivMobile
-    {
+    .esriCTCloseDivMobile {
         display: block;
     }
 
-    .esriCTTabs div.esriCTInfoClose
-    {
+    .esriCTTabs div.esriCTInfoClose {
         display: none;
     }
 
-    .esriCTInfoSubmitButton, .esriCTInfoPostButton
-    {
+    .esriCTInfoSubmitButton, .esriCTInfoPostButton {
         background: none repeat scroll 0 0 #fff;
         bottom: 1px;
         position: absolute !important;
@@ -595,8 +492,7 @@
         padding: 8px 0px;
     }
 
-    .esriCTInfoBackButton
-    {
+    .esriCTInfoBackButton {
         background: none repeat scroll 0 0 #fff;
         bottom: 1px;
         position: absolute !important;
@@ -605,57 +501,56 @@
         padding: 8px 16px;
     }
 
-    .esriCTGalleryInfoContainer, .esriCTDirectionTabContent, .esriCTInfoCommentOuterContainer
-    {
+    .esriCTGalleryInfoContainer, .esriCTDirectionTabContent, .esriCTInfoCommentOuterContainer {
         width: 100%;
     }
 
-    .esriCTCustomMapLogoPostionChange
-    {
+    .esriCTGalleryInfoContainer {
+        height: 94%;
+        margin-right: 0px;
+    }
+
+        .esriCTGalleryInfoContainer div.esriCTImgPrev, .esriCTGalleryInfoContainer div.esriCTImgNext {
+            bottom: 44%;
+        }
+
+    .esriCTCustomMapLogoPostionChange {
         bottom: 35px;
     }
 
-    .esriCTCustomMapLogoPostion
-    {
+    .esriCTCustomMapLogoPostion {
         bottom: 8px;
     }
 
-    .esriCTTabs div.esriCTTabsRight
-    {
+    .esriCTTabs div.esriCTTabsRight {
         float: right;
         margin-left: -5px;
     }
 
-    .esriCTActivityContentHeight
-    {
+    .esriCTActivityContentHeight {
         height: 100px;
     }
 
-    .commentsTab
-    {
+    .commentsTab {
         padding: 9px 0 9px 0;
     }
 
-    .esriCTCommentContainer
-    {
+    .esriCTCommentContainer {
         height: calc(100% - 10px);
         height: -moz-calc(100% - 10px);
         height: -webkit-calc(100% - 10px);
         height: -o-calc(100% - 10px);
     }
 
-    .esriCTDivLegendBoxUp
-    {
+    .esriCTDivLegendBoxUp {
         bottom: 0px;
     }
 
-    .esriCTDivMapPositionUp
-    {
+    .esriCTDivMapPositionUp {
         bottom: 0px;
     }
 
-    .esriCTDivLegendBox
-    {
+    .esriCTDivLegendBox {
         width: 100%;
         bottom: 2px;
         margin-left: 0px;
@@ -663,177 +558,147 @@
         position: fixed;
     }
 
-    .esriCTLegendBox
-    {
+    .esriCTLegendBox {
         margin-right: 6px !important;
     }
 
-    .esriCTLegendChangePositionUp, .esriCTdivLegendbox
-    {
+    .esriCTLegendChangePositionUp, .esriCTdivLegendbox {
         width: 100%;
         bottom: 0px !important;
         margin-left: 0px !important;
     }
 
-    .esriCTLegendChangePositionDown
-    {
+    .esriCTLegendChangePositionDown {
         width: 100%;
         bottom: 0px !important;
         margin-left: 0px !important;
     }
 
-    .esriCTTabsLeftFlexi
-    {
+    .esriCTTabsLeftFlexi {
         height: 35px;
+    }
+
+    .esriCTTPaginationList {
+        margin-top: 0px !important;
     }
 }
 
-@media (max-height : 300px)
-{
-    .esriCTActivityTable
-    {
+@media (max-height : 300px) {
+    .esriCTActivityTable {
         height: 120px;
     }
 
-    .esriCTActivityMainContainer
-    {
+    .esriCTActivityMainContainer {
         height: -webkit-calc(100% - 182px);
     }
 
-    .esriCTAddressList
-    {
+    .esriCTAddressList {
         height: 130px;
     }
 
-    .esriCTEventPlannerContainer
-    {
+    .esriCTEventPlannerContainer {
         height: 100px;
     }
 
-    .esriCTActiviyDateContainer
-    {
+    .esriCTActiviyDateContainer {
         margin: 7px 10px 5px 10px;
     }
 
-    .esriCTMyListContainer
-    {
+    .esriCTMyListContainer {
         height: 140px;
     }
 }
 
-@media (max-height : 214px)
-{
-    .esriCTBottomPanelHeight
-    {
+@media (max-height : 214px) {
+    .esriCTBottomPanelHeight {
         height: 210px;
     }
 }
 
-@media (max-height : 120px)
-{
-    .esriCTInfoBackButton
-    {
+@media (max-height : 120px) {
+    .esriCTInfoBackButton {
         left: 400px !important;
         bottom: 34px;
         padding: 0px;
     }
 
-    .esriCTInfoSubmitButton
-    {
+    .esriCTInfoSubmitButton {
         bottom: 33px;
         padding: 0px;
     }
 }
 
-@media (max-height : 80px)
-{
-    .esriCTInfoBackButton
-    {
+@media (max-height : 80px) {
+    .esriCTInfoBackButton {
         bottom: 13px;
     }
 
-    .esriCTInfoSubmitButton
-    {
+    .esriCTInfoSubmitButton {
         bottom: 12px;
     }
 }
 /* Portrait */
-@media screen and (max-width: 320px)
-{
-    html, body
-    {
+@media screen and (max-width: 320px) {
+    html, body {
         font-size: 14px !important;
     }
 
-    input
-    {
+    input {
         font-size: 14px !important;
     }
 
-    .esriCTInfoText span
-    {
+    .esriCTInfoText span {
         font-size: 14px !important;
     }
 
-    .esriCTDirectionContainer .esriCTRouteInformationContainer, .esriCTTextAreaContainer
-    {
+    .esriCTTextAreaContainer {
         font-size: 14px !important;
     }
     /*********************************************************/
 
-    .esriCTDivSearchResultHolder, .esriCTAddressContentHeight
-    {
+    .esriCTDivSearchResultHolder, .esriCTAddressContentHeight {
         width: 100% !important;
     }
 
-    .esriCTAddressContent, .esriCTDirectionMainContainer
-    {
+    .esriCTAddressContent, .esriCTDirectionMainContainer {
         width: 300px;
     }
 
-    .esriCTApplicationHeader
-    {
+    .esriCTApplicationHeader {
         height: 61px !important;
         z-index: 1000;
     }
 
-    .esriCTDivActivityAppContainer, .esriCTDivSearchResultHolder
-    {
+    .esriCTDivActivityAppContainer, .esriCTDivSearchResultHolder {
         top: 61px;
         width: 100% !important;
     }
 
-    .esriCTDivAppContainer
-    {
+    .esriCTDivAppContainer {
         top: 61px;
         width: 100% !important;
     }
 
-    .esriCTDivAppContainer, .esriCTShowContainerHeight, .esriCTInfoScrollContent
-    {
+    .esriCTDivAppContainer, .esriCTShowContainerHeight, .esriCTInfoScrollContent {
         width: 100% !important;
     }
 
-    .esriCTDivAppHolder
-    {
+    .esriCTDivAppHolder {
         width: 99.6% !important;
     }
 
-    .esriCTDivshareContainer
-    {
+    .esriCTDivshareContainer {
         width: 99.6% !important;
     }
 
-    .esriCTShareCursor, .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding
-    {
+    .esriCTShareCursor, .esriCTFacebook, .esriCTTwitter, .esriCTEmail, .esriCTEmbedding {
         height: 44px !important;
         width: 44px !important;
         padding: 8px 0 !important;
         background-size: 44px;
     }
 
-    .esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTTdGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTHelpImg, .esriCTHelpImg, .esriCTEventsImg, .esriCTEventsImgSelected
-    {
+    .esriCTHeaderSearch, .esriCTHeaderSearchSelected, .esriCTTdGeolocation, .esriCTImgSocialMediaSelected, .esriCTImgSocialMedia, .esriCTHelpImg, .esriCTHelpImg, .esriCTEventsImg, .esriCTEventsImgSelected {
         height: 44px !important;
         width: 44px !important;
         background-size: 44px !important;
@@ -841,162 +706,104 @@
         margin: 8px 0 !important;
     }
 
-    .esriCTApplicationHeaderIcon
-    {
+    .esriCTApplicationHeaderIcon {
         display: none;
     }
 
-    .esriCTRightTab, .esriCTSpanHeader, .esriCTSpanHeaderInfoWindow
-    {
+    .esriCTRightTab, .esriCTSpanHeader, .esriCTSpanHeaderInfoWindow {
         width: 100% !important;
     }
 
     /* Splash Screen */
 
-    .esriCTSplashScreenDialog
-    {
+    .esriCTSplashScreenDialog {
         height: 90% !important;
         width: 93% !important;
     }
 
-    .esriCTdivSplashScreenContent
-    {
+    .esriCTdivSplashScreenContent {
         width: 95% !important;
     }
 
-    .sriGovtSplashContent
-    {
-        width: 100% !important;
-    }
-
-    .esriCTShowInfoContent
-    {
+    .esriCTShowInfoContent {
         display: block !important;
     }
 
-    .scrollbar_content
-    {
+    .scrollbar_content {
         width: 100% !important;
     }
 
-    .esriCTApplicationHeaderTextTD
-    {
+    .esriCTApplicationHeaderTextTD {
         display: none;
     }
 
     /* End of Splash Screen */
 
-    .esriCTlayerList
-    {
+    .esriCTlayerList {
         display: none !important;
     }
 
-    .esriCTSearchClose
-    {
+    .esriCTSearchClose {
         right: 70px;
     }
 
-    .divHideInfoMobileContent
-    {
+    .divHideInfoMobileContent {
         display: none !important;
     }
 
-    .esriCTDivSearchResultHolder
-    {
+    .esriCTDivSearchResultHolder {
         z-index: 997;
     }
 
-    .esriCTDivActivityContainer
-    {
+    .esriCTDivActivityContainer {
         width: 100%;
         z-index: 1000;
         top: 35px;
     }
 
-    .splashScreenscrollBarheight
-    {
-        height: 300px !important;
-    }
-
-    .esriCTDirectionContainer .esriCTRouteInformationContainer
-    {
-        font-size: 14px !important;
-        line-height: 40px;
-    }
-
-    .mapLogo
-    {
+    .mapLogo {
         position: relative;
         right: 0px;
     }
 
-    .legendrightbox
-    {
-        display: none;
-    }
-
-    .divRightArrow
-    {
-        right: 0px;
-    }
-
-    .esriCTCustomButtonInner
-    {
+    .esriCTCustomButtonInner {
         padding-top: 4px;
     }
 
-    .esriCTInfoContent
-    {
+    .esriCTInfoContent {
         display: none;
         width: 100%;
     }
 
-    .esriCTShowInfoContent
-    {
+    .esriCTShowInfoContent {
         display: block !important;
     }
 
-    .divHideInfoMobileContent
-    {
+    .divHideInfoMobileContent {
         display: none !important;
     }
 
-    .infopanel
-    {
+    .infopanel {
         height: 93% !important;
         left: 0px;
     }
 
-    .esriCTDivTriangle
-    {
+    .esriCTDivTriangle {
         top: 30px;
     }
 
-    .esriCTInfoMobileContent
-    {
-        display: block !important;
-    }
-
-    .divHideInfoMobileContent
-    {
+    .esriCThidedivTriangle {
         display: none !important;
     }
 
-    .esriCThidedivTriangle
-    {
-        display: none !important;
-    }
-
-    .esriCTinfoWindowHeightWidth
-    {
+    .esriCTinfoWindowHeightWidth {
         height: 100% !important;
         width: 100% !important;
         bottom: 0px !important;
         left: 0px !important;
     }
 
-    .esriCTCloseDivMobile
-    {
+    .esriCTCloseDivMobile {
         display: block;
         cursor: pointer;
         padding: 8px 0 8px 16px;
@@ -1008,145 +815,104 @@
         text-align: left;
     }
 
-    .scrollbar_footerVisible
-    {
+    .scrollbar_footerVisible {
         display: none;
     }
 
-    .esriCTinfoWindow
-    {
+    .esriCTinfoWindow {
         z-index: 1001;
     }
 
-    .esriCTInfoScrollContent
-    {
+    .esriCTInfoScrollContent {
         height: 300px;
     }
 
-    .esriCTDivLegendContainer
-    {
+    .esriCTDivLegendContainer {
         width: 100% !important;
         margin-left: 3px;
     }
 
-    .esriCTdivSplashContent, .esriCTdivToggle, .esriCTDivCarouselContent
-    {
+    .esriCTdivSplashContent, .esriCTdivToggle, .esriCTDivCarouselContent {
         display: none !important;
     }
 
-    .divCarouselContent
-    {
+    .divCarouselContent {
         display: none;
     }
 
-    .esriCTDivMapPositionTop
-    {
-        bottom: 35px !important;
+    .esriCTDivMapPositionTop {
+        bottom: 45px !important;
     }
 
-    .esriCTLegendBox
-    {
+    .esriCTLegendBox {
         margin-right: 6px !important;
     }
 
-    .esriCTLegendChangePositionUp, .esriCTdivLegendbox
-    {
+    .esriCTLegendChangePositionUp, .esriCTdivLegendbox {
         width: 100%;
         bottom: 0px !important;
         margin-left: 0px !important;
     }
 
-    .esriCTLegendChangePositionDown
-    {
+    .esriCTLegendChangePositionDown {
         width: 100%;
         bottom: 0px !important;
         margin-left: 0px !important;
     }
 
-    .esriCTActivityList, .esriCTEventPlannerListTable
-    {
+    .esriCTActivityList, .esriCTEventPlannerListTable {
         width: 100%;
     }
 
-    .esriCTMyListTable
-    {
+    .esriCTMyListTable {
         width: 100%;
     }
 
-    .esriCTMyListIcons
-    {
+    .esriCTMyListIcons {
         margin-right: 20px;
     }
 
-    .esriCTEventPlannerAddlist
-    {
+    .esriCTEventPlannerAddlist {
         margin-right: 30px;
         width: 100px;
         float: right;
     }
 
-    .dijitTextBox
-    {
+    .dijitTextBox {
         width: 112px !important;
     }
 
-    .esriCTDivFromDate, .esriCTDivToDate
-    {
+    .esriCTDivFromDate, .esriCTDivToDate {
         width: 117px !important;
     }
 
-    .esriCTActiviyDateInnerContainer, .esriCTDivEventContainer, .esriCTActivityPlaner
-    {
+    .esriCTActiviyDateInnerContainer, .esriCTDivEventContainer, .esriCTActivityPlaner {
         width: 100%;
         margin: 0 auto;
     }
 
-    .esriCTSearchTextContainer
-    {
+    .esriCTSearchTextContainer {
         width: 305px;
     }
 
-    .esriCTSearchTextInner
-    {
+    .esriCTSearchTextInner {
         width: 220px;
     }
 
-    .scrollbar_footerVisible
-    {
-        display: none;
-    }
-
-    .esriCThidedivTriangle
-    {
-        display: none !important;
-    }
-
-    .esriCTinfoWindowHeightWidth
-    {
-        height: 100% !important;
-        width: 100% !important;
-        bottom: 0px !important;
-        left: 0px !important;
-    }
-
-    .esriCTInfoMobileContent
-    {
+    .esriCTInfoMobileContent {
         color: #6e6e6e;
         display: block;
     }
 
-    .esriCTCloseDivMobile
-    {
+    .esriCTCloseDivMobile {
         display: block;
     }
 
-    .esriCTTabs div.esriCTInfoClose
-    {
+    .esriCTTabs div.esriCTInfoClose {
         display: none;
     }
 
-    .esriCTInfoSubmitButton, .esriCTInfoPostButton
-    {
+    .esriCTInfoSubmitButton, .esriCTInfoPostButton {
         background: none repeat scroll 0 0 #fff;
         bottom: 1px !important;
         position: absolute !important;
@@ -1155,8 +921,7 @@
         padding: 8px 0px;
     }
 
-    .esriCTInfoBackButton
-    {
+    .esriCTInfoBackButton {
         background: none repeat scroll 0 0 #fff;
         bottom: 1px;
         position: absolute !important;
@@ -1165,66 +930,63 @@
         padding: 8px 16px;
     }
 
-    .esriCTGalleryInfoContainer, .esriCTDirectionTabContent, .esriCTInfoCommentOuterContainer
-    {
+    .esriCTGalleryInfoContainer, .esriCTDirectionTabContent, .esriCTInfoCommentOuterContainer {
         width: 100%;
     }
 
-    .esriCTinfoWindow
-    {
+        .esriCTGalleryInfoContainer div.esriCTImgPrev, .esriCTGalleryInfoContainer div.esriCTImgNext {
+            bottom: 45%;
+        }
+
+    .esriCTGalleryInfoContainer {
+        height: 94%;
+        margin-right: 0px;
+    }
+
+    .esriCTinfoWindow {
         z-index: 1001;
     }
 
-    .esriCTRightTab
-    {
+    .esriCTRightTab {
         z-index: 1000;
     }
 
-    .esriCTTabs div.esriCTInfoClose
-    {
+    .esriCTTabs div.esriCTInfoClose {
         padding: 7px;
     }
 
-    .esriCTCustomMapLogoPostionChange
-    {
+    .esriCTCustomMapLogoPostionChange {
         bottom: 35px;
     }
 
-    .esriCTCustomMapLogoPostion
-    {
+    .esriCTCustomMapLogoPostion {
         bottom: 8px;
     }
 
-    .esriCTActivityContentHeight
-    {
+    .esriCTActivityContentHeight {
         height: 200px;
     }
 
-    .commentsTab
-    {
+    .commentsTab {
         padding: 9px 0 9px 0;
     }
 
-    .esriCTCommentContainer
-    {
+    .esriCTCommentContainer {
         height: calc(100% - 10px);
         height: -moz-calc(100% - 10px);
         height: -webkit-calc(100% - 10px);
         height: -o-calc(100% - 10px);
     }
 
-    .esriCTDivLegendBoxUp
-    {
+    .esriCTDivLegendBoxUp {
         bottom: 0px;
     }
 
-    .esriCTDivMapPositionUp
-    {
+    .esriCTDivMapPositionUp {
         bottom: 0px;
     }
 
-    .esriCTDivLegendBox
-    {
+    .esriCTDivLegendBox {
         width: 100%;
         bottom: 2px;
         margin-left: 0px;
@@ -1232,9 +994,12 @@
         position: fixed;
     }
 
-    .esriCTTabsLeftFlexi
-    {
+    .esriCTTabsLeftFlexi {
         height: 35px;
+    }
+
+    .esriCTTPaginationList {
+        margin-top: 0px !important;
     }
 }
 /* Landscape */

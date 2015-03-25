@@ -1,4 +1,4 @@
-﻿/*global define,dojo,alert,dijit */
+﻿/*global define,dojo,alert,dijit,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -25,6 +25,7 @@ define([
     "dojo/dom-attr",
     "dojo/dom",
     "dojo/dom-class",
+    "dojo/_base/array",
     "esri/domUtils",
     "esri/InfoWindowBase",
     "dojo/text!./templates/infoWindow.html",
@@ -36,14 +37,15 @@ define([
     "dijit/_WidgetsInTemplateMixin",
     "dijit/a11yclick"
 
-], function (declare, domConstruct, domStyle, lang, on, domAttr, dom, domClass, domUtils, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, query, topic, sharedNls, _WidgetsInTemplateMixin, a11yclick) {
+], function (declare, domConstruct, domStyle, lang, on, domAttr, dom, domClass, array, domUtils, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, query, topic, sharedNls, _WidgetsInTemplateMixin, a11yclick) {
     return declare([InfoWindowBase, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
         sharedNls: sharedNls,
         InfoShow: true,
         widgetName: null,
         isTabEnabled: true,
-        galaryObject: null,
+        galleryObject: null,
+        queryURL: null,
 
         postCreate: function () {
             var infoTab;
@@ -55,48 +57,50 @@ define([
             this.own(on(this.backToMap, a11yclick, lang.hitch(this, function () {
                 this._closeInfowindow();
             })));
+            // onclick on mobile arraw button
             this.own(on(this.mobileArrow, a11yclick, lang.hitch(this, function () {
                 this.InfoShow = false;
                 this._openInfowindow();
             })));
+            // subscribing mobile info window
             topic.subscribe("openMobileInfowindow", lang.hitch(this, function () {
                 this._openInfowindow();
             }));
+            // subscribing for widget name for further query
             topic.subscribe("getInfoWidgetName", lang.hitch(this, function (value) {
                 this.widgetName = value;
             }));
-
+            // subscribing for return Query URL for further query
+            topic.subscribe("returnQueryURL", lang.hitch(this, function (value) {
+                this.queryURL = value;
+            }));
             this.onWindowResize();
-            topic.subscribe("galaryObject", lang.hitch(this, function (value) {
-                this.galaryObject = value;
-            }));
-
-            topic.subscribe("commentObject", lang.hitch(this, function (value) {
-                this.commentObject = value;
-            }));
-
-            topic.subscribe("directionObject", lang.hitch(this, function (value) {
-                this.directionObject = value;
-            }));
-
+            // subscribing for add To List Object for further query
             topic.subscribe("addToListObject", lang.hitch(this, function (value) {
                 this.addToListObject = value;
             }));
 
+            // subscribing for finding attachment in layer
+            topic.subscribe("isattachmentFound", lang.hitch(this, function (value) {
+                this.isAttachmentFound = value;
+            }));
+            // onclick on close button
             this.own(on(this.divClose, a11yclick, lang.hitch(this, function () {
                 this.InfoShow = true;
                 domUtils.hide(this.domNode);
                 this.map.getLayer("highlightLayerId").clear();
-                dojo.mapClickedPoint = null;
+                appGlobals.shareOptions.mapClickedPoint = null;
             })));
+            // onclicko n mobile close div button
             this.own(on(this.mobileCloseDiv, a11yclick, lang.hitch(this, function () {
                 this.InfoShow = true;
-                dojo.setMapTipPosition = true;
+                appGlobals.shareOptions.setMapTipPosition = true;
                 domUtils.hide(this.domNode);
-                dojo.infoWindowIsShowing = false;
+                appGlobals.shareOptions.infoWindowIsShowing = false;
                 this.map.getLayer("highlightLayerId").clear();
-                dojo.mapClickedPoint = null;
+                appGlobals.shareOptions.mapClickedPoint = null;
             })));
+            // on click on informaition tab for showing result
             this.own(on(this.informationTab, a11yclick, lang.hitch(this, function () {
                 this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
                 domClass.add(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
@@ -109,6 +113,7 @@ define([
                     this._displayBackToMapText();
                 }
             })));
+            // onclick on gallery tab for showing tab and data
             this.own(on(this.galleryTab, a11yclick, lang.hitch(this, function () {
                 this._showInfoWindowTab(this.galleryTab, dojo.byId("galleryTabContainer"));
                 domClass.replace(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
@@ -121,6 +126,7 @@ define([
                     this._displayBackToMapText();
                 }
             })));
+            // onclick on comments Tab for showing tab and data
             this.own(on(this.commentsTab, a11yclick, lang.hitch(this, function () {
                 this._showInfoWindowTab(this.commentsTab, dojo.byId("commentsTabContainer"));
                 domClass.replace(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
@@ -133,9 +139,8 @@ define([
                     this._displayBackText();
                 }
             })));
+            // onclick on direction Tab for showing tab and data
             this.own(on(this.esriCTGetDir, a11yclick, lang.hitch(this, function () {
-                topic.publish("showDirection", this.directionObject);
-                topic.publish("extentSetValue", true);
                 this._showInfoWindowTab(this.esriCTGetDir, dojo.byId("getDirContainer"));
                 domClass.replace(this.getDirselect, "esriCTImageTabSelected", "esriCTImageTab");
                 domClass.replace(this.infoSelect, "esriCTInfoTabImage", "esriCTInfoTabImageSelect");
@@ -143,11 +148,12 @@ define([
                 domClass.replace(this.commentSelect, "esriCTCommentsTabImage", "esriCTCommentsTabImageselect");
                 domClass.replace(this.addtoListSelect, "addtoListTabImage", "addtoListTabImageSelect");
                 domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
-                // Setting the back to map text
+                // Setting back to map text
                 if (dojo.window.getBox().w < 767) {
                     this._displayBackToMapText();
                 }
             })));
+            // onclick on addtoList Tab for adding data in my list
             this.own(on(this.addtoListTab, a11yclick, lang.hitch(this, function () {
                 infoTab = query('.esriCTInfoSelectedTab')[0];
                 if (infoTab) {
@@ -166,16 +172,25 @@ define([
             })));
         },
 
+        /**
+        * show info window tab
+        * @param {Object} tabNode object of tabs
+        * @param {Object} containerNode object of container Node
+        * @memberOf widgets/infoWindow/infoWindow
+        */
         _showInfoWindowTab: function (tabNode, containerNode) {
             var infoContainer, infoTab;
             infoContainer = query('.displayBlock')[0];
             infoTab = query('.esriCTInfoSelectedTab')[0];
+            // checking for info container
             if (infoContainer) {
                 domClass.remove(infoContainer, "displayBlock");
             }
+            // checking for inow tab
             if (infoTab) {
                 domClass.remove(infoTab, "esriCTInfoSelectedTab");
             }
+            // replacing class for all the tabs
             domClass.replace(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
             domClass.replace(this.infoSelect, "esriCTInfoTabImageSelect", "esriCTInfoTabImage");
             domClass.replace(this.gallerySelect, "esriCTGalleryTabImage", "esriCTGalleryTabImageSelect");
@@ -184,45 +199,65 @@ define([
             domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
             domClass.add(tabNode, "esriCTInfoSelectedTab");
             domClass.add(containerNode, "displayBlock");
-            if (dijit.registry.byId("myList")) {
-                domStyle.set(this.addtoListTab, "display", "table-cell");
-            } else {
-                domStyle.set(this.addtoListTab, "display", "none");
-            }
         },
 
+        /**
+        * show the info window
+        * @param {Object} screenPoint object of screen Point
+        * @memberOf widgets/infoWindow/infoWindow
+        */
         show: function (screenPoint) {
             var iscommentsPodEnabled = this.getPodStatus("CommentsPod"), tabName, tabEnabled = 0, isdirectionsPodEnabled, isgalleryPodEnabled, isfacilityInformationPodEnabled, faclityInfo;
-            if (dojo.configData.DrivingDirectionSettings.GetDirections) {
+            // checking for direction tag from config file for showing drection tab in info window
+            if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
                 isdirectionsPodEnabled = this.getPodStatus("DirectionsPod");
             }
             isgalleryPodEnabled = this.getPodStatus("GalleryPod");
-            isfacilityInformationPodEnabled = this.getPodStatus("FacilityInformationPod");
-
+            // checking for gallery pod enabled status
             if (!isgalleryPodEnabled) {
                 domStyle.set(this.galleryTab, "display", "none");
             } else {
+                domStyle.set(this.galleryTab, "display", "table-cell");
                 tabEnabled++;
                 tabName = "GalleryPod";
             }
+            isfacilityInformationPodEnabled = this.getPodStatus("FacilityInformationPod");
+            // checking for facility information pod enabled status
             if (!isfacilityInformationPodEnabled) {
                 domStyle.set(this.informationTab, "display", "none");
             } else {
                 tabEnabled++;
                 tabName = "FacilityInformationPod";
             }
-            if (!isdirectionsPodEnabled) {
+            // checking if it is a other url then hide direction and add to list tab
+            if (this.queryURL.toLowerCase() === "otherurl") {
+                domStyle.set(this.esriCTGetDir, "display", "none");
+            } else if (!isdirectionsPodEnabled) {
                 domStyle.set(this.esriCTGetDir, "display", "none");
             } else {
+                domStyle.set(this.esriCTGetDir, "display", "table-cell");
                 tabEnabled++;
                 tabName = "DirectionsPod";
             }
-            if (!iscommentsPodEnabled) {
+            // checking for other url if it is then hide comment tab
+            if (this.queryURL.toLowerCase() === "otherurl") {
+                domStyle.set(this.commentsTab, "display", "none");
+            } else if (!iscommentsPodEnabled) {
                 domStyle.set(this.commentsTab, "display", "none");
             } else {
+                domStyle.set(this.commentsTab, "display", "table-cell");
                 tabEnabled++;
                 tabName = "CommentsPod";
             }
+            // checking for other url if it is then hide add to list tab
+            if (this.queryURL.toLowerCase() === "otherurl") {
+                domStyle.set(this.addtoListTab, "display", "none");
+            } else if (dijit.registry.byId("myList")) {
+                domStyle.set(this.addtoListTab, "display", "table-cell");
+            } else {
+                domStyle.set(this.addtoListTab, "display", "none");
+            }
+            // checking for event search if it is then hide event tab
             if (this.widgetName.toLowerCase() === "infoevent") {
                 domStyle.set(this.commentsTab, "display", "none");
             } else if (this.widgetName.toLowerCase() === "infoactivity") {
@@ -234,9 +269,11 @@ define([
             }
             this.InfoShow = false;
             faclityInfo = "FacilityInformationPod";
-            if (tabEnabled > 1 && dojo.configData.PodSettings[1][faclityInfo].Enabled) {
+            if (tabEnabled > 1 && appGlobals.configData.PodSettings[1][faclityInfo].Enabled) {
                 this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
             } else {
+                this.isTabEnabled = true;
+                // checking for comment tab for showing info window tab
                 if (tabName === "CommentsPod") {
                     this._showInfoWindowTab(this.commentsTab, dojo.byId("commentsTabContainer"));
                 } else if (tabName === "GalleryPod") {
@@ -252,6 +289,7 @@ define([
                     alert(sharedNls.errorMessages.enablePodSettingsInConfig);
                 }
             }
+            // checking for tab name for showing and hiding tab on the basis id enabled settings in config file
             if (tabName) {
                 if (tabName === "CommentsPod" && this.widgetName.toLowerCase() === "infoevent" && tabEnabled === 1) {
                     this.isTabEnabled = false;
@@ -263,9 +301,27 @@ define([
                     this.setLocation(screenPoint);
                 }
             }
+            // checking for tags in config file for showing hiding comment tab in info window
+            if (!appGlobals.configData.ActivitySearchSettings[0].CommentsSettings.Enabled || !appGlobals.configData.ActivitySearchSettings[0].Enable || appGlobals.configData.ActivitySearchSettings[0].CommentsSettings.QueryURL === "") {
+                domStyle.set(this.commentsTab, "display", "none");
+                if (dojo.byId("commentsTabContainer")) {
+                    domConstruct.empty(dojo.byId("commentsTabContainer"));
+                }
+            }
+            // checking if attachment is not found then hide gallery pod
+            if (!this.isAttachmentFound) {
+                domStyle.set(this.galleryTab, "display", "none");
+            }
         },
 
+        /**
+        * resize the info window
+        * @param {string} width string of width
+        * @param {string} height string of height
+        * @memberOf widgets/infoWindow/infoWindow
+        */
         resize: function (width, height) {
+            // checking for window height
             if (dojo.window.getBox().w <= 767) {
                 this.infoWindowWidth = 180;
                 this.infoWindowHeight = 30;
@@ -290,15 +346,23 @@ define([
         * @memberOf widgets/infoWindow/infoWindow
         */
         setTitle: function (mobTitle) {
-            if (mobTitle.length > 0) {
+            if (mobTitle && mobTitle.length > 0) {
                 this.spanDirection.innerHTML = mobTitle;
                 this.spanDirection.title = mobTitle;
             } else {
-                this.esriCTheadderPanel.innerHTML = "";
-                this.spanDirection.innerHTML = "";
+                if (this.esriCTheadderPanel && this.spanDirection) {
+                    this.esriCTheadderPanel.innerHTML = "";
+                    this.spanDirection.innerHTML = "";
+                }
             }
         },
 
+
+        /**
+        * setting location of info window
+        * @param {string} location string of location value
+        * @memberOf widgets/infoWindow/infoWindow
+        */
         setLocation: function (location) {
             if (this.isTabEnabled) {
                 if (location.spatialReference) {
@@ -314,17 +378,25 @@ define([
             }
         },
 
+        /**
+        * hideing info window
+        * @memberOf widgets/infoWindow/infoWindow
+        */
         hide: function () {
             domUtils.hide(this.domNode);
             this.isShowing = false;
             this.onHide();
-            dojo.openInfowindow = false;
+            appGlobals.shareOptions.openInfowindow = false;
         },
 
+        /**
+        * hideing info window container
+        * @memberOf widgets/infoWindow/infoWindow
+        */
         _hideInfoContainer: function () {
             this.own(on(this.divClose, a11yclick, lang.hitch(this, function () {
                 domUtils.hide(this.domNode);
-                dojo.infoWindowIsShowing = false;
+                appGlobals.shareOptions.infoWindowIsShowing = false;
             })));
         },
 
@@ -346,15 +418,15 @@ define([
                 this.infoWindowzIndex = 1002;
                 domStyle.set(this.domNode, { zIndex: 1002 });
             } else {
-                dojo.doQuery = "false";
-                dojo.addressLocationDirectionActivity = null;
+                appGlobals.shareOptions.doQuery = "false";
+                appGlobals.shareOptions.addressLocationDirectionActivity = null;
                 this.infoWindowzIndex = 997;
                 domStyle.set(this.domNode, { zIndex: 997 });
             }
         },
 
         /**
-        * Create info winodw for mobile
+        * Create info window for mobile
         * @memberOf widgets/infoWindow/infoWindow
         */
         _openInfowindow: function () {
@@ -364,7 +436,7 @@ define([
             domClass.add(query(".esriCTInfoMobileContent")[0], "divHideInfoMobileContent");
             domClass.add(query(".esriCTDivTriangle")[0], "esriCThidedivTriangle");
             domClass.add(query(".esriCTInfoWindow")[0], "esriCTinfoWindowHeightWidth");
-            dojo.onInfoWindowResize = true;
+            appGlobals.shareOptions.onInfoWindowResize = true;
             this.isMobileInfoWindowOpen = true;
             this.infoWindowResizeOnMap();
         },
@@ -374,7 +446,7 @@ define([
         * @memberOf widgets/infoWindow/infoWindow
         */
         _closeInfowindow: function () {
-            dojo.onInfoWindowResize = false;
+            appGlobals.shareOptions.onInfoWindowResize = false;
             this.isMobileInfoWindowOpen = false;
             this.infoWindowResizeOnMap();
             domClass.remove(query(".esriCTInfoContent")[0], "esriCTShowInfoContent");
@@ -385,16 +457,16 @@ define([
         },
         /**
         * Returns the pod enabled status from config file.
-        * @param {string} Key name mensioned in config file
+        * @param {string} Key name mentioned in config file
         * @memberOf widgets/infoWindow/infoWindow
         */
         getPodStatus: function (keyValue) {
             var isEnabled, i, key;
             isEnabled = false;
-            for (i = 0; i < dojo.configData.PodSettings.length; i++) {
-                for (key in dojo.configData.PodSettings[i]) {
-                    if (dojo.configData.PodSettings[i].hasOwnProperty(key)) {
-                        if (key === keyValue && dojo.configData.PodSettings[i][key].Enabled) {
+            for (i = 0; i < appGlobals.configData.PodSettings.length; i++) {
+                for (key in appGlobals.configData.PodSettings[i]) {
+                    if (appGlobals.configData.PodSettings[i].hasOwnProperty(key)) {
+                        if (key === keyValue && appGlobals.configData.PodSettings[i][key].Enabled) {
                             isEnabled = true;
                             break;
                         }
@@ -413,6 +485,7 @@ define([
             backToMapHide = query('.esriCTCloseDivMobile')[0];
             backButton = query('.esriCTInfoBackButton')[0];
             backToMap = domStyle.get(backToMapHide, "display");
+            // checking for back to map for showing back to map
             if (backToMap === "none") {
                 domStyle.set(backToMapHide, "display", "block");
                 domStyle.set(backButton, "display", "none");
@@ -420,7 +493,7 @@ define([
         },
 
         /**
-        * Display 'Back' text in mobile Phones
+        * Display 'Back' text in mobile devices
         * @memberOf widgets/infoWindow/infoWindow
         */
         _displayBackText: function () {
@@ -428,6 +501,7 @@ define([
             backToMapHide = query('.esriCTCloseDivMobile')[0];
             backButton = query('.esriCTInfoBackButton')[0];
             PostCommentContainer = query('.esriCTCommentInfoOuterContainer')[0];
+            // checking for pos comment container
             if (PostCommentContainer) {
                 PostCommentContainerDisplay = domStyle.get(PostCommentContainer, "display");
                 if (PostCommentContainerDisplay === "none") {
