@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig:true,alert,console,esri,Modernizr,dijit */
+﻿/*global define,dojo,dojoConfig:true,alert,console,esri,Modernizr,dijit,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -43,7 +43,12 @@ define([
         sharedNls: sharedNls,                                // Variable for shared NLS
 
         /**
-        * This file creats bottom pod data search from any layer
+        * This file creates carousel container with pods for showing results
+        * Search panel : Showing all searched features
+        * Informaitional panel: showing information about the feature
+        * Galary panel : Showing image if layer has attachment
+        * Comment panel : Showing comments after querying on comment layer
+        *
         */
 
 
@@ -53,7 +58,7 @@ define([
         */
         _createCarouselContainer: function () {
             this.carouselContainer = new CarouselContainer();
-            this.carouselContainer.createPod(dom.byId("esriCTParentDivContainer"), dojo.configData.BottomPanelToggleButtonText);
+            this.carouselContainer.createPod(dom.byId("esriCTParentDivContainer"), appGlobals.configData.BottomPanelToggleButtonText);
         },
 
         /**
@@ -63,23 +68,23 @@ define([
         createCarouselPod: function () {
             var divCarouselPod, divGallerycontent, divPodInfoContainer, divcommentcontent, divHeader, divsearchcontent, i, key, carouselPodKey;
             // Looping for pod settings array from config file for getting value
-            for (i = 0; i < dojo.configData.PodSettings.length; i++) {
+            for (i = 0; i < appGlobals.configData.PodSettings.length; i++) {
                 // Getting key from pod settings
-                for (key in dojo.configData.PodSettings[i]) {
-                    if (dojo.configData.PodSettings[i].hasOwnProperty(key)) {
-                        // If in config pod settings is enabled then set carousel pod key name to key mached
-                        if (dojo.configData.PodSettings && dojo.configData.PodSettings[i][key].Enabled) {
+                for (key in appGlobals.configData.PodSettings[i]) {
+                    if (appGlobals.configData.PodSettings[i].hasOwnProperty(key)) {
+                        // If in config pod settings is enabled then set carousel pod key name to key matched
+                        if (appGlobals.configData.PodSettings && appGlobals.configData.PodSettings[i][key].Enabled) {
                             divCarouselPod = domConstruct.create("div", { "class": "esriCTBoxContainer" });
                             divPodInfoContainer = domConstruct.create("div", { "class": "esriCTInfoContainer" }, divCarouselPod);
                             carouselPodKey = key;
                             // If comment settings is enabled then only set comment pod visible to user.
-                            if (!dojo.configData.ActivitySearchSettings[0].CommentsSettings.Enabled) {
+                            if (!appGlobals.configData.ActivitySearchSettings[0].CommentsSettings.Enabled) {
                                 if (carouselPodKey.toLowerCase() === "commentspod") {
                                     carouselPodKey = "default";
                                 }
                             }
-                            if (!dojo.configData.DrivingDirectionSettings.GetDirections) {
-                                if (dojo.configData.PodSettings[i].DirectionsPod) {
+                            if (!appGlobals.configData.DrivingDirectionSettings.GetDirections) {
+                                if (appGlobals.configData.PodSettings[i].DirectionsPod) {
                                     carouselPodKey = "default";
                                 }
                             }
@@ -89,7 +94,7 @@ define([
                         }
                         // Switch for carouse pod key for creating div
                         switch (carouselPodKey.toLowerCase()) {
-                            // If it is a search pod
+                        // If it is a search pod
                         case "searchresultpod":
                             divHeader = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
                             domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.searchResultText }, divHeader);
@@ -104,7 +109,7 @@ define([
                             break;
                         case "directionspod":
                             // If it is a direction pod
-                            if (dojo.configData.DrivingDirectionSettings.GetDirections) {
+                            if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
                                 this.directionContainer = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
                                 domConstruct.create("div", { "class": "esriCTDivDirectioncontent" }, this.directionContainer);
                             }
@@ -140,52 +145,55 @@ define([
         /**
         * set the content in (Search result) carousel pod
         * @param {object} result contains features
-        * @param {boolean} isBufferNeeded
+        * @param {boolean} isBufferNeeded contains boolean value for buffer creation
         * @param {object} queryURL contains Layer URL
         * @param {string} widgetName contains name of widgets
         * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         setSearchContent: function (result, isBufferNeeded, queryURL, widgetName, activityData) {
-            var isPodEnabled = this.getPodStatus("SearchResultPod"), subStringRouteUnit, searchContenTitle, searchedFacilityObject, divHeaderContent, resultcontent = [], milesCalulatedData, searchContenData, g, l, serchSetting, intialSearchSettingData;
+            var isPodEnabled = this.getPodStatus("SearchResultPod"), subStringRouteUnit, searchContenTitle, searchedFacilityObject, divHeaderContent, resultcontent = [], milesCalulatedData, searchContenData, g, l, serchSetting;
+            // Checking for pod enable status in config file
             if (isPodEnabled) {
-                // If it is comming from unified search and geolocation then set search content title and search contend Data
+                // If it is coming from unified search and geolocation then set search content title and search contend Data
                 if (widgetName.toLowerCase() === "unifiedsearch" || widgetName.toLowerCase() === "geolocation") {
                     searchContenTitle = sharedNls.titles.numberOfFeaturesFoundNearAddress;
                 } else if (widgetName.toLowerCase() === "activitysearch") {
-                    // If it is comming from activity search and geolocation then set search content title and search contend Data
-                    searchContenTitle = sharedNls.titles.numberOfFoundFeatureNearAddress;
+                    // If it is coming from activity search and geolocation then set search content title and search content Data
+                    searchContenTitle = sharedNls.titles.numberOfFeaturesFound;
                 } else if (widgetName.toLowerCase() === "event") {
-                    // If it is comming from event search and geolocation then set search content title and search contend Data
-                    searchContenTitle = sharedNls.titles.numberOfFoundEventsNearAddress;
+                    // If it is coming from event search and geolocation then set search content title and search contend Data
+                    searchContenTitle = sharedNls.titles.numberOfEventsFound;
                 }
+                // function for getting search settings from queryURL.
                 serchSetting = this.getSearchSetting(queryURL);
                 searchContenData = this.getKeyValue(serchSetting.SearchDisplayFields);
                 divHeaderContent = query('.esriCTDivSearchResulContent');
+                // iF DIV has data then remove all childs element
                 if (divHeaderContent.length > 0) {
                     domConstruct.empty(divHeaderContent[0]);
-                    this.spanFeatureListContainer = domConstruct.create("div", { "class": "esriCTSpanFeatureListContainer", "innerHTML": string.substitute(searchContenTitle, [result.length]) }, divHeaderContent[0]);
-                    // looping for result for showing data in pod
-                    array.forEach(result, lang.hitch(this, function (resultData, i) {
-                        if (!isBufferNeeded && result[i].distance) {
-                            subStringRouteUnit = this._getSubStringUnitData();
-                            milesCalulatedData = " (" + parseFloat(result[i].distance).toFixed(2) + subStringRouteUnit + sharedNls.showApproxString + ")";
-                        } else {
-                            milesCalulatedData = "";
-                        }
-                        // if it is not comming from event layer
-                        if (widgetName.toLowerCase() !== "event") {
-                            // If result length is greater than 1
-                            resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotext" }, divHeaderContent[0]);
-                            if (i === 0) {
-                                intialSearchSettingData = serchSetting;
-                            }
-                            if (result.length > 1) {
-                                // If it is comming from unified search and geolocation
-                                if (widgetName.toLowerCase() === "unifiedsearch" || widgetName.toLowerCase() === "geolocation") {
-                                    // Looping for activity data featched from unified search
+                }
+                this.spanFeatureListContainer = domConstruct.create("div", { "class": "esriCTSpanFeatureListContainer", "innerHTML": string.substitute(searchContenTitle, [result.length]) }, divHeaderContent[0]);
+                // looping through the results for showing data in pod
+                array.forEach(result, lang.hitch(this, function (resultData, i) {
+                    if (!isBufferNeeded && result[i].distance) {
+                        subStringRouteUnit = this._getSubStringUnitData();
+                        milesCalulatedData = " (" + parseFloat(result[i].distance).toFixed(2) + subStringRouteUnit + sharedNls.showApproxString + ")";
+                    } else {
+                        milesCalulatedData = "";
+                    }
+                    // if it is not coming from event layer
+                    if (widgetName.toLowerCase() !== "event") {
+                        // If result length is greater than 1
+                        resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotext" }, divHeaderContent[0]);
+                        if (result.length > 1) {
+                            // If it is coming from unified search and geolocation
+                            if (widgetName.toLowerCase() === "unifiedsearch" || widgetName.toLowerCase() === "geolocation") {
+                                if (activityData) {
+                                    // Looping for activity data fetched from unified search
                                     for (g = 0; g < activityData.length; g++) {
                                         // Looping for features
                                         for (l = 0; l < activityData[g].records.features.length; l++) {
+                                            // checking for distnace attr for getting curren value for unified search data
                                             if (activityData[g].records.features[l].distance === result[i].distance) {
                                                 domAttr.set(resultcontent[i], "QueryURL", activityData[g].queryURL);
                                                 serchSetting = this.getSearchSetting(activityData[g].queryURL);
@@ -193,34 +201,37 @@ define([
                                             }
                                         }
                                     }
-                                } else {
-                                    domAttr.set(resultcontent[i], "QueryURL", queryURL);
-                                }
-                                resultcontent[i].innerHTML = result[i].attributes[searchContenData] + milesCalulatedData;
-                                domAttr.set(resultcontent[i], "value", i);
-                                searchedFacilityObject = { "FeatureData": result, "SelectedRow": resultcontent[i], "IsBufferNeeded": isBufferNeeded, "QueryLayer": queryURL, "WidgetName": widgetName, "searchedFacilityIndex": i, "activityData": activityData };
-                                this.own(on(resultcontent[i], a11yclick, lang.hitch(this, function (event) {
-                                    topic.publish("extentSetValue", true);
-                                    this._clickOnSearchedFacility(searchedFacilityObject, event);
-                                })));
-                                // If it is comming from share url then show data in search pod
-                                if (window.location.href.toString().split("$selectedSearchResult=").length > 1 && Number(window.location.href.toString().split("$selectedSearchResult=")[1].split("$")[0]) === i) {
-                                    // Checking when it is not a shared link
-                                    if (this.isExtentSet === true) {
-                                        return;
-                                    }
-                                    queryURL = domAttr.get(resultcontent[i], "QueryURL");
-                                    searchedFacilityObject = { "FeatureData": result, "SelectedRow": resultcontent[i], "IsBufferNeeded": isBufferNeeded, "QueryLayer": queryURL, "WidgetName": widgetName, "searchedFacilityIndex": i, "activityData": activityData };
-                                    domClass.add(resultcontent[i], "esriCTDivHighlightFacility");
-                                    this._clickOnSearchedFacility(searchedFacilityObject, null);
-                                    this.isFirstSearchResult = true;
-                                } else if (query('.esriCTDivHighlightFacility').length < 1 && !this.isFirstSearchResult) {
-                                    domClass.add(resultcontent[0], "esriCTDivHighlightFacility");
                                 }
                             } else {
-                                // If it is comming from unified search and geolocation then loop through the activity data
-                                if (widgetName.toLowerCase() === "unifiedsearch" || widgetName.toLowerCase() === "geolocation") {
-                                    // Looping for activity data for getting query URL on the basis of direction
+                                // setting attribute of query url for further query
+                                domAttr.set(resultcontent[i], "QueryURL", queryURL);
+                            }
+                            resultcontent[i].innerHTML = result[i].attributes[searchContenData] + milesCalulatedData;
+                            domAttr.set(resultcontent[i], "value", i);
+                            searchedFacilityObject = { "FeatureData": result, "SelectedRow": resultcontent[i], "IsBufferNeeded": isBufferNeeded, "QueryLayer": queryURL, "WidgetName": widgetName, "searchedFacilityIndex": i, "activityData": activityData };
+                            this.own(on(resultcontent[i], a11yclick, lang.hitch(this, function (event) {
+                                topic.publish("extentSetValue", true);
+                                this._clickOnSearchedFacility(searchedFacilityObject, event);
+                            })));
+                            // If it is coming from share url then show data in search pod
+                            if (window.location.href.toString().split("$selectedSearchResult=").length > 1 && Number(window.location.href.toString().split("$selectedSearchResult=")[1].split("$")[0]) === i) {
+                                // Checking when it is not a shared link
+                                if (this.isExtentSet === true) {
+                                    return;
+                                }
+                                queryURL = domAttr.get(resultcontent[i], "QueryURL");
+                                searchedFacilityObject = { "FeatureData": result, "SelectedRow": resultcontent[i], "IsBufferNeeded": isBufferNeeded, "QueryLayer": queryURL, "WidgetName": widgetName, "searchedFacilityIndex": i, "activityData": activityData };
+                                domClass.add(resultcontent[i], "esriCTDivHighlightFacility");
+                                this._clickOnSearchedFacility(searchedFacilityObject, null);
+                                this.isFirstSearchResult = true;
+                            } else if (query('.esriCTDivHighlightFacility').length < 1 && !this.isFirstSearchResult) {
+                                domClass.add(resultcontent[0], "esriCTDivHighlightFacility");
+                            }
+                        } else {
+                            // If it is comming from unified search and geolocation then loop through the activity data
+                            if (widgetName.toLowerCase() === "unifiedsearch" || widgetName.toLowerCase() === "geolocation") {
+                                // Looping for activity data for getting query URL on the basis of direction
+                                if (activityData) {
                                     for (g = 0; g < activityData.length; g++) {
                                         // Looping for features
                                         for (l = 0; l < activityData[g].records.features.length; l++) {
@@ -232,22 +243,13 @@ define([
                                         }
                                     }
                                 }
-                                if (i === 0) {
-                                    intialSearchSettingData = serchSetting;
-                                }
-                                resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotextForEvent", "innerHTML": result[i].attributes[searchContenData] + milesCalulatedData }, divHeaderContent[0]);
-                            }
-                        } else {
-                            if (i === 0) {
-                                intialSearchSettingData = serchSetting;
                             }
                             resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotextForEvent", "innerHTML": result[i].attributes[searchContenData] + milesCalulatedData }, divHeaderContent[0]);
                         }
-                    }));
-                }
-            }
-            if (intialSearchSettingData) {
-                this.searchSettingData = intialSearchSettingData;
+                    } else {
+                        resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotextForEvent", "innerHTML": result[i].attributes[searchContenData] + milesCalulatedData }, divHeaderContent[0]);
+                    }
+                }));
             }
         },
 
@@ -257,11 +259,12 @@ define([
         * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         _clickOnSearchedFacility: function (searchedFacilityObject, event) {
-            var pushPinGemotery, widgetName, routeObject, queryObject, highlightedDiv, queryURL, rowIndex;
+            var pushpinGeometry, widgetName, routeObject, queryObject, highlightedDiv, queryURL, rowIndex;
+            this.featureSetWithoutNullValue = searchedFacilityObject.FeatureData;
             topic.publish("hideInfoWindow");
             // If feature data has some items
             if (searchedFacilityObject.FeatureData.length > 1) {
-                // If event is available then get tuery URL and row index from event.
+                // If event is available then get query URL and row index from event.
                 if (event !== null) {
                     queryURL = domAttr.get(event.currentTarget, "QueryURL");
                     rowIndex = domAttr.get(event.currentTarget, "value");
@@ -271,7 +274,7 @@ define([
                     queryURL = searchedFacilityObject.QueryLayer;
                     rowIndex = searchedFacilityObject.searchedFacilityIndex;
                 }
-                // query for getting highlighed div
+                // query for getting highlighted div
                 highlightedDiv = query('.esriCTDivHighlightFacility')[0];
                 if (highlightedDiv) {
                     domClass.replace(highlightedDiv, "esriCTSearchResultInfotext", "esriCTDivHighlightFacility");
@@ -280,25 +283,25 @@ define([
                 if (event !== null) {
                     domClass.replace(event.currentTarget, "esriCTDivHighlightFacility", "esriCTSearchResultInfotext");
                 }
-                dojo.searchFacilityIndex = Number(rowIndex);
-                // If it is comming from activity search pod then remove buffer layer.
+                appGlobals.shareOptions.searchFacilityIndex = Number(rowIndex);
+                // If it is coming from activity search pod then remove buffer layer.
                 if (searchedFacilityObject.WidgetName.toLowerCase() === "activitysearch") {
                     this.removeBuffer();
                 }
                 widgetName = "SearchedFacility";
                 topic.publish("showProgressIndicator");
                 this.removeHighlightedCircleGraphics();
-                // If any point is ther on map related to geolocation settings else it is locator settings.
+                // Check if any graphic is present on map, related to geolocation settings or locator settings
                 if (this.map.getLayer(this.geoLocationGraphicsLayerID) && this.map.getLayer(this.geoLocationGraphicsLayerID).graphics.length > 0) {
-                    pushPinGemotery = this.map.getLayer(this.geoLocationGraphicsLayerID).graphics;
+                    pushpinGeometry = this.map.getLayer(this.geoLocationGraphicsLayerID).graphics;
                 } else if (this.map.getLayer(this.locatorGraphicsLayerID).graphics.length > 0) {
-                    pushPinGemotery = this.map.getLayer(this.locatorGraphicsLayerID).graphics;
+                    pushpinGeometry = this.map.getLayer(this.locatorGraphicsLayerID).graphics;
                 } else {
-                    pushPinGemotery = [this.selectedGraphic];
+                    pushpinGeometry = [this.selectedGraphic];
                 }
-                // If data is found then call show route function.
-                if (pushPinGemotery[0]) {
-                    routeObject = { "StartPoint": pushPinGemotery[0], "EndPoint": searchedFacilityObject.FeatureData, "Index": Number(rowIndex), "WidgetName": widgetName, "QueryURL": queryURL, "activityData": searchedFacilityObject.activityData };
+                // If graphic is present on map, execute show route function.
+                if (pushpinGeometry[0]) {
+                    routeObject = { "StartPoint": pushpinGeometry[0], "EndPoint": searchedFacilityObject.FeatureData, "Index": Number(rowIndex), "WidgetName": widgetName, "QueryURL": queryURL, "activityData": searchedFacilityObject.activityData };
                     this.showRoute(routeObject);
                 } else if (this.selectedGraphic) {
                     routeObject = { "StartPoint": this.selectedGraphic, "EndPoint": searchedFacilityObject.FeatureData, "Index": Number(rowIndex), "WidgetName": widgetName, "QueryURL": queryURL, "activityData": searchedFacilityObject.activityData };
@@ -314,137 +317,162 @@ define([
 
         /**
         * set the content in (Facility) carousel pod if user click on search result data
-        * @param {object} facilityObject contans feature, widget name, selected facility, Layer URL
+        * @param {object} facilityObject contains feature, widget name, selected facility, Layer URL
         * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         setFacility: function (facilityObject) {
-            var divHeaderContent, layerId, layerTitle, facilityContenTitle, infoPodAddtoList, isEventSearched = false, infowWindowData, divHeader, facilityDiv, divFacilityContainer, divFacilityContent, k, j, m, p, activityImageDiv, SearchSettingsLayers, isPodEnabled, divFacilityImages,
-                spanHeaderAddToList, _self = this, listData, isAlreadyAdded, t, objectIDField, serchSetting;
+            var divHeaderContent, layerId, layerTitle, infoPodAddtoList, isEventSearched = false, infowWindowData, divHeader, facilityDiv, divFacilityContainer, divFacilityContent, k, j, m, p, activityImageDiv, SearchSettingsLayers, isPodEnabled, divFacilityImages,
+                _self = this, listData, isAlreadyAdded, objectIDField, serchSetting, queryLayerId, descriptionValue, infoTitle, operationLayer, layerdetails, contentDiv, descriptionResult, fieldValue, fieldName, fieldInfo, domainValue, formatedDataField;
             isPodEnabled = this.getPodStatus("FacilityInformationPod");
+
             // If pod is enabled
             if (isPodEnabled) {
                 divHeaderContent = query('.esriCTdivFacilityContent');
                 // If div is created
                 if (divHeaderContent.length > 0) {
                     domConstruct.empty(divHeaderContent[0]);
-                    divHeader = domConstruct.create("div", {}, divHeaderContent[0]);
-                    serchSetting = this.getSearchSetting(facilityObject.QueryURL);
-                    facilityContenTitle = this.getKeyValue(serchSetting.SearchDisplayFields);
-                    layerId = serchSetting.QueryLayerId;
-                    layerTitle = serchSetting.Title;
-                    facilityObject.Feature = this.removeNullValue(facilityObject.Feature);
-                    if (facilityObject.WidgetName.toLowerCase() === "unifiedsearch" || facilityObject.WidgetName.toLowerCase() === "geolocation") {
-                        // If it is comming from unified search than loop throug the activity data
-                        for (t = 0; t < facilityObject.activityData.length; t++) {
-                            // If distance is matched than set layer id and layer title
-                            if (parseFloat(facilityObject.Feature[facilityObject.SelectedItem.value].distance) === parseFloat(facilityObject.activityData[t].records.features[facilityObject.SelectedItem.value].distance)) {
-                                if (facilityObject.activityData[t].queryURL === dojo.configData.ActivitySearchSettings[0].QueryURL) {
-                                    serchSetting = this.getSearchSetting(facilityObject.activityData[t].queryURL);
-                                    facilityContenTitle = this.getKeyValue(serchSetting.SearchDisplayFields);
-                                    layerId = serchSetting.QueryLayerId;
-                                    layerTitle = serchSetting.Title;
-                                } else {
-                                    isEventSearched = true;
-                                    serchSetting = this.getSearchSetting(facilityObject.activityData[t].queryURL);
-                                    facilityContenTitle = this.getKeyValue(serchSetting.SearchDisplayFields);
-                                    layerId = serchSetting.QueryLayerId;
-                                    layerTitle = serchSetting.Title;
-                                }
-                                for (p = 0; p < dojo.configData.InfoWindowSettings.length; p++) {
-                                    if (facilityObject.activityData[t].queryURL === dojo.configData.InfoWindowSettings[p].InfoQueryURL) {
-                                        infowWindowData = dojo.configData.InfoWindowSettings[p].InfoWindowData;
-                                        break;
-                                    }
-                                }
-                                break;
+                }
+
+                divHeader = domConstruct.create("div", {}, divHeaderContent[0]);
+                serchSetting = this.getSearchSetting(facilityObject.QueryURL);
+                layerId = serchSetting.QueryLayerId;
+                layerTitle = serchSetting.Title;
+                facilityObject.Feature = this.removeNullValue(facilityObject.Feature);
+                // Looping for operational data for getting info window settings from data
+                for (p = 0; p < appGlobals.operationLayerSettings.length; p++) {
+                    if (facilityObject.QueryURL === appGlobals.operationLayerSettings[p].layerURL) {
+                        operationLayer = appGlobals.operationLayerSettings[p];
+                        if (appGlobals.operationLayerSettings[p].layerDetails) {
+                            layerdetails = appGlobals.operationLayerSettings[p].layerDetails;
+                        }
+                        if (appGlobals.operationLayerSettings[p].infoWindowData) {
+                            infowWindowData = appGlobals.operationLayerSettings[p].infoWindowData.infoWindowfields;
+                            if (appGlobals.operationLayerSettings[p].layerDetails && appGlobals.operationLayerSettings[p].layerDetails.popupInfo && appGlobals.operationLayerSettings[p].layerDetails.popupInfo.description) {
+                                descriptionValue = appGlobals.operationLayerSettings[p].layerDetails;
                             }
                         }
-                    } else {
-                        // If it is not unified search than get info window settings
-                        // Looping through infow window data for getting facility information
-                        for (p = 0; p < dojo.configData.InfoWindowSettings.length; p++) {
-                            if (facilityObject.QueryURL === dojo.configData.InfoWindowSettings[p].InfoQueryURL) {
-                                infowWindowData = dojo.configData.InfoWindowSettings[p].InfoWindowData;
-                                if (facilityObject.QueryURL !== dojo.configData.ActivitySearchSettings[0].QueryURL) {
-                                    isEventSearched = true;
-                                }
-                                break;
+                        if (appGlobals.operationLayerSettings[p].activitySearchSettings) {
+                            if (facilityObject.QueryURL !== appGlobals.operationLayerSettings[p].activitySearchSettings.QueryURL) {
+                                isEventSearched = true;
                             }
                         }
                     }
-                    // If facility object has feature
-                    if (facilityObject.SelectedItem && facilityObject.Feature) {
-                        domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": facilityObject.Feature[facilityObject.SelectedItem.value].attributes[facilityContenTitle] }, divHeader);
-                        spanHeaderAddToList = domConstruct.create("span", { "class": "esriCTSpanHeaderAddToList" }, divHeader);
-                        infoPodAddtoList = domConstruct.create("div", { "class": "esriCTInfoAddToList" }, spanHeaderAddToList);
+                }
+
+                // If facility object has feature
+                if (facilityObject.SelectedItem && facilityObject.Feature) {
+                    try {
+                        infoTitle = this.popUpTitleDetails(facilityObject.Feature[facilityObject.SelectedItem.value].attributes, layerdetails);
+                    } catch (ex) {
+                        infoTitle = appGlobals.configData.ShowNullValueAs;
+                    }
+                    domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": infoTitle }, divHeader);
+                    if (dijit.registry.byId("myList")) {
+                        infoPodAddtoList = domConstruct.create("div", { "class": "esriCTCarouselAddToListDiv", "title": sharedNls.tooltips.addToListTooltip }, divHeader);
                         domAttr.set(infoPodAddtoList, "LayerId", layerId);
                         domAttr.set(infoPodAddtoList, "LayerTitle", layerTitle);
-                        if (dijit.registry.byId("myList")) {
-                            domConstruct.create("div", { "class": "esriCTInfoAddToListIcon" }, infoPodAddtoList);
-                            domConstruct.create("div", { "class": "esriCTInfoAddToListText", "innerHTML": sharedNls.titles.addToListTitle }, infoPodAddtoList);
-
-                            // On click for add to list item
-                            this.own(on(infoPodAddtoList, a11yclick, function (event) {
-                                layerId = domAttr.get(event.currentTarget, "LayerId");
-                                layerTitle = domAttr.get(event.currentTarget, "LayerTitle");
-                                array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
-                                    if (settings.QueryLayerId === layerId && settings.Title === layerTitle) {
-                                        objectIDField = settings.ObjectID;
-                                    }
-                                }));
-                                // Looping for activity search setting for getting object id
-                                array.forEach(dojo.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
-                                    if (settings.QueryLayerId === layerId && settings.Title === layerTitle) {
-                                        objectIDField = settings.ObjectID;
-                                    }
-                                }));
-                                isAlreadyAdded = false;
-                                // If my store has data
-                                if (_self.myListStore && _self.myListStore.length > 0) {
-                                    // looping for my list data
-                                    for (listData = 0; listData < _self.myListStore.length; listData++) {
-                                        // Comparing object id for my list and facility object id value
-                                        if (_self.myListStore[listData].value[_self.myListStore[listData].key] === facilityObject.Feature[facilityObject.SelectedItem.value].attributes[objectIDField]) {
-                                            alert(sharedNls.errorMessages.activityAlreadyadded);
-                                            isAlreadyAdded = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                // If activity is not added then add to my list
-                                if (!isAlreadyAdded) {
-                                    if (query(".esriCTEventsImg")[0]) {
-                                        topic.publish("toggleWidget", "myList");
-                                        topic.publish("showActivityPlannerContainer");
-                                    }
-                                    topic.publish("addToMyList", facilityObject.Feature[facilityObject.SelectedItem.value], facilityObject.WidgetName, layerId, layerTitle);
+                        // On click for add to list item
+                        this.own(on(infoPodAddtoList, a11yclick, function (event) {
+                            layerId = parseInt(domAttr.get(event.currentTarget, "LayerId"), 10);
+                            layerTitle = domAttr.get(event.currentTarget, "LayerTitle");
+                            array.forEach(appGlobals.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
+                                queryLayerId = Number(settings.QueryLayerId);
+                                if (queryLayerId === layerId && settings.Title === layerTitle) {
+                                    objectIDField = settings.ObjectID;
                                 }
                             }));
-                        }
-                        divFacilityContainer = domConstruct.create("div", { "class": "esriCTResultContent" }, divHeaderContent[0]);
-                        divFacilityContent = domConstruct.create("div", {}, divFacilityContainer);
-                        if (infowWindowData.length === 0) {
-                            domConstruct.create("div", { "class": "esriCTInfoText", "innerHTML": sharedNls.errorMessages.feildNotconfigure }, divFacilityContent);
-                        }
-                        // Looping for info window data to set value
-                        for (j = 0; j < infowWindowData.length; j++) {
-                            facilityDiv = domConstruct.create("div", { "class": "esriCTInfoText" }, divFacilityContent);
-                            if (string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes).substring(0, 4) === "http") {
-                                facilityDiv.innerHTML = infowWindowData[j].DisplayText + " ";
-                                domConstruct.create("a", { "class": "esriCTinfoWindowHyperlink", "href": string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "title": string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "innerHTML": sharedNls.titles.infoWindowTextURL, "target": "_blank" }, facilityDiv);
-                            } else if (string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes).substring(0, 3) === "www") {
-                                domConstruct.create("a", { "class": "esriCTinfoWindowHyperlink", "href": "http://" + string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "title": "http://" + string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "innerHTML": sharedNls.titles.infoWindowTextURL, "target": "_blank" }, facilityDiv);
-                            } else {
-                                facilityDiv.innerHTML = infowWindowData[j].DisplayText + " " + string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes);
+                            // Looping for activity search setting for getting object id
+                            array.forEach(appGlobals.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
+                                queryLayerId = Number(settings.QueryLayerId);
+                                if (queryLayerId === layerId && settings.Title === layerTitle) {
+                                    objectIDField = settings.ObjectID;
+                                }
+                            }));
+                            isAlreadyAdded = false;
+                            // If my store has data
+                            if (_self.myListStore && _self.myListStore.length > 0) {
+                                // looping for my list data
+                                for (listData = 0; listData < _self.myListStore.length; listData++) {
+                                    // Comparing object id for my list and facility object id value
+                                    if (_self.myListStore[listData].value[_self.myListStore[listData].key] === facilityObject.Feature[facilityObject.SelectedItem.value].attributes[objectIDField]) {
+                                        alert(sharedNls.errorMessages.activityAlreadyAdded);
+                                        isAlreadyAdded = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            // If activity is not added then add to my list
+                            if (!isAlreadyAdded) {
+                                if (query(".esriCTEventsImg")[0]) {
+                                    topic.publish("toggleWidget", "myList");
+                                    topic.publish("showActivityPlannerContainer");
+                                }
+                                formatedDataField = _self._formatedData(facilityObject.Feature[facilityObject.SelectedItem.value]);
+                                // publishing function for add to list item
+                                topic.publish("addToMyList", formatedDataField, facilityObject.WidgetName, layerId, layerTitle);
+                            }
+                        }));
+                    }
+                    divFacilityContainer = domConstruct.create("div", { "class": "esriCTResultContent" }, divHeaderContent[0]);
+                    divFacilityContent = domConstruct.create("div", {}, divFacilityContainer);
+                    contentDiv = domConstruct.create("div", { "class": "esriCTDivClear" }, divFacilityContent);
+                    if (infowWindowData && infowWindowData.length === 0 && !descriptionValue) {
+                        domConstruct.create("div", { "class": "esriCTInfoText", "innerHTML": sharedNls.errorMessages.fieldNotConfigured }, divFacilityContent);
+                    }
+                    if (infowWindowData) {
+                        if (descriptionValue) {
+                            descriptionResult = this._getDescription(facilityObject.Feature[facilityObject.SelectedItem.value].attributes, descriptionValue, this.featureClick);
+                            domConstruct.create("div", {
+                                "innerHTML": descriptionResult,
+                                "class": "esriCTCustomPopupDiv"
+                            }, contentDiv);
+                        } else {
+                            // Looping through info window data to set value
+                            for (j = 0; j < infowWindowData.length; j++) {
+                                facilityDiv = domConstruct.create("div", { "class": "esriCTInfoText" }, divFacilityContent);
+                                if (string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes).match("http:") || string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes).match("https:")) {
+                                    facilityDiv.innerHTML = infowWindowData[j].DisplayText + " ";
+                                    domConstruct.create("a", { "class": "esriCTinfoWindowHyperlink", "href": string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "title": string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "innerHTML": sharedNls.titles.infoWindowTextURL, "target": "_blank" }, facilityDiv);
+                                } else if (string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes).substring(0, 3) === "www") {
+                                    domConstruct.create("a", { "class": "esriCTinfoWindowHyperlink", "href": "http://" + string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "title": "http://" + string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes), "innerHTML": sharedNls.titles.infoWindowTextURL, "target": "_blank" }, facilityDiv);
+                                } else {
+                                    try {
+                                        //get field value from feature attributes
+                                        fieldValue = string.substitute(infowWindowData[j].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes);
+                                    } catch (e) {
+                                        fieldValue = appGlobals.configData.ShowNullValueAs;
+                                    }
+                                    fieldName = infowWindowData[j].FieldName.split("${")[1].split("}")[0];
+                                    fieldInfo = this.isDateField(fieldName, operationLayer.layerDetails.layerObject);
+                                    if (fieldInfo) {
+                                        if (fieldValue !== appGlobals.configData.ShowNullValueAs) {
+                                            fieldValue = this.setDateFormat(infowWindowData[j], fieldValue, this.featureClick);
+                                        }
+                                    } else {
+                                        //check if field has coded values
+                                        fieldInfo = this.hasDomainCodedValue(fieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes, operationLayer.layerDetails.layerObject);
+                                        if (fieldInfo) {
+                                            if (fieldInfo.isTypeIdField) {
+                                                fieldValue = fieldInfo.name;
+                                            } else {
+                                                domainValue = this.domainCodedValues(fieldInfo, fieldValue, this.featureClick);
+                                                fieldValue = domainValue.domainCodedValue;
+                                            }
+                                        }
+                                        if (infowWindowData[j].format) {
+                                            fieldValue = this.numberFormatCorverter(infowWindowData[j], fieldValue);
+                                        }
+                                    }
+                                    facilityDiv.innerHTML = infowWindowData[j].DisplayText + " " + fieldValue;
+                                }
                             }
                         }
-                        // If it is not comming from event layer then set facility icons
-                        if (facilityObject.WidgetName.toLowerCase() !== "event" && dojo.configData.ActivitySearchSettings[0].Enable && !isEventSearched) {
-                            domConstruct.create("div", { "class": "esriCTCarouselUtilitiesHeader", "innerHTML": sharedNls.titles.carouselUtilitiesText }, divFacilityContent);
+                        // If it is not coming from event layer then set facility icons
+                        if (facilityObject.WidgetName.toLowerCase() !== "event" && appGlobals.configData.ActivitySearchSettings[0].Enable && !isEventSearched) {
                             divFacilityImages = domConstruct.create("div", { "class": "esriCTDivFacilityImages" }, divFacilityContent);
                             if (facilityObject.Feature) {
-                                for (m = 0; m < dojo.configData.ActivitySearchSettings.length; m++) {
-                                    SearchSettingsLayers = dojo.configData.ActivitySearchSettings[m];
+                                for (m = 0; m < appGlobals.configData.ActivitySearchSettings.length; m++) {
+                                    SearchSettingsLayers = appGlobals.configData.ActivitySearchSettings[m];
                                 }
                                 for (k = 0; k < SearchSettingsLayers.ActivityList.length; k++) {
                                     if (dojo.string.substitute(SearchSettingsLayers.ActivityList[k].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes)) {
@@ -456,12 +484,13 @@ define([
                                 }
                             }
                         }
+                    } else {
+                        facilityDiv = domConstruct.create("div", { "class": "esriCTInfoText" }, divFacilityContent);
+                        facilityDiv.innerHTML = sharedNls.errorMessages.fieldNotConfigured;
                     }
                 }
             }
-            if (serchSetting) {
-                this.searchSettingData = serchSetting;
-            }
+
         },
 
         /**
@@ -471,7 +500,7 @@ define([
         * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         setDirection: function (directionObject, isInfoWindowClick) {
-            var isPodEnabled = this.getPodStatus("DirectionsPod"), divHeaderContent, directionTitle, serchSetting, divHeader, divDirectionContainer, divDrectionContent, distanceAndDuration, printButton, j, divDrectionList, printmapData, ConvertedTime, minutes, g, l;
+            var isPodEnabled = this.getPodStatus("DirectionsPod"), divHeaderContent, directionTitle, serchSetting, divHeader, divDirectionContainer, divDrectionContent, distanceAndDuration, printButton, j, divDrectionList, ConvertedTime, minutes;
             // If info window is clicked
             if (isInfoWindowClick) {
                 isPodEnabled = true;
@@ -483,73 +512,36 @@ define([
             if (isPodEnabled) {
                 if (divHeaderContent.length > 0) {
                     domConstruct.empty(divHeaderContent[0]);
-                    // If it is comming from unified search
-                    serchSetting = this.getSearchSetting(directionObject.QueryURL);
-                    directionTitle = this.getKeyValue(serchSetting.SearchDisplayFields);
-                    if (directionObject.WidgetName.toLowerCase() === "searchedfacility") {
-                        if (directionObject.activityData) {
-                            for (g = 0; g < directionObject.activityData.length; g++) {
-                                // Looping for features
-                                for (l = 0; l < directionObject.activityData[g].records.features.length; l++) {
-                                    if (directionObject.activityData[g].records.features[l].distance === directionObject.Feature[directionObject.SelectedItem.value].distance) {
-                                        serchSetting = this.getSearchSetting(directionObject.activityData[g].queryURL);
-                                        directionTitle = this.getKeyValue(serchSetting.SearchDisplayFields);
-                                    }
-                                }
-                            }
-                        } else {
-                            serchSetting = this.getSearchSetting(directionObject.QueryURL);
-                            directionTitle = this.getKeyValue(serchSetting.SearchDisplayFields);
-                        }
-                    }
-                    if (directionObject.WidgetName.toLowerCase() === "unifiedsearch" || directionObject.WidgetName.toLowerCase() === "geolocation") {
-                        // Looping for activity data featched from unified search
-                        for (g = 0; g < directionObject.activityData.length; g++) {
-                            // Looping for features
-                            for (l = 0; l < directionObject.activityData[g].records.features.length; l++) {
-                                if (directionObject.activityData[g].records.features[l].distance === directionObject.Feature[directionObject.SelectedItem.value].distance) {
-                                    serchSetting = this.getSearchSetting(directionObject.activityData[g].queryURL);
-                                    directionTitle = this.getKeyValue(serchSetting.SearchDisplayFields);
-                                }
-                            }
-                        }
-                    }
-                    divHeader = domConstruct.create("div", {}, divHeaderContent[0]);
-                    // If direction is found than set direction data in div
-                    if (directionObject.SelectedItem) {
-                        domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + directionObject.Feature[directionObject.SelectedItem.value].attributes[directionTitle] }, divHeader);
-                        //set start location text
-                        directionObject.SolveRoute[0].directions.features[0].attributes.text = directionObject.SolveRoute[0].directions.features[0].attributes.text.replace('Location 1', directionObject.Address);
-                        if (directionObject.WidgetName.toLowerCase() !== "infoactivity" && directionObject.WidgetName.toLowerCase() !== "infoevent") {
-                            printButton = domConstruct.create("div", { "class": "esriCTDivPrint", "title": sharedNls.tooltips.printButtonTooltips }, divHeader);
-                            minutes = directionObject.SolveRoute[0].directions.totalDriveTime;
-                            ConvertedTime = this.convertMinToHr(minutes);
-                            printmapData = {
-                                "Features": directionObject.SolveRoute[0].directions.features,
-                                "Title": sharedNls.titles.directionText + " " + directionObject.Feature[directionObject.SelectedItem.value].attributes[directionTitle],
-                                "Distance": sharedNls.titles.directionTextDistance + parseFloat(directionObject.SolveRoute[0].directions.totalLength).toFixed(2) + this._getSubStringUnitData(),
-                                "Time": sharedNls.titles.directionTextTime + ConvertedTime
-                            };
-                            this.own(on(printButton, a11yclick, lang.hitch(this, this.print, printmapData)));
-                        }
+                }
+                // If it is coming from unified search
+                serchSetting = this.getSearchSetting(directionObject.QueryURL);
+                directionTitle = this.getKeyValue(serchSetting.SearchDisplayFields);
+                divHeader = domConstruct.create("div", {}, divHeaderContent[0]);
+                // If direction is found than set direction data in div
+                if (directionObject.SelectedItem) {
+                    domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.directionText + " " + directionObject.Feature[directionObject.SelectedItem.value].attributes[directionTitle] }, divHeader);
+                    //set start location text
+                    directionObject.SolveRoute[0].directions.features[0].attributes.text = directionObject.SolveRoute[0].directions.features[0].attributes.text.replace('Location 1', directionObject.Address);
+                    if (directionObject.WidgetName.toLowerCase() !== "infoactivity" && directionObject.WidgetName.toLowerCase() !== "infoevent") {
+                        printButton = domConstruct.create("div", { "class": "esriCTDivPrint", "title": sharedNls.tooltips.printButtonTooltip }, divHeader);
                         minutes = directionObject.SolveRoute[0].directions.totalDriveTime;
                         ConvertedTime = this.convertMinToHr(minutes);
-                        divDirectionContainer = domConstruct.create("div", { "class": "esriCTDirectionResultContent" }, divHeaderContent[0]);
-                        distanceAndDuration = domConstruct.create("div", { "class": "esriCTDistanceAndDuration" }, divHeader);
-                        domConstruct.create("div", { "class": "esriCTDivDistance", "innerHTML": sharedNls.titles.directionTextDistance + " " + parseFloat(directionObject.SolveRoute[0].directions.totalLength).toFixed(2) + this._getSubStringUnitData() }, distanceAndDuration);
-                        domConstruct.create("div", { "class": "esriCTDivTime", "innerHTML": sharedNls.titles.directionTextTime + " " + ConvertedTime }, distanceAndDuration);
-                        divDrectionContent = domConstruct.create("div", { "class": "esriCTDirectionRow" }, divDirectionContainer);
-                        divDrectionList = domConstruct.create("ol", {}, divDrectionContent);
-                        domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": directionObject.SolveRoute[0].directions.features[0].attributes.text }, divDrectionList);
-                        for (j = 1; j < directionObject.SolveRoute[0].directions.features.length; j++) {
-                            domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": directionObject.SolveRoute[0].directions.features[j].attributes.text + " (" + parseFloat(directionObject.SolveRoute[0].directions.features[j].attributes.length).toFixed(2) + this._getSubStringUnitData() + ")" }, divDrectionList);
-                        }
+                        this.own(on(printButton, "click", lang.hitch(this, this.print)));
+                    }
+                    minutes = directionObject.SolveRoute[0].directions.totalDriveTime;
+                    ConvertedTime = this.convertMinToHr(minutes);
+                    divDirectionContainer = domConstruct.create("div", { "class": "esriCTDirectionResultContent" }, divHeaderContent[0]);
+                    distanceAndDuration = domConstruct.create("div", { "class": "esriCTDistanceAndDuration" }, divHeader);
+                    domConstruct.create("div", { "class": "esriCTDivDistance", "innerHTML": sharedNls.titles.directionTextDistance + " " + parseFloat(directionObject.SolveRoute[0].directions.totalLength).toFixed(2) + this._getSubStringUnitData() }, distanceAndDuration);
+                    domConstruct.create("div", { "class": "esriCTDivTime", "innerHTML": sharedNls.titles.directionTextTime + " " + ConvertedTime }, distanceAndDuration);
+                    divDrectionContent = domConstruct.create("div", { "class": "esriCTDirectionRow" }, divDirectionContainer);
+                    divDrectionList = domConstruct.create("ol", {}, divDrectionContent);
+                    domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": directionObject.SolveRoute[0].directions.features[0].attributes.text }, divDrectionList);
+                    for (j = 1; j < directionObject.SolveRoute[0].directions.features.length; j++) {
+                        domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": directionObject.SolveRoute[0].directions.features[j].attributes.text + " (" + parseFloat(directionObject.SolveRoute[0].directions.features[j].attributes.length).toFixed(2) + this._getSubStringUnitData() + ")" }, divDrectionList);
                     }
                 }
                 topic.publish("hideProgressIndicator");
-            }
-            if (serchSetting) {
-                this.searchSettingData = serchSetting;
             }
         },
 
@@ -560,12 +552,13 @@ define([
         * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         setGallery: function (selectedFeature, resultcontent) {
-            var isPodEnabled = this.getPodStatus("GalleryPod"), divHeaderContent, layerID, isAttachmentFound = false, serchSetting, g, l;
+            var isPodEnabled = this.getPodStatus("GalleryPod"), divHeaderContent, layerID, isAttachmentFound = false, serchSetting, g, l, showAttachment = false, i, queryLayerId;
             serchSetting = this.getSearchSetting(selectedFeature.QueryURL);
+            this.addGalleryPod();
             if (selectedFeature.WidgetName.toLowerCase() === "searchedfacility") {
                 if (selectedFeature.activityData) {
                     for (g = 0; g < selectedFeature.activityData.length; g++) {
-                        // Looping for features
+                        // Looping for features for getting search settings for further query
                         for (l = 0; l < selectedFeature.activityData[g].records.features.length; l++) {
                             if (selectedFeature.activityData[g].records.features[l].distance === selectedFeature.FeatureData[resultcontent.value].distance) {
                                 serchSetting = this.getSearchSetting(selectedFeature.activityData[g].queryURL);
@@ -576,39 +569,40 @@ define([
                     serchSetting = this.getSearchSetting(selectedFeature.QueryURL);
                 }
             }
-            if (selectedFeature.WidgetName.toLowerCase() === "unifiedsearch" || selectedFeature.WidgetName.toLowerCase() === "geolocation") {
-                // Looping for activity data featched from unified search
-                for (g = 0; g < selectedFeature.activityData.length; g++) {
-                    // Looping for features
-                    for (l = 0; l < selectedFeature.activityData[g].records.features.length; l++) {
-                        if (selectedFeature.activityData[g].records.features[l].distance === selectedFeature.FeatureData[resultcontent.value].distance) {
-                            serchSetting = this.getSearchSetting(selectedFeature.activityData[g].queryURL);
-                        }
-                    }
-                }
-            }
-            // IF pod is enabled
+
+            // If pod is enabled
             if (isPodEnabled) {
                 divHeaderContent = query('.esriCTDivGalleryContent');
                 if (divHeaderContent.length > 0) {
                     domConstruct.empty(divHeaderContent[0]);
+                }
+                for (i = 0; i < appGlobals.operationLayerSettings.length; i++) {
+                    queryLayerId = Number(serchSetting.QueryLayerId);
+                    if (queryLayerId === appGlobals.operationLayerSettings[i].layerID && serchSetting.Title === appGlobals.operationLayerSettings[i].layerTitle) {
+                        if (appGlobals.operationLayerSettings[i].layerDetails && appGlobals.operationLayerSettings[i].layerDetails.popupInfo) {
+                            showAttachment = appGlobals.operationLayerSettings[i].layerDetails.popupInfo.showAttachments;
+                        }
+                    }
                 }
                 // If map has layer
                 if (this.map._layers) {
                     // Looping for layer id in map layer
                     for (layerID in this.map._layers) {
                         if (this.map._layers.hasOwnProperty(layerID)) {
-                            // If map has layr id than query on the basis of object id for getting attachments.
-                            if (this.map._layers[layerID].url && this.map._layers[layerID].hasAttachments && (this.map._layers[layerID].url === serchSetting.QueryURL)) {
+                            // If map has layer id than query on the basis of object id for getting attachments.
+                            if (this.map._layers[layerID].hasAttachments && (this.map._layers[layerID].url && this.map._layers[layerID].url === serchSetting.QueryURL && showAttachment)) {
+                                this.isGalleryPodEnabled = true;
                                 this.map._layers[layerID].queryAttachmentInfos(selectedFeature.FeatureData[resultcontent.value].attributes[this.map._layers[layerID].objectIdField], lang.hitch(this, this.setAttachments), this.logError);
                                 isAttachmentFound = true;
                                 break;
                             }
                         }
                     }
-                }
-                if (!isAttachmentFound) {
-                    domConstruct.create("div", { "class": "esriCTGalleryBox", "innerHTML": sharedNls.errorMessages.imageDoesNotFound }, divHeaderContent[0]);
+                    // if attachment is not enabled then remove gallery pod from bottom container
+                    if (!isAttachmentFound) {
+                        this.isGalleryPodEnabled = false;
+                        this.removeGalleryPod();
+                    }
                 }
             }
         },
@@ -620,7 +614,7 @@ define([
         */
         setAttachments: function (response) {
             topic.publish("showProgressIndicator");
-            var divAttchment, divHeaderContent, divPreviousImg, divNextImg;
+            var divAttachment, divHeaderContent, divPreviousImg, divNextImg;
             this.imageCount = 0;
             divHeaderContent = query('.esriCTDivGalleryContent');
             // Looping if gallery div has data
@@ -630,13 +624,33 @@ define([
                 if (response.length > 1) {
                     divPreviousImg = domConstruct.create("div", { "class": "esriCTImgPrev" }, divHeaderContent[0]);
                     divNextImg = domConstruct.create("div", { "class": "esriCTImgNext" }, divHeaderContent[0]);
-                    divAttchment = domConstruct.create("img", { "class": "esriCTDivAttchment" }, divHeaderContent[0]);
-                    domAttr.set(divAttchment, "src", response[0].url);
-                    this.own(on(divPreviousImg, a11yclick, lang.hitch(this, this._previousImage, response, divAttchment)));
-                    this.own(on(divNextImg, a11yclick, lang.hitch(this, this._nextImage, response, divAttchment)));
+                    divAttachment = domConstruct.create("img", { "class": "esriCTDivAttchment" }, divHeaderContent[0]);
+                    domAttr.set(divAttachment, "src", response[0].url);
+                    // on click on image previous button
+                    this.own(on(divPreviousImg, a11yclick, lang.hitch(this, function () {
+                        this.imageCount--;
+                        if (this.imageCount === 0) {
+                            domStyle.set(divPreviousImg, "display", "none");
+                        } else {
+                            domStyle.set(divPreviousImg, "display", "block");
+                        }
+                        domStyle.set(divNextImg, "display", "block");
+                        domAttr.set(divAttachment, "src", response[this.imageCount].url);
+                    })));
+                    // on click on image next button
+                    this.own(on(divNextImg, a11yclick, lang.hitch(this, function () {
+                        this.imageCount++;
+                        if (this.imageCount === response.length - 1) {
+                            domStyle.set(divNextImg, "display", "none");
+                        } else {
+                            domStyle.set(divNextImg, "display", "block");
+                        }
+                        domStyle.set(divPreviousImg, "display", "block");
+                        domAttr.set(divAttachment, "src", response[this.imageCount].url);
+                    })));
                 } else if (response.length === 1) {
-                    divAttchment = domConstruct.create("img", { "class": "esriCTDivAttchment" }, divHeaderContent[0]);
-                    domAttr.set(divAttchment, "src", response[0].url);
+                    divAttachment = domConstruct.create("img", { "class": "esriCTDivAttchment" }, divHeaderContent[0]);
+                    domAttr.set(divAttachment, "src", response[0].url);
                 } else {
                     domConstruct.create("div", { "class": "esriCTGalleryBox", "innerHTML": sharedNls.errorMessages.imageDoesNotFound }, divHeaderContent[0]);
                 }
@@ -645,39 +659,17 @@ define([
         },
 
         /**
-        * change the image when click on previous arrow of image
-        * @param {object} response contain the images which are in the feature layer
-        * @param {node} divAttchmentInfo is domNode
-        * @memberOf widgets/commonHelper/carouselContainerHelper
-        */
-        _previousImage: function (response, divAttchment) {
-            this.imageCount--;
-            if (this.imageCount < 0) {
-                this.imageCount = response.length - 1;
-            }
-            domAttr.set(divAttchment, "src", response[this.imageCount].url);
-        },
-
-        /**
-        * change the image when click on next arrow of image
-        * @param {object} response contain the images which are in the feature layer
-        * @param {node} divAttchmentInfo is domNode
-        * @memberOf widgets/commonHelper/carouselContainerHelper
-        */
-        _nextImage: function (response, divAttchment) {
-            this.imageCount++;
-            if (this.imageCount === response.length) {
-                this.imageCount = 0;
-            }
-            domAttr.set(divAttchment, "src", response[this.imageCount].url);
-        },
-
-        /**
         * show error in console
         * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         logError: function (error) {
+            var divHeaderContent;
             console.log(error);
+            divHeaderContent = query('.esriCTDivGalleryContent');
+            if (divHeaderContent.length > 0) {
+                domConstruct.empty(divHeaderContent[0]);
+            }
+            domConstruct.create("div", { "class": "esriCTGalleryBox", "innerHTML": error }, divHeaderContent[0]);
         },
 
         /**
@@ -687,85 +679,87 @@ define([
         * @param {object} resultcontent store the value of the click of search result
         * @memberOf widgets/commonHelper/carouselContainerHelper
         */
-        setComment: function (feature, result, resultcontent) {
-            var isPodEnabled = this.getPodStatus("CommentsPod"), divHeaderContent, isActivityLayerFound = false, j, index, divHeaderStar, divStar, commentAttribute, utcMilliseconds, l, isCommentFound, rankFieldAttribute, esriCTCommentDateStar, divCommentRow, updatedCommentAttribute;
-            // If pod is enabled
-            //  this.removeCommentPod();
-            if (isPodEnabled) {
-                // looping in activity search for setting comment data
-                for (index = 0; index < dojo.configData.ActivitySearchSettings.length; index++) {
-                    // Checking for search setting to enable and disable comment pod
-                    if (this.searchSettingData) {
-                        // Checking with layer id and lyer title for comment pod and setting boolean value for activity sarch layer
-                        if (this.searchSettingData.QueryLayerId === dojo.configData.ActivitySearchSettings[0].QueryLayerId) {
-                            if (this.searchSettingData.Title === dojo.configData.ActivitySearchSettings[0].Title) {
-                                isActivityLayerFound = true;
-                            }
+        setComment: function (feature, result, resultcontent, queryURL) {
+            var primaryKeyField, foreignKeyField, isPodEnabled = this.getPodStatus("CommentsPod"), divHeaderContent, isActivityLayerFound = false, j, index, divHeaderStar, divStar, commentAttribute, utcMilliseconds, l, isCommentFound, rankFieldAttribute, esriCTCommentDateStar, divCommentRow, updatedCommentAttribute, formatedDate;
+            // Checking for activity settings and comment settings enabled tag for showing comment layer.
+            if (!appGlobals.configData.ActivitySearchSettings[0].Enable || !appGlobals.configData.ActivitySearchSettings[0].CommentsSettings.Enabled || appGlobals.configData.ActivitySearchSettings[0].CommentsSettings.QueryURL === "") {
+                this.removeCommentPod();
+            } else {
+                if (isPodEnabled) {
+                    // looping in activity search for setting comment data
+                    for (index = 0; index < appGlobals.configData.ActivitySearchSettings.length; index++) {
+                        // Checking for search setting to enable and disable comment pod
+                        if (appGlobals.configData.ActivitySearchSettings[0].QueryURL === queryURL) {
+                            isActivityLayerFound = true;
                         }
-                    }
-                    // If comment setting is set enable and if it is an Activity layer setting than do further things
-                    if (dojo.configData.ActivitySearchSettings[index].CommentsSettings.Enabled && isActivityLayerFound) {
-                        // Add comment pod for activity layer
-                        this.addCommentPod();
-                        divHeaderContent = query('.esriCTDivCommentContent');
-                        // If length is equal to 0
-                        if (result.length === 0) {
-                            if (divHeaderContent[0]) {
-                                domConstruct.empty(divHeaderContent[0]);
-                            }
-                            divCommentRow = domConstruct.create("div", { "class": "esriCTRowNoComment" }, divHeaderContent[0]);
-                            domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
-                            return;
-                        }
-                        result = this.removeNullValue(result);
-                        isCommentFound = false;
-                        // If reault is found and has data
-                        if (result.length !== 0) {
+                        // If comment setting is set enable and if it is an Activity layer setting than do further things
+                        if (appGlobals.configData.ActivitySearchSettings[index].CommentsSettings.Enabled && isActivityLayerFound) {
+                            // Add comment pod for activity layer
+                            this.addCommentPod();
                             divHeaderContent = query('.esriCTDivCommentContent');
-                            if (divHeaderContent[0]) {
-                                domConstruct.empty(divHeaderContent[0]);
+                            // If length is equal to 0
+                            if (result.length === 0) {
+                                if (divHeaderContent[0]) {
+                                    domConstruct.empty(divHeaderContent[0]);
+                                }
+                                divCommentRow = domConstruct.create("div", { "class": "esriCTRowNoComment" }, divHeaderContent[0]);
+                                domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentsAvailable }, divCommentRow);
+                                return;
                             }
-                            // Looping for result data
-                            for (l = 0; l < result.length; l++) {
-                                rankFieldAttribute = string.substitute(dojo.configData.ActivitySearchSettings[index].CommentsSettings.RankField, result[l].attributes);
-                                commentAttribute = string.substitute(dojo.configData.ActivitySearchSettings[index].CommentsSettings.CommentField, result[l].attributes);
-                                updatedCommentAttribute = this._getFormattedCommentText(commentAttribute);
-                                if (feature[resultcontent.value].attributes[this.objectIdForCommentLayer] === Number(result[l].attributes.id)) {
-                                    if (updatedCommentAttribute) {
-                                        divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
-                                        isCommentFound = true;
-                                        esriCTCommentDateStar = domConstruct.create("div", { "class": "esriCTCommentDateStar" }, divCommentRow);
-                                        divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, esriCTCommentDateStar);
-                                        // Looping for showing 5 star in comment div
-                                        for (j = 0; j < 5; j++) {
-                                            divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
-                                            if (j < rankFieldAttribute) {
-                                                domClass.add(divStar, "esriCTRatingStarChecked");
+                            result = this.removeNullValue(result);
+                            isCommentFound = false;
+                            // If result is found and has data
+                            if (result.length !== 0) {
+                                divHeaderContent = query('.esriCTDivCommentContent');
+                                if (divHeaderContent[0]) {
+                                    domConstruct.empty(divHeaderContent[0]);
+                                }
+                                // Looping for result data
+                                for (l = 0; l < result.length; l++) {
+                                    rankFieldAttribute = string.substitute(appGlobals.configData.ActivitySearchSettings[index].CommentsSettings.RankField, result[l].attributes);
+                                    commentAttribute = string.substitute(appGlobals.configData.ActivitySearchSettings[index].CommentsSettings.CommentField, result[l].attributes);
+                                    updatedCommentAttribute = this._getFormattedCommentText(commentAttribute);
+                                    primaryKeyField = this.getKeyValue(appGlobals.configData.ActivitySearchSettings[index].PrimaryKeyForActivity);
+                                    foreignKeyField = this.getKeyValue(appGlobals.configData.ActivitySearchSettings[index].CommentsSettings.ForeignKeyFieldForComment);
+                                    // checking for primary key and forign key for getting comments from table.
+                                    if (feature[resultcontent.value].attributes[primaryKeyField] === Number(result[l].attributes[foreignKeyField])) {
+                                        if (updatedCommentAttribute) {
+                                            divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
+                                            isCommentFound = true;
+                                            esriCTCommentDateStar = domConstruct.create("div", { "class": "esriCTCommentDateStar" }, divCommentRow);
+                                            divHeaderStar = domConstruct.create("div", { "class": "esriCTHeaderRatingStar" }, esriCTCommentDateStar);
+                                            // Looping for showing 5 star in comment div
+                                            for (j = 0; j < 5; j++) {
+                                                divStar = domConstruct.create("span", { "class": "esriCTRatingStar" }, divHeaderStar);
+                                                if (j < rankFieldAttribute) {
+                                                    domClass.add(divStar, "esriCTRatingStarChecked");
+                                                }
                                             }
-                                        }
-                                        if (string.substitute(dojo.configData.ActivitySearchSettings[index].CommentsSettings.SubmissionDateField, result[l].attributes) === sharedNls.showNullValue) {
-                                            utcMilliseconds = sharedNls.showNullValue;
-                                        } else {
-                                            utcMilliseconds = Number(dojo.string.substitute(dojo.configData.ActivitySearchSettings[index].CommentsSettings.SubmissionDateField, result[l].attributes));
-                                        }
-                                        domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": updatedCommentAttribute }, divCommentRow);
-                                        if (utcMilliseconds === sharedNls.showNullValue) {
-                                            domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": sharedNls.showNullValue }, esriCTCommentDateStar);
-                                        } else {
-                                            domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": dojo.date.locale.format(this.utcTimestampFromMs(utcMilliseconds), { datePattern: dojo.configData.ActivitySearchSettings[index].CommentsSettings.DisplayDateFormat, selector: "date" }) }, esriCTCommentDateStar);
+                                            if (string.substitute(appGlobals.configData.ActivitySearchSettings[index].CommentsSettings.SubmissionDateField, result[l].attributes) === appGlobals.configData.ShowNullValueAs) {
+                                                utcMilliseconds = appGlobals.configData.ShowNullValueAs;
+                                            } else {
+                                                utcMilliseconds = Number(dojo.string.substitute(appGlobals.configData.ActivitySearchSettings[index].CommentsSettings.SubmissionDateField, result[l].attributes));
+                                            }
+                                            domConstruct.create("div", { "class": "esriCTCommentText", "innerHTML": updatedCommentAttribute }, divCommentRow);
+                                            if (utcMilliseconds === appGlobals.configData.ShowNullValueAs) {
+                                                domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": appGlobals.configData.ShowNullValueAs }, esriCTCommentDateStar);
+                                            } else {
+                                                formatedDate = this._changeDateFormatForComment(result[l].attributes, appGlobals.configData.ActivitySearchSettings[index].CommentsSettings.SubmissionDateField);
+                                                domConstruct.create("div", { "class": "esriCTCommentDate", "innerHTML": formatedDate }, esriCTCommentDateStar);
+                                            }
                                         }
                                     }
                                 }
                             }
+                            // If comment is not found than show comment not found in div
+                            if (!isCommentFound) {
+                                divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
+                                domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentsAvailable }, divCommentRow);
+                            }
+                        } else {
+                            this.removeCommentPod();
+                            return;
                         }
-                        // If comment is not found than show comment not found in div
-                        if (!isCommentFound) {
-                            divCommentRow = domConstruct.create("div", { "class": "esriCTDivCommentRow" }, divHeaderContent[0]);
-                            domConstruct.create("div", { "class": "esriCTInfotextRownoComment", "innerHTML": sharedNls.errorMessages.noCommentAvaiable }, divCommentRow);
-                        }
-                    } else {
-                        this.removeCommentPod();
-                        return;
                     }
                 }
             }
@@ -773,10 +767,9 @@ define([
 
         /**
         * initialize the object of printMap Widget
-        * @param {object} directions contains solve route result
         * @memberOf widgets/commonHelper/carouselContainerHelper
         */
-        print: function (directions) {
+        print: function () {
             topic.publish("showProgressIndicator");
             this._esriDirectionsWidget._printDirections();
             topic.publish("hideProgressIndicator");
@@ -789,14 +782,14 @@ define([
         */
         getSearchSetting: function (queryURL) {
             var settingData;
-            // Looping for getting object id from event search.
-            array.forEach(dojo.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
+            // Looping for fetching search settings of the specified layer from EventSearchSettings
+            array.forEach(appGlobals.configData.EventSearchSettings, lang.hitch(this, function (settings, eventSettingIndex) {
                 if (settings.QueryURL === queryURL) {
                     settingData = settings;
                 }
             }));
-            // Looping for getting object id from activity search.
-            array.forEach(dojo.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
+            // Looping for fetching search settings of the specified layer from ActivitySearchSettings
+            array.forEach(appGlobals.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
                 if (settings.QueryURL === queryURL) {
                     settingData = settings;
                 }
@@ -805,13 +798,13 @@ define([
         },
 
         /**
-        * get the Unit text from confing file after removing esri text
+        * get the Unit text from config file after removing esri text
         * @ return route unit name
         * @memberOf widgets/commonHelper/carouselContainerHelper
         */
         _getSubStringUnitData: function () {
             var routeUnitString, unitsValue, unitName, defaultUnit = "Miles";
-            // If in direction unit found esri than set unit value
+            // If in direction unit esri text is found then set unit value
             if (this._esriDirectionsWidget.directionsLengthUnits.substring(0, 4) === "esri") {
                 unitsValue = this._esriDirectionsWidget.directionsLengthUnits.substring(4, this._esriDirectionsWidget.directionsLengthUnits.length).toUpperCase();
             } else {

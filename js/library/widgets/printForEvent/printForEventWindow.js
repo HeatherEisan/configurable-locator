@@ -46,7 +46,9 @@ define([
             dataObject = {
                 "eventData": _self.eventListData
             };
-            printWindow = window.open(dojoConfig.baseURL + "/js/library/widgets/printForEvent/templates/printForEvent.html", dataObject);
+            // Opening window
+            printWindow = window.open('', '_blank');
+            printWindow.location.href = dojoConfig.baseURL + "/js/library/widgets/printForEvent/templates/printForEvent.html";
             printWindow.opener.mapData = dataObject;
         }
     });

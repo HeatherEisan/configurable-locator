@@ -1,4 +1,4 @@
-﻿/*global define,dojo */
+﻿/*global define,dojo,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
@@ -39,8 +39,8 @@ define([
         * @name widgets/help/help
         */
         postCreate: function () {
-            this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.helpTooltips, "class": "esriCTHelpImg" }, null);
-            this.own(on(this.domNode, a11yclick, lang.hitch(this, function () {
+            this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.helpTooltip, "class": "esriCTHelpImg" }, null);
+            this.own(on(this.domNode, "click", lang.hitch(this, function () {
 
                 /**
                 * minimize other open header panel widgets and show help
@@ -56,7 +56,8 @@ define([
         * @memberOf widgets/help/help
         */
         _showHelpPage: function () {
-            window.open(dojo.configData.HelpURL);
+            var showHelpPage = window.open('', '_blank');
+            showHelpPage.location.href = appGlobals.configData.HelpURL;
         }
     });
 });

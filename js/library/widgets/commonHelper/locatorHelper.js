@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig:true,alert,esri,Modernizr */
+﻿/*global define,dojo,dojoConfig:true,alert,esri,Modernizr,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -19,22 +19,14 @@
 define([
     "dojo/_base/declare",
     "dojo/dom-construct",
-    "dojo/dom-style",
-    "dojo/dom-attr",
     "dojo/_base/lang",
     "dojo/on",
     "dojo/_base/array",
-    "dojo/dom-class",
     "dojo/query",
-    "dojo/string",
-    "esri/tasks/locator",
     "esri/tasks/query",
-    "dojo/Deferred",
-    "dojo/DeferredList",
+    "dojo/promise/all",
     "esri/tasks/QueryTask",
-    "esri/geometry",
     "esri/graphic",
-    "esri/geometry/Point",
     "dijit/_WidgetBase",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
@@ -42,10 +34,9 @@ define([
     "dojo/_base/Color",
     "esri/tasks/GeometryService",
     "esri/symbols/SimpleLineSymbol",
-    "esri/symbols/SimpleFillSymbol",
-    "esri/symbols/SimpleMarkerSymbol"
+    "esri/symbols/SimpleFillSymbol"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, query, string, Locator, Query, Deferred, DeferredList, QueryTask, Geometry, Graphic, Point, _WidgetBase, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol) {
+], function (declare, domConstruct, lang, on, array, query, Query, all, QueryTask, Graphic, _WidgetBase, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase], {
@@ -53,8 +44,8 @@ define([
 
         /**
         * careate buffer around pushpin
-        * @param {object}mapPoint Contains the map point on map
-        * @param {data}widgetName Contains the name of the functionality from where buffer is created.
+        * @param {object} mapPoint Contains the map point on map
+        * @param {string} widgetName Contains the name of the functionality from where buffer is created.
         * @memberOf widgets/commonHelper/locatorHelper
         */
         createBuffer: function (mapPoint, widgetName) {
@@ -62,11 +53,11 @@ define([
             this.carouselContainer.removeAllPod();
             this.carouselContainer.addPod(this.carouselPodData);
             this.removeBuffer();
-            geometryService = new GeometryService(dojo.configData.GeometryService);
+            geometryService = new GeometryService(appGlobals.configData.GeometryService);
             // checking the map point or map point is having geometry and if config data has buffer distance.
-            if ((mapPoint || mapPoint.geometry) && dojo.configData.BufferDistance) {
+            if ((mapPoint || mapPoint.geometry) && appGlobals.configData.BufferDistance) {
                 params = new BufferParameters();
-                params.distances = [dojo.configData.BufferDistance];
+                params.distances = [appGlobals.configData.BufferDistance];
                 params.unit = GeometryService.UNIT_STATUTE_MILE;
                 params.bufferSpatialReference = this.map.spatialReference;
                 params.outSpatialReference = this.map.spatialReference;
@@ -92,13 +83,11 @@ define([
         showBuffer: function (geometries, mapPoint, widgetName) {
             var bufferSymbol;
             // checking the geolocation variable in the case of share app.
-            if (!dojo.sharedGeolocation) {
+            if (!appGlobals.shareOptions.sharedGeolocation) {
                 this._clearBuffer();
             }
-            bufferSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(dojo.configData.BufferSymbology.LineSymbolColor.split(",")[0], 10), parseInt(dojo.configData.BufferSymbology.LineSymbolColor.split(",")[1], 10), parseInt(dojo.configData.BufferSymbology.FillSymbolColor.split(",")[2], 10), parseFloat(dojo.configData.BufferSymbology.LineSymbolTransparency.split(",")[0], 10)]), 2
-                        ),
-                        new Color([parseInt(dojo.configData.BufferSymbology.FillSymbolColor.split(",")[0], 10), parseInt(dojo.configData.BufferSymbology.FillSymbolColor.split(",")[1], 10), parseInt(dojo.configData.BufferSymbology.LineSymbolColor.split(",")[2], 10), parseFloat(dojo.configData.BufferSymbology.FillSymbolTransparency.split(",")[0], 10)])
-                        );
+            bufferSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(appGlobals.configData.BufferSymbology.LineSymbolColor.split(",")[0], 10), parseInt(appGlobals.configData.BufferSymbology.LineSymbolColor.split(",")[1], 10), parseInt(appGlobals.configData.BufferSymbology.FillSymbolColor.split(",")[2], 10), parseFloat(appGlobals.configData.BufferSymbology.LineSymbolTransparency.split(",")[0], 10)]), 2),
+                        new Color([parseInt(appGlobals.configData.BufferSymbology.FillSymbolColor.split(",")[0], 10), parseInt(appGlobals.configData.BufferSymbology.FillSymbolColor.split(",")[1], 10), parseInt(appGlobals.configData.BufferSymbology.LineSymbolColor.split(",")[2], 10), parseFloat(appGlobals.configData.BufferSymbology.FillSymbolTransparency.split(",")[0], 10)]));
             // Adding graphic on map
             this._addGraphic(this.map.getLayer("tempBufferLayer"), bufferSymbol, geometries[0]);
             topic.publish("showProgressIndicator");
@@ -127,7 +116,7 @@ define([
             var graphic;
             graphic = new Graphic(point, symbol);
             layer.add(graphic);
-            //checking the extenct changed variable in the case of shared app to maintain extent on map
+            // checking the extent changed variable in the case of shared app to maintain extent on map
             if (window.location.href.toString().split("$extentChanged=").length > 1) {
                 // if extent change variable set to be true then set the extent other wise don't do any thing.
                 if (this.isExtentSet) {
@@ -137,23 +126,28 @@ define([
                 // In normal scenario set extent when graphics is added.
                 this.map.setExtent(point.getExtent().expand(1.6));
             }
-
         },
 
         /**
         * query layer URL
         * create an object of graphic
         * @param {object} geometry of graphic
-        * @param {object}mapPoint Contains the map point
-        * @param {object}widget name of the functionality from query layer is called.
+        * @param {object} mapPoint Contains the map point
+        * @param {object} widget name of the functionality from query layer is called.
         * @memberOf widgets/commonHelper/locatorHelper
         */
         _queryLayer: function (geometry, mapPoint, widget) {
-            var layerobject, i, deferredArray = [], result = [];
+            var layerobject, i, deferredArray = [], result = [], widgetName, featuresWithinBuffer = [],
+                dist, featureSet = [], isDistanceFound, j, k, routeObject;
             // validate selectedLayerTitle for querying on each layer configured, for finding facility within the buffer.
+            if (widget) {
+                widgetName = widget;
+            } else {
+                widgetName = "unifiedSearch";
+            }
             if (this.selectedLayerTitle) {
                 // Looping each layer for query
-                array.forEach(dojo.configData.SearchSettings, lang.hitch(this, function (SearchSettings) {
+                array.forEach(appGlobals.configData.SearchSettings, lang.hitch(this, function (SearchSettings) {
                     // Checking search display title for getting layer.
                     if (SearchSettings.SearchDisplayTitle === this.selectedLayerTitle) {
                         layerobject = SearchSettings;
@@ -162,59 +156,14 @@ define([
                     }
                 }));
             } else {
-                // Looping on each layer for finding facility within the buffer.
-                for (i = 0; i < dojo.configData.SearchSettings.length; i++) {
-                    layerobject = dojo.configData.SearchSettings[i];
+                // Looping on each layer for finding facility within the buffer
+                for (i = 0; i < appGlobals.configData.SearchSettings.length; i++) {
+                    layerobject = appGlobals.configData.SearchSettings[i];
                     this._queryLayerForFacility(layerobject, widget, geometry, deferredArray, mapPoint, result);
                 }
-            }
-        },
-
-        /**
-        * query layer for getting facilty
-        * finding route from start point to the nearest feature
-        * @param {object} layerobject contains the layer information
-        * @param {object} widget contains name of the functionality from query is called.
-        * @param {object} geometry contains the geometry
-        * @param {object} deferredArray contains deffered array for further operation
-        * @param {object}mapPoint Contains the map point
-        * @param {object} result array to contain feature data
-        * @memberOf widgets/commonHelper/locatorHelper
-        */
-        _queryLayerForFacility: function (layerobject, widget, geometry, deferredArray, mapPoint, result) {
-            var queryTask, queryLayer, featuresWithinBuffer = [], dist, featureSet, i, widgetName, deferredListResult, isDistanceFound, layerObject, j, k, routeObject;
-            featureSet = [];
-            isDistanceFound = false;
-            // Check the functionality name from query is called, if not available the set default name for further operation
-            if (widget) {
-                widgetName = widget;
-            } else {
-                widgetName = "unifiedSearch";
-            }
-            // Checking the query url availablity
-            if (layerobject.QueryURL) {
-                queryTask = new esri.tasks.QueryTask(layerobject.QueryURL);
-                queryLayer = new esri.tasks.Query();
-                queryLayer.outFields = ["*"];
-                queryLayer.returnGeometry = true;
-                // Checking the geometry
-                if (geometry) {
-                    queryLayer.geometry = geometry;
-                }
-                layerObject = {};
-                // Pushing the query task in deferred array for further query
-                deferredArray.push(queryTask.execute(queryLayer, lang.hitch(this, function (records) {
-                    layerObject = { "queryURL": layerobject.QueryURL, "records": records };
-                    // If feature is available the push data in result.
-                    if (records.features.length > 0) {
-                        result.push(layerObject);
-                    }
-                })));
-                // creating deferred list
-                deferredListResult = new DeferredList(deferredArray);
                 // Calling deferred list when all query is completed.
-                deferredListResult.then(lang.hitch(this, function (relatedRecords) {
-                    // loopint the result for getting records and pusing it in a variable for further query
+                all(deferredArray).then(lang.hitch(this, function (relatedRecords) {
+                    // looping the result for getting records and pushing it in a variable for further query
                     for (j = 0; j < result.length; j++) {
                         if (result.length > 0) {
                             this.dateFieldArray = this.getDateField(result[j].records);
@@ -223,7 +172,7 @@ define([
                             }
                         }
                     }
-                    // Loopint final array for finding distance from start point and calculating route.
+                    // Looping final array for finding distance from start point and calculating route.
                     for (i = 0; i < featuresWithinBuffer.length; i++) {
                         // Checking the geometry
                         if (mapPoint.geometry) {
@@ -242,24 +191,23 @@ define([
                         featureSet.sort(function (a, b) {
                             return parseFloat(a.distance) - parseFloat(b.distance);
                         });
-                        // loopint the result data for sorting data by distance
+                        // looping the result data for sorting data by distance
                         array.forEach(result, lang.hitch(this, function (resultSet) {
                             resultSet.records.features.sort(function (a, b) {
                                 return parseFloat(a.distance) - parseFloat(b.distance);
                             });
                         }));
                         this.highlightFeature(featureSet[0].geometry);
-                        // Changing date formate for feature if date field is available.
-                        featureSet = this.changeDateFormatForActivity(featureSet);
+                        // Changing date format for feature if date field is available.
                         routeObject = { "StartPoint": mapPoint, "EndPoint": featureSet, "Index": 0, "WidgetName": widgetName, "QueryURL": layerobject.QueryURL, "activityData": result };
                         //Calling route function to create route
                         this.showRoute(routeObject);
                     }
                     // Checking result array length, if it is 0 then show message and hide carousel container and remove graphics
                     if (result.length === 0) {
-                        alert(sharedNls.errorMessages.facilitydoestfound);
-                        dojo.eventInfoWindowData = null;
-                        dojo.infoRoutePoint = null;
+                        alert(sharedNls.errorMessages.facilityNotfound);
+                        appGlobals.shareOptions.eventInfoWindowData = null;
+                        appGlobals.shareOptions.infoRoutePoint = null;
                         this.removeRouteGraphichOfDirectionWidget();
                         this.removeHighlightedCircleGraphics();
                         if (widgetName !== "unifiedSearch") {
@@ -269,8 +217,45 @@ define([
                             this.carouselContainer.hideCarouselContainer();
                             this.carouselContainer._setLegendPositionDown();
                         }
+                        topic.publish("hideProgressIndicator");
                     }
                 }));
+            }
+        },
+
+        /**
+        * query layer for getting facilty
+        * finding route from start point to the nearest feature
+        * @param {object} layerobject contains the layer information
+        * @param {object} widget contains name of the functionality from query is called.
+        * @param {object} geometry contains the geometry
+        * @param {object} deferredArray contains deferred array for further operation
+        * @param {object}mapPoint Contains the map point
+        * @param {object} result array to contain feature data
+        * @memberOf widgets/commonHelper/locatorHelper
+        */
+        _queryLayerForFacility: function (layerobject, widget, geometry, deferredArray, mapPoint, result) {
+            var queryTask, queryLayer, layerObject;
+            // Checking the query url availability
+            if (layerobject.QueryURL) {
+                queryTask = new QueryTask(layerobject.QueryURL);
+                queryLayer = new Query();
+                queryLayer.outFields = ["*"];
+                queryLayer.returnGeometry = true;
+                // Checking the geometry
+                if (geometry) {
+                    queryLayer.geometry = geometry;
+                }
+                layerObject = {};
+                // Pushing the query task in deferred array for further query
+                deferredArray.push(queryTask.execute(queryLayer, lang.hitch(this, function (records) {
+                    layerObject = { "queryURL": layerobject.QueryURL, "records": records };
+                    // If feature is available the push data in result.
+                    if (records.features.length > 0) {
+                        result.push(layerObject);
+                    }
+                })));
+            } else {
                 topic.publish("hideProgressIndicator");
             }
         }

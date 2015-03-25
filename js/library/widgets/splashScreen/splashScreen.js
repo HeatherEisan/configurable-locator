@@ -1,4 +1,4 @@
-﻿/*global define,dojo */
+﻿/*global define,dojo,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -58,7 +58,7 @@ define([
             domStyle.set(this.domNode, "display", "block");
             splashScreenContent = domConstruct.create("div", { "class": "esriCTSplashContent" }, this.splashScreenScrollBarContainer);
             this.splashScreenScrollBarContainer.style.height = (this.splashScreenDialogContainer.offsetHeight - 70) + "px";
-            domAttr.set(splashScreenContent, "innerHTML", dojo.configData.SplashScreen.SplashScreenContent);
+            domAttr.set(splashScreenContent, "innerHTML", appGlobals.configData.SplashScreen.SplashScreenContent);
         },
 
         _hideSplashScreenDialog: function () {

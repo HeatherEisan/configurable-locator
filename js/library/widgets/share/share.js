@@ -1,4 +1,4 @@
-﻿/*global define,dojo,window,alert,esri,parent:true */
+﻿/*global define,dojo,window,alert,esri,parent:true,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
 | Copyright 2013 Esri
@@ -77,7 +77,7 @@ define([
                     }
                 }
             }));
-            this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.shareTooltips, "class": "esriCTImgSocialMedia" }, null);
+            this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.shareTooltip, "class": "esriCTImgSocialMedia" }, null);
             applicationHeaderDiv = domConstruct.create("div", { "class": "esriCTApplicationShareicon" }, dom.byId("esriCTParentDivContainer"));
             applicationHeaderDiv.appendChild(this.divAppContainer);
             this.own(on(this.domNode, a11yclick, lang.hitch(this, function () {
@@ -95,8 +95,8 @@ define([
             /**
                 * add event handlers to sharing options
                 */
-            on(this.tdFacebook, a11yclick, lang.hitch(this, function () { this._share("facebook"); }));
-            on(this.tdTwitter, a11yclick, lang.hitch(this, function () { this._share("twitter"); }));
+            on(this.tdFacebook, "click", lang.hitch(this, function () { this._share("facebook"); }));
+            on(this.tdTwitter, "click", lang.hitch(this, function () { this._share("twitter"); }));
             on(this.tdMail, a11yclick, lang.hitch(this, function () { this._share("email"); }));
         },
 
@@ -169,7 +169,7 @@ define([
 
         /**
           * display sharing panel
-          * @param {array} dojo.configData.MapSharingOptions Sharing option settings specified in configuration file
+          * @param {array} appGlobals.configData.MapSharingOptions Sharing option settings specified in configuration file
           * @memberOf widgets/share/share
           */
         _shareLink: function () {
@@ -185,97 +185,102 @@ define([
             mapExtent = this._getMapExtent();
             url = esri.urlToObject(window.location.toString());
             urlStr = encodeURI(url.path) + "?extent=" + mapExtent;
-            //dojo.addressLocation variable is use to store the address geometry in unified search and append in shared URL
-            if (dojo.addressLocation) {
-                urlStr += "$address=" + dojo.addressLocation;
+            //appGlobals.shareOptions.addressLocation variable is use to store the address geometry in unified search and append in shared URL
+            if (appGlobals.shareOptions.addressLocation) {
+                urlStr += "$address=" + appGlobals.shareOptions.addressLocation;
             }
-            //dojo.mapClickedPoint variable is use to store infowindow Point(geometry)and append in shared URL
-            if (dojo.mapClickedPoint) {
-                clickCoords = dojo.mapClickedPoint.x + "," + dojo.mapClickedPoint.y + "," + dojo.screenPoint;
+
+            if (appGlobals.shareOptions.searchSettingsDetails) {
+                urlStr += "$settingsDetails=" + appGlobals.shareOptions.searchSettingsDetails;
+            }
+
+            //appGlobals.shareOptions.mapClickedPoint variable is use to store infowindow Point(geometry)and append in shared URL
+            if (appGlobals.shareOptions.mapClickedPoint) {
+                clickCoords = appGlobals.shareOptions.mapClickedPoint.x + "," + appGlobals.shareOptions.mapClickedPoint.y + "," + appGlobals.shareOptions.screenPoint;
                 urlStr += "$mapClickPoint=" + clickCoords;
             }
-            //dojo.infowindowDirection variable is use to store the infowindow direction geometry and append in shared URL
-            if (dojo.infowindowDirection) {
-                urlStr += "$infowindowDirection=" + dojo.infowindowDirection.toString();
+            //appGlobals.shareOptions.infowindowDirection variable is use to store the infowindow direction geometry and append in shared URL
+            if (appGlobals.shareOptions.infowindowDirection) {
+                urlStr += "$infowindowDirection=" + appGlobals.shareOptions.infowindowDirection.toString();
             }
-            //dojo.activitySearch variable is use to store the activity name and append in shared URL
-            if (dojo.activitySearch) {
-                urlStr += "$activitySearch=" + dojo.activitySearch.join(",");
+            //appGlobals.shareOptions.activitySearch variable is use to store the activity name and append in shared URL
+            if (appGlobals.shareOptions.activitySearch) {
+                urlStr += "$activitySearch=" + appGlobals.shareOptions.activitySearch.join(",");
             }
-            //dojo.isShowPod variable is use to store minimize and maximize state of carousel pod and append in shared URL
-            if (dojo.isShowPod && dojo.isShowPod.toString() === "false") {
-                urlStr += "$isShowPod=" + dojo.isShowPod.toString();
+            //appGlobals.shareOptions.isShowPod variable is use to store minimize and maximize state of carousel pod and append in shared URL
+            if (appGlobals.shareOptions.isShowPod && appGlobals.shareOptions.isShowPod.toString() === "false") {
+                urlStr += "$isShowPod=" + appGlobals.shareOptions.isShowPod.toString();
             }
-            //dojo.doQuery variable is use for maintain the activity state and append in shared URL
-            if (dojo.doQuery) {
-                urlStr += "$doQuery=" + dojo.doQuery.toString();
+            //appGlobals.shareOptions.doQuery variable is use for maintain the activity state and append in shared URL
+            if (appGlobals.shareOptions.doQuery) {
+                urlStr += "$doQuery=" + appGlobals.shareOptions.doQuery.toString();
             }
-            //dojo.searchFacilityIndex variable is use to store the index of facility and append in shared URL
-            if (dojo.searchFacilityIndex >= 0) {
-                urlStr += "$selectedSearchResult=" + dojo.searchFacilityIndex;
+            //appGlobals.shareOptions.searchFacilityIndex variable is use to store the index of facility and append in shared URL
+            if (appGlobals.shareOptions.searchFacilityIndex >= 0) {
+                urlStr += "$selectedSearchResult=" + appGlobals.shareOptions.searchFacilityIndex;
             }
-            //dojo.selectedBasemapIndex variable is use to store the index of Basemap and append in shared URL
-            if (dojo.selectedBasemapIndex !== null) {
-                urlStr += "$selectedBasemapIndex=" + dojo.selectedBasemapIndex;
+            //appGlobals.shareOptions.selectedBasemapIndex variable is use to store the index of Basemap and append in shared URL
+            if (appGlobals.shareOptions.selectedBasemapIndex !== null) {
+                urlStr += "$selectedBasemapIndex=" + appGlobals.shareOptions.selectedBasemapIndex;
             }
-            //dojo.addressLocationDirectionActivity variable is use to store direction geometry in bottom pod and append in shared URL
-            if (dojo.addressLocationDirectionActivity) {
-                urlStr += "$addressLocationDirectionActivity=" + dojo.addressLocationDirectionActivity.toString();
+            //appGlobals.shareOptions.addressLocationDirectionActivity variable is use to store direction geometry in bottom pod and append in shared URL
+            if (appGlobals.shareOptions.addressLocationDirectionActivity) {
+                urlStr += "$addressLocationDirectionActivity=" + appGlobals.shareOptions.addressLocationDirectionActivity.toString();
             }
-            //dojo.sharedGeolocation variable is use to store Geolocation geometry and append in shared URL
-            if (dojo.sharedGeolocation) {
-                if (dojo.sharedGeolocation === "false") {
-                    geolocationCoords = dojo.sharedGeolocation.toString();
+            //appGlobals.shareOptions.sharedGeolocation variable is use to store Geolocation geometry and append in shared URL
+            if (appGlobals.shareOptions.sharedGeolocation) {
+                if (appGlobals.shareOptions.sharedGeolocation === "false") {
+                    geolocationCoords = appGlobals.shareOptions.sharedGeolocation.toString();
                 } else {
-                    geolocationCoords = dojo.sharedGeolocation.geometry.x.toString() + "," + dojo.sharedGeolocation.geometry.y.toString();
+                    geolocationCoords = appGlobals.shareOptions.sharedGeolocation.geometry.x.toString() + "," + appGlobals.shareOptions.sharedGeolocation.geometry.y.toString();
                 }
                 urlStr += "$sharedGeolocation=" + geolocationCoords;
             }
-            //dojo.addressLocationDirection variable is use to store address direction geometry and append in shared URL
-            if (dojo.addressLocationDirection) {
-                urlStr += "$addressLocationDirection=" + dojo.addressLocationDirection.toString();
+            //appGlobals.shareOptions.addressLocationDirection variable is use to store address direction geometry and append in shared URL
+            if (appGlobals.shareOptions.addressLocationDirection) {
+                urlStr += "$addressLocationDirection=" + appGlobals.shareOptions.addressLocationDirection.toString();
             }
-            if (dojo.eventOrderInMyList) {
-                urlStr += "$eventOrderInMyList=" + dojo.eventOrderInMyList;
+            if (appGlobals.shareOptions.eventOrderInMyList) {
+                urlStr += "$eventOrderInMyList=" + appGlobals.shareOptions.eventOrderInMyList;
             }
-            //dojo.eventInfoWindowIdActivity variable is use to store event array of ObjectID for add to list and append in shared URL
-            if (dojo.eventInfoWindowData) {
-                urlStr += "$eventInfoWindowData=" + dojo.eventInfoWindowData.x.toString() + "," + dojo.eventInfoWindowData.y.toString();
+            //appGlobals.shareOptions.eventInfoWindowIdActivity variable is use to store event array of ObjectID for add to list and append in shared URL
+            if (appGlobals.shareOptions.eventInfoWindowData) {
+                urlStr += "$eventInfoWindowData=" + appGlobals.shareOptions.eventInfoWindowData.x.toString() + "," + appGlobals.shareOptions.eventInfoWindowData.y.toString();
             }
-            //dojo.eventInfoWindowAttribute variable is use to store mapPoint(geometry)for add to list and append in shared URL
-            if (dojo.eventInfoWindowAttribute) {
-                urlStr += "$eventInfoWindowAttribute=" + dojo.eventInfoWindowAttribute;
+            //appGlobals.shareOptions.eventInfoWindowAttribute variable is use to store mapPoint(geometry)for add to list and append in shared URL
+            if (appGlobals.shareOptions.eventInfoWindowAttribute) {
+                urlStr += "$eventInfoWindowAttribute=" + appGlobals.shareOptions.eventInfoWindowAttribute;
             }
-            //dojo.eventInfoWindowIdActivity variable is use to store array of ObjectID for add to list and append in shared URL
-            if (dojo.eventInfoWindowIdActivity) {
-                urlStr += "$eventInfoWindowIdActivity=" + dojo.eventInfoWindowIdActivity;
+            //appGlobals.shareOptions.eventInfoWindowIdActivity variable is use to store array of ObjectID for add to list and append in shared URL
+            if (appGlobals.shareOptions.eventInfoWindowIdActivity) {
+                urlStr += "$eventInfoWindowIdActivity=" + appGlobals.shareOptions.eventInfoWindowIdActivity;
             }
-            //dojo.infoRoutePoint variable is use to store direction Point(geomerty) for add to list and append in shared URL
-            if (dojo.infoRoutePoint) {
-                urlStr += "$infoRoutePoint=" + dojo.infoRoutePoint.toString();
+            //appGlobals.shareOptions.infoRoutePoint variable is use to store direction Point(geomerty) for add to list and append in shared URL
+            if (appGlobals.shareOptions.infoRoutePoint) {
+                urlStr += "$infoRoutePoint=" + appGlobals.shareOptions.infoRoutePoint.toString();
             }
-            //dojo.eventForListClicked variable is use to store Activity array of ObjectID for add to list and append in shared URL
-            if (dojo.eventForListClicked) {
-                urlStr += "$eventRouteforList=" + dojo.eventForListClicked.toString();
+            //appGlobals.shareOptions.eventForListClicked variable is use to store Activity array of ObjectID for add to list and append in shared URL
+            if (appGlobals.shareOptions.eventForListClicked) {
+                urlStr += "$eventRouteforList=" + appGlobals.shareOptions.eventForListClicked.toString();
             }
-            //dojo.eventRoutePoint variable is use to store event route Point(geometry) and append in shared URL
-            if (dojo.eventRoutePoint) {
-                urlStr += "$eventRoutePoint=" + dojo.eventRoutePoint.toString();
+            //appGlobals.shareOptions.eventRoutePoint variable is use to store event route Point(geometry) and append in shared URL
+            if (appGlobals.shareOptions.eventRoutePoint) {
+                urlStr += "$eventRoutePoint=" + appGlobals.shareOptions.eventRoutePoint.toString();
             }
-            //dojo.eventIndex variable is use to store event objectId search from datePicker and append in shared URL
-            if (dojo.eventIndex && dojo.eventPlannerQuery === undefined) {
-                urlStr += "$eventIndex=" + dojo.eventIndex.toString();
+            //appGlobals.shareOptions.eventIndex variable is use to store event objectId search from datePicker and append in shared URL
+            if (appGlobals.shareOptions.eventIndex && appGlobals.shareOptions.eventPlannerQuery === undefined) {
+                urlStr += "$eventIndex=" + appGlobals.shareOptions.eventIndex.toString();
             }
-            //dojo.eventIndex variable is use to store true/false if search the event from datePicker and append in shared URL
-            if (dojo.eventPlannerQuery) {
+            //appGlobals.shareOptions.eventIndex variable is use to store true/false if search the event from datePicker and append in shared URL
+            if (appGlobals.shareOptions.eventPlannerQuery) {
                 eventIndex = "";
-                if (dojo.eventIndex) {
-                    eventIndex = dojo.eventIndex.toString();
+                if (appGlobals.shareOptions.eventIndex) {
+                    eventIndex = appGlobals.shareOptions.eventIndex.toString();
                 }
-                urlStr += "$eventplanner=" + "true" + "$startDate=" + dojo.eventPlannerQuery.split(",")[0].replace(new RegExp(" ", 'g'), ",").toString() + "$endDate=" + dojo.eventPlannerQuery.split(",")[1].replace(new RegExp(" ", 'g'), ",").toString() + "$eventIndex=" + eventIndex;
+                urlStr += "$eventplanner=" + "true" + "$startDate=" + appGlobals.shareOptions.eventPlannerQuery.split(",")[0].replace(new RegExp(" ", 'g'), ",").toString() + "$endDate=" + appGlobals.shareOptions.eventPlannerQuery.split(",")[1].replace(new RegExp(" ", 'g'), ",").toString() + "$eventIndex=" + eventIndex;
             }
             urlStr += "$extentChanged=true";
-            this.getTinyUrl = commonShare.getTinyLink(urlStr, dojo.configData.MapSharingOptions.TinyURLServiceURL);
+            this.getTinyUrl = commonShare.getTinyLink(urlStr, appGlobals.configData.MapSharingOptions.TinyURLServiceURL);
         },
 
         /**
@@ -295,7 +300,7 @@ define([
                 domClass.add(this.divAppContainer, "esriCTZeroHeight");
             }
             //Do the share
-            commonShare.share(this.getTinyUrl, dojo.configData.MapSharingOptions, site);
+            commonShare.share(this.getTinyUrl, appGlobals.configData.MapSharingOptions, site);
         }
     });
 });

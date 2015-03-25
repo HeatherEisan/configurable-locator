@@ -2,13 +2,16 @@
     <div data-dojo-attach-point="divSearchResultContent" class="esriCTDivSearchResultContent">
         <div data-dojo-attach-point="divTabConatiner" class="esriCTDivTabConatiner">
             <div data-dojo-attach-point="divSearchPanel" class="esriCTDivSearchPanel">
-                <span class="esriCTSearchTab" data-dojo-attach-point="searchPanelTitle"></span>
+                <div class="esriCTSearchTab" data-dojo-attach-point="searchPanelTitle">
+                </div>
             </div>
             <div data-dojo-attach-point="divActivityPanel" class="esriCTActivityPanel">
-                <span class="esriCTSearchTab" data-dojo-attach-point="activityPanelTitle"></span>
+                <div class="esriCTSearchTab" data-dojo-attach-point="activityPanelTitle">
+                </div>
             </div>
             <div data-dojo-attach-point="divEventsPanel" class="esriCTEventsPanel">
-                <span class="esriCTSearchTab" data-dojo-attach-point="eventsPanelTitle"></span>
+                <div class="esriCTSearchTab" data-dojo-attach-point="eventsPanelTitle">
+                </div>
             </div>
         </div>
         <div class="esriCTDivActivityContainer" data-dojo-attach-point="divActivityContainer">
@@ -35,7 +38,7 @@
                             <input type="date" name="toDate" data-dojo-type="dijit/form/DateTextBox" data-dojo-attach-point="myToDate"
                                 required="true" />
                         </div>
-                        <div class="esriCTBottomGo" data-dojo-attach-point="bottonGo" title="${sharedNls.tooltips.searchTooltips}">
+                        <div class="esriCTBottomGo" data-dojo-attach-point="buttonGo" title="${sharedNls.tooltips.searchTooltip}">
                         </div>
                     </div>
                 </div>
