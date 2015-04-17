@@ -178,52 +178,52 @@ define([], function () {
             ActivityList: [{
                 FieldName: "ADACOMPLY",
                 Alias: "ADA Compliant",
-                Image: "js/library/themes/images/activity/fourwheel.png",
+                Image: "js/library/themes/images/activity/wheelchairAccessible.png",
                 IsSelected: false
             }, {
                 FieldName: "SWIMMING",
                 Alias: "Swimming",
-                Image: "js/library/themes/images/activity/electricHookup.png",
+                Image: "js/library/themes/images/activity/swimming.png",
                 IsSelected: false
             }, {
                 FieldName: "HIKING",
                 Alias: "Hiking",
-                Image: "js/library/themes/images/activity/waterHookup.png",
+                Image: "js/library/themes/images/activity/climbing.png",
                 IsSelected: false
             }, {
                 FieldName: "RESTROOM",
                 Alias: "Restrooms Available",
-                Image: "js/library/themes/images/activity/restroomsAvail.png",
+                Image: "js/library/themes/images/activity/restrooms.png",
                 IsSelected: true
             }, {
                 FieldName: "PICNIC",
                 Alias: "Picnic Shelters",
-                Image: "js/library/themes/images/activity/marina.png",
+                Image: "js/library/themes/images/activity/picnicShelter.png",
                 IsSelected: false
             }, {
                 FieldName: "BOATING",
                 Alias: "Boating",
-                Image: "js/library/themes/images/activity/marina.png",
+                Image: "js/library/themes/images/activity/motorboating.png",
                 IsSelected: false
             }, {
                 FieldName: "ROADCYCLE",
                 Alias: "Road Cycling",
-                Image: "js/library/themes/images/activity/marina.png",
+                Image: "js/library/themes/images/activity/bicycleTrail.png",
                 IsSelected: false
             }, {
                 FieldName: "MTBCYCLE",
                 Alias: "Mountain Biking",
-                Image: "js/library/themes/images/activity/marina.png",
+                Image: "js/library/themes/images/activity/bicycleTrail.png",
                 IsSelected: false
             }, {
                 FieldName: "PLAYGROUND",
                 Alias: "Playgrounds",
-                Image: "js/library/themes/images/activity/marina.png",
+                Image: "js/library/themes/images/activity/playground.png",
                 IsSelected: false
             }, {
                 FieldName: "SKI",
                 Alias: "Skiing",
-                Image: "js/library/themes/images/activity/marina.png",
+                Image: "js/library/themes/images/activity/downhillSkiing.png",
                 IsSelected: false
             }, {
                 FieldName: "SOCCER",
@@ -233,7 +233,7 @@ define([], function () {
             }, {
                 FieldName: "CAMPING",
                 Alias: "Camping",
-                Image: "js/library/themes/images/activity/marina.png",
+                Image: "js/library/themes/images/activity/campground.png",
                 IsSelected: false
             }, {
                 FieldName: "HUNTING",
@@ -243,7 +243,7 @@ define([], function () {
             }, {
                 FieldName: "BASEBALL",
                 Alias: "Baseball Fields",
-                Image: "js/library/themes/images/activity/marina.png",
+                Image: "js/library/themes/images/activity/baseball.png",
                 IsSelected: false
             }, {
                 FieldName: "BASKETBALL",
