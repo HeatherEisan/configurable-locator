@@ -18,34 +18,34 @@
 //============================================================================================================================//
 
 require([
-    "esri/map",
     "../../../../config.js",
     "dojo/dom-construct",
-    "dojo/dom",
-    "dojo/topic"
+    "dojo/dom"
 
-], function (esriMap, config, domConstruct, dom, topic) {
+], function (config, domConstruct, dom) {
     /**
     * create print widget for event list.
     *
     * @class
     * @name widgets/printForEvent/printForEvent
     */
-
-    var eventInfoData, i;
-    document.title = config.ApplicationName;
-    /**
-    * function to add polygon and graphics in the print map window when it gets open
-    * @memberOf widgets/printForEvent/printForEvent
-    */
-    eventInfoData = window.opener.mapData.eventData;
-    //Print Directions on Page
-    dom.byId("title").innerHTML = eventInfoData[0].Title;
-    for (i = 0; i < eventInfoData.length; i++) {
-        domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": eventInfoData[i].Name + "<br>" + eventInfoData[i].BottomText }, dom.byId("directionsList"));
-    }
     // Set time out for window print
     setTimeout(function () {
-        window.print();
-    }, 1000);
+        var eventInfoData, i;
+        document.title = config.ApplicationName;
+        /**
+        * function to add polygon and graphics in the print map window when it gets open
+        * @memberOf widgets/printForEvent/printForEvent
+        */
+        eventInfoData = window.opener.mapData.eventData;
+        //Print Directions on Page
+        dom.byId("title").innerHTML = eventInfoData[0].Title;
+        for (i = 0; i < eventInfoData.length; i++) {
+            domConstruct.create("li", { "class": "esriCTInfotextDirection", "innerHTML": eventInfoData[i].Name + "<br>" + eventInfoData[i].BottomText }, dom.byId("directionsList"));
+        }
+        // Set time out for window print
+        setTimeout(function () {
+            window.print();
+        }, 1000);
+    }, 2000);
 });

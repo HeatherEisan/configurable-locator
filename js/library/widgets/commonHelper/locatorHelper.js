@@ -18,11 +18,8 @@
 //============================================================================================================================//
 define([
     "dojo/_base/declare",
-    "dojo/dom-construct",
     "dojo/_base/lang",
-    "dojo/on",
     "dojo/_base/array",
-    "dojo/query",
     "esri/tasks/query",
     "dojo/promise/all",
     "esri/tasks/QueryTask",
@@ -36,14 +33,14 @@ define([
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol"
 
-], function (declare, domConstruct, lang, on, array, query, Query, all, QueryTask, Graphic, _WidgetBase, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol) {
+], function (declare, lang, array, Query, all, QueryTask, Graphic, _WidgetBase, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase], {
-        sharedNls: sharedNls,                                      // Variable for shared NLS
+        sharedNls: sharedNls, // Variable for shared NLS
 
         /**
-        * careate buffer around pushpin
+        * Create buffer around pushpin
         * @param {object} mapPoint Contains the map point on map
         * @param {string} widgetName Contains the name of the functionality from where buffer is created.
         * @memberOf widgets/commonHelper/locatorHelper
@@ -54,20 +51,20 @@ define([
             this.carouselContainer.addPod(this.carouselPodData);
             this.removeBuffer();
             geometryService = new GeometryService(appGlobals.configData.GeometryService);
-            // checking the map point or map point is having geometry and if config data has buffer distance.
+            // Checking the map point or map point is having geometry and if config data has buffer distance.
             if ((mapPoint || mapPoint.geometry) && appGlobals.configData.BufferDistance) {
                 params = new BufferParameters();
                 params.distances = [appGlobals.configData.BufferDistance];
                 params.unit = GeometryService.UNIT_STATUTE_MILE;
                 params.bufferSpatialReference = this.map.spatialReference;
                 params.outSpatialReference = this.map.spatialReference;
-                // checking the geometry
+                // Checking the geometry
                 if (mapPoint.geometry) {
                     params.geometries = [mapPoint.geometry];
                 } else {
                     params.geometries = [mapPoint];
                 }
-                // creating buffer and calling show buffer function.
+                // Ccreating buffer and calling show buffer function.
                 geometryService.buffer(params, lang.hitch(this, function (geometries) {
                     this.showBuffer(geometries, mapPoint, widgetName);
                 }));
@@ -75,14 +72,14 @@ define([
         },
 
         /**
-        * show buffer on map
+        * Show buffer on map
         * @param {object} geometries of mapPoint
         * @param {object} mapPoint Contains the map point
         * @memberOf widgets/commonHelper/locatorHelper
         */
         showBuffer: function (geometries, mapPoint, widgetName) {
             var bufferSymbol;
-            // checking the geolocation variable in the case of share app.
+            // Checking the geolocation variable in the case of share app.
             if (!appGlobals.shareOptions.sharedGeolocation) {
                 this._clearBuffer();
             }
@@ -96,7 +93,7 @@ define([
         },
 
         /**
-        * clear buffer from map
+        * Clear buffer from map
         * @memberOf widgets/commonHelper/locatorHelper
         */
         _clearBuffer: function () {
@@ -106,7 +103,7 @@ define([
         },
 
         /**
-        * add graphic layer on map of buffer and set expand
+        * Add graphic layer on map of buffer and set expand
         * @param {object} layer Contains feature layer
         * @param {object} symbol Contains graphic
         * @param {object}point Contains the map point
@@ -116,9 +113,9 @@ define([
             var graphic;
             graphic = new Graphic(point, symbol);
             layer.add(graphic);
-            // checking the extent changed variable in the case of shared app to maintain extent on map
+            // Checking the extent changed variable in the case of shared app to maintain extent on map
             if (window.location.href.toString().split("$extentChanged=").length > 1) {
-                // if extent change variable set to be true then set the extent other wise don't do any thing.
+                // If extent change variable set to be true then set the extent other wise don't do any thing.
                 if (this.isExtentSet) {
                     this.map.setExtent(point.getExtent().expand(1.6));
                 }
@@ -129,8 +126,8 @@ define([
         },
 
         /**
-        * query layer URL
-        * create an object of graphic
+        * Query layer URL
+        * Create an object of graphic
         * @param {object} geometry of graphic
         * @param {object} mapPoint Contains the map point
         * @param {object} widget name of the functionality from query layer is called.
@@ -139,7 +136,7 @@ define([
         _queryLayer: function (geometry, mapPoint, widget) {
             var layerobject, i, deferredArray = [], result = [], widgetName, featuresWithinBuffer = [],
                 dist, featureSet = [], isDistanceFound, j, k, routeObject;
-            // validate selectedLayerTitle for querying on each layer configured, for finding facility within the buffer.
+            // Validate selectedLayerTitle for querying on each layer configured, for finding facility within the buffer.
             if (widget) {
                 widgetName = widget;
             } else {
@@ -152,14 +149,14 @@ define([
                     if (SearchSettings.SearchDisplayTitle === this.selectedLayerTitle) {
                         layerobject = SearchSettings;
                         // Query on layer for facility.
-                        this._queryLayerForFacility(layerobject, widget, geometry, deferredArray, mapPoint, result);
+                        this._queryLayerForFacility(layerobject, geometry, deferredArray, result);
                     }
                 }));
             } else {
                 // Looping on each layer for finding facility within the buffer
                 for (i = 0; i < appGlobals.configData.SearchSettings.length; i++) {
                     layerobject = appGlobals.configData.SearchSettings[i];
-                    this._queryLayerForFacility(layerobject, widget, geometry, deferredArray, mapPoint, result);
+                    this._queryLayerForFacility(layerobject, geometry, deferredArray, result);
                 }
                 // Calling deferred list when all query is completed.
                 all(deferredArray).then(lang.hitch(this, function (relatedRecords) {
@@ -224,17 +221,15 @@ define([
         },
 
         /**
-        * query layer for getting facilty
+        * Query layer for getting facilty
         * finding route from start point to the nearest feature
         * @param {object} layerobject contains the layer information
-        * @param {object} widget contains name of the functionality from query is called.
         * @param {object} geometry contains the geometry
         * @param {object} deferredArray contains deferred array for further operation
-        * @param {object}mapPoint Contains the map point
         * @param {object} result array to contain feature data
         * @memberOf widgets/commonHelper/locatorHelper
         */
-        _queryLayerForFacility: function (layerobject, widget, geometry, deferredArray, mapPoint, result) {
+        _queryLayerForFacility: function (layerobject, geometry, deferredArray, result) {
             var queryTask, queryLayer, layerObject;
             // Checking the query url availability
             if (layerobject.QueryURL) {

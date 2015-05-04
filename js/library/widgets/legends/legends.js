@@ -23,6 +23,7 @@ define([
     "dojo/_base/lang",
     "dojo/_base/array",
     "dojo/query",
+    "dojo/dom-attr",
     "dojo/on",
     "dojo/dom",
     "dojo/dom-class",
@@ -39,44 +40,39 @@ define([
     "esri/tasks/query",
     "esri/tasks/QueryTask",
     "dijit/a11yclick"
-], function (declare, domConstruct, domStyle, lang, array, query, on, dom, domClass, template, topic, Deferred, all, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, Color, esriRequest, Query, QueryTask, a11yclick) {
+], function (declare, domConstruct, domStyle, lang, array, query, domAttr, on, dom, domClass, template, topic, Deferred, all, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, Color, esriRequest, Query, QueryTask, a11yclick) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
         sharedNls: sharedNls,
+        divLegendlist: null,
         layerObject: null,
+        logoContainer: null,
         _layerCollection: {},
         rendererArray: [],
         isExtentBasedLegend: false,
-        webmapUpdatedRenderer: null,
         hostedLayersJSON: null,
+        webmapUpdatedRenderer: null,
         newLeft: 0,
         legendListWidth: [],
         indexesForLayer: [],
-        divLegendContainer: null,
-        divLegendContent: null,
-        widthLegendContentDiv: 0,
-
         /**
-        * create legend widget
+        * create legends widget
         * @class
-        * @name widgets/legend/legend
+        * @name widgets/legends/legends
         */
         postCreate: function () {
             this._createLegendContainerUI();
             topic.subscribe("setMaxLegendLength", lang.hitch(this, this._setMaxLegendLengthResult));
             topic.subscribe("setMinLegendLength", lang.hitch(this, this._setMinLegendLengthResult));
-            topic.subscribe("setMap", lang.hitch(this, function (map) {
-                this.map = map;
+
+            topic.subscribe("updateLegends", lang.hitch(this, function (geometry) {
+                this._updatedLegend(geometry);
             }));
-            topic.subscribe("updateLegends", lang.hitch(this, this._updatedLegend));
-            this.own(on(window, "resize", lang.hitch(this, this._displaySlideControls)));
-            if (this.isExtentBasedLegend) {
-                this.map.on("extent-change", lang.hitch(this, function (evt) {
-                    this._updatedLegend(evt.extent);
-                }));
-            }
+
+            this.own(on(window, "orientationchange", lang.hitch(this, this._resetLegendContainer)));
+            this.own(on(window, "resize", lang.hitch(this, this._resetLegendContainer)));
         },
 
         /**
@@ -84,18 +80,23 @@ define([
         * @memberOf widgets/legends/legends
         */
         startup: function (layerArray, updatedRendererArray, mapExtent) {
-            var mapServerURL, matchedString, index, hostedDefArray = [], defArray = [], params, layersRequest, hostedLayers, i, featureLayerUrl, layerIndex, legendCreated;
+            var mapServerURL, index, hostedDefArray = [], defArray = [], params, layersRequest, hostedLayers, i, featureLayerUrl, layerIndex, legendCreated, matchedString;
             this.mapServerArray = [];
-            this.featureServerArray = [];
+            this.indexesForLayer = {};
             this.hostedLayersJSON = null;
             this.legendListWidth = [];
+
+            //display message if no layer is available to display legend
             if (!layerArray.length && !updatedRendererArray) {
+                domConstruct.empty(this.divLegendContent);
                 domConstruct.create("span", { "innerHTML": sharedNls.errorMessages.noLegend, "class": "esriCTDivNoLegendContainer" }, this.divLegendContent);
                 return;
             }
             this.webmapUpdatedRenderer = updatedRendererArray;
+            //filter hosted map services
             hostedLayers = this._filterHostedFeatureServices(layerArray);
             for (i = 0; i < hostedLayers.length; i++) {
+                //get layer JSON
                 params = {
                     url: hostedLayers[i].url,
                     content: { f: "json" },
@@ -111,18 +112,15 @@ define([
                         this.hostedLayersJSON = null;
                     } else {
                         this.hostedLayersJSON = {};
-                        if (this.webmapUpdatedRenderer === null && this._layerCollection === null) {
-                            domConstruct.empty(this.divLegendContent);
-                        }
                     }
                     for (i = 0; i < result.length; i++) {
                         if (result[i]) {
+                            //set layer title
                             this.hostedLayersJSON[hostedLayers[i].url] = result[i];
                             this.hostedLayersJSON[hostedLayers[i].url].title = hostedLayers[i].title;
                         }
                     }
                     this._displayHostedLayerRenderer(mapExtent);
-                    this._addlegendListWidth();
                 }));
             }
 
@@ -152,9 +150,10 @@ define([
                     this.mapServerArray.push({ "url": mapServerURL, "featureLayerUrl": featureLayerUrl });
                 }
             }
-
+            //remove duplicate map server url
             this.mapServerArray = this._removeDuplicate(this.mapServerArray);
             for (index = 0; index < this.mapServerArray.length; index++) {
+                //get legend data for layer
                 params = {
                     url: this.mapServerArray[index].url + "/legend",
                     content: { f: "json" },
@@ -180,7 +179,6 @@ define([
             }));
             if (this.webmapUpdatedRenderer) {
                 this._displayWebmapRenderer(mapExtent);
-                this._addlegendListWidth();
             }
         },
 
@@ -189,26 +187,28 @@ define([
         * @memberOf widgets/legends/legends
         */
         _updatedLegend: function (geometry) {
-            var defQueryArray = [], queryResult, resultListArray = [], i;
-
+            var defQueryArray = [], queryParams, resultListArray = [], i;
             this.rendererArray = [];
             this.legendListWidth = [];
             this._resetLegendContainer();
             domConstruct.empty(this.divLegendContent);
-            this._addlegendListWidth(this.legendListWidth);
-            domStyle.set(this.divRightArrow, "display", "none");
-            domStyle.set(this.divLeftArrow, "display", "none");
-            domConstruct.create("span", { innerHTML: sharedNls.errorMessages.loadingText, "class": "esriCTDivLegendLoadingContainer" }, this.divLegendContent);
+            this._addlegendListWidth();
+            //display loading text in legend container
+            domConstruct.create("span", { "innerHTML": sharedNls.errorMessages.loadingText, "class": "esriCTDivLegendLoadingContainer" }, this.divLegendContent);
             if (!geometry) {
+                //display message if geometry is not available to query legend info
                 domConstruct.empty(this.divLegendContent);
-                domConstruct.create("span", { innerHTML: sharedNls.errorMessages.noLegend, "class": "esriCTDivNoLegendContainer" }, this.divLegendContent);
+                domConstruct.create("span", { "innerHTML": sharedNls.errorMessages.noLegend, "class": "esriCTDivNoLegendContainer" }, this.divLegendContent);
                 domStyle.set(this.divRightArrow, "display", "none");
                 return;
             }
-            queryResult = this._setQueryParams(geometry);
-            this._queryLegendOnMapExtent(this._layerCollection, defQueryArray, queryResult, false);
-            this._queryLegendOnMapExtent(this.hostedLayersJSON, defQueryArray, queryResult, true);
-            this._queryLegendOnMapExtent(this.webmapUpdatedRenderer, defQueryArray, queryResult, true);
+            queryParams = this._setQueryParams(geometry);
+            //query for map services to get legend data
+            this._queryLegendOnMapExtent(this._layerCollection, defQueryArray, queryParams, false);
+            //query for hosted service to get legend data
+            this._queryLegendOnMapExtent(this.hostedLayersJSON, defQueryArray, queryParams, true);
+            //query for webmap edited layers to get legend data
+            this._queryLegendOnMapExtent(this.webmapUpdatedRenderer, defQueryArray, queryParams, true);
             if (defQueryArray.length > 0) {
                 all(defQueryArray).then(lang.hitch(this, function (result) {
                     domConstruct.empty(this.divLegendContent);
@@ -217,6 +217,7 @@ define([
                         if (result[i] && result[i].count > 0) {
                             resultListArray.push(result[i]);
                             if (result[i].hasDrawingInfo) {
+                                //create legend symbol in legend container for webmap edited and hosted services
                                 if (this.rendererArray[i].drawingInfo) {
                                     this._createLegendSymbol(this.rendererArray[i].drawingInfo, this.rendererArray[i].title);
                                 } else if (this.rendererArray[i].layerDefinition) {
@@ -225,19 +226,23 @@ define([
                                     this._createLegendSymbol(this.rendererArray[i], this.rendererArray[i].title);
                                 }
                             } else {
+                                //create legend symbol in legend container for map services
                                 this._addLegendSymbol(this.rendererArray[i].renderer, this.rendererArray[i].title);
                             }
                         }
                     }
-                    this._addlegendListWidth(this.legendListWidth);
+                    //update legend container width for updated legend list
+                    this._addlegendListWidth();
                     if (resultListArray.length === 0) {
+                        //display message if no feature is available on map
                         domConstruct.create("span", { "innerHTML": sharedNls.errorMessages.noLegend, "class": "esriCTDivNoLegendContainer" }, this.divLegendContent);
                     }
                 }));
             } else {
                 this.legendListWidth = [];
                 domConstruct.empty(this.divLegendContent);
-                this._addlegendListWidth(this.legendListWidth);
+                this._addlegendListWidth();
+                //display message if no feature is available on map
                 domConstruct.create("span", { "innerHTML": sharedNls.errorMessages.noLegend, "class": "esriCTDivNoLegendContainer" }, this.divLegendContent);
             }
         },
@@ -246,7 +251,7 @@ define([
         * query legend for current extent
         * @memberOf widgets/legends/legends
         */
-        _queryLegendOnMapExtent: function (layerArray, defQueryArray, queryResult, hasDrawingInfo) {
+        _queryLegendOnMapExtent: function (layerArray, defQueryArray, queryParams, hasDrawingInfo) {
             var layer, layerUrl, rendererObject, layerObject, index, i, fieldValue, currentTime = new Date();
             for (layer in layerArray) {
                 if (layerArray.hasOwnProperty(layer)) {
@@ -254,7 +259,8 @@ define([
                     if (layerArray[layer].featureLayerUrl) {
                         layerUrl = layerArray[layer].featureLayerUrl;
                     }
-                    if (this._checkLayerVisibility(layerUrl)) {
+                    //check if layer is visible on map if it is extent based legend
+                    if (!this.isExtentBasedLegend || this._checkLayerVisibility(layerUrl)) {
                         layerObject = layerArray[layer];
                         if (!hasDrawingInfo) {
                             rendererObject = layerArray[layer].legend;
@@ -263,25 +269,29 @@ define([
                                     rendererObject[index].layerUrl = layer;
                                     this.rendererArray.push({ "renderer": rendererObject[index], "title": layerArray[layer].layerName });
                                     if (layerObject.rendererType === "uniqueValue") {
+                                        //set query string for unique value type renderer
                                         if (rendererObject[index].values) {
                                             if (layerObject.fieldType === "esriFieldTypeString") {
+                                                //check if field type is string
                                                 fieldValue = "'" + rendererObject[index].values[0] + "'";
                                             } else {
                                                 fieldValue = rendererObject[index].values[0];
                                             }
-                                            queryResult.where = layerObject.fieldName + " = " + fieldValue + " AND " + currentTime.getTime() + "=" + currentTime.getTime();
+                                            queryParams.where = layerObject.fieldName + " = " + fieldValue + " AND " + currentTime.getTime() + "=" + currentTime.getTime();
                                         } else {
-                                            queryResult.where = currentTime.getTime() + "=" + currentTime.getTime();
+                                            queryParams.where = currentTime.getTime() + "=" + currentTime.getTime();
                                         }
                                     } else if (layerObject.rendererType === "classBreaks") {
-                                        queryResult.where = rendererObject[index - 1] ? layerObject.fieldName + ">" + rendererObject[index - 1].values[0] + " AND " + layerObject.fieldName + "<=" + rendererObject[index].values[0] : layerObject.fieldName + "=" + rendererObject[index].values[0] + " AND " + currentTime.getTime().toString() + "=" + currentTime.getTime().toString();
+                                        //set query string for class breaks type renderer
+                                        queryParams.where = rendererObject[index - 1] ? layerObject.fieldName + ">" + rendererObject[index - 1].values[0] + " AND " + layerObject.fieldName + "<=" + rendererObject[index].values[0] : layerObject.fieldName + "=" + rendererObject[index].values[0] + " AND " + currentTime.getTime().toString() + "=" + currentTime.getTime().toString();
                                     } else {
-                                        queryResult.where = currentTime.getTime() + "=" + currentTime.getTime();
+                                        queryParams.where = currentTime.getTime() + "=" + currentTime.getTime();
                                     }
-                                    this._executeQueryTask(layer, defQueryArray, queryResult, hasDrawingInfo);
+                                    this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo);
                                 }
                             }
                         } else {
+                            //fetch layer renderer info
                             if (layerObject.drawingInfo) {
                                 rendererObject = layerObject.drawingInfo.renderer;
                             } else {
@@ -289,30 +299,37 @@ define([
                             }
 
                             if (rendererObject.type === "uniqueValue") {
+                                //set query string for unique value type renderer
                                 for (i = 0; i < rendererObject.uniqueValueInfos.length; i++) {
                                     this.rendererArray.push({ "renderer": rendererObject.uniqueValueInfos[i], "title": layerObject.title });
                                     if (layerObject.fieldType === "esriFieldTypeString") {
+                                        //check if field type is string
                                         fieldValue = "'" + rendererObject.uniqueValueInfos[i].value + "'";
                                     } else {
                                         fieldValue = rendererObject.uniqueValueInfos[i].value;
                                     }
                                     if (rendererObject.uniqueValueInfos[i].value) {
-                                        queryResult.where = layerObject.fieldName + " = " + fieldValue + " AND " + currentTime.getTime() + "=" + currentTime.getTime();
+                                        queryParams.where = layerObject.fieldName + " = " + fieldValue + " AND " + currentTime.getTime() + "=" + currentTime.getTime();
                                     } else {
-                                        queryResult.where = currentTime.getTime() + "=" + currentTime.getTime();
+                                        queryParams.where = currentTime.getTime() + "=" + currentTime.getTime();
                                     }
-                                    this._executeQueryTask(layer, defQueryArray, queryResult, hasDrawingInfo);
+                                    this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo);
                                 }
                             } else if (rendererObject.type === "classBreaks") {
+                                //set query string for class breaks type renderer
                                 for (i = 0; i < rendererObject.classBreakInfos.length; i++) {
                                     this.rendererArray.push({ "renderer": rendererObject.classBreakInfos[i], "title": layerObject.title });
-                                    queryResult.where = layerObject.fieldName + ">=" + rendererObject.classBreakInfos[i].minValue + " AND " + layerObject.fieldName + "<=" + rendererObject.classBreakInfos[i].maxValue + " AND " + currentTime.getTime().toString() + "=" + currentTime.getTime().toString();
-                                    this._executeQueryTask(layer, defQueryArray, queryResult, hasDrawingInfo);
+                                    queryParams.where = layerObject.fieldName + ">=" + rendererObject.classBreakInfos[i].minValue + " AND " + layerObject.fieldName + "<=" + rendererObject.classBreakInfos[i].maxValue + " AND " + currentTime.getTime().toString() + "=" + currentTime.getTime().toString();
+                                    this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo);
                                 }
                             } else {
+                                if (!layerObject.title) {
+                                    layerObject.title = layerObject.name;
+                                }
                                 this.rendererArray.push(layerObject);
-                                queryResult.where = currentTime.getTime() + "=" + currentTime.getTime();
-                                this._executeQueryTask(layer, defQueryArray, queryResult, hasDrawingInfo);
+                                //set query string for simple renderer
+                                queryParams.where = currentTime.getTime() + "=" + currentTime.getTime();
+                                this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo);
                             }
                         }
                     }
@@ -325,17 +342,18 @@ define([
         * @memberOf widgets/legends/legends
         */
         _checkLayerVisibility: function (layerUrl) {
-            var layer, lastChar, mapLayerUrl, layerUrlIndex = layerUrl.split('/'),
-                returnVal = false;
+            var layer, lastChar, mapLayerUrl, layerUrlIndex = layerUrl.split('/'), returnVal = false;
             layerUrlIndex = layerUrlIndex[layerUrlIndex.length - 1];
             for (layer in this.map._layers) {
                 if (this.map._layers.hasOwnProperty(layer)) {
+                    //check layer visibility on current map scale
                     if (this.map._layers[layer].url === layerUrl) {
-                        if (this.map._layers[layer].visibleAtMapScale || !this.isExtentBasedLegend) {
+                        if (this.map._layers[layer].visibleAtMapScale) {
                             returnVal = true;
                             break;
                         }
                     } else if (this.map._layers[layer].visibleLayers) {
+                        //check map server layer visibility on current map scale
                         lastChar = this.map._layers[layer].url[this.map._layers[layer].url.length - 1];
                         if (lastChar === "/") {
                             mapLayerUrl = this.map._layers[layer].url + layerUrlIndex;
@@ -344,7 +362,7 @@ define([
                         }
                         if (mapLayerUrl === layerUrl) {
                             if (array.indexOf(this.map._layers[layer].visibleLayers, parseInt(layerUrlIndex, 10)) !== -1) {
-                                if (this.isExtentBasedLegend && this.map._layers[layer].visibleAtMapScale) {
+                                if (this.map._layers[layer].visibleAtMapScale) {
                                     if (this.map._layers[layer].dynamicLayerInfos) {
                                         if (this.map.__LOD.scale < this.map._layers[layer].dynamicLayerInfos[parseInt(layerUrlIndex, 10)].minScale) {
                                             returnVal = true;
@@ -412,21 +430,26 @@ define([
         */
         _createLegendContainerUI: function () {
             var legendOuterContainer;
+            //get domNode of already created legend widget
             legendOuterContainer = query('.esriCTDivLegendBox', dom.byId("esriCTParentDivContainer"));
-
+            //empty old legend container
             if (query('.esriCTDivLegendBoxContent')[0]) {
                 domConstruct.empty(query('.esriCTDivLegendBoxContent')[0]);
             }
+            //destroy old legend container's parent node
             if (legendOuterContainer[0]) {
                 domConstruct.destroy(legendOuterContainer[0].parentElement);
             }
+            //add current legend container in application root container
             dom.byId("esriCTParentDivContainer").appendChild(this.divLegendBox);
             this.divLegendContainer = domConstruct.create("div", { "class": "esriCTDivLegendContainer" }, this.divLegendListContainer);
             this.divLegendContent = domConstruct.create("div", { "class": "esriCTDivLegendContent" }, this.divLegendContainer);
-            this.divLeftArrow = domConstruct.create("div", { "class": "esriCTLeftArrow" }, this.divLegendBoxContent);
+            domConstruct.create("span", { "innerHTML": sharedNls.errorMessages.loadingText, "class": "esriCTDivLegendLoadingContainer" }, this.divLegendContent);
+            //create UI for left arrow
+            this.divLeftArrow = domConstruct.create("div", { "class": "esriCTLeftArrow", "style": "display:none" }, this.divLegendBoxContent);
             on(this.divLeftArrow, a11yclick, lang.hitch(this, this._slideLeft));
-
-            this.divRightArrow = domConstruct.create("div", { "class": "esriCTRightArrow" }, this.divLegendBoxContent);
+            //create UI for right arrow
+            this.divRightArrow = domConstruct.create("div", { "class": "esriCTRightArrow", "style": "display:none" }, this.divLegendBoxContent);
             on(this.divRightArrow, a11yclick, lang.hitch(this, this._slideRight));
         },
 
@@ -465,26 +488,6 @@ define([
         },
 
         /**
-        * display slider controls
-        * @memberOf widgets/legends/legends
-        */
-        _displaySlideControls: function () {
-            if (dojo.window.getBox().w < this.widthLegendContentDiv) {
-                domStyle.set(this.divRightArrow, "display", "block");
-                domStyle.set(this.divRightArrow, "cursor", "pointer");
-                this._addlegendListWidth();
-            } else {
-                this.newLeft = 0;
-                domStyle.set(this.divRightArrow, "display", "none");
-                domStyle.set(this.divRightArrow, "cursor", "default");
-                domStyle.set(this.divLeftArrow, "display", "none");
-                domStyle.set(this.divLeftArrow, "cursor", "default");
-                domStyle.set(this.divLegendContent, "left", this.newLeft + "px");
-                this._addlegendListWidth();
-            }
-        },
-
-        /**
         * reset slider controls
         * @memberOf widgets/legends/legends
         */
@@ -515,8 +518,10 @@ define([
             if (this.isExtentBasedLegend) {
                 queryParams.geometry = currentExtent;
                 queryParams.spatialRelationship = "esriSpatialRelIntersects";
-                queryParams.returnGeometry = false;
+            } else {
+                queryParams.where = "1=1";
             }
+            queryParams.returnGeometry = false;
             return queryParams;
         },
 
@@ -527,12 +532,11 @@ define([
         _executeQueryTask: function (layer, defQueryArray, queryParams, hasDrawingInfo) {
             var defResult = [], queryTask, queryDeferred = new Deferred();
             queryTask = new QueryTask(layer);
+            //add key to identify layer type(hosted/webmap-edited/map service)
             defResult.hasDrawingInfo = hasDrawingInfo;
             defResult.count = 0;
-            if (!this.isExtentBasedLegend) {
-                queryParams.where = "1=1";
-            }
             queryTask.executeForCount(queryParams, lang.hitch(this, function (count) {
+                //add count of visible features on current extent
                 defResult.count = count;
                 queryDeferred.resolve(defResult);
             }), function () {
@@ -576,9 +580,10 @@ define([
         * @memberOf widgets/legends/legends
         */
         _createLegendSymbol: function (layerData, layerTitle) {
-            var renderer, divLegendImage, divLegendLabel, rendererObject, i, legendWidth, divLegendList, imageHeightWidth, height, width;
+            var renderer, divLegendImage, divLegendLabel, rendererObject, i, legendWidth, divLegendList, height, width, imageHeightWidth;
             if (layerData) {
                 renderer = layerData.renderer;
+                //set legend title if available in renderer object
                 if (renderer && renderer.label) {
                     layerTitle = renderer.label;
                 }
@@ -616,18 +621,15 @@ define([
                 } else {
                     divLegendList = domConstruct.create("div", { "class": "esriCTDivLegendList" }, this.divLegendContent);
                     divLegendImage = domConstruct.create("div", { "class": "esriCTDivLegend" }, divLegendList);
-                    if (renderer && renderer.symbol.url) {
-                        height = renderer.symbol.height ? renderer.symbol.height < 5 ? 5 : renderer.symbol.height : 15;
-                        width = renderer.symbol.width ? renderer.symbol.width < 5 ? 5 : renderer.symbol.width : 15;
+                    if (renderer.symbol.url) {
+                        height = renderer.symbol.height ? renderer.symbol.height < 5 ? 5 : renderer.symbol.height : 20;
+                        width = renderer.symbol.width ? renderer.symbol.width < 5 ? 5 : renderer.symbol.width : 20;
                         imageHeightWidth = { width: width + 'px', height: height + 'px' };
-                        domConstruct.create("img", {
-                            "src": renderer.symbol.url,
-                            "style": imageHeightWidth
-                        }, divLegendImage);
-                        divLegendLabel = domConstruct.create("div", { "class": "esriCTDivLegendLabel" }, divLegendList);
-                        legendWidth = divLegendLabel.offsetWidth + width + 10;
-                        this.legendListWidth.push(legendWidth);
+                        domConstruct.create("img", { "src": renderer.symbol.url, "style": imageHeightWidth }, divLegendImage);
                     }
+                    divLegendLabel = domConstruct.create("div", { "class": "esriCTDivLegendLabel", "innerHTML": layerTitle }, divLegendList);
+                    legendWidth = divLegendLabel.offsetWidth + width + 40;
+                    this.legendListWidth.push(legendWidth);
                 }
             }
         },
@@ -637,25 +639,18 @@ define([
         * @memberOf widgets/legends/legends
         */
         _createSymbol: function (symbolType, url, color, width, height, imageData, label) {
-            var bgColor, divLegendList, divLegendLabel, divLegendImage, divSymbol, legendWidth;
+            var divLegendList, bgColor, divLegendLabel, divLegendImage, divSymbol, legendWidth, imageHeightWidth;
             divLegendList = domConstruct.create("div", { "class": "esriCTDivLegendList" }, this.divLegendContent);
-            divLegendImage = domConstruct.create("div", { "class": "esriCTDivLegend" }, null);
+            divLegendImage = domConstruct.create("div", { "class": "esriCTDivLegend" }, divLegendList);
             height = height ? height < 5 ? 5 : height : 20;
             width = width ? width < 5 ? 5 : width : 20;
+            imageHeightWidth = { width: width + 'px', height: height + 'px' };
             if (symbolType === "picturemarkersymbol" && url) {
-                domConstruct.create("img", {
-                    "src": url,
-                    "style": "width:" + width + "px; height:" + height + "px"
-                }, divLegendImage);
-                divLegendList.appendChild(divLegendImage);
+                domConstruct.create("img", { "src": "data:image/gif;base64," + url, "style": imageHeightWidth }, divLegendImage);
             } else if (symbolType === "esriPMS" && url) {
-                domConstruct.create("img", {
-                    "src": "data:image/gif;base64," + imageData,
-                    "style": "width:" + width + "px; height:" + height + "px"
-                }, divLegendImage);
-                divLegendList.appendChild(divLegendImage);
+                domConstruct.create("img", { "src": "data:image/gif;base64," + imageData, "style": imageHeightWidth }, divLegendImage);
             } else {
-                divSymbol = document.createElement("div");
+                divSymbol = domConstruct.create("div", { "style": imageHeightWidth }, null);
                 if (color.r || color.r === 0) {
                     if (color.a || color.a === 0) {
                         bgColor = 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',' + color.a + ')';
@@ -673,13 +668,11 @@ define([
                     }
                 }
                 divSymbol.style.background = bgColor;
-                divSymbol.style.height = height + "px";
-                divSymbol.style.width = width + "px";
                 divLegendImage.appendChild(divSymbol);
-                divLegendList.appendChild(divLegendImage);
             }
-            divLegendLabel = domConstruct.create("div", { "class": "esriCTDivLegendLabel", "innerHTML": label }, divLegendList);
-            legendWidth = divLegendLabel.offsetWidth + width + 10;
+            divLegendLabel = domConstruct.create("div", { "class": "esriCTDivLegendLabel", "innerHTML": label }, null);
+            divLegendList.appendChild(divLegendLabel);
+            legendWidth = divLegendLabel.offsetWidth + width + 40;
             this.legendListWidth.push(legendWidth);
         },
 
@@ -823,7 +816,6 @@ define([
                     }
                 }
             }
-            this._addlegendListWidth();
             return isLegendCreated;
         },
 
@@ -849,12 +841,16 @@ define([
             var total = 0, j;
             for (j = 0; j < this.legendListWidth.length; j++) {
                 total += this.legendListWidth[j];
-                this.widthLegendContentDiv = total;
             }
             if (total < this.divLegendContainer.offsetWidth) {
                 domStyle.set(this.divLegendContent, "width", "auto");
             } else {
                 domStyle.set(this.divLegendContent, "width", (total + 5) + "px");
+            }
+            if (total <= 0 || this.divLegendContent.offsetWidth < this.divLegendBoxContent.offsetWidth) {
+                domStyle.set(this.divRightArrow, "display", "none");
+            } else {
+                domStyle.set(this.divRightArrow, "display", "block");
             }
             this._resetSlideControls();
         },
@@ -864,24 +860,22 @@ define([
         * @memberOf widgets/legends/legends
         */
         _addLegendSymbol: function (legend, layerName) {
-            var divLegendList, divLegendImage, divLegendLabel, legendWidth, width, height;
+            var divLegendList, divLegendImage, divLegendLabel, width, height, imageHeightWidth;
             if (legend) {
                 divLegendList = domConstruct.create("div", { "class": "esriCTDivLegendList" }, this.divLegendContent);
-                divLegendImage = domConstruct.create("div", { "class": "esriCTDivLegend" }, null);
-                width = legend.width ? legend.width < 5 ? 5 : legend.width : 20;
+                divLegendImage = domConstruct.create("div", { "class": "esriCTDivLegend" }, divLegendList);
                 height = legend.height ? legend.height < 5 ? 5 : legend.height : 20;
-                domConstruct.create("img", {
-                    "src": "data:image/gif;base64," + legend.imageData,
-                    "style": "width:" + width + "px; height:" + height + "px"
-                }, divLegendImage);
-                divLegendList.appendChild(divLegendImage);
+                width = legend.width ? legend.width < 5 ? 5 : legend.width : 20;
+                imageHeightWidth = { width: width + 'px', height: height + 'px' };
+                domConstruct.create("img", { "src": "data:image/gif;base64," + legend.imageData, "style": imageHeightWidth }, divLegendImage);
+                divLegendLabel = domConstruct.create("div", { "class": "esriCTDivLegendLabel" }, divLegendList);
                 if (legend.label) {
-                    divLegendLabel = domConstruct.create("div", { "class": "esriCTDivLegendLabel", "innerHTML": legend.label }, divLegendList);
+                    domAttr.set(divLegendLabel, "innerHTML", legend.label);
                 } else {
-                    divLegendLabel = domConstruct.create("div", { "class": "esriCTDivLegendLabel", "innerHTML": layerName }, divLegendList);
+                    domAttr.set(divLegendLabel, "innerHTML", layerName);
                 }
-                legendWidth = divLegendLabel.offsetWidth + legend.width + 60;
-                this.legendListWidth.push(legendWidth);
+                width = divLegendLabel.offsetWidth + width + 40;
+                this.legendListWidth.push(width);
             }
         }
     });

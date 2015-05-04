@@ -48,11 +48,15 @@ define([
             this.own(on(this.customButton, a11yclick, lang.hitch(this, function () {
                 this._hideSplashScreenDialog();
             })));
-            this.domNode = domConstruct.create("div", { "class": "esriCTSplashScreen" }, dojo.body());
+            this.domNode = domConstruct.create("div", { "class": "esriCTSplashScreen" }, document.body);
             this.domNode.appendChild(this.splashScreenScrollBarOuterContainer);
             domConstruct.create("div", { "class": "esriCTLoadingIndicator", "id": "splashscreenlodingIndicator" }, this.splashScreenScrollBarOuterContainer);
         },
 
+        /**
+        * Function to show splash screen dialog box on load
+        * @memberOf widgets/splashScreen/splashScreen
+        */
         showSplashScreenDialog: function () {
             var splashScreenContent;
             domStyle.set(this.domNode, "display", "block");
@@ -61,6 +65,10 @@ define([
             domAttr.set(splashScreenContent, "innerHTML", appGlobals.configData.SplashScreen.SplashScreenContent);
         },
 
+        /**
+        * Function to hide splash screen dialog box
+        * @memberOf widgets/splashScreen/splashScreen
+        */
         _hideSplashScreenDialog: function () {
             domStyle.set(this.domNode, "display", "none");
         }

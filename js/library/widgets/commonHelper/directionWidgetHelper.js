@@ -19,37 +19,26 @@
 define([
     "dojo/_base/declare",
     "dojo/dom-construct",
-    "dojo/dom-style",
-    "dojo/dom-attr",
     "dojo/_base/lang",
     "dojo/on",
     "dojo/_base/array",
-    "dojo/dom-class",
     "dojo/query",
     "dojo/string",
-    "esri/tasks/locator",
-    "esri/tasks/query",
     "dojo/Deferred",
     "dojo/promise/all",
-    "esri/tasks/QueryTask",
-    "esri/geometry",
-    "esri/graphic",
     "esri/geometry/Point",
     "dijit/_WidgetBase",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
-    "esri/tasks/BufferParameters",
     "dojo/_base/Color",
-    "esri/tasks/GeometryService",
-    "esri/symbols/SimpleLineSymbol",
-    "esri/symbols/SimpleFillSymbol",
-    "esri/symbols/SimpleMarkerSymbol",
     "esri/dijit/Directions",
     "esri/urlUtils",
     "esri/units",
-    "widgets/locator/locator"
+    "widgets/locator/locator",
+    "dojo/has",
+    "dojo/sniff"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, query, string, Locator, Query, Deferred, all, QueryTask, Geometry, Graphic, Point, _WidgetBase, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol, Directions, urlUtils, units, LocatorTool) {
+], function (declare, domConstruct, lang, on, array, query, string, Deferred, all, Point, _WidgetBase, sharedNls, topic, Color, Directions, urlUtils, units, LocatorTool, has) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase], {
@@ -64,17 +53,17 @@ define([
         _createDirectionWidget: function () {
             var address, queryObject, resultcontent, directionObject, queryURLLink;
             try {
-                //proxy setting for routeService
+                // Proxy setting for routeService
                 urlUtils.addProxyRule({
                     urlPrefix: appGlobals.configData.DrivingDirectionSettings.RouteServiceURL,
                     proxyUrl: appGlobals.configData.ProxyUrl
                 });
-                //proxy setting for GeometryService
+                // Proxy setting for GeometryService
                 urlUtils.addProxyRule({
                     urlPrefix: appGlobals.configData.GeometryService,
                     proxyUrl: appGlobals.configData.ProxyUrl
                 });
-                //creating esriDirection widget.
+                // Creating esriDirection widget.
                 this._esriDirectionsWidget = new Directions({
                     map: this.map,
                     directionsLengthUnits: units[appGlobals.configData.DrivingDirectionSettings.RouteUnit.toUpperCase()],
@@ -82,33 +71,33 @@ define([
                     dragging: false,
                     routeTaskUrl: appGlobals.configData.DrivingDirectionSettings.RouteServiceURL
                 });
-                //set geocoderOptions is autoComplete for ersiDirection widget
+                // Set geocoderOptions is autoComplete for ersiDirection widget
                 this._esriDirectionsWidget.options.geocoderOptions.autoComplete = true;
                 this._esriDirectionsWidget.autoSolve = false;
                 this._esriDirectionsWidget.deactivate();
-                //calling esriDirection widget
+                // Calling esriDirection widget
                 this._esriDirectionsWidget.startup();
-                // set the color of route in direction widget
+                // Set the color of route in direction widget
                 this._esriDirectionsWidget.options.routeSymbol.color = new Color([parseInt(appGlobals.configData.DrivingDirectionSettings.RouteColor.split(",")[0], 10), parseInt(appGlobals.configData.DrivingDirectionSettings.RouteColor.split(",")[1], 10), parseInt(appGlobals.configData.DrivingDirectionSettings.RouteColor.split(",")[2], 10), parseFloat(appGlobals.configData.DrivingDirectionSettings.Transparency.split(",")[0], 10)]);
-                //set the width of route in direction widget
+                // Set the width of route in direction widget
                 this._esriDirectionsWidget.options.routeSymbol.width = parseInt(appGlobals.configData.DrivingDirectionSettings.RouteWidth, 10);
-                // callback function for direction widget when route is started
+                // Callback function for direction widget when route is started
                 this.own(on(this._esriDirectionsWidget, "directions-start", lang.hitch(this, function (a) {
-                    // setting length of geocoders to 0 in the case of IE8 browser  because direction widget throwing error internally when it sort to geocoders.
-                    if (dojo.isIE === 8) {
+                    // Setting length of geocoders to 0 in the case of IE8 browser  because direction widget throwing error internally when it sort to geocoders.
+                    if (has("ie") === 8) {
                         a.target.geocoders.length = 0;
                     }
                 })));
-                // callback function for direction widget when route is finish
+                // Callback function for direction widget when route is finish
                 this.own(on(this._esriDirectionsWidget, "directions-finish", lang.hitch(this, function (a) {
                     this.disableInfoPopupOfDirectionWidget(this._esriDirectionsWidget);
                     if (this.locatorAddress !== "") {
                         address = this.locatorAddress;
-                        //check is start point is there then set title
+                        // Check is start point is there then set title
                     } else if (this.routeObject.StartPoint) {
                         address = sharedNls.titles.directionCurrentLocationText;
                     }
-                    //check if direction not null or null then set zoom level of route in share URL
+                    // Check if direction not null or null then set zoom level of route in share URL
                     if (this._esriDirectionsWidget.directions !== null) {
                         if (window.location.href.toString().split("$extentChanged=").length > 1) {
                             if (this.isExtentSet) {
@@ -117,7 +106,7 @@ define([
                         } else {
                             this._esriDirectionsWidget.zoomToFullRoute();
                         }
-                        //switch case for widget name
+                        // Switch case for widget name
                         switch (this.routeObject.WidgetName.toLowerCase()) {
                         case "activitysearch":
                             appGlobals.shareOptions.sharedGeolocation = null;
@@ -146,6 +135,7 @@ define([
                             topic.publish("hideProgressIndicator");
                             break;
                         case "unifiedsearch":
+                            appGlobals.shareOptions.sharedGeolocation = null;
                             appGlobals.shareOptions.infowindowDirection = null;
                             appGlobals.shareOptions.eventForListClicked = null;
                             queryURLLink = this.getQueryURLWithUnifiedSearch(this.routeObject.activityData, this.routeObject.EndPoint[this.routeObject.Index].distance);
@@ -160,7 +150,7 @@ define([
                             }
                             break;
                         case "geolocation":
-                            appGlobals.shareOptions.addressLocationDirectionActivity = null;
+                            // AppGlobals.shareOptions.addressLocationDirectionActivity = null;
                             appGlobals.shareOptions.eventForListClicked = null;
                             appGlobals.shareOptions.eventInfoWindowData = null;
                             appGlobals.shareOptions.infoRoutePoint = null;
@@ -209,6 +199,10 @@ define([
                             alert(sharedNls.errorMessages.routeComment);
                             topic.publish("hideProgressIndicator");
                             this.isRouteCreated = false;
+                        } else if (this.routeObject.WidgetName.toLowerCase() === "infoactivity" || this.routeObject.WidgetName.toLowerCase() === "infoevent") {
+                            alert(sharedNls.errorMessages.routeComment);
+                            topic.publish("hideProgressIndicator");
+                            this.isRouteCreated = false;
                         } else {
                             appGlobals.shareOptions.eventForListClicked = null;
                             this._executeWhenRouteNotCalculated(this.routeObject);
@@ -228,7 +222,7 @@ define([
         },
 
         /**
-        * function will show the event search
+        * Function will show the event search
         * @param {object} a contains route data
         * @param {string} address contains address of the route
         * @memberOf widgets/commonHelper/directionWidgetHelper
@@ -244,11 +238,10 @@ define([
             this.carouselContainer.showCarouselContainer();
             this.setSearchContent(this.routeObject.EndPoint, false, this.routeObject.QueryURL, this.routeObject.WidgetName, this.routeObject.activityData);
             this.highlightFeature(this.routeObject.EndPoint[this.routeObject.Index].geometry);
-            this.setCenterAt(this.routeObject.EndPoint[this.routeObject.Index].geometry);
             resultcontent = { "value": this.routeObject.Index };
             facilityObject = { "Feature": this.routeObject.EndPoint, "SelectedItem": resultcontent, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "activityData": this.routeObject.activityData };
             this.setFacility(facilityObject);
-            // checking for solve route if direction is not calculated then show address search box
+            // Checking for solve route if direction is not calculated then show address search box
             if (queryObject.SolveRoute[0].directions && queryObject.SolveRoute[0].directions.totalLength <= 0) {
                 this._createAddressSearchTextBox(queryObject, resultcontent);
             } else {
@@ -262,13 +255,13 @@ define([
         },
 
         /**
-        * create route for two points
+        * Create route for two points
         * @param {object} routeObject contains Start point, End point, widget name and query URL
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         showRoute: function (routeObject) {
             var endPointGeometery, startPointGeometery, geoArray, queryObject;
-            // if variable is set to false directions cannot be enabled
+            // If variable is set to false directions cannot be enabled
             topic.publish("showProgressIndicator");
             routeObject.EndPoint = this.removeNullValue(routeObject.EndPoint);
             // Remove ripple only when routeObject's widgetName is neither InfoActivity nor InfoEvent
@@ -288,19 +281,19 @@ define([
             if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
                 // For clearing the direction from map and div.
                 this._esriDirectionsWidget.clearDirections();
-                // function for updating stops and getting direction from direction widget
+                // Function for updating stops and getting direction from direction widget
                 this._esriDirectionsWidget.updateStops(geoArray).then(lang.hitch(this, function () {
-                    this._esriDirectionsWidget.getDirections().then(lang.hitch(this, function () {
+                    this._esriDirectionsWidget.getDirections().then(lang.hitch(this, function (e) {
                         topic.publish("hideProgressIndicator");
                     }), lang.hitch(this, function (err) {
-                        // when route is not calculated by direction widget then show alert message and show results in pod
+                        // When route is not calculated by direction widget then show alert message and show results in pod
                         alert(sharedNls.errorMessages.routeComment);
                         topic.publish("executeWhenRouteNotCalculated", this.routeObject);
                         this.isRouteCreated = false;
                         topic.publish("hideProgressIndicator");
                     }));
                 }), lang.hitch(this, function (err) {
-                    // when route is not calculated by direction widget then show alert message and show results in pod
+                    // When route is not calculated by direction widget then show alert message and show results in pod
                     alert(sharedNls.errorMessages.routeComment);
                     topic.publish("executeWhenRouteNotCalculated", this.routeObject);
                     this.isRouteCreated = false;
@@ -314,12 +307,12 @@ define([
         },
 
         /**
-        * query on Comment Layer
+        * Query on Comment Layer
         * @param {object} queryObject Contains FeatureData, Index, Layer URL, WidgetName, Address, IsRouteCreated{boolean}
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         queryCommentLayer: function (queryObject) {
-            var queryTask, errorMessage, foreignKeyField, primaryKeyField, esriQuery, deferredArray = [], commentArray = [], k, j, featureId, i, searchSettingsData;
+            var queryTask, errorMessage, foreignKeyField, primaryKeyField, esriQuery, queryString, deferredArray = [], commentArray = [], k, j, featureId, i, searchSettingsData;
             try {
                 searchSettingsData = [];
                 for (i = 0; i < appGlobals.operationLayerSettings.length; i++) {
@@ -328,24 +321,33 @@ define([
                         break;
                     }
                 }
-                // looping activity search setting for getting comments
+                if (searchSettingsData.length === 0) {
+                    this._switchCaseForRoute(queryObject, commentArray, featureId, null);
+                }
+                if (appGlobals.configData.ActivitySearchSettings && appGlobals.configData.ActivitySearchSettings[0].PrimaryKeyForActivity && this.primaryFieldType) {
+                    queryObject.primaryFieldType = this.primaryFieldType;
+                }
+                // Looping activity search setting for getting comments
                 array.forEach(searchSettingsData, (lang.hitch(this, function (SearchSettings) {
                     if (appGlobals.configData.ActivitySearchSettings[0].CommentsSettings.QueryURL !== "") {
                         queryTask = new esri.tasks.QueryTask(SearchSettings.CommentsSettings.QueryURL);
                         primaryKeyField = this.getKeyValue(SearchSettings.PrimaryKeyForActivity) || "";
                         foreignKeyField = this.getKeyValue(SearchSettings.CommentsSettings.ForeignKeyFieldForComment) || "";
-                        if (primaryKeyField !== "" && foreignKeyField !== "") {
+                        if (primaryKeyField !== "" && foreignKeyField !== "" && queryObject.FeatureData) {
                             esriQuery = new esri.tasks.Query();
                             esriQuery.outFields = ["*"];
                             esriQuery.returnGeometry = true;
-                            // Checking if queryObject has feature data
-                            if (queryObject.FeatureData) {
-                                if (queryObject.WidgetName.toLowerCase() === "infoactivity") {
-                                    esriQuery.where = foreignKeyField + "=" + queryObject.FeatureData[primaryKeyField];
-                                    featureId = queryObject.FeatureData[primaryKeyField];
-                                } else {
-                                    esriQuery.where = foreignKeyField + "=" + queryObject.FeatureData[queryObject.Index].attributes[primaryKeyField];
-                                }
+                            if (queryObject.WidgetName.toLowerCase() === "infoactivity") {
+                                queryString = this.getQueryStringForComment(this.commentLayerResponse, foreignKeyField, queryObject.primaryFieldType);
+                                esriQuery.where = queryString === "" ? "" : string.substitute(queryString, [foreignKeyField, queryObject.FeatureData[primaryKeyField]]);
+                                featureId = queryObject.FeatureData[primaryKeyField];
+                                this.queryString = queryString;
+                            } else {
+                                queryString = this.getQueryStringForComment(this.commentLayerResponse, foreignKeyField, queryObject.primaryFieldType);
+                                esriQuery.where = queryString === "" ? "" : string.substitute(queryString, [foreignKeyField, queryObject.FeatureData[queryObject.Index].attributes[primaryKeyField]]);
+                                this.queryString = queryString;
+                            }
+                            if (esriQuery.where !== "") {
                                 // Setting deferred array
                                 deferredArray.push(queryTask.execute(esriQuery, lang.hitch(this, this._executeQueryTask)));
                                 // Calling deferred array then to do further query.
@@ -368,13 +370,16 @@ define([
                                         }
                                         this._switchCaseForRoute(queryObject, commentArray, featureId);
                                     }
-                                }), function (err) {
+                                }), lang.hitch(this, function (err) {
                                     commentArray = [];
                                     errorMessage = sharedNls.errorMessages.errorInQueringLayer;
                                     // Creating other pod if comment is unable to get, due to some issue.
                                     this._switchCaseForRoute(queryObject, commentArray, featureId, errorMessage);
                                     topic.publish("hideProgressIndicator");
-                                });
+                                }));
+                            } else {
+                                errorMessage = "";
+                                this._switchCaseForRoute(queryObject, commentArray, featureId, errorMessage);
                             }
                         } else {
                             errorMessage = sharedNls.errorMessages.fieldNotConfigured;
@@ -394,7 +399,123 @@ define([
         },
 
         /**
-        * this function calculates route bassed on wedget click
+        * This function is used to get query string for comment layer
+        * @param {object} commentLayerResponse contains comment Layer's Response
+        * @param {string} keyField contains field name
+        * @param {string} primaryFieldType contains the primary field type
+        * @memberOf widgets/commonHelper/InfoWindowHelper
+        */
+        getQueryStringForComment: function (commentLayerResponse, keyField, primaryFieldType) {
+            var queryString, foreignKeyField;
+            // Function to get field type
+            foreignKeyField = this.getTypeOfField(commentLayerResponse, keyField);
+            queryString = "";
+            switch (foreignKeyField) {
+            case "string":
+                switch (primaryFieldType) {
+                case "string":
+                    queryString = "${0} =" + "'" + "${1}" + "'";
+                    break;
+                case "number":
+                    queryString = "${0} =" + "'" + "${1}" + "'";
+                    break;
+                case "objectID":
+                    queryString = "${0} =" + "'" + "${1}" + "'";
+                    break;
+                case "GUID":
+                    queryString = "${0} =" + "'" + "${1}" + "'";
+                    break;
+                case "GlobalID":
+                    queryString = "${0} =" + "'" + "${1}" + "'";
+                    break;
+                default:
+                    queryString = "";
+                }
+                break;
+            case "number":
+                switch (primaryFieldType) {
+                case "number":
+                    queryString = "${0} =" + "${1}";
+                    break;
+                case "objectID":
+                    queryString = "${0} =" + "${1}";
+                    break;
+                default:
+                    queryString = "";
+                }
+                break;
+            case "objectID":
+                switch (primaryFieldType) {
+                case "number":
+                    queryString = "${0} =" + "${1}";
+                    break;
+                default:
+                    queryString = "";
+                }
+                break;
+            case "GUID":
+                switch (primaryFieldType) {
+                case "GUID":
+                    queryString = "${0} =" + "'" + "${1}" + "'";
+                    break;
+                case "GlobalID":
+                    queryString = "${0} =" + "'" + "${1}" + "'";
+                    break;
+                default:
+                    queryString = "";
+                }
+                break;
+            default:
+                queryString = "";
+            }
+            return queryString;
+        },
+
+        /**
+        * This function is used to get type of field
+        * @param {object} commentLayerResponse contains comment Layer's Response
+        * @param {string} keyField contains field name
+        * @return {string} foreignKeyField contains field value type
+        * @memberOf widgets/commonHelper/InfoWindowHelper
+        */
+        getTypeOfField: function (commentLayerResponse, keyField) {
+            var keyFieldType, fieldType, j;
+            for (j = 0; j < commentLayerResponse.fields.length; j++) {
+                if (commentLayerResponse.fields[j].name === keyField) {
+                    fieldType = commentLayerResponse.fields[j].type;
+                    break;
+                }
+            }
+            switch (fieldType) {
+            case "esriFieldTypeSmallInteger":
+                keyFieldType = "number";
+                break;
+            case "esriFieldTypeInteger":
+                keyFieldType = "number";
+                break;
+            case "esriFieldTypeSingle":
+                keyFieldType = "number";
+                break;
+            case "esriFieldTypeString":
+                keyFieldType = "string";
+                break;
+            case "esriFieldTypeOID":
+                keyFieldType = "objectID";
+                break;
+            case "esriFieldTypeGUID":
+                keyFieldType = "GUID";
+                break;
+            case "esriFieldTypeGlobalID":
+                keyFieldType = "GlobalID";
+                break;
+            default:
+                keyFieldType = "none";
+            }
+            return keyFieldType;
+        },
+
+        /**
+        * This function calculates route bassed on wedget click
         * @param {object} queryObject Contains FeatureData
         * @param {array} commentArray Contains comments data
         * @param {string} featureId Contains feature Id
@@ -403,7 +524,7 @@ define([
         _switchCaseForRoute: function (queryObject, commentArray, featureId, errorMessage) {
             var resultcontent;
             switch (queryObject.WidgetName.toLowerCase()) {
-            // If it is coming from activity search then set bottom pod's data
+            // If it is comming from activity search then set bottom pod's data
             case "activitysearch":
                 topic.publish("showProgressIndicator");
                 resultcontent = { "value": queryObject.Index };
@@ -424,7 +545,7 @@ define([
                 topic.publish("hideProgressIndicator");
                 break;
             case "searchedfacility":
-                // If it is coming from click on search pod item then set bottom pod's data
+                // If it is comming from click on search pod item then set bottom pod's data
                 topic.publish("showProgressIndicator");
                 this.highlightFeature(queryObject.FeatureData[queryObject.Index].geometry);
                 if (!queryObject.IsRouteCreated) {
@@ -439,7 +560,7 @@ define([
                 topic.publish("hideProgressIndicator");
                 break;
             case "unifiedsearch":
-                // If it is coming from unified search then set bottom pod's data
+                // If it is comming from unified search then set bottom pod's data
                 topic.publish("showProgressIndicator");
                 resultcontent = { "value": 0 };
                 this.carouselContainer.removeAllPod();
@@ -460,12 +581,14 @@ define([
                 this.widgetName = true;
                 break;
             case "geolocation":
-                // If it is coming from geolocation search widget then set bottom pod's data
+                // If it is comming from geolocation search widget then set bottom pod's data
                 topic.publish("showProgressIndicator");
                 resultcontent = { "value": 0 };
                 this.carouselContainer.showCarouselContainer();
                 this.carouselContainer.expandCarousel();
-                this.highlightFeature(queryObject.FeatureData[0].geometry);
+                if (dijit.registry.byId("Geolocation")) {
+                    this.highlightFeature(queryObject.FeatureData[0].geometry);
+                }
                 if (!queryObject.IsRouteCreated) {
                     this.setCenterAt(queryObject.FeatureData[queryObject.Index].geometry);
                 }
@@ -478,7 +601,7 @@ define([
                 topic.publish("hideProgressIndicator");
                 break;
             case "infoactivity":
-                // If it is coming from info window's direction widget  search then set bottom pod's data
+                // If it is comming from info window's direction widget  search then set bottom pod's data
                 resultcontent = { "value": 0 };
                 if (commentArray !== null) {
                     this._setInfoWindowComment(commentArray, featureId, queryObject, errorMessage);
@@ -491,14 +614,14 @@ define([
         },
 
         /**
-        * set the carousel container state (hide/show) in share case.
+        * Set the carousel container state (hide/show) in share case.
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         _setCrouselContainerInSharedCase: function () {
             // Checking for bottom pod's status in the case of share
             if (window.location.href.toString().split("$isShowPod=").length > 1) {
                 if (window.location.href.toString().split("$isShowPod=")[1].split("$")[0].toString() === "false") {
-                    // collapsing down the carousel container
+                    // Collapsing down the carousel container
                     if (this.carouselContainer) {
                         this.carouselContainer.collapseCarousel();
                     }
@@ -513,7 +636,7 @@ define([
         },
 
         /**
-        * execute query task for Comment Layer
+        * Execute query task for Comment Layer
         * @param {object} relatedRecords Contains Comment layer URL
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
@@ -521,9 +644,9 @@ define([
             var featureSet, i, deferred, features = [];
             deferred = new Deferred();
             featureSet = new esri.tasks.FeatureSet();
-            // check if relatedRecords contains features or not
+            // Check if relatedRecords contains features or not
             if (relatedRecords.features.length > 0) {
-                //loop for the features of comment layer and push the data into features
+                // Loop for the features of comment layer and push the data into features
                 for (i = 0; i < relatedRecords.features.length; i++) {
                     if (relatedRecords.features.hasOwnProperty(i)) {
                         features.push(relatedRecords.features[i]);
@@ -535,7 +658,7 @@ define([
         },
 
         /**
-        * set the error message in comments carousel pod in case of error
+        * Set the error message in comments carousel pod in case of error
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         setCommentForError: function (errorMessage) {
@@ -552,22 +675,22 @@ define([
         },
 
         /**
-        * execute this function when route is not calculated due to any error
+        * Execute this function when route is not calculated due to any error
         * @param{object} routeObject contains route information
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         _executeWhenRouteNotCalculated: function (routeObject) {
-            // check if widgetName is activitysearch
+            // Check if widgetName is activitysearch
             if (routeObject.WidgetName.toLowerCase() === "activitysearch") {
                 this.removeBuffer();
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, 0);
             }
-            // check if widgetName is searchedfacility
+            // Check if widgetName is searchedfacility
             if (routeObject.WidgetName.toLowerCase() === "searchedfacility") {
                 this.removeBuffer();
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
             }
-            // check if widgetName is event
+            // Check if widgetName is event
             if (routeObject.WidgetName.toLowerCase() === "event") {
                 this.removeBuffer();
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
@@ -595,7 +718,7 @@ define([
             this.setFacility(facilityObject);
             // Checking for Driving direction setting is enabled
             if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
-                //check whether the solve route is null
+                // Check whether the solve route is null
                 if (queryObject.SolveRoute === null) {
                     this._createAddressSearchTextBox(queryObject, resultcontent);
                 } else {
@@ -608,7 +731,7 @@ define([
                 }
             }
             this.setGallery(queryObject, resultcontent);
-            // if comment is not null, set comment in comment pod
+            // If comment is not null, set comment in comment pod
             if (commentArray !== null) {
                 this.setComment(queryObject.FeatureData, commentArray, resultcontent, queryObject.QueryURL);
             } else {
@@ -636,7 +759,7 @@ define([
                     locatorSettings: appGlobals.configData.LocatorSettings,
                     configSearchSettings: appGlobals.configData.SearchSettings
                 };
-                // getting the key value from search display field from config file
+                // Getting the key value from search display field from config file
                 searchSetting = this.getSearchSetting(queryObject.QueryURL);
                 searchContenData = this.getKeyValue(searchSetting.SearchDisplayFields);
                 divHeader = domConstruct.create("div", {}, divDirectioncontent);
@@ -644,11 +767,11 @@ define([
                 activityMapPoint = this.map.getLayer(locatorParamsForCarouselContainer.graphicsLayerId);
                 locatorObjectForCarouselContainer = new LocatorTool(locatorParamsForCarouselContainer);
                 locatorObjectForCarouselContainer.candidateClicked = lang.hitch(this, function (graphic) {
-                    // checking for selectedGraphic from locator
+                    // Checking for selectedGraphic from locator
                     if (locatorObjectForCarouselContainer && locatorObjectForCarouselContainer.selectedGraphic) {
                         appGlobals.shareOptions.addressLocationDirectionActivity = locatorObjectForCarouselContainer.selectedGraphic.geometry.x.toString() + "," + locatorObjectForCarouselContainer.selectedGraphic.geometry.y.toString();
                     }
-                    // check graphic address
+                    // Check graphic address
                     if (graphic && graphic.attributes && graphic.attributes.address) {
                         this.locatorAddress = graphic.attributes.address;
                     }
@@ -657,7 +780,7 @@ define([
                     }
                     this._clearBuffer();
                     this.removeGeolocationPushPin();
-                    // checking for graphic layer for showing results in pod
+                    // Checking for graphic layer for showing results in pod
                     if (graphic && graphic.layer) {
                         this.selectedGraphic = graphic;
                         if (queryObject.WidgetName.toLowerCase() === "unifiedsearch" || queryObject.WidgetName.toLowerCase() === "geolocation") {
@@ -675,13 +798,16 @@ define([
                         } else {
                             routeObject = { "StartPoint": activityMapPoint.graphics[0], "EndPoint": queryObject.FeatureData, "Index": queryObject.Index, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL };
                         }
+                        appGlobals.shareOptions.addressLocationDirectionActivity = activityMapPoint.graphics[0].geometry.x.toString() + "," + activityMapPoint.graphics[0].geometry.y.toString();
                         this.showRoute(routeObject);
+
                     }
                 });
-                // check if "addressLocationDirectionActivity" is there in share URL or not.
+                // Check if "addressLocationDirectionActivity" is there in share URL or not.
                 if (window.location.href.toString().split("$addressLocationDirectionActivity=").length > 1) {
                     mapPoint = new Point(window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[0], window.location.href.toString().split("$addressLocationDirectionActivity=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
                     locatorObjectForCarouselContainer._locateAddressOnMap(mapPoint);
+                    this._clearBuffer();
                     routeObject = { "StartPoint": activityMapPoint.graphics[0], "EndPoint": queryObject.FeatureData, "Index": queryObject.Index, "WidgetName": queryObject.WidgetName, "QueryURL": queryObject.QueryURL };
                     this.showRoute(routeObject);
                 }
@@ -695,7 +821,7 @@ define([
         */
         _createPodWithoutCommentLayer: function (queryObject) {
             var resultcontent;
-            // check if widgetName is activitysearch.
+            // Check if widgetName is activitysearch.
             if (queryObject.WidgetName.toLowerCase() === "activitysearch") {
                 topic.publish("showProgressIndicator");
                 resultcontent = { "value": 0 };
@@ -710,7 +836,7 @@ define([
                 this.setCommentForError();
                 topic.publish("hideProgressIndicator");
             }
-            //check if widgetName is searchedfacility.
+            // Check if widgetName is searchedfacility.
             if (queryObject.WidgetName.toLowerCase() === "searchedfacility") {
                 topic.publish("showProgressIndicator");
                 this.highlightFeature(queryObject.FeatureData[queryObject.Index].geometry);
@@ -723,7 +849,7 @@ define([
         },
 
         /**
-        * create route for multiple points
+        * Create route for multiple points
         * @param {object} contains Start point, End point, widget name and query URL
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
@@ -750,10 +876,11 @@ define([
         },
 
         /**
-        * get the feature within buffer and sort it in ascending order.
+        * Get the feature within buffer and sort it in ascending order.
         * @param {object} featureSetObject Contains Feature
-        * @param {object} QueryURL Contains layer URL
+        * @param {string} QueryURL Contains layer URL
         * @param {string} widgetName Contains name of widget
+        * @param {bool} featureClick
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         _executeQueryForFeatures: function (featureSetObject, QueryURL, widgetName, featureClick) {
@@ -842,7 +969,7 @@ define([
                             }
                         }
                         if (!isPreLoaded) {
-                            // appGlobals.shareOptions.eventRoutePoint = null;
+                            // AppGlobals.shareOptions.eventRoutePoint = null;
                             this.removeLocatorPushPin();
                             topic.publish("hideProgressIndicator");
                             this.removeRouteGraphichOfDirectionWidget();
@@ -850,11 +977,13 @@ define([
                             this.executeWithoutGeolocation(this.featureSetWithoutNullValue, QueryURL, widgetName, 0);
                         }
                     });
-                } else { //calling error message when geoloation widget is not configured.
+                } else {
+                    // Calling error message when geoloation widget is not configured.
                     topic.publish("hideProgressIndicator");
                     alert(sharedNls.errorMessages.geolocationWidgetNotFoundMessage);
                 }
-            } else { //calling error message when geolocation is not supported
+            } else {
+                // Calling error message when geolocation is not supported
                 topic.publish("hideProgressIndicator");
                 alert(sharedNls.errorMessages.activitySearchGeolocationText);
                 appGlobals.shareOptions.eventRoutePoint = null;
@@ -870,8 +999,9 @@ define([
         /**
         * Execute when geolocation is not found.
         * @param {object} featureset Contains information of feature
-        * @param {object} Query URL of the layer
+        * @param {string} Query URL of the layer
         * @param {string} widget name
+        * @param {number} index
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         executeWithoutGeolocation: function (featureSetWithoutNullValue, QueryURL, widgetName, index) {
@@ -1002,7 +1132,7 @@ define([
             queryObject = { "FeatureData": featureSetWithoutNullValue, "WidgetName": widgetName, "QueryURL": QueryURL, "activityData": null };
             this.setGallery(queryObject, resultcontent);
             this.removeCommentPod();
-            // function for share in the case of address searh from activity in bottom pod.
+            // Function for share in the case of address searh from activity in bottom pod.
             setTimeout(lang.hitch(this, function () {
                 // If it is a share url and direction is calculated from bottom pod then show route for the same
                 if (window.location.href.toString().split("$addressLocationDirectionActivity=").length > 1 && window.location.href.toString().split("$addressLocationDirectionActivity=")[1].substring(0, 18) !== "$sharedGeolocation") {

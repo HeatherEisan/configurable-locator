@@ -1,4 +1,4 @@
-﻿/*global define,alert */
+﻿/*global define,alert,console */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /*
  | Copyright 2013 Esri
@@ -56,7 +56,7 @@ define([
                     }
                 }, function (error) {
                     deferred.resolve(urlStr);
-                    alert(sharedNls.errorMessages.unableToShareURL);
+                    console.log(sharedNls.errorMessages.unableToShareURL);
                 });
             } catch (ex) {
                 deferred.resolve(urlStr);

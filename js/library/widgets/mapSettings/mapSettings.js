@@ -1,4 +1,4 @@
-﻿/*global define,dojo,dojoConfig,alert,esri,appGlobals */
+﻿/*global define,dojo,dojoConfig,alert,console,esri,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
  | Copyright 2013 Esri
@@ -66,7 +66,7 @@ define([
         geoLocationGraphicsLayerID: "geoLocationGraphicsLayer",           // Geolocation graphics layer id
         locatorGraphicsLayerID: "esriGraphicsLayerMapSettings",           // Locator graphics layer id
         /**
-        * initialize map object
+        * Initialize map object
         *
         * @class
         * @name widgets/mapSettings/mapSettings
@@ -74,18 +74,17 @@ define([
         postCreate: function () {
             var mapDeferred, infoWindowPoint, point;
             appGlobals.operationLayerSettings = [];
-            //subscribing function to set the position of infowindow on map
+            // Subscribing function to set the position of infowindow on map
             topic.subscribe("setInfoWindowOnMap", lang.hitch(this, function (infoTitle, screenPoint, infoPopupWidth, infoPopupHeight) {
                 this._onSetInfoWindowPosition(infoTitle, screenPoint, infoPopupWidth, infoPopupHeight);
             }));
-            //subscribing value for extent
+            // Subscribing value for extent
             topic.subscribe("extentSetValue", lang.hitch(this, function (value) {
                 this.isExtentSet = value;
             }));
-
-            //subscribing function to hide infowindow.
+            // Subscribing function to hide infowindow.
             topic.subscribe("hideInfoWindow", lang.hitch(this, function () {
-                //check whether "mapClickPoint" is in the share URL or not.
+                // Check whether "mapClickPoint" is in the share URL or not.
                 if (window.location.href.toString().split("$mapClickPoint=").length > 1) {
                     if (this.isExtentSet) {
                         this.infoWindowPanel.hide();
@@ -100,7 +99,7 @@ define([
                     this.isInfowindowHide = true;
                 }
             }));
-            //subscribing function for show infowindow on map
+            // Subscribing function for show infowindow on map
             topic.subscribe("showInfoWindowOnMap", lang.hitch(this, function (point) {
                 this._showInfoWindowOnMap(point);
             }));
@@ -108,7 +107,7 @@ define([
                 this._extentFromPoint(mapPoint);
             }));
             /**
-            * load map
+            * Load map
             * @param {string} appGlobals.configData.BaseMapLayers Basemap settings specified in configuration file
             */
             appGlobals.shareOptions.selectedBasemapIndex = 0;
@@ -122,17 +121,14 @@ define([
                 mapDeferred.then(lang.hitch(this, function (response) {
                     this.map = response.map;
                     appGlobals.shareOptions.selectedBasemapIndex = null;
-                    if (response.itemInfo.itemData.baseMap.baseMapLayers) {
-                        this._setBasemapLayerId(response.itemInfo.itemData.baseMap.baseMapLayers);
-                    }
+
                     topic.publish("filterRedundantBasemap", response.itemInfo);
                     this._generateRequiredKeyField(response.itemInfo.itemData.operationalLayers);
                     topic.publish("setMap", this.map);
-                    //topic.publish("hideProgressIndicator");
                     this._mapOnLoad();
-                    // function for getting web map data
+                    // Function for getting web map data
                     this._fetchWebMapData(response);
-                    // function for share in the case of address search from unified search
+                    // Function for share in the case of address search from unified search
                     setTimeout(lang.hitch(this, function () {
                         if (window.location.toString().split("$address=").length > 1) {
                             topic.publish("addressSearch");
@@ -168,15 +164,15 @@ define([
         },
 
         /**
-        * creating webmap layer list
+        * Creating webmap layer list
         * @param{object} layers contain the layer information
         * @memberOf widgets/mapSettings/mapSettings
         */
         _createWebmapLegendLayerList: function (layers) {
             var i, webMapLayers = [], webmapLayerList = {}, hasLayers = false;
-            // looping for layer for getting layer object
+            // Looping for layer for getting layer object
             for (i = 0; i < layers.length; i++) {
-                // checking for layer visibility
+                // Checking for layer visibility
                 if (layers[i].visibility) {
                     if (layers[i].layerDefinition && layers[i].layerDefinition.drawingInfo) {
                         webmapLayerList[layers[i].url] = layers[i];
@@ -188,39 +184,8 @@ define([
             }
             this._addLayerLegendWebmap(webMapLayers, webmapLayerList, hasLayers);
         },
-
         /**
-        * set default id for basemaps
-        * @memberOf widgets/mapSettings/mapSettings
-        */
-        _setBasemapLayerId: function (baseMapLayers) {
-            var i = 0, defaultId = "defaultBasemap";
-            if (baseMapLayers.length === 1) {
-                this._setBasemapId(baseMapLayers[0], defaultId);
-            } else {
-                for (i = 0; i < baseMapLayers.length; i++) {
-                    this._setBasemapId(baseMapLayers[i], defaultId + i);
-                }
-            }
-        },
-
-        /**
-        * set default id for each basemap of webmap
-        * @memberOf widgets/mapSettings/mapSettings
-        */
-        _setBasemapId: function (basmap, defaultId) {
-            var layerIndex;
-            this.map.getLayer(basmap.id).id = defaultId;
-            this.map._layers[defaultId] = this.map.getLayer(basmap.id);
-            layerIndex = array.indexOf(this.map.layerIds, basmap.id);
-            if (defaultId !== basmap.id) {
-                delete this.map._layers[basmap.id];
-            }
-            this.map.layerIds[layerIndex] = defaultId;
-        },
-
-        /**
-        * create operation layer object depending on the default visibility of layer and populate in an array
+        * Create operation layer object depending on the default visibility of layer and populate in an array
         * @param{object} layers contain the layer information
         * @param{object} layerTable contain the layer table information information
         * @memberOf widgets/mapSettings/mapSettings
@@ -242,24 +207,24 @@ define([
             if (layer.layerObject.geometryType === "esriGeometryPoint") {
                 this.map.reorderLayer(layer.layerObject, array.indexOf(this.map.graphicsLayerIds, this.tempBufferLayerId));
             }
-            //create an object of operation layer
+            // Create an object of operation layer
             if (layer.layerObject.layerInfos) {
-                //layer is added as dynamic layer in the webmap
+                // Layer is added as dynamic layer in the webmap
                 for (i = 0; i < layer.layerObject.layerInfos.length; i++) {
                     operationLayer = {};
-                    //check the operation layer default visibility
+                    // Check the operation layer default visibility
                     if (layer.layerObject.layerInfos[i].defaultVisibility) {
-                        //set the operation layer title
+                        // Set the operation layer title
                         operationLayer.layerTitle = lang.trim(layer.title);
-                        //set the operation layer ID
+                        // Set the operation layer ID
                         operationLayer.layerID = layer.layerObject.layerInfos[i].id;
-                        //set the operation layer service URL
+                        // Set the operation layer service URL
                         if (isNaN(lastIndex) || lastIndex === "") {
                             operationLayer.layerURL = url + layer.layerObject.layerInfos[i].id;
                         } else {
                             operationLayer.layerURL = url;
                         }
-                        //set searchSetting for operation layer if available
+                        // Set searchSetting for operation layer if available
                         for (j = 0; j < searchSettings.length; j++) {
                             if (lang.trim(layer.title) === searchSettings[j][0].Title && layer.layerObject.layerInfos[i].id === parseInt((searchSettings[j][0].QueryLayerId), 10)) {
                                 searchSettings[j].QueryURL = operationLayer.layerURL;
@@ -278,15 +243,15 @@ define([
                     }
                 }
             } else {
-                //layer is added as feature layer in webmap
+                // Layer is added as feature layer in webmap
                 operationLayer = {};
-                //set the operation layer title
+                // Set the operation layer title
                 operationLayer.layerTitle = lang.trim(layer.title);
-                //set the operation layer ID
+                // Set the operation layer ID
                 operationLayer.layerID = layer.layerObject.layerId;
-                //set the operation layer service URL
+                // Set the operation layer service URL
                 operationLayer.layerURL = layer.url;
-                //set searchSetting for operation layer if available
+                // Set searchSetting for operation layer if available
                 for (j = 0; j < searchSettings.length; j++) {
                     if (lang.trim(layer.title) === searchSettings[j][0].Title && layer.layerObject.layerId === parseInt((searchSettings[j][0].QueryLayerId), 10)) {
                         searchSettings[j].QueryURL = layer.url;
@@ -306,15 +271,15 @@ define([
         },
 
         /**
-        * store infoWindow fields in an array to display in infoWindow content
+        * Store infoWindow fields in an array to display in infoWindow content
         * @param{object} layerInfo contain the layer information
         * @param{object} infoWindowData info window data
         * @memberOf widgets/mapSettings/mapSettings
         */
         _createWebMapInfoWindowData: function (layerInfo, infoWindowData) {
             var i, infoWindowHeaderField, field;
-            //set infowWindow header field with title and attribute
-            if (layerInfo.popupInfo.title.split("{").length > 1) {
+            // Set infowWindow header field with title and attribute
+            if (layerInfo.popupInfo && layerInfo.popupInfo.title.split("{").length > 1) {
                 infoWindowHeaderField = lang.trim(layerInfo.popupInfo.title.split("{")[0]) + " ";
                 for (i = 1; i < layerInfo.popupInfo.title.split("{").length; i++) {
                     infoWindowHeaderField += "${" + lang.trim(layerInfo.popupInfo.title.split("{")[i]);
@@ -327,7 +292,7 @@ define([
                 }
             }
             infoWindowData.infoWindowHeader = infoWindowHeaderField;
-            //populate infoWindow fieldname and display text
+            // Populate infoWindow fieldname and display text
             infoWindowData.infoWindowfields = [];
             for (field in layerInfo.popupInfo.fieldInfos) {
                 if (layerInfo.popupInfo.fieldInfos.hasOwnProperty(field)) {
@@ -343,7 +308,7 @@ define([
         },
 
         /**
-        * this function helps to fetch web map data from web map
+        * This function helps to fetch web map data from web map
         * @param{object} response contain the layer information
         * @memberOf widgets/mapSettings/mapSettings
         */
@@ -355,21 +320,20 @@ define([
             webMapDetails = response.itemInfo.itemData;
             appGlobals.configData.OperationalLayers = [];
             this.operationalLayers = webMapDetails.operationalLayers;
-            //for (i = 0; i < webMapDetails.operationalLayers.length; i++) {
             array.forEach(webMapDetails.operationalLayers, lang.hitch(this, function (LayerData, i) {
                 if (webMapDetails.operationalLayers[i].visibility) {
-                    //create operation layers array
+                    // Create operation layers array
                     this._createWebmapOperationLayer(webMapDetails.operationalLayers[i], layerTable);
-                    //set infowWindowData for each operation layer
+                    // Set infowWindowData for each operation layer
                     if (webMapDetails.operationalLayers[i].layers) {
                         defArr = [];
-                        //Fetching infopopup data in case the layers are added as dynamic layers in the webmap
+                        // Fetching infopopup data in case the layers are added as dynamic layers in the webmap
                         for (j = 0; j < webMapDetails.operationalLayers[i].layers.length; j++) {
                             layerInfo = webMapDetails.operationalLayers[i].layers[j];
-                            //check the operation layer before creating the infoWindow data
+                            // Check the operation layer before creating the infoWindow data
                             for (k = 0; k < appGlobals.operationLayerSettings.length; k++) {
                                 if (appGlobals.operationLayerSettings[k].layerURL === webMapDetails.operationalLayers[i].url + "/" + layerInfo.id) {
-                                    //set infoWindow content to operation layer
+                                    // Set infoWindow content to operation layer
                                     appGlobals.operationLayerSettings[k].infoWindowData = {};
                                     layerURL = webMapDetails.operationalLayers[i].url + "/" + webMapDetails.operationalLayers[i].layers[j].id;
                                     defArr.push(this._loadFeatureLayer(layerURL, webMapDetails.operationalLayers[i].layers[j], k));
@@ -390,12 +354,12 @@ define([
                             }));
                         }));
                     } else if (webMapDetails.operationalLayers[i].popupInfo) {
-                        //Fetching infopopup data in case the layers are added as feature layers in the webmap
+                        // Fetching infopopup data in case the layers are added as feature layers in the webmap
                         layerInfo = webMapDetails.operationalLayers[i];
-                        //check the operation layer before creating the infoWindow data
+                        // Check the operation layer before creating the infoWindow data
                         for (k = 0; k < appGlobals.operationLayerSettings.length; k++) {
                             if (appGlobals.operationLayerSettings[k].layerURL === webMapDetails.operationalLayers[i].url) {
-                                //set infoWindow content to operation layer
+                                // Set infoWindow content to operation layer
                                 appGlobals.operationLayerSettings[k].infoWindowData = {};
                                 appGlobals.operationLayerSettings[k].layerDetails = webMapDetails.operationalLayers[i];
                                 break;
@@ -407,6 +371,13 @@ define([
             }));
         },
 
+        /**
+        * This function is to load feature layers on the map from config
+        * @param{string} contain the layer url
+        * @param{object} response contain the layer information
+        * @param{int} contains index of the layer
+        * @memberOf widgets/mapSettings/mapSettings
+        */
         _loadFeatureLayer: function (layerURL, layerObject, k) {
             var fLayer, param = {}, def = new Deferred();
             fLayer = new FeatureLayer(layerURL);
@@ -421,7 +392,7 @@ define([
         },
 
         /**
-        * map onclick event
+        * Map onclick event
         * @memberOf widgets/mapSettings/mapSettings
         */
         _mapEvents: function () {
@@ -455,19 +426,19 @@ define([
         },
 
         /**
-        * initialize map object when map is loading
+        * Initialize map object when map is loading
         * @memberOf widgets/mapSettings/mapSettings
         */
         _mapOnLoad: function () {
             var home, mapDefaultExtent, graphicsLayer, buffergraphicsLayer, extent, routegraphicsLayer, highlightfeature, imgSource, imgCustomLogo, mapLogoPostionDown;
             /**
-            * set map extent to default extent
+            * Set map extent to default extent
             * @param {string} Default extent of map
             */
             extent = this._getQueryString('extent');
             if (extent !== "") {
                 mapDefaultExtent = extent.split(',');
-                mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(mapDefaultExtent[0]), "ymin": parseFloat(mapDefaultExtent[1]), "xmax": parseFloat(mapDefaultExtent[2]), "ymax": parseFloat(mapDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid } });
+                mapDefaultExtent = new GeometryExtent({ "xmin": parseFloat(mapDefaultExtent[0]), "ymin": parseFloat(mapDefaultExtent[1]), "xmax": parseFloat(mapDefaultExtent[2]), "ymax": parseFloat(mapDefaultExtent[3]), "spatialReference": { "wkid": this.map.spatialReference.wkid} });
                 this.map.setExtent(mapDefaultExtent);
             }
             /**
@@ -476,8 +447,7 @@ define([
             home = this._addHomeButton();
             domConstruct.place(home.domNode, query(".esriSimpleSliderIncrementButton")[0], "after");
             home.startup();
-
-            // if ShowLegend is 'true' then set esriLogo position above the Legend
+            // If ShowLegend is 'true' then set esriLogo position above the Legend
             if (appGlobals.configData.ShowLegend) {
                 mapLogoPostionDown = query('.esriControlsBR')[0];
                 domClass.add(mapLogoPostionDown, "esriCTDivMapPositionTop");
@@ -489,7 +459,7 @@ define([
                     imgSource = dojoConfig.baseURL + appGlobals.configData.CustomLogoUrl;
                 }
                 imgCustomLogo = domConstruct.create("img", { "src": imgSource, "class": "esriCTCustomMapLogo" }, dom.byId("esriCTParentDivContainer"));
-                // if ShowLegend is 'true' then set customLogo position above the Legend
+                // If ShowLegend is 'true' then set customLogo position above the Legend
                 if (appGlobals.configData.ShowLegend) {
                     domClass.add(imgCustomLogo, "esriCTCustomMapLogoBottom");
                 }
@@ -507,7 +477,7 @@ define([
             this.map.addLayer(highlightfeature);
             this.map.addLayer(routegraphicsLayer);
             if (appGlobals.configData.BaseMapLayers.length > 1) {
-                this._showBaseMapGallery();
+                this._showBaseMapGallery(true);
             }
             graphicsLayer.on("graphic-add", lang.hitch(this, function (feature) {
                 topic.publish("doBufferHandler", feature);
@@ -515,7 +485,7 @@ define([
         },
 
         /**
-        * set infowindow position
+        * Set infowindow position
         * @param{string} infoTitle info window title
         * @param{object} screenPoint contain screen Point
         * @param{object} infoPopupHeight contain the info Popup Height
@@ -531,12 +501,11 @@ define([
         },
 
         /**
-        * show infoWindow on map
+        * Show infoWindow on map
         * @param {Map point} mapPoint
         * @memberOf widgets/mapSettings/mapSettings
         */
         _showInfoWindowOnMap: function (mapPoint) {
-            appGlobals.shareOptions.mapClickedPoint = mapPoint;
             var index, onMapFeaturArray = [], featureArray = [];
             this.counter = 0;
             for (index = 0; index < appGlobals.operationLayerSettings.length; index++) {
@@ -564,7 +533,7 @@ define([
                             }
                         }
                     }
-                    this._fetchQueryResults(featureArray);
+                    this._fetchQueryResults(featureArray, mapPoint);
                 }
             }), function (err) {
                 alert(err.message);
@@ -572,7 +541,7 @@ define([
         },
 
         /**
-        * execute query for the layer
+        * Execute query for the layer
         * @param {number} index of feature layer
         * @param {object} mapPoint
         * @param {array} onMapFeaturArray Contains array of feature layer URL
@@ -596,17 +565,16 @@ define([
             queryTask.execute(queryLayer, lang.hitch(this, function (results) {
                 deferred.resolve(results);
             }), function (err) {
-                alert(err.message);
+                console.log(err.message);
                 deferred.resolve();
             });
             onMapFeaturArray.push(deferred);
         },
 
         /**
-        * Description
-        * @method _checkLayerVisibility
-        * @param {} layerUrl
-        * @return returnVal
+        * Check the layer loading dynamic of feature
+        * @param {object} layerUrl contains layer
+        * @memberOf widgets/mapSettings/mapSettings
         */
         _checkLayerVisibility: function (layerUrl) {
             var layer, lastChar, mapLayerUrl, layerUrlIndex = layerUrl.split('/'),
@@ -651,7 +619,7 @@ define([
         },
 
         /**
-        * set extent from mappoint
+        * Set extent from mappoint
         * @param {object} mapPoint
         * @memberOf widgets/mapSettings/mapSettings
         */
@@ -659,12 +627,12 @@ define([
             var tolerance, screenPoint, pnt1, pnt2, mapPoint1, mapPoint2, geometryPointData;
             tolerance = 20;
             screenPoint = this.map.toScreen(point);
-            pnt1 = new esri.geometry.Point(screenPoint.x - tolerance, screenPoint.y + tolerance);
-            pnt2 = new esri.geometry.Point(screenPoint.x + tolerance, screenPoint.y - tolerance);
+            pnt1 = new Point(screenPoint.x - tolerance, screenPoint.y + tolerance);
+            pnt2 = new Point(screenPoint.x + tolerance, screenPoint.y - tolerance);
             mapPoint1 = this.map.toMap(pnt1);
             mapPoint2 = this.map.toMap(pnt2);
             //set the screen point xmin, ymin, xmax, ymax
-            appGlobals.shareOptions.screenPoint = mapPoint1.x + "," + mapPoint1.y + "," + mapPoint2.x + "," + mapPoint2.y;
+            this.shareOptionScreenPoint = mapPoint1.x + "," + mapPoint1.y + "," + mapPoint2.x + "," + mapPoint2.y;
             if (window.location.href.toString().split("$mapClickPoint=").length > 1) {
                 if (!this.isExtentSet) {
                     geometryPointData = new esri.geometry.Extent(parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[2]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[3]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[4]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[5].split("$")[0]), this.map.spatialReference);
@@ -678,19 +646,19 @@ define([
         },
 
         /**
-        * fetch infowindow data from query task result
+        * Fetch infowindow data from query task result
         * @param {array} featureArray Contains features array on map
         * @memberOf widgets/mapSettings/mapSettings
         */
-        _fetchQueryResults: function (featureArray) {
+        _fetchQueryResults: function (featureArray, mapPoint) {
             var point, infoWindowParameter;
             topic.publish("showProgressIndicator");
             if (featureArray.length > 0) {
                 this.count = 0;
                 if (featureArray[this.count].attr.geometry.type === "polygon") {
-                    point = featureArray[this.count].attr.geometry.getCentroid();
+                    point = mapPoint;
                 } else if (featureArray[this.count].attr.geometry.type === "polyline") {
-                    point = featureArray[this.count].attr.geometry.getPoint(0, 0);
+                    point = mapPoint;
                 } else {
                     point = featureArray[0].attr.geometry;
                 }
@@ -705,28 +673,16 @@ define([
                     "IndexNumber": 1
                 };
                 topic.publish("hideProgressIndicator");
+                appGlobals.shareOptions.mapClickedPoint = mapPoint;
+                appGlobals.shareOptions.screenPoint = this.shareOptionScreenPoint;
                 this.infoWindowHelperObject._createInfoWindowContent(infoWindowParameter);
             } else {
                 topic.publish("hideProgressIndicator");
             }
         },
 
-        utcTimestampFromMs: function (utcMilliseconds) {
-            return this.localToUtc(new Date(utcMilliseconds));
-        },
-
         /**
-        * convert the local time to UTC
-        * @param {object} localTimestamp contains Local time
-        * @returns Date
-        * @memberOf widgets/mapSettings/mapSettings
-        */
-        localToUtc: function (localTimestamp) {
-            return new Date(localTimestamp.getTime());
-        },
-
-        /**
-        * get the string of service URL using query operation
+        * Get the string of service URL using query operation
         * @param {number} key for service URL
         * @memberOf widgets/mapSettings/mapSettings
         */
@@ -741,7 +697,7 @@ define([
         },
 
         /**
-        * generate required Key Fields which are required in functions
+        * Generate required Key Fields which are required in functions
         * @param {Layer} operationalLayers contains service layer URL
         * @memberOf widgets/mapSettings/mapSettings
         */
@@ -751,7 +707,6 @@ define([
                 appGlobals.configData.EventSearchSettings[eventSettingIndex].ObjectID = "";
                 appGlobals.configData.EventSearchSettings[eventSettingIndex].DateField = [];
             }));
-
             // Looping for getting object id from activity search.
             array.forEach(appGlobals.configData.ActivitySearchSettings, lang.hitch(this, function (settings, activitySettingIndex) {
                 appGlobals.configData.ActivitySearchSettings[activitySettingIndex].ObjectID = "";
@@ -760,29 +715,29 @@ define([
 
             searchSettings = appGlobals.configData.ActivitySearchSettings;
             eventSearchSettings = appGlobals.configData.EventSearchSettings;
-            // loop for the operational layer
+            // Loop for the operational layer
             for (i = 0; i < operationalLayers.length; i++) {
-                // check if webMapId is not configured then layer is  directly load from operational layer
+                // Check if webMapId is not configured then layer is  directly load from operational layer
                 if (appGlobals.configData.WebMapId && lang.trim(appGlobals.configData.WebMapId).length !== 0) {
                     str = operationalLayers[i].url.split('/');
                     layerTitle = operationalLayers[i].title;
                     layerId = str[str.length - 1];
-                    // loop for searchSetting fetch each layer
+                    // Loop for searchSetting fetch each layer
                     for (index = 0; index < searchSettings.length; index++) {
-                        // check Title and QueryLayerId both are having in activitySearchSetting
+                        // Check Title and QueryLayerId both are having in activitySearchSetting
                         if (searchSettings[index].Title && searchSettings[index].QueryLayerId) {
-                            // check  layer Title and layer QueryLayerId from activitySearchSetting
+                            // Check  layer Title and layer QueryLayerId from activitySearchSetting
                             if (layerTitle === searchSettings[index].Title && layerId === searchSettings[index].QueryLayerId) {
                                 searchSettings[index].ObjectID = operationalLayers[i].layerObject.objectIdField;
                                 searchSettings[index].DateField = this.getDateField(operationalLayers[i].layerObject.fields);
                             }
                         }
                     }
-                    // loop for event layers to fetch the each layer information
+                    // Loop for event layers to fetch the each layer information
                     for (eventIndex = 0; eventIndex < eventSearchSettings.length; eventIndex++) {
-                        // check Title and QueryLayerId both are having in  eventSearchSettings
+                        // Check Title and QueryLayerId both are having in  eventSearchSettings
                         if (eventSearchSettings[eventIndex].Title && eventSearchSettings[eventIndex].QueryLayerId) {
-                            // check  layer Title and layer QueryLayerId from eventSearchSettings
+                            // Check  layer Title and layer QueryLayerId from eventSearchSettings
                             if (layerTitle === eventSearchSettings[eventIndex].Title && layerId === eventSearchSettings[eventIndex].QueryLayerId) {
                                 eventSearchSettings[eventIndex].ObjectID = operationalLayers[i].layerObject.objectIdField;
                                 eventSearchSettings[eventIndex].DateField = this.getDateField(operationalLayers[i].layerObject.fields);
@@ -794,7 +749,7 @@ define([
         },
 
         /**
-        * load esri 'Home Button' widget which sets map extent to default extent
+        * Load esri 'Home Button' widget which sets map extent to default extent
         * @return {object} Home button widget
         * @memberOf widgets/mapSettings/mapSettings
         */
@@ -811,15 +766,16 @@ define([
         * @return {object} baseMapGallery widget
         * @memberOf widgets/mapSettings/mapSettings
         */
-        _showBaseMapGallery: function () {
+        _showBaseMapGallery: function (isWebmap) {
             var baseMapGallery = new BaseMapGallery({
-                map: this.map
+                map: this.map,
+                isWebmap: isWebmap
             }, domConstruct.create("div", {}, null));
             return baseMapGallery;
         },
 
         /**
-        * initialize the object of legend box
+        * Initialize the object of legend box
         * @return {legendObject} returns the legend Object
         * @memberOf widgets/mapSettings/mapSettings
         */
@@ -833,12 +789,12 @@ define([
         },
 
         /**
-        * add legend for the web map
+        * Add legend for the web map
         * @memberOf widgets/mapSettings/mapSettings
         */
         _addLayerLegendWebmap: function (webMapLayers, webmapLayerList, hasLayers) {
             var mapServerArray = [], i, j, legendObject, layer;
-            // loop for webmap layer
+            // Loop for webmap layer
             for (j = 0; j < webMapLayers.length; j++) {
                 if (webMapLayers[j].layerObject) {
                     if (webMapLayers[j].layers) {
@@ -872,7 +828,7 @@ define([
         },
 
         /**
-        * return current map instance
+        * Return current map instance
         * @return {object} Current map instance
         * @memberOf widgets/mapSettings/mapSettings
         */
@@ -919,8 +875,6 @@ define([
         /**
         * Get related table url from webmap data
         * @param {object} layerTable contains the table data of webmap
-        * @param {string} title contains the title of the layer
-        * @return {string} commentLayerURL contains url of the comment layer
         * @memberOf widgets/mapSettings/mapSettings
         */
         _getRelatedTableURL: function (layerTable) {

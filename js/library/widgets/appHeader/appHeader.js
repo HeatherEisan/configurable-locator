@@ -112,6 +112,10 @@ define([
             }
         },
 
+        /**
+        * load Application icon to be shown as application shortcut icon
+        * @memberOf widgets/appHeader/appHeader
+        */
         _loadIcons: function (rel, iconPath) {
             var icon;
             icon = domConstruct.create("link");
@@ -121,10 +125,18 @@ define([
             document.getElementsByTagName('head')[0].appendChild(icon);
         },
 
+        /**
+        * showing progess indicator
+        * @memberOf widgets/appHeader/appHeader
+        */
         showProgressIndicator: function () {
             domClass.replace(this.divLoadingIndicator, "displayBlock", "displayNone");
         },
 
+        /**
+        * hiding progess indicator
+        * @memberOf widgets/appHeader/appHeader
+        */
         hideProgressIndicator: function () {
             domClass.replace(this.divLoadingIndicator, "displayNone", "displayBlock");
         }

@@ -23,11 +23,8 @@ define([
     "dojo/dom-attr",
     "dojo/on",
     "dojo/dom",
-    "dojo/dom-class",
     "dojo/dom-geometry",
     "dojo/dom-style",
-    "dojo/string",
-    "esri/request",
     "dojo/_base/html",
     "dojo/text!./templates/shareTemplate.html",
     "dijit/_WidgetBase",
@@ -35,9 +32,10 @@ define([
     "dijit/_WidgetsInTemplateMixin",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
+    "dojo/dom-class",
     "dijit/a11yclick",
     "widgets/share/commonShare"
-], function (declare, domConstruct, lang, domAttr, on, dom, domClass, domGeom, domStyle, string, esriRequest, html, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, a11yclick, commonShare) {
+], function (declare, domConstruct, lang, domAttr, on, dom, domGeom, domStyle, html, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, domClass, a11yclick, commonShare) {
 
     //========================================================================================================================//
 

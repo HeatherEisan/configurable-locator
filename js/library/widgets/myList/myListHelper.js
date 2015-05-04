@@ -28,6 +28,7 @@ define([
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
     "dojo/date",
+    "dojo/date/locale",
     "dojo/_base/array",
     "esri/tasks/query",
     "esri/tasks/QueryTask",
@@ -35,14 +36,14 @@ define([
     "dojo/query",
     "widgets/printForEvent/printForEventWindow",
     "dijit/a11yclick"
-], function (declare, lang, domClass, html, domStyle, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, date, array, Query, QueryTask, string, query, PrintForEventWindow, a11yclick) {
+], function (declare, lang, domClass, html, domStyle, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, date, locale, array, Query, QueryTask, string, query, PrintForEventWindow, a11yclick) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         sharedNls: sharedNls,                // Variable for shared NLS
 
         /**
-        * create myList helper file to store feature added from activity and event, User can search show route, add to calendar, find route for list, print for list.
+        * Create myList helper file to store feature added from activity and event, User can search show route, add to calendar, find route for list, print for list.
         */
 
         /**
@@ -76,6 +77,8 @@ define([
             var eventFeatureList = [], i, featureSetArray = [], eventDataObject, g, startDateAttribute, queryLayerId;
             // If feature set got from service call then remove null value and change if date field is found
             this.dateFieldArray = this.getDateField(featureSet);
+            // Function for setting date attribute
+            featureSet.features = this.setDateWithUTC(featureSet.features);
             if (featureSet) {
                 featureSet.features = this._removeNullValue(featureSet.features);
                 featureSet.features = this._formatedDataForShare(featureSet.features);
@@ -108,11 +111,33 @@ define([
             }
         },
 
+        /**
+        * Function to set UTC date format
+        * @param {object} eventData contains the event data
+        * @memberOf widgets/myList/myList
+        */
+        setDateWithUTC: function (eventData) {
+            var utcDateObject = {}, startDateAttr, endDateAttr;
+            array.forEach(appGlobals.configData.EventSearchSettings, lang.hitch(this, function (settings) {
+                startDateAttr = this.getKeyValue(settings.AddToCalendarSettings[0].StartDate);
+                endDateAttr = this.getKeyValue(settings.AddToCalendarSettings[0].EndDate);
+            }));
+            array.forEach(eventData, lang.hitch(this, function (event) {
+                utcDateObject = {};
+                utcDateObject[startDateAttr] = event.attributes[startDateAttr];
+                utcDateObject[endDateAttr] = event.attributes[endDateAttr];
+                event.utcDate = utcDateObject;
+            }));
+            return eventData;
+        },
 
+        /**
+        * Change the format of date, number into coded domain value
+        * @param {object} featureSet contains the feature data
+        * @memberOf widgets/myList/myListHelper
+        */
         _formatedDataForShare: function (featureSet) {
             var attributes, i, l, j, k, layerDetails, fieldValue, fieldName, fieldInfo, domainValue;
-            //eventFeatureObject.value.features = this._removeNullValue(eventFeatureObject.value.features);
-
             for (k = 0; k < featureSet.length; k++) {
                 attributes = featureSet[k].attributes;
 
@@ -128,8 +153,7 @@ define([
                         layerDetails = appGlobals.operationLayerSettings[i].layerDetails;
                         for (j = 0; j < layerDetails.popupInfo.fieldInfos.length; j++) {
                             try {
-                                //get field value from feature attributes
-                                //fieldValue = string.substitute(layerDetails.popupInfo.fieldInfos[j].fieldName, attributes);
+                                // Get field value from feature attributes
                                 fieldValue = attributes[layerDetails.popupInfo.fieldInfos[j].fieldName];
                             } catch (ex) {
                                 fieldValue = appGlobals.configData.ShowNullValueAs;
@@ -142,7 +166,7 @@ define([
                                     attributes[layerDetails.popupInfo.fieldInfos[j].fieldName] = fieldValue;
                                 }
                             } else {
-                                //check if field has coded values
+                                // Check if field has coded values
                                 fieldInfo = this.hasDomainCodedValue(fieldName, attributes, layerDetails.layerObject);
                                 if (fieldInfo) {
                                     if (fieldInfo.isTypeIdField) {
@@ -165,6 +189,7 @@ define([
             }
             return featureSet;
         },
+
         /**
         * Query for activity in share window
         * @param {object} object of layer
@@ -191,7 +216,7 @@ define([
         * @memberOf widgets/myList/myListHelper
         */
         _activityResult: function (activitySearchSettings, featureSet) {
-            var activityFeatureList = [], i, featureSetArray = [], eventCalenderContainer, activityDataObject, g, queryLayerId;
+            var activityFeatureList = [], i, featureSetArray = [], activityDataObject, g, queryLayerId;
             // If feature set is found then remove null value from feature and change date format
             this.dateFieldArray = this.getDateField(featureSet);
             if (featureSet) {
@@ -220,10 +245,6 @@ define([
                             }
                         }
                     }
-                }
-                eventCalenderContainer = query(".esriCTAddEventList")[0];
-                if (eventCalenderContainer) {
-                    domClass.replace(eventCalenderContainer, "esriCTActivityCalender", "esriCTAddEventList");
                 }
             }
         },
@@ -324,7 +345,7 @@ define([
         _showDataForCalendar: function () {
             var featureArray = [], sortResult, t, startDateFound, searchSetting, startDate, startDateAttr, endDateAttr,
                 formatedStartDate, endDate, formatedEndDate, difference;
-            sortResult = this._sortDate(this.ascendingFlag);
+            sortResult = this.sortDate(this.ascendingFlag);
             searchSetting = appGlobals.configData.EventSearchSettings[0];
             startDateAttr = this.getKeyValue(searchSetting.AddToCalendarSettings[0].StartDate);
             endDateAttr = this.getKeyValue(searchSetting.AddToCalendarSettings[0].EndDate);
@@ -332,9 +353,9 @@ define([
                 startDateFound = false;
                 // Looping for getting date field
                 if (sortResult[t].settingsName === "eventsettings") {
-                    startDate = sortResult[t].featureSet.attributes[startDateAttr];
-                    endDate = sortResult[t].featureSet.attributes[endDateAttr];
-                    if (startDate === appGlobals.configData.ShowNullValueAs || endDate === appGlobals.configData.ShowNullValueAs) {
+                    startDate = sortResult[t].featureSet.utcDate[startDateAttr];
+                    endDate = sortResult[t].featureSet.utcDate[endDateAttr];
+                    if (startDate === null || endDate === null || startDate === appGlobals.configData.ShowNullValueAs || endDate === appGlobals.configData.ShowNullValueAs) {
                         startDateFound = false;
                     } else {
                         formatedStartDate = new Date(startDate);
@@ -404,15 +425,16 @@ define([
                     summary = this.getKeyValue(searchSetting.AddToCalendarSettings[0].Summary);
                     description = this.getKeyValue(searchSetting.AddToCalendarSettings[0].Description);
                 }
-                calStartDate = new Date(featureDataItem.featureSet.attributes[startDateAttr]);
-                calEndDate = new Date(featureDataItem.featureSet.attributes[endDateAttr]);
+                calStartDate = locale.format(new Date(featureDataItem.featureSet.utcDate[startDateAttr]), { datePattern: "MMMM dd, yyyy", selector: "date", locale: "en-us" });
+                calEndDate = locale.format(new Date(featureDataItem.featureSet.utcDate[endDateAttr]), { datePattern: "MMMM dd, yyyy", selector: "date", locale: "en-us" });
+                calStartDate = new Date(calStartDate);
+                calEndDate = new Date(calEndDate);
                 startingDate = calStartDate.getFullYear().toString() + this._getMonth(calStartDate).toString() + this._getDate(calStartDate).toString() + "T020000Z";
                 endingDate = calEndDate.getFullYear().toString() + this._getMonth(calEndDate).toString() + this._getDate(calEndDate).toString() + "T100000Z";
                 calSummary = featureDataItem.featureSet.attributes[summary];
                 if (featureDataItem.featureSet.attributes[description]) {
                     calDescription = encodeURI(featureDataItem.featureSet.attributes[description].replace(/[#$&\/\.%]/g, " "));
                 }
-
                 calLocation = encodeURI(addToCalendarSettingsItemArray.join(","));
                 calOrganizer = organizerAttr;
                 // Open Ics file for add to calendar if it is a valid event
@@ -428,25 +450,25 @@ define([
                 index++;
                 this.featureLength = index;
             }));
-            // check whether the url string is not empty.
+            // Check whether the url string is not empty.
             if (this.URLString !== "") {
                 this.URLString = dojoConfig.baseURL + "/js/library/widgets/myList/ICalendar.ashx?" + this.URLString;
                 URI = encodeURI(this.URLString);
-                // if feature count is only 1 and uri length is exceeding 2048, then setting description to null
+                // If feature count is only 1 and uri length is exceeding 2048, then setting description to null
                 if (this.featureLength === 1 && URI && URI.length > 2048) {
-                // setting index = 0 for a single event.
+                    // Setting index = 0 for a single event.
                     index = 0;
-                    //create url string without description.
+                    // Create url string without description.
                     this.URLString = dojoConfig.baseURL + "/js/library/widgets/myList/ICalendar.ashx?" + "&sd" + index + "=" + startingDate.toString() + "&ed" + index + "=" + endingDate.toString() + "&sum" + index + "=" + calSummary + "&org" + index + "=" + calOrganizer + "&fn" + index + "=" + calSummary + "&loc" + index + "=" + calLocation + "&des" + index + "= " + "&events=" + this.featureLength;
                     URI = encodeURI(this.URLString);
-                    // check uri (with description = null) not exceeding than 2048, else show alert.
+                    // Check uri (with description = null) not exceeding than 2048, else show alert.
                     if (URI.length < 2048) {
                         window.open(this.URLString, "_blank");
                     } else {
                         alert(sharedNls.errorMessages.unableAddEventToCalendar);
                     }
                 } else {
-                    // if feature count is greater than 1, check encode uri length exeeds than 2048, else show alert.
+                    // If feature count is greater than 1, check encode uri length exeeds than 2048, else show alert.
                     if (URI.length < 2048) {
                         window.open(this.URLString, "_blank");
                     } else {
@@ -474,7 +496,7 @@ define([
         },
 
         /**
-        * sort my list events in ascending or descending order
+        * Sort my list events in ascending or descending order
         * @param string ascendingFlag contains boolean flag for ascending value
         * @param {featureSet} contains the feature set data
         * @memberOf widgets/myList/myListHelper
@@ -489,23 +511,23 @@ define([
                 if (this.myListStore.length > 1) {
                     domClass.replace(this.orderByDateImage, "esriCTImgOrderByDateDown", "esriCTImgOrderByDateUp");
                 }
-                sortResult = this._sortDate(ascendingFlag);
+                sortResult = this.sortDate(ascendingFlag);
             } else {
                 if (this.myListStore.length > 1) {
                     domClass.replace(this.orderByDateImage, "esriCTImgOrderByDateUp", "esriCTImgOrderByDateDown");
                 }
-                sortResult = this._sortDate(ascendingFlag);
+                sortResult = this.sortDate(ascendingFlag);
             }
             return sortResult;
         },
 
         /**
-        * sort date by order
+        * Sort date by order
         * @param string startDate contains date attribute
         * @param string ascendingFlag contains boolean flag for ascending value
         * @memberOf widgets/myList/myListHelper
         */
-        _sortDate: function (ascendingFlag) {
+        sortDate: function (ascendingFlag) {
             var sortResult = [], searchSettingA, searchSettingB, sortedEventData = [], sortedActivityData = [], t, startDateFound, p, q, sortedDateArray, nameFieldA, nameFieldB;
             // Checking for order of data and sorting.
             if (ascendingFlag) {
@@ -539,7 +561,7 @@ define([
                     sortedActivityData.push(sortResult[t]);
                 }
             }
-            //sorting the activity from name
+            // Sorting the activity from name
             sortedActivityData = sortedActivityData.sort(function (a, b) {
                 if (a.settingsName === "eventsettings") {
                     searchSettingA = appGlobals.configData.EventSearchSettings[a.eventSettingsIndex];
@@ -572,7 +594,7 @@ define([
         },
 
         /**
-        * get the key field value from the config file
+        * Get the key field value from the config file
         * @param {data} keyField value with $ sign
         * @memberOf widgets/myList/myListHelper
         */
@@ -587,7 +609,7 @@ define([
         },
 
         /**
-        * show eventPlanner tab and block the Mylist tab
+        * Show eventPlanner tab and block the Mylist tab
         * @memberOf widgets/myList/myListHelper
         */
         _showActivityTab: function () {
@@ -610,12 +632,12 @@ define([
         },
 
         /**
-        * print event List data
+        * Print event List data
         * @memberOf widgets/myList/myListHelper
         */
         _printForEventList: function () {
             var directionData, finalText, activityNameField, nameField, isDataFound, splitedField, sortResult, eventDataArray = [], l, searchSetting;
-            sortResult = this._sortDate(this.ascendingFlag);
+            sortResult = this.sortDate(this.ascendingFlag);
             // Looping for sort data for getting date field.
             for (l = 0; l < sortResult.length; l++) {
                 isDataFound = false;
@@ -692,7 +714,7 @@ define([
         },
 
         /**
-        * get the feature within buffer and sort it in ascending order.
+        * Get the feature within buffer and sort it in ascending order.
         * @param {object} featureset Contains information of feature within buffer
         * @param {object} geometry Contains geometry service of route
         * @param {mapPoint} map point
@@ -733,30 +755,32 @@ define([
                 } else {
                     // Shown when the browser returns an error instead of the current geographical position
                     topic.publish("hideProgressIndicator");
-                    alert(sharedNls.errorMessages.activitySerachGeolocationText);
+                    alert(sharedNls.errorMessages.geolocationWidgetNotFoundMessage);
                 }
-                // Call back when error is found after geolocation
-                dijit.registry.byId("geoLocation").onGeolocationError = lang.hitch(this, function (error, isPreLoaded) {
-                    if (isPreLoaded) {
-                        topic.publish("extentSetValue", true);
-                        topic.publish("hideInfoWindow");
-                        topic.publish("removeHighlightedCircleGraphics");
-                        topic.publish("removeLocatorPushPin");
-                        topic.publish("removeBuffer");
-                        if (this.carouselContainer) {
-                            this.carouselContainer.hideCarouselContainer();
-                            this.carouselContainer._setLegendPositionDown();
+                if (dijit.registry.byId("geoLocation")) {
+                    // Call back when error is found after geolocation
+                    dijit.registry.byId("geoLocation").onGeolocationError = lang.hitch(this, function (error, isPreLoaded) {
+                        if (isPreLoaded) {
+                            topic.publish("extentSetValue", true);
+                            topic.publish("hideInfoWindow");
+                            topic.publish("removeHighlightedCircleGraphics");
+                            topic.publish("removeLocatorPushPin");
+                            topic.publish("removeBuffer");
+                            if (this.carouselContainer) {
+                                this.carouselContainer.hideCarouselContainer();
+                                this.carouselContainer._setLegendPositionDown();
+                            }
                         }
-                    }
-                    // If it is not coming from geolocation
-                    if (!isPreLoaded) {
-                        topic.publish("removeLocatorPushPin");
-                        topic.publish("hideInfoWindow");
-                        topic.publish("hideProgressIndicator");
-                    }
-                });
+                        // If it is not coming from geolocation
+                        if (!isPreLoaded) {
+                            topic.publish("removeLocatorPushPin");
+                            topic.publish("hideInfoWindow");
+                            topic.publish("hideProgressIndicator");
+                        }
+                    });
+                }
             } else {
-                // calling error message when geoloation widget is not configured.
+                // Calling error message when geoloation widget is not configured.
                 topic.publish("hideProgressIndicator");
                 alert(sharedNls.errorMessages.activitySearchGeolocationText);
             }
@@ -786,7 +810,9 @@ define([
         * @memberOf widgets/commonHelper/InfoWindowHelper
         */
         convertNumberToThousandSeperator: function (number) {
-            return number.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+            number = number.split(".");
+            number[0] = number[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+            return number.join('.');
         }
     });
 });

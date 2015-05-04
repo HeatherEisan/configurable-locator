@@ -27,11 +27,8 @@ define([
     "dojo/dom-class",
     "dojo/query",
     "dojo/string",
-    "esri/tasks/locator",
     "esri/tasks/query",
     "esri/tasks/QueryTask",
-    "esri/geometry",
-    "esri/graphic",
     "dojo/date/locale",
     "esri/geometry/Point",
     "dojo/text!./templates/searchSettingTemplate.html",
@@ -45,11 +42,9 @@ define([
     "dojo/date",
     "dojo/parser",
     "dojo/store/Memory",
-    "esri/units",
-    "../carouselContainer/carouselContainer",
     "dijit/a11yclick"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, query, string, Locator, Query, QueryTask, Geometry, Graphic, locale, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, esriRequest, DateTextBox, date, parser, Memory, units, CarouselContainer, a11yclick) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, query, string, Query, QueryTask, locale, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, esriRequest, DateTextBox, date, parser, Memory, a11yclick) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -163,16 +158,16 @@ define([
         */
         _queryForLayerInAddressSearch: function (URL, result) {
             var resultSet, routeObject;
-            // function for getting date field
+            // Function for getting date field
             this.dateFieldArray = this.getDateField(result);
             resultSet = result.features[0];
-            // calling the show route
+            // Calling the show route
             routeObject = { "StartPoint": resultSet, "EndPoint": [resultSet], "Index": 0, "WidgetName": "unifiedsearch", "QueryURL": URL };
             topic.publish("showRoute", routeObject);
         },
 
         /**
-        * show event tab in panel
+        * Show event tab in panel
         * @memberOf widgets/searchSetting/eventPlannerHelper
         */
         _showEventTab: function () {
@@ -185,12 +180,12 @@ define([
             domClass.replace(this.divEventContainer, "esriCTShowContainerHeight", "esriCTHideContainerHeight");
         },
         /**
-        * activityPlanner Date Validation
+        * ActivityPlanner Date Validation
         * @memberOf widgets/searchSetting/eventPlannerHelper
         */
         _activityPlannerDateValidation: function () {
             var formattedFromDate, formattedToDate;
-            // checking for my date and to date validation
+            // Checking for my date and to date validation
             if (this.myFromDate.validate() && this.myToDate.validate()) {
                 formattedFromDate = locale.format(this.myFromDate.value, { datePattern: "yyyy-MM-dd", selector: "date", locale: "en-us" });
                 formattedToDate = locale.format(this.myToDate.value, { datePattern: "yyyy-MM-dd", selector: "date", locale: "en-us" });
@@ -212,7 +207,7 @@ define([
         },
 
         /**
-        * query events layer within given date range
+        * Query events layer within given date range
         * @param {object} startDate contains user selected from date
         * @param {object} endDate contains user selected to date
         * @memberOf widgets/searchSetting/eventPlannerHelper
@@ -265,7 +260,7 @@ define([
         },
 
         /**
-        * displays the events list
+        * Displays the events list
         * @param {object} featureSet contains featureSet returned by querying eventPlanner layer
         * @memberOf widgets/searchSetting/eventPlannerHelper
         */
@@ -289,6 +284,7 @@ define([
                 // Looping for feature set for storing data in feature set array for further use
                 if (featureSet && featureSet.features) {
                     eventFeatureObject = { "key": eventSearchSettings.ObjectID, "startDateKey": startDateAtt, "value": featureSet, "eventSettingsIndex": eventSearchSettingsIndex };
+                    eventFeatureObject.value = this.setDateWithUTC(eventFeatureObject.value, eventSearchSettingsIndex);
                     eventFeatureObject.value = this._changeDateFormat(eventFeatureObject.value);
                     eventFeatureObject.value.features = this._removeNullValue(eventFeatureObject.value.features);
                     this.featureSet.push(eventFeatureObject);
@@ -296,11 +292,11 @@ define([
             }
             widgetName = "Event";
             topic.publish("setEventFeatrueSet", this.featureSet);
-            //hide the eventPlanner list if already present
+            // Hide the eventPlanner list if already present
             this._hideActivitiesList();
             activityPlannerContainer = domConstruct.create("div", { "class": "esriCTEventPlannerContainer" }, this.divEventContainer);
             plannerListTable = domConstruct.create("div", { "class": "esriCTEventPlannerListTable" }, activityPlannerContainer);
-            //remove the event from eventPlanner list if it is already added to the MyList
+            // Remove the event from eventPlanner list if it is already added to the MyList
             activityList = new Memory();
             eventSettingsWithActivity = {};
             eventSettingsWithActivityArray = [];
@@ -337,15 +333,15 @@ define([
                     }, this);
                 }));
             }
-            //display an error message when no eventPlanner in the list
+            // Display an error message when no eventPlanner in the list
             if (this.featureSet && this.featureSet.length === 1 && (this.featureSet[0].value.features.length === 0 || (eventFeatureObject && eventFeatureObject.value.features.length === 0))) {
                 activityPlannerListRow = domConstruct.create("div", { "class": "esriCTEventPlannerListError", "innerHTML": sharedNls.errorMessages.invalidSearch }, plannerListTable);
             } else if (this.myFromDate.value && this.myToDate.value && activityList.data.length === 0) {
                 activityPlannerListRow = domConstruct.create("div", { "class": "esriCTEventPlannerListAddToList", "innerHTML": sharedNls.errorMessages.addedActivities }, plannerListTable);
                 domClass.replace(plannerListTable, "esriCTPlannerListAddedActivities", "esriCTEventPlannerListTable");
             }
-            //sort the eventPlanner list on event start date
-            sortedActivityList = activityList.query({}, { sort: [{ attribute: startDateAtt, ascending: true }] });
+            // Sort the eventPlanner list on event start date
+            sortedActivityList = activityList.query({}, { sort: [{ attribute: startDateAtt, ascending: true}] });
             // Looping for sorted activity list for setting data in event searh panel
             array.forEach(sortedActivityList, function (eventPlanner, k) {
                 var configEventSettings, activityPlannerAddListObject;
@@ -386,7 +382,7 @@ define([
                     this._clickOnActivityPlannerLeft(event, configEventSettings);
                 })));
             }, this);
-            // function for share in the case of event search from event search
+            // Function for share in the case of event search from event search
             setTimeout(lang.hitch(this, function () {
                 var searchSettings, startDateAttribute, settingsName, settingsIndex, g, searchSetting, queryLayerId;
                 // Checking share url for adding item in my list panel
@@ -438,7 +434,27 @@ define([
         },
 
         /**
-        * add item in my list panel
+        * Function to set UTC date format
+        * @param {object} eventData contains the event data
+        * @memberOf widgets/searchSetting/eventPlannerHelper
+        */
+        setDateWithUTC: function (eventData, settingsIndex) {
+            var utcDate = {}, startDateAttr, endDateAttr;
+            if (eventData.features && appGlobals.configData.EventSearchSettings) {
+                startDateAttr = this.getKeyValue(appGlobals.configData.EventSearchSettings[settingsIndex].AddToCalendarSettings[0].StartDate);
+                endDateAttr = this.getKeyValue(appGlobals.configData.EventSearchSettings[settingsIndex].AddToCalendarSettings[0].EndDate);
+                array.forEach(eventData.features, lang.hitch(this, function (features, featuresIndex) {
+                    utcDate = {};
+                    utcDate[startDateAttr] = features.attributes[startDateAttr];
+                    utcDate[endDateAttr] = features.attributes[endDateAttr];
+                    features.utcDate = utcDate;
+                }));
+            }
+            return eventData;
+        },
+
+        /**
+        * Add item in my list panel
         * @param {object} activityPlannerAddListObject contains the activity Planner Add to List Object
         * @memberOf widgets/searchSetting/eventPlannerHelper
         */
@@ -473,7 +489,7 @@ define([
         * @memberOf widgets/searchSetting/eventPlannerHelper
         */
         _clickOnActivityPlannerLeft: function (event, eventSearchSettings) {
-            var featureData, activityListObjectId, infoWindowParameter, mapPoint;
+            var featureData, activityListObjectId, infoWindowParameter, mapPoint, tolerance, screenPoint, pnt1, pnt2, mapPoint1, mapPoint2, shareOptionScreenPoint;
             topic.publish("extentSetValue", true);
             activityListObjectId = event.currentTarget.value[eventSearchSettings.ObjectID];
             // Checking for feature set for getting feature data for showing info window
@@ -499,6 +515,15 @@ define([
             mapPoint = featureData.geometry;
             topic.publish("extentFromPoint", mapPoint);
             appGlobals.shareOptions.mapClickedPoint = mapPoint;
+            tolerance = 20;
+            screenPoint = this.map.toScreen(mapPoint);
+            pnt1 = new Point(screenPoint.x - tolerance, screenPoint.y + tolerance);
+            pnt2 = new Point(screenPoint.x + tolerance, screenPoint.y - tolerance);
+            mapPoint1 = this.map.toMap(pnt1);
+            mapPoint2 = this.map.toMap(pnt2);
+            // Set the screen point xmin, ymin, xmax, ymax
+            shareOptionScreenPoint = mapPoint1.x + "," + mapPoint1.y + "," + mapPoint2.x + "," + mapPoint2.y;
+            appGlobals.shareOptions.screenPoint = shareOptionScreenPoint;
             topic.publish("createInfoWindowContent", infoWindowParameter);
             topic.publish("hideCarouselContainer");
             topic.publish("setZoomAndCenterAt", featureData.geometry);
@@ -524,7 +549,7 @@ define([
             return (rad / Math.PI) * 180.0;
         },
         /**
-        * convert the UTC time stamp from Millisecond
+        * Convert the UTC time stamp from Millisecond
         * @param {object} utcMilliseconds contains UTC millisecond
         * @returns Date
         * @memberOf widgets/searchSetting/eventPlannerHelper
@@ -534,7 +559,7 @@ define([
         },
 
         /**
-        * convert the local time to UTC
+        * Convert the local time to UTC
         * @param {object} localTimestamp contains Local time
         * @returns Date
         * @memberOf widgets/searchSetting/eventPlannerHelper

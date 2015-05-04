@@ -178,10 +178,10 @@
     color: #028D6A;
 }
 
-    /* Application Header */
-    .galleryTab, .commentsTab, .esriCTTabs div.esriCTGetDir, .esriCTTabs div.esriCTInfoClose, .esriCTApplicationHeader {
-        border-color: #028D6A;
-    }
+/* Application Header */
+.galleryTab, .commentsTab, .esriCTTabs div.esriCTGetDir, .esriCTTabs div.esriCTInfoClose, .esriCTApplicationHeader {
+    border-color: #028D6A;
+}
 
 .esriCTApplicationHeaderTextTD {
     color: #028D6A;
@@ -536,10 +536,6 @@ input {
     background: url("../images/img24x24/activityPlannerGreen24.png") no-repeat center center !important;
 }
 
-.esriCTPlusRound {
-    background-image: url("../images/addToListGreen.png") !important;
-}
-
 .esriCTImgOrderByDateDown {
     background-image: url("../images/dateArrowDownGreen.png");
 }
@@ -641,32 +637,32 @@ input {
 
 .esriCTInfoTabImage {
     color: #028D6A;
-    background: url("../images/info-green.png");
+    background: url("../images/infoGreen.png");
 }
 
 .esriCTInfoTabImageSelect {
     color: #028D6A;
-    background: url("../images/info-select.png");
+    background: url("../images/infoSelect.png");
 }
 
 .esriCTGalleryTabImage {
     color: #028D6A;
-    background: url("../images/gallery-green.png");
+    background: url("../images/galleryGreen.png");
 }
 
 .esriCTGalleryTabImageSelect {
     color: #028D6A;
-    background: url("../images/gallery-select.png");
+    background: url("../images/gallerySelect.png");
 }
 
 .esriCTCommentsTabImage {
     color: #028D6A;
-    background: url("../images/comment-green.png");
+    background: url("../images/commentGreen.png");
 }
 
 .esriCTCommentsTabImageselect {
     color: #028D6A;
-    background: url("../images/comment-select.png");
+    background: url("../images/commentSelect.png");
 }
 
 .addtoListTabImage {
@@ -686,5 +682,5 @@ input {
 
 .esriCTActivityTextArea {
     color: #028D6A;
-    text-align: initial;
+    text-align: left;
 }

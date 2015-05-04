@@ -25,11 +25,11 @@ define([
     "dojo/on",
     "dojo/_base/array",
     "dojo/dom-class",
+    "dojo/window",
     "esri/graphic",
     "dijit/_WidgetBase",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
-    "../carouselContainer/carouselContainer",
     "esri/geometry/Point",
     "esri/geometry/Polyline",
     "esri/geometry/Polygon",
@@ -40,16 +40,16 @@ define([
     "dojo/_base/Color",
     "dojo/query"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, Graphic, _WidgetBase, sharedNls, topic, CarouselContainer, Point, Polyline, Polygon, a11yclick, SimpleLineSymbol, SimpleMarkerSymbol, SimpleFillSymbol, Color, query) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, array, domClass, win, Graphic, _WidgetBase, sharedNls, topic, Point, Polyline, Polygon, a11yclick, SimpleLineSymbol, SimpleMarkerSymbol, SimpleFillSymbol, Color, query) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase], {
-        sharedNls: sharedNls,                            // Variable for shared NLS
+        sharedNls: sharedNls, // Variable for shared NLS
 
         /** This file has some common function which is used in intire project **/
 
         /**
-        * remove highlighted symbol graphics from map
+        * Remove highlighted symbol graphics from map
         * @memberOf widgets/commonHelper/commonHelper
         */
         removeHighlightedCircleGraphics: function () {
@@ -60,7 +60,7 @@ define([
         },
 
         /**
-        * remove buffer graphics from map
+        * Remove buffer graphics from map
         * @memberOf widgets/commonHelper/commonHelper
         */
         removeBuffer: function () {
@@ -82,7 +82,7 @@ define([
         },
 
         /**
-        * remove Locator's layer graphics from map
+        * Remove Locator's layer graphics from map
         * @memberOf widgets/commonHelper/commonHelper
         */
         removeLocatorPushPin: function () {
@@ -108,7 +108,7 @@ define([
         */
         disableInfoPopupOfDirectionWidget: function (dirctionWidgetObject) {
             var i;
-            // checking the direction widget's stop graphics
+            // Checking the direction widget's stop graphics
             if (dirctionWidgetObject.stopGraphics) {
                 // Looping for direction widget stop graphic for disabling info window
                 for (i = 0; i < dirctionWidgetObject.stopGraphics.length; i++) {
@@ -157,7 +157,7 @@ define([
         },
 
         /**
-        * hide carousel container
+        * Hide carousel container
         * @memberOf widgets/commonHelper/commonHelper
         */
         hideCarouselContainer: function () {
@@ -168,7 +168,7 @@ define([
         },
 
         /**
-        * highlight the nearest feature on the map
+        * Highlight the nearest feature on the map
         * @param{object} featureGeometry contains feature
         * @memberOf widgets/commonHelper/commonHelper
         */
@@ -197,9 +197,9 @@ define([
         * @memberOf widgets/commonHelper/commonHelper
         */
         setCenterAt: function (geometry) {
-            // checking if application in share url, If it is a share url then do not set extent, else set extent
+            // Checking if application in share url, If it is a share url then do not set extent, else set extent
             if (window.location.href.toString().split("$extentChanged=").length > 1) {
-                // checking if application in share url, If it is a share url then do not set extent, else set extent
+                // Checking if application in share url, If it is a share url then do not set extent, else set extent
                 if (this.isExtentSet) {
                     this.map.centerAt(geometry);
                 }
@@ -213,9 +213,9 @@ define([
         * @memberOf widgets/commonHelper/commonHelper
         */
         setZoomAndCenterAt: function (geometry) {
-            // checking if application in share url, If it is a share url then do not set extent, else set extent
+            // Checking if application in share url, If it is a share url then do not set extent, else set extent
             if (window.location.href.toString().split("$extentChanged=").length > 1) {
-                // checking if application in share url, If it is a share url then do not set extent, else set extent
+                // Checking if application in share url, If it is a share url then do not set extent, else set extent
                 if (this.isExtentSet) {
                     this.map.centerAndZoom(geometry, appGlobals.configData.ZoomLevel);
                 }
@@ -225,7 +225,7 @@ define([
         },
 
         /**
-        * calculate the distance between the pushpin(start point) and nearest feature(end point)
+        * Calculate the distance between the pushpin(start point) and nearest feature(end point)
         * @param {object} startPoint is pushpin on map
         * @param {object} endPoint is search result
         * @memberOf widgets/commonHelper/commonHelper
@@ -245,7 +245,7 @@ define([
             dist = dist * 60 * 1.1515;
             // Getting unit name from config file and setting according to direction widget
             unitName = this._getSubStringUnitData();
-            // switching unit name to calculate distance from start point to end point
+            // Switching unit name to calculate distance from start point to end point
             switch (unitName) {
             case " Miles":
                 dist = (dist * 10) / 10;
@@ -283,7 +283,7 @@ define([
             return (rad / Math.PI) * 180.0;
         },
         /**
-        * convert the UTC time stamp from Millisecond
+        * Convert the UTC time stamp from Millisecond
         * @param {object} utcMilliseconds contains UTC millisecond
         * @returns Date
         * @memberOf widgets/commonHelper/commonHelper
@@ -293,7 +293,7 @@ define([
         },
 
         /**
-        * convert the local time to UTC
+        * Convert the local time to UTC
         * @param {object} localTimestamp contains Local time
         * @returns Date
         * @memberOf widgets/commonHelper/commonHelper
@@ -310,7 +310,7 @@ define([
         getPodStatus: function (keyValue) {
             var isEnabled, i, key;
             isEnabled = false;
-            // looping the podSetting in config file
+            // Looping the podSetting in config file
             for (i = 0; i < appGlobals.configData.PodSettings.length; i++) {
                 for (key in appGlobals.configData.PodSettings[i]) {
                     if (appGlobals.configData.PodSettings[i].hasOwnProperty(key)) {
@@ -326,7 +326,7 @@ define([
         },
 
         /**
-        * get query url from unified search data
+        * Get query url from unified search data
         * @param {object} activityData contains unified search data with layer information
         * @param {object} result contains unified search data only
         * @memberOf widgets/commonHelper/commonHelper
@@ -356,11 +356,11 @@ define([
             hours = Math.floor(Math.abs(minutes) / 60);
             convertMinutes = Math.round((Math.abs(minutes) % 60));
             if (hours === 0) {
-                displayTime = convertMinutes + 'min';
+                displayTime = convertMinutes + sharedNls.titles.minuteText;
             } else if (convertMinutes === 0) {
-                displayTime = hours + 'hrs';
+                displayTime = hours + sharedNls.titles.hourText;
             } else {
-                displayTime = hours + 'hrs' + " " + convertMinutes + 'min';
+                displayTime = hours + sharedNls.titles.hourText + " " + convertMinutes + sharedNls.titles.minuteText;
             }
             return displayTime;
         },
@@ -375,7 +375,6 @@ define([
             if (Number(this.divPaginationCount.innerHTML.split("/")[0]) > 1) {
                 this.divPaginationCount.innerHTML = Number(this.divPaginationCount.innerHTML.split("/")[0]) - 1 + "/" + featureCount;
                 rowNumber = Number(this.divPaginationCount.innerHTML.split("/")[0]) - 1;
-
                 if (this.infoWindowFeatureData[rowNumber].attr.geometry.type === "polygon") {
                     point = this.infoWindowFeatureData[rowNumber].attr.geometry.getCentroid();
                 } else if (this.infoWindowFeatureData[rowNumber].attr.geometry.type === "polyline") {
@@ -383,7 +382,6 @@ define([
                 } else {
                     point = this.infoWindowFeatureData[rowNumber].attr.geometry;
                 }
-
                 // Setting info window parameter for showing info window on map
                 infoWindowParameter = {
                     "mapPoint": point,
@@ -434,7 +432,7 @@ define([
         },
 
         /**
-        * get the setting name by passing query layer
+        * Get the setting name by passing query layer
         * @ return search setting Data
         * @memberOf widgets/commonHelper/commonHelper
         */
@@ -465,9 +463,9 @@ define([
             // Looping for carousel pod data for removing comment pod from container
             for (i = 0; i < this.carouselPodData.length; i++) {
                 selectedPodName = domAttr.get(this.carouselPodData[i], "CarouselPodName");
-                // checking for comment pod for removing it from container
+                // Checking for comment pod for removing it from container
                 if (selectedPodName !== "CommentsPod") {
-                    // checking for gallery pod from settings for removal of gallery pod from settings
+                    // Checking for gallery pod from settings for removal of gallery pod from settings
                     if (!this.isGalleryPodEnabled) {
                         if (selectedPodName !== "GalleryPod") {
                             eventPodData.push(this.carouselPodData[i]);
@@ -540,9 +538,9 @@ define([
         */
         setZoomForGeolocation: function () {
             var isZoomToLocation = false;
-            // checking if application in share url, If it is a share url then do not set extent, else set extent
+            // Checking if application in share url, If it is a share url then do not set extent, else set extent
             if (window.location.href.toString().split("$extentChanged=").length > 1) {
-                // checking if application in share url, If it is a share url then do not set extent, else set extent
+                // Checking if application in share url, If it is a share url then do not set extent, else set extent
                 if (this.isExtentSet) {
                     isZoomToLocation = true;
                 } else {
@@ -565,7 +563,7 @@ define([
             width = this.map.extent.getWidth();
             infoWidth = (this.map.width / 2) + appGlobals.configData.InfoPopupWidth / 2 + 400;
             height = this.map.extent.getHeight();
-            // check if infoWindow width is greater than map width
+            // Check if infoWindow width is greater than map width
             if (infoWidth > this.map.width) {
                 diff = infoWidth - this.map.width;
             } else {
@@ -575,8 +573,8 @@ define([
             ratioWidth = width / this.map.width;
             totalYPoint = appGlobals.configData.InfoPopupHeight + 30 + 61;
             xmin = mapPoint.x - (width / 2);
-            // validate the width of window
-            if (dojo.window.getBox().w >= 680) {
+            // Validate the width of window
+            if (win.getBox().w >= 680) {
                 ymin = mapPoint.y - height + (ratioHeight * totalYPoint);
                 xmax = xmin + width + diff * ratioWidth;
             } else {
@@ -596,7 +594,7 @@ define([
         */
         getInfowWindowIndex: function (layerTitle, layerId) {
             var index, i;
-            // looping for getting the layer id
+            // Looping for getting the layer id
             for (i = 0; i < appGlobals.operationLayerSettings.length; i++) {
                 if (appGlobals.operationLayerSettings[i].infoWindowData) {
                     if (layerTitle === appGlobals.operationLayerSettings[i].layerTitle && layerId === appGlobals.operationLayerSettings[i].layerID) {
@@ -616,7 +614,7 @@ define([
         */
         getObjectId: function (response) {
             var objectId, j;
-            // loop through the layer fields to fetch field of the type 'esriFieldTypeOID'
+            // Loop through the layer fields to fetch field of the type 'esriFieldTypeOID'
             for (j = 0; j < response.length; j++) {
                 if (response[j].type === "esriFieldTypeOID") {
                     objectId = response[j].name;
@@ -700,10 +698,15 @@ define([
         * @memberOf widgets/commonHelper/commonHelper
         */
         getAttachments: function (response) {
-            var divAttchmentInfo, divPreviousImgInfo, divNextImgInfo;
+            var divAttchmentInfo, divPreviousImgInfo, divNextImgInfo, filteredResponse = [], i;
             this.imageCountInfo = 0;
-            // check if number of attachments fetched is more than 1
-            if (response.length > 1) {
+            for (i = 0; i < response.length; i++) {
+                if (response[i].contentType.indexOf("image") > -1) {
+                    filteredResponse.push(response[i]);
+                }
+            }
+            // Check if number of attachments fetched is more than 1
+            if (filteredResponse && filteredResponse.length > 1) {
                 divPreviousImgInfo = domConstruct.create("div", { "class": "esriCTImgPrev" }, this.galleryContainer);
                 divNextImgInfo = domConstruct.create("div", { "class": "esriCTImgNext" }, this.galleryContainer);
                 divAttchmentInfo = domConstruct.create("img", { "class": "esriCTDivAttchmentInfo" }, this.galleryContainer);
@@ -716,51 +719,51 @@ define([
                         domStyle.set(divPreviousImgInfo, "display", "block");
                     }
                     domStyle.set(divNextImgInfo, "display", "block");
-                    domAttr.set(divAttchmentInfo, "src", response[this.imageCountInfo].url);
+                    domAttr.set(divAttchmentInfo, "src", filteredResponse[this.imageCountInfo].url);
                 })));
                 this.own(on(divNextImgInfo, a11yclick, lang.hitch(this, function () {
                     this.imageCountInfo++;
-                    if (this.imageCountInfo === response.length - 1) {
+                    if (this.imageCountInfo === filteredResponse.length - 1) {
                         domStyle.set(divNextImgInfo, "display", "none");
                     } else {
                         domStyle.set(divNextImgInfo, "display", "block");
                     }
                     domStyle.set(divPreviousImgInfo, "display", "block");
-                    domAttr.set(divAttchmentInfo, "src", response[this.imageCountInfo].url);
+                    domAttr.set(divAttchmentInfo, "src", filteredResponse[this.imageCountInfo].url);
                 })));
-                // if number of attachments fetched is equal to 1
-            } else if (response.length === 1) {
+                // If number of attachments fetched is equal to 1
+            } else if (filteredResponse.length === 1) {
                 divAttchmentInfo = domConstruct.create("img", { "class": "esriCTDivAttchmentInfo" }, this.galleryContainer);
-                domAttr.set(divAttchmentInfo, "src", response[0].url);
+                domAttr.set(divAttchmentInfo, "src", filteredResponse[0].url);
             } else {
-                // if no attachments fetched
+                // If no attachments fetched
                 domConstruct.create("div", { "class": "esriCTGalleryBox", "innerHTML": sharedNls.errorMessages.imageDoesNotFound }, this.galleryContainer);
             }
         },
 
         /**
-        *Fetch the geometry type of the mapPoint
+        * Fetch the geometry type of the mapPoint
         * @param {object} geometry Contains the geometry service
         * return selected MapPoint
         * @memberOf widgets/commonHelper/commonHelper
         */
         getMapPoint: function (geometry) {
             var selectedMapPoint, mapPoint, rings, points;
-            //if geometry type is point
+            // If geometry type is point
             if (geometry.type === "point") {
                 selectedMapPoint = geometry;
-                //if geometry type is polyline
+                // If geometry type is polyline
             } else if (geometry.type === "polyline") {
                 selectedMapPoint = geometry.getPoint(0, 0);
             } else if (geometry.type === "polygon") {
                 mapPoint = geometry.getExtent().getCenter();
                 if (!geometry.contains(mapPoint)) {
-                    //if the center of the polygon does not lie within the polygon
+                    // If the center of the polygon does not lie within the polygon
                     rings = Math.floor(geometry.rings.length / 2);
                     points = Math.floor(geometry.rings[rings].length / 2);
                     selectedMapPoint = geometry.getPoint(rings, points);
                 } else {
-                    //if the center of the polygon lies within the polygon
+                    // If the center of the polygon lies within the polygon
                     selectedMapPoint = geometry.getExtent().getCenter();
                 }
             }
@@ -784,7 +787,7 @@ define([
         },
 
         /**
-        * function for adding item in my list panel
+        * Function for adding item in my list panel
         * @param {object} eventDataObject - contains the event object information
         * @param {string} widgetName - contains the widget name
         * @memberOf widgets/commonHelper/commonHelper
@@ -801,7 +804,7 @@ define([
                     LayerInfo.push(settings);
                 }
             }));
-            // looping through layer info for getting settings
+            // Looping through layer info for getting settings
             array.forEach(LayerInfo, lang.hitch(this, function (settingsName, eventSettingIndexValue) {
                 if (!IsSearchsettingFound) {
                     var key;
@@ -834,14 +837,14 @@ define([
                     }
                 }
             }));
-            //add the selected event object to the memory store
+            // Add the selected event object to the memory store
             listObject = { "key": eventDataObject.ObjectIDField, "value": eventDataObject.eventDetails, "featureSet": eventDataObject.featureSet, "startDateField": eventDataObject.StartDateField, "eventSettingsIndex": eventSearchSettingsIndex, "settingsName": this.searchSettingsName };
             this.myListStore.push(listObject);
             topic.publish("getMyListData", this.myListStore);
             if (this.myListStore.length > 0) {
                 topic.publish("replaceClassForMyList");
             }
-            //sort with ascending order of date
+            // Sort with ascending order of date
             topic.publish("sortMyList", true, this.featureSet);
             if (widgetName.toLowerCase() === "infoevent" || "event") {
                 sortedMyList = this.sortedList;
@@ -859,7 +862,7 @@ define([
             }
             // Looping my list store for adding object id in an array for share application
             for (l = 0; l < this.myListStore.length; l++) {
-                // check if event added from event search
+                // Check if event added from event search
                 if (!eventDataObject.infoWindowClick) {
                     if (appGlobals.shareOptions.eventIndex) {
                         appGlobals.shareOptions.eventIndex += "," + this.myListStore[l].value[this.myListStore[l].key].toString();
@@ -868,12 +871,12 @@ define([
                     }
                 }
             }
-            // function for share for odering even search data
+            // Function for share for odering even search data
             if (window.location.toString().split("$eventOrderInMyList=").length > 1) {
                 if (this.myListStore.length === Number(window.location.toString().split("$eventOrderInMyList=")[1].split(",")[1].split("$")[0])) {
                     orderEvent = window.location.toString().split("$eventOrderInMyList=")[1].split(",")[0] === "true" ? true : false;
                     topic.publish("sortMyList", orderEvent);
-                    sortedMyListData = this._sortDate(orderEvent);
+                    sortedMyListData = this.sortDate(orderEvent);
                     eventObject = { "EventDetails": null, "SortedData": sortedMyListData, "InfowindowClick": false, "eventForOrder": true };
                     // show data in mylist panel after order by list.
                     topic.publish("refreshMyList", eventObject, widgetName);
@@ -883,12 +886,40 @@ define([
         },
 
         /**
-        * sort date by order
+        * Function to get value type
+        * @param {object} data contains the data
+        * @memberOf widgets/commonHelper/commonHelper
+        */
+        getValueType: function (data) {
+            var isNumber;
+            isNumber = isNaN(data);
+            return isNumber;
+        },
+
+        /**
+        * Function to set UTC date format
+        * @param {object} eventData contains the event data
+        * @memberOf widgets/commonHelper/commonHelper
+        */
+        setDateWithUTC: function (eventData) {
+            var utcDateObject = {}, startDateAttr, endDateAttr;
+            array.forEach(appGlobals.configData.EventSearchSettings, lang.hitch(this, function (settings) {
+                startDateAttr = this.getKeyValue(settings.AddToCalendarSettings[0].StartDate);
+                endDateAttr = this.getKeyValue(settings.AddToCalendarSettings[0].EndDate);
+            }));
+            utcDateObject[startDateAttr] = eventData.attributes[startDateAttr];
+            utcDateObject[endDateAttr] = eventData.attributes[endDateAttr];
+            eventData.utcDate = utcDateObject;
+            return eventData;
+        },
+
+        /**
+        * Sort date by order
         * @param {string} startDate contains date attribute
         * @param {string} ascendingFlag contains boolean flag for ascending value
         * @memberOf widgets/commonHelper/commonHelper
         */
-        _sortDate: function (ascendingFlag) {
+        sortDate: function (ascendingFlag) {
             var sortResult = [], sortedEventData = [], sortedActivityData = [], t, startDateFound, p, q, sortedDataKey, sortedDateArray, nameValue, nameData;
             // Checking for order of data and sorting in assending order.
             if (ascendingFlag) {
@@ -928,7 +959,7 @@ define([
                     sortedActivityData.push(sortResult[t]);
                 }
             }
-            // sorting for activity data on the basic of name attribute
+            // Sorting for activity data on the basic of name attribute
             sortedActivityData = sortedActivityData.sort(function (a, b) {
                 nameValue = a.value.NAME.toLowerCase();
                 nameData = b.value.NAME.toLowerCase();
@@ -940,7 +971,7 @@ define([
                 }
                 return 0; //default return value (no sorting)
             });
-            // fetching of event and activity data in two diffrent array and finally returning sorted data
+            // Fetching of event and activity data in two diffrent array and finally returning sorted data
             sortResult.length = 0;
             for (p = 0; p < sortedEventData.length; p++) {
                 sortResult.push(sortedEventData[p]);
