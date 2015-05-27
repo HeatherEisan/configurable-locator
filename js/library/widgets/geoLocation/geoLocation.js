@@ -83,7 +83,6 @@ define([
         * @param {string} appGlobals.configData.GeometryService Geometry service url specified in configuration file
         * @memberOf widgets/geoLocation/geoLocation
         */
-
         showCurrentLocation: function (preLoaded, centerAndZoom) {
             var mapPoint, self = this, currentBaseMap, geometryServiceUrl, geometryService, isPreLoaded = preLoaded;
             geometryServiceUrl = appGlobals.configData.GeometryService;
@@ -104,11 +103,17 @@ define([
                 * @param {object} newPoint Map point of device location in spatialReference of map
                 */
                 geometryService.project([mapPoint], self.map.spatialReference).then(function (newPoint) {
-                    currentBaseMap = self.map.getLayer("defaultBasemap");
-                    if (!currentBaseMap) {
-                        currentBaseMap = self.map.getLayer("defaultBasemap0");
+                    var selectedBasemap, basemapId;
+                    selectedBasemap = appGlobals.configData.BaseMapLayers[appGlobals.shareOptions.selectedBasemapIndex];
+                    if (selectedBasemap.length) {
+                        basemapId = selectedBasemap[0].BasemapId;
+                    } else {
+                        basemapId = selectedBasemap.BasemapId;
                     }
-                    if (currentBaseMap.visible) {
+                    if (self.map.getLayer(basemapId)) {
+                        currentBaseMap = self.map.getLayer(basemapId);
+                    }
+                    if (currentBaseMap && currentBaseMap.visible) {
                         if (!currentBaseMap.fullExtent.contains(newPoint[0])) {
                             alert(sharedNls.errorMessages.invalidLocation);
                             topic.publish("hideProgressIndicator");
@@ -135,6 +140,7 @@ define([
         /**
         * add push pin on the map
         * @param {object} mapPoint Map point of device location in spatialReference of map
+        * @param {bool} isPreLoaded
         * @memberOf widgets/geoLocation/geoLocation
         */
         _addGraphic: function (mapPoint, isPreLoaded) {
@@ -151,6 +157,7 @@ define([
         /**
         * executed after adding geolocation graphic on map
         * @param {object} graphic
+        * @param {bool} isPreLoaded
         * @memberOf widgets/geoLocation/geoLocation
         */
         onGeolocationComplete: function (graphic, isPreLoaded) {
@@ -160,12 +167,17 @@ define([
         /**
         * executed when geolocation returns any error
         * @param {object} error
+        * @param {bool} isPreLoaded
         * @memberOf widgets/geoLocation/geoLocation
         */
         onGeolocationError: function (error, isPreLoaded) {
             return true;
         },
 
+        /**
+        * clears geolocation graphics ploted on layer
+        * @memberOf widgets/geoLocation/geoLocation
+        */
         clearGeoLocationGraphic: function () {
             if (this.map.getLayer(this.graphicsLayerId)) {
                 this.map.getLayer(this.graphicsLayerId).clear();

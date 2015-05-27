@@ -26,19 +26,22 @@ define([
     "dojo/dom-class",
     "dojo/_base/html",
     "dojo/dom-style",
+    "dojo/date/locale",
     "dojo/text!./templates/myListTemplate.html",
+    "dojo/window",
     "dijit/_WidgetBase",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
     "dojo/date",
+    "esri/geometry/Point",
     "dojo/_base/array",
     "dojo/string",
     "dojo/query",
     "dijit/a11yclick",
     "../myList/myListHelper"
-], function (declare, domConstruct, lang, on, dom, domAttr, domClass, html, domStyle, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, date, array, string, query, a11yclick, MyListHelper) {
+], function (declare, domConstruct, lang, on, dom, domAttr, domClass, html, domStyle, locale, template, win, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, date, Point, array, string, query, a11yclick, MyListHelper) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, MyListHelper], {
@@ -51,14 +54,14 @@ define([
         dateFieldArray: [],                  // Array to store date field name from layer to change date format
         isExtentSet: false,                  // Checks the extent is set in the case of shared app
         /**
-        * create myList widget to store feature added from activity and event, User can search show route, add to calendar, find route for list, print for list.
+        * Create myList widget to store feature added from activity and event, User can search show route, add to calendar, find route for list, print for list.
         *
         * @class
         * @name widgets/myList/myList
         */
         postCreate: function () {
             /**
-            * minimize other open header panel widgets and show myList
+            * Minimize other open header panel widgets and show myList
             */
             topic.subscribe("toggleWidget", lang.hitch(this, function (widget) {
                 var myListContainer = query(".esriCTMyListContainer")[0];
@@ -74,52 +77,52 @@ define([
                     }
                 }
             }));
-
             this.domNode = domConstruct.create("div", { "title": sharedNls.tooltips.eventsTooltip, "class": "esriCTEventsImg" }, null);
             dom.byId("esriCTParentDivContainer").appendChild(this.applicationHeaderActivityContainer);
 
-            /** Subscribe functions for calling them from other widget */
-            // subscribing for showing myList container.
+            /** Subscribe functions for calling them from other widget
+            subscribing for showing myList container.*/
             topic.subscribe("showActivityPlannerContainer", lang.hitch(this, function () {
                 this._showMyListContainer();
             }));
 
-            // subscribing to store feature set searched from event search in eventPlannerHelper.js file.
+            // Subscribing to store feature set searched from event search in eventPlannerHelper.js file.
             topic.subscribe("setEventFeatrueSet", lang.hitch(this, function (value) {
                 this.featureSet = value;
             }));
 
-            // subscribing to refresh myList panel data from other file.
+            // Subscribing to refresh myList panel data from other file.
             topic.subscribe("refreshMyList", lang.hitch(this, function (eventObject) {
                 this._refreshMyList(eventObject);
             }));
 
-            // subscribing to show route from list
+            // Subscribing to show route from list
             topic.subscribe("eventForListForShare", lang.hitch(this, function () {
                 this._drawRouteForListItem();
             }));
 
-            // subscribing for storing myList data from other file
+            // Subscribing for storing myList data from other file
             topic.subscribe("getMyListData", lang.hitch(this, function (value) {
                 this.myListStore = value;
             }));
 
-            // subscribing for storing myList data from other file
+            // Subscribing for storing myList data from other file
             topic.subscribe("infowWindowClick", lang.hitch(this, function () {
                 this.infowWindowClick = true;
             }));
-            // subscribing for replacing class
+
+            // Subscribing for replacing class
             topic.subscribe("replaceClassForMyList", lang.hitch(this, function () {
                 this._replaceClassForMyList();
             }));
 
-            // subscribing for call sort my list function from other file
+            // Subscribing for call sort my list function from other file
             topic.subscribe("sortMyList", lang.hitch(this, function (ascendingFlag, featureSet) {
                 this.sortedList = this._sortMyList(ascendingFlag, featureSet);
                 topic.publish("sortMyListData", this.sortedList);
             }));
 
-            // subscribing for replacing class for application header container.
+            // Subscribing for replacing class for application header container.
             topic.subscribe("replaceApplicationHeaderContainer", lang.hitch(this, function () {
                 domClass.replace(this.applicationHeaderActivityContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
             }));
@@ -131,12 +134,12 @@ define([
                 this._executeQueryForEventForList(featureSetObject);
             }));
 
-            // subscribing for getting widget name
+            // Subscribing for getting widget name
             topic.subscribe("showWidgetName", lang.hitch(this, function (widgetName) {
                 this.widgetName = widgetName;
             }));
 
-            // subscribing for add To List Features Data
+            // Subscribing for add To List Features Data
             topic.subscribe("addToListFeaturesData", lang.hitch(this, function (value) {
                 this.addToListFeatures = value;
             }));
@@ -162,15 +165,15 @@ define([
                     return;
                 }
                 topic.publish("extentSetValue", this.isExtentSet);
-                if (dojo.hasClass(this.orderByDateImage, "esriCTImgOrderByDateDown")) {
-                    //sort with descending order of date
+                if (domClass.contains(this.orderByDateImage, "esriCTImgOrderByDateDown")) {
+                    // Sort with descending order of date
                     sortedMyList = this._sortMyList(false, this.featureSet);
-                } else if (dojo.hasClass(this.orderByDateImage, "esriCTImgOrderByDateUp")) {
-                    //sort with ascending order of date
+                } else if (domClass.contains(this.orderByDateImage, "esriCTImgOrderByDateUp")) {
+                    // Sort with ascending order of date
                     sortedMyList = this._sortMyList(true, this.featureSet);
                 }
                 eventObject = { "EventDetails": null, "SortedData": sortedMyList, "InfowindowClick": false };
-                // show data in mylist panel after order by list.
+                // Show data in mylist panel after order by list.
                 this._refreshMyList(eventObject);
             })));
 
@@ -197,19 +200,23 @@ define([
             }));
             /** End of On click functions */
 
-            //check if getDirection is enable then add the class"esriCTHeaderDirectionAcitivityListDisable"
+            // Check if getDirection is enable then add the class"esriCTHeaderDirectionAcitivityListDisable"
             if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
                 domClass.add(this.directionForEvents, "esriCTHeaderDirectionAcitivityListDisable");
             }
+            on(window, "resize", lang.hitch(this, function () {
+                this.checkWidthForNexusDevice();
+            }));
+
             setTimeout(lang.hitch(this, function () {
                 var eventObjectId, activityObjectId;
-                //check if eventInfoWindowAttribute is there in share URL or not. It stores the event layer objectID.
+                // Check if eventInfoWindowAttribute is there in share URL or not. It stores the event layer objectID.
                 if (window.location.toString().split("$eventInfoWindowAttribute=").length > 1) {
                     eventObjectId = window.location.toString().split("eventInfoWindowAttribute=")[1].split("$")[0];
                     this._queryForEventShare(eventObjectId);
                     appGlobals.shareOptions.eventInfoWindowAttribute = eventObjectId;
                 }
-                //check if eventInfoWindowIdActivity is there in share URL or not. It stores the activity layer objectID.
+                // Check if eventInfoWindowIdActivity is there in share URL or not. It stores the activity layer objectID.
                 if (window.location.toString().split("$eventInfoWindowIdActivity=").length > 1) {
                     activityObjectId = window.location.toString().split("eventInfoWindowIdActivity=")[1].split("$")[0];
                     this._queryForActivityShare(activityObjectId);
@@ -226,7 +233,7 @@ define([
             var myListContainer = query(".esriCTMyListContainer")[0];
             if (html.coords(this.applicationHeaderActivityContainer).h > 1) {
                 /**
-                * when user clicks on eventPlanner icon in header panel, close the eventPlanner panel if it is open
+                * When user clicks on eventPlanner icon in header panel, close the eventPlanner panel if it is open
                 */
                 domClass.replace(this.domNode, "esriCTEventsImg", "esriCTEventsImgSelected");
                 domClass.replace(this.applicationHeaderActivityContainer, "esriCTHideContainerHeight", "esriCTShowContainerHeight");
@@ -235,7 +242,7 @@ define([
                 }
             } else {
                 /**
-                * when user clicks on eventPlanner icon in header panel, open the eventPlanner panel if it is closed
+                * When user clicks on eventPlanner icon in header panel, open the eventPlanner panel if it is closed
                 */
                 domClass.replace(this.domNode, "esriCTEventsImgSelected", "esriCTEventsImg");
                 this._showActivityTab();
@@ -247,14 +254,14 @@ define([
         },
 
         /**
-        * displays the updated and sorted list
+        * Displays the updated and sorted list
         * @param {object} object of event details having Event attributes, sorted event details, infowindow click
         * @param widgetName string for refresh page according to info window click
         * @memberOf widgets/myList/myList
         */
         _refreshMyList: function (eventObject) {
-            var myListContainer, fieldName, fieldValue, searchSetting, evenObjectID, featureArray = [], startDateAttribute, isDateFound = false, myListTable, myListRow, myListLeft = [], myListRight, myListIcons, eventDate, name, objectIdField, myListDeleteIcon = [], splitedField, finalText,
-                directionAcitivityList = [], startDate, endDate, difference, addToCalender = [], layerId, layerTitle, n, endDateKeyField, isAddToCalandarEnabled;
+            var fieldName, fieldValue, searchSetting, evenObjectID, featureArray = [], startDateAttribute, isDateFound = false, myListRow, myListLeft = [], myListRight, myListIcons, name, objectIdField, myListDeleteIcon = [], splitedField, finalText,
+                directionAcitivityList = [], startDate, endDate, difference, addToCalender = [], isStartDateFound = false, layerId, layerTitle, n, endDateKeyField, isAddToCalandarEnabled, startDateKeyField, calEventEndDate, calEventStartDate, startDatesCount = 0;
             topic.publish("showProgressIndicator");
             appGlobals.shareOptions.addToListEvents = eventObject;
             // Checking feature set data length for removing null value from features.
@@ -271,11 +278,11 @@ define([
             if (this.activityList.childNodes.length > 1) {
                 domConstruct.destroy(this.activityList.children[1]);
             }
-            myListContainer = domConstruct.create("div", { "class": "esriCTMyListContainer esriCTShowMyListContainer" }, this.activityList);
-            myListTable = domConstruct.create("div", { "class": "esriCTMyListTable" }, myListContainer);
+            this.myListContainer = domConstruct.create("div", { "class": "esriCTMyListContainer esriCTShowMyListContainer" }, this.activityList);
+            this.myListTable = domConstruct.create("div", { "class": "esriCTMyListTable" }, this.myListContainer);
             // Looping for creating row in my list panel from sorted data.
             array.forEach(eventObject.SortedData, function (myListEvent, j) {
-                var isStartDateFound = false;
+                isStartDateFound = false;
                 // Checking if my list item's search setting name for getting value from config.
                 if (myListEvent.settingsName === "eventsettings") {
                     searchSetting = appGlobals.configData.EventSearchSettings;
@@ -293,17 +300,15 @@ define([
                     }, this);
                     startDateAttribute = searchSetting[myListEvent.eventSettingsIndex].SortingKeyField ? this.getKeyValue(searchSetting[myListEvent.eventSettingsIndex].SortingKeyField) : "";
                     name = string.substitute(searchSetting[myListEvent.eventSettingsIndex].SearchDisplayFields, myListEvent.value);
-                    eventDate = myListEvent.value[startDateAttribute] || appGlobals.configData.ShowNullValueAs;
                     layerId = searchSetting[myListEvent.eventSettingsIndex].QueryLayerId;
                     layerTitle = searchSetting[myListEvent.eventSettingsIndex].Title;
                 } else {
                     name = string.substitute(searchSetting[0].SearchDisplayFields, myListEvent.value);
-                    eventDate = appGlobals.configData.ShowNullValueAs;
                     layerId = searchSetting[0].QueryLayerId;
                     layerTitle = searchSetting[0].Title;
                 }
                 objectIdField = string.substitute("${" + myListEvent.key + "}", myListEvent.value);
-                myListRow = domConstruct.create("div", { "class": "esriCTMyListRow" }, myListTable);
+                myListRow = domConstruct.create("div", { "class": "esriCTMyListRow" }, this.myListTable);
                 myListLeft[j] = domConstruct.create("div", { "class": "esriCTMyListLeft", "value": myListEvent.value }, myListRow);
                 // Checking if name field has no value then set to N/A
                 if (!name) {
@@ -320,8 +325,9 @@ define([
                 on(myListLeft[j], a11yclick, lang.hitch(this, function (event) {
                     this._clickOnMyListRow(event);
                 }));
-                directionAcitivityList[j] = domConstruct.create("div", { "title": sharedNls.tooltips.routeTooltip, "class": "esriCTDirectionEventListWithoutImage", "value": myListEvent.value }, myListIcons);
+                directionAcitivityList[j] = domConstruct.create("div", {"class": "esriCTDirectionEventListWithoutImage", "value": myListEvent.value }, myListIcons);
                 if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
+                    directionAcitivityList[j].title = sharedNls.tooltips.routeTooltip;
                     domClass.replace(directionAcitivityList[j], "esriCTDirectionEventList", "esriCTDirectionEventListWithoutImage");
                 }
                 domAttr.set(directionAcitivityList[j], "ObjectID", objectIdField);
@@ -329,23 +335,32 @@ define([
                 domAttr.set(directionAcitivityList[j], "LayerTitle", layerTitle);
                 // On click on my list item to calculate route and show data in bottom pod.
                 on(directionAcitivityList[j], a11yclick, lang.hitch(this, function (event) {
-                    this._clickOnRouteButton(event, directionAcitivityList[j], featureArray, eventObject);
+                    if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
+                        this._clickOnRouteButton(event, directionAcitivityList[j], featureArray, eventObject);
+                    }
                 }));
-                isAddToCalandarEnabled = true;
+                isAddToCalandarEnabled = false;
                 // Checking if list have no start date attribute.
                 if (myListEvent.settingsName === "eventsettings") {
-                    isStartDateFound = true;
                     endDateKeyField = this.getKeyValue(searchSetting[0].AddToCalendarSettings[0].EndDate);
-                    if (eventDate === appGlobals.configData.ShowNullValueAs || myListEvent.value[endDateKeyField] === appGlobals.configData.ShowNullValueAs) {
+                    startDateKeyField = this.getKeyValue(searchSetting[0].AddToCalendarSettings[0].StartDate);
+                    calEventEndDate = myListEvent.featureSet.utcDate[endDateKeyField];
+                    calEventStartDate = myListEvent.featureSet.utcDate[startDateKeyField];
+                    if (calEventStartDate === null || calEventEndDate === null || calEventStartDate === appGlobals.configData.ShowNullValueAs || calEventEndDate === appGlobals.configData.ShowNullValueAs) {
                         isAddToCalandarEnabled = false;
+                        if (calEventStartDate === null || calEventStartDate === appGlobals.configData.ShowNullValueAs) {
+                            isStartDateFound = false;
+                        } else {
+                            isStartDateFound = true;
+                        }
                     } else {
-                        startDate = new Date(eventDate);
-                        endDate = new Date(myListEvent.value[endDateKeyField]);
+                        isStartDateFound = true;
+                        startDate = new Date(calEventStartDate);
+                        endDate = new Date(calEventEndDate);
                         difference = date.difference(startDate, endDate, "day");
                         if (difference < 0) {
                             isAddToCalandarEnabled = false;
                         } else {
-                            isStartDateFound = true;
                             isAddToCalandarEnabled = true;
                             isDateFound = true;
                         }
@@ -353,6 +368,7 @@ define([
                 }
                 // If start date found then change the add to calendar icon color.
                 if (isStartDateFound) {
+                    startDatesCount++;
                     if (isAddToCalandarEnabled) {
                         addToCalender[j] = domConstruct.create("div", { "title": sharedNls.tooltips.addToCalanderTooltip, "class": "esriCTAddEventList" }, myListIcons);
                         domAttr.set(addToCalender[j], "WidgetName", "eventlistitem");
@@ -373,7 +389,7 @@ define([
                 })));
                 myListDeleteIcon[j] = domConstruct.create("div", { "title": sharedNls.tooltips.deleteFromListTooltip, "class": "esriCTDeleteEventList" }, myListIcons);
                 domAttr.set(myListDeleteIcon[j], "ID", myListEvent.id);
-                //if new event is being added, highlight the added event
+                // If new event is being added, highlight the added event
                 if (eventObject.EventDetails) {
                     if (objectIdField === evenObjectID) {
                         domClass.add(myListRow, "esriCTMyListRowChecked");
@@ -389,13 +405,14 @@ define([
                     this._clickOnMyListDeleteIcon(event, myListDeleteIcon, myListLeft, eventObject);
                 })));
             }, this);
-            domStyle.set(myListTable, "display", "block");
+            domStyle.set(this.myListTable, "display", "block");
+            this.checkWidthForNexusDevice();
             if (isDateFound) {
                 domClass.replace(this.calenderForEvent, "esriCTHeaderAddAcitivityList", "esriCTHeaderAddAcitivityListDisable");
             } else {
                 domClass.replace(this.calenderForEvent, "esriCTHeaderAddAcitivityListDisable", "esriCTHeaderAddAcitivityList");
             }
-            if (!isDateFound) {
+            if (startDatesCount < 2) {
                 domClass.replace(this.orderByDateList, "esriCTMyListHeaderTextDisable", "esriCTMyListHeaderText");
                 domClass.replace(this.orderByDateImage, "esriCTImgOrderByDateDownDisable", "esriCTImgOrderByDateDown");
                 domClass.replace(this.orderByDateImage, "esriCTImgOrderByDateDisable", "esriCTImgOrderByDate");
@@ -418,7 +435,8 @@ define([
         * @memberOf widgets/myList/myList
         */
         _clickOnMyListRow: function (event) {
-            var featureData, mapPoint, objectIDforRow, LayerId, LayerTitle, g, activityListObjectId, infoWindowParameter;
+            var featureData, mapPoint, objectIDforRow, LayerId, LayerTitle, g, activityListObjectId, infoWindowParameter, tolerance, screenPoint, mapPoint1, mapPoint2,
+                pnt1, pnt2, shareOptionScreenPoint;
             topic.publish("hideCarouselContainer");
             LayerId = Number(domAttr.get(event.currentTarget, "LayerId"));
             LayerTitle = domAttr.get(event.currentTarget, "LayerTitle");
@@ -433,7 +451,7 @@ define([
                     break;
                 }
             }
-            //object of infowindow parameter
+            // Object of infowindow parameter
             infoWindowParameter = {
                 "mapPoint": featureData.geometry,
                 "attribute": featureData.attributes,
@@ -447,6 +465,15 @@ define([
             mapPoint = featureData.geometry;
             topic.publish("extentFromPoint", mapPoint);
             appGlobals.shareOptions.mapClickedPoint = mapPoint;
+            tolerance = 20;
+            screenPoint = this.map.toScreen(mapPoint);
+            pnt1 = new Point(screenPoint.x - tolerance, screenPoint.y + tolerance);
+            pnt2 = new Point(screenPoint.x + tolerance, screenPoint.y - tolerance);
+            mapPoint1 = this.map.toMap(pnt1);
+            mapPoint2 = this.map.toMap(pnt2);
+            // Set the screen point xmin, ymin, xmax, ymax
+            shareOptionScreenPoint = mapPoint1.x + "," + mapPoint1.y + "," + mapPoint2.x + "," + mapPoint2.y;
+            appGlobals.shareOptions.screenPoint = shareOptionScreenPoint;
             topic.publish("createInfoWindowContent", infoWindowParameter);
             topic.publish("setZoomAndCenterAt", featureData.geometry);
         },
@@ -515,38 +542,38 @@ define([
             settingsName = domAttr.get(event.currentTarget, "SettingsName");
             objectID = domAttr.get(event.currentTarget, "ObjectID");
             startDate = domAttr.get(event.currentTarget, "StartDate");
-            //verify the layer is event or activity
+            // Verify the layer is event or activity
             if (settingsName === "eventsettings") {
                 searchSetting = appGlobals.configData.EventSearchSettings;
             } else {
                 searchSetting = appGlobals.configData.ActivitySearchSettings;
             }
-            //loop for feature which is added on myList
+            // Loop for feature which is added on myList
             for (i = 0; i < this.addToListFeatures.length; i++) {
-                //"getObjectIdFromAddToList" returns the objectId fields
+                // "getObjectIdFromAddToList" returns the objectId fields
                 objectIdFeild = this.getObjectIdFromAddToList(this.addToListFeatures[i]);
                 if (this.addToListFeatures[i].value.attributes[objectIdFeild] === Number(objectID)) {
                     indexForData = i;
                 }
-                //"splice" is use to delete feature from Mylist
+                // "splice" is use to delete feature from Mylist
                 this.addToListFeatures.splice(indexForData, 1);
             }
             topic.publish("addToListFeaturesUpdate", this.addToListFeatures);
-            // store the event objectID which is added from Infowindow and bottom pod
+            // Store the event objectID which is added from Infowindow and bottom pod
             if (appGlobals.shareOptions.eventInfoWindowAttribute) {
                 infoWindowArray = appGlobals.shareOptions.eventInfoWindowAttribute.split(",");
             }
-            // store the activity objectID which is added from Infowindow and bottom pod
+            // Store the activity objectID which is added from Infowindow and bottom pod
             if (appGlobals.shareOptions.eventInfoWindowIdActivity) {
                 infoWindowArrayActivity = appGlobals.shareOptions.eventInfoWindowIdActivity.split(",");
             }
-            //appGlobals.shareOptions.eventIndex(array) is store the event objectID which is search from datePicker
+            // AppGlobals.shareOptions.eventIndex(array) is store the event objectID which is search from datePicker
             if (appGlobals.shareOptions.eventIndex) {
                 eventIndexArray = appGlobals.shareOptions.eventIndex.split(",");
             }
             appGlobals.shareOptions.eventInfoWindowAttribute = null;
             appGlobals.shareOptions.eventIndex = null;
-            // looping for deleting events and activity from myList
+            // Looping for deleting events and activity from myList
             for (m = 0; m < this.myListStore.length; m++) {
                 objId = this.myListStore[m].value[this.myListStore[m].key].toString();
                 if (infoWindowArray) {
@@ -587,14 +614,14 @@ define([
                 domClass.replace(this.orderByDateImage, "esriCTImgOrderByDateDisable", "esriCTImgOrderByDate");
                 domClass.replace(this.orderByDateImage, "esriCTImgOrderByDateDisable", "esriCTImgOrderByDateUp");
             }
-            //sort with ascending order of date
+            // Sort with ascending order of date
             eventObject.SortedData = this._sortMyList(true, this.featureSet);
             eventObjectToRefresh = { "EventDetails": null, "SortedData": eventObject.SortedData, "InfowindowClick": eventObject.InfowindowClick, "layerId": searchSetting.QueryLayerId, "layerTitle": searchSetting.Title, "settingsName": settingsName, "key": objectID, "startDateField": startDate };
             this._refreshMyList(eventObjectToRefresh);
         },
 
         /**
-        * function to draw route for single list item
+        * Function to draw route for single list item
         *@param {eventListObject} feature set for single event list item
         *@param {featureArray} feature array object
         *@param {eventObject} containing the data related to event item
@@ -651,7 +678,7 @@ define([
         },
 
         /**
-        * convert the UTC time stamp from Millisecond
+        * Convert the UTC time stamp from Millisecond
         * @returns Date
         * @param {object} utcMilliseconds contains UTC millisecond
         * @memberOf widgets/myList/myList
@@ -661,7 +688,7 @@ define([
         },
 
         /**
-        * convert the local time to UTC
+        * Convert the local time to UTC
         * @param {object} localTimestamp contains Local time
         * @returns Date
         * @memberOf widgets/myList/myList
@@ -671,7 +698,7 @@ define([
         },
 
         /**
-        * draw route for event list items
+        * Draw route for event list items
         * @memberOf widgets/myList/myList
         */
         _drawRouteForListItem: function () {
@@ -688,7 +715,7 @@ define([
             appGlobals.shareOptions.addressLocationDirectionActivity = null;
             appGlobals.shareOptions.sharedGeolocation = null;
             appGlobals.shareOptions.infoRoutePoint = null;
-            sortResult = this._sortDate(this.ascendingFlag);
+            sortResult = this.sortDate(this.ascendingFlag);
             eventListArrayList = [];
             // Looping for getting feature set.
             for (q = 0; q < sortResult.length; q++) {
@@ -700,8 +727,10 @@ define([
             } else {
                 topic.publish("hideInfoWindow");
             }
-        }, /**
-        * check if field type is date
+        },
+
+        /**
+        * Check if field type is date
         * @param{object} layerObj - layer data
         * @param{string} fieldName - current field
         * @memberOf widgets/myList/myList
@@ -723,7 +752,7 @@ define([
         * @param{string} dataFieldValue
         * @memberOf widgets/myList/myList
         */
-        setDateFormat: function (dateFieldInfo, dateFieldValue, widgetName) {
+        setDateFormat: function (dateFieldInfo, dateFieldValue) {
             var isFormatedDate = false, formatedDate, dateObj, popupDateFormat;
             formatedDate = Number(dateFieldValue);
             if (formatedDate) {
@@ -735,7 +764,7 @@ define([
             if (dateFieldInfo.format && dateFieldInfo.format.dateFormat) {
                 if (!isFormatedDate) {
                     popupDateFormat = this._getDateFormat(dateFieldInfo.format.dateFormat);
-                    dateFieldValue = dojo.date.locale.format(dateObj, {
+                    dateFieldValue = locale.format(dateObj, {
                         datePattern: popupDateFormat,
                         selector: "date"
                     });
@@ -776,6 +805,9 @@ define([
             case "shortDateLELongTime":
                 dateFormat = "dd/MM/yyyy hh:mm:ss a";
                 break;
+            case "shortDateLELongTime24":
+                dateFormat = "dd/MM/yyyy hh:mm:ss";
+                break;
             case "shortDateShortTime":
                 dateFormat = "MM/dd/yyyy hh:mm a";
                 break;
@@ -784,6 +816,9 @@ define([
                 break;
             case "shortDateShortTime24":
                 dateFormat = "MM/dd/yyyy HH:mm";
+                break;
+            case "shortDateLongTime24":
+                dateFormat = "MM/dd/yyyy hh:mm:ss";
                 break;
             case "shortDateLEShortTime24":
                 dateFormat = "dd/MM/yyyy HH:mm";
@@ -817,21 +852,21 @@ define([
                     if (layerObject.fields[i].domain && layerObject.fields[i].domain.codedValues) {
                         fieldInfo = layerObject.fields[i];
                     } else if (layerObject.typeIdField) {
-                        // get types from layer object, if typeIdField is available
+                        // Get types from layer object, if typeIdField is available
                         for (j = 0; j < layerObject.types.length; j++) {
                             if (String(layerObject.types[j].id) === String(feature[layerObject.typeIdField])) {
                                 fieldInfo = layerObject.types[j];
                                 break;
                             }
                         }
-                        // if types info is found for current value of typeIdField then break the outer loop
+                        // If types info is found for current value of typeIdField then break the outer loop
                         if (fieldInfo) {
                             break;
                         }
                     }
                 }
             }
-            // get domain values from layer types object according to the value of typeIdfield
+            // Get domain values from layer types object according to the value of typeIdfield
             if (fieldInfo && fieldInfo.domains) {
                 if (layerObject.typeIdField && layerObject.typeIdField !== fieldName) {
                     fieldInfo.isTypeIdField = false;
@@ -850,7 +885,7 @@ define([
         },
 
         /**
-        * fetch domain coded value
+        * Fetch domain coded value
         * @param{object} operationalLayerDetails
         * @param{string} fieldValue
         * @memberOf widgets/myList/myList
@@ -864,11 +899,8 @@ define([
                     // Loop for codedValue
                     for (k = 0; k < codedValues.length; k++) {
                         // Check if the value is string or number
-                        if (isNaN(codedValues[k].code)) {
-                            // Check if the fieldValue and codedValue is equal
-                            if (codedValues[k].code === fieldValue) {
-                                fieldValue = codedValues[k].name;
-                            }
+                        if (codedValues[k].code === fieldValue) {
+                            fieldValue = codedValues[k].name;
                         } else if (codedValues[k].code === parseInt(fieldValue, 10)) {
                             fieldValue = codedValues[k].name;
                         }
@@ -878,7 +910,6 @@ define([
             domainValueObj.domainCodedValue = fieldValue;
             return domainValueObj;
         },
-
 
         /**
         * Format number value based on the format received from info popup
@@ -902,6 +933,38 @@ define([
                 }
             }
             return fieldValue;
+        },
+
+        /**
+        * this function is used to convert number to thousand separator
+        * @memberOf widgets/mapSettings/mapSettings
+        */
+        convertNumberToThousandSeperator: function (number) {
+            number = number.split(".");
+            number[0] = number[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+            return number.join('.');
+        },
+
+        /**
+        * Check width of device for scroll
+        * @memberOf widgets/myList/myList
+        */
+        checkWidthForNexusDevice: function () {
+            var headerMyListRight, myListContainerHeight, myListTableHeight;
+            headerMyListRight = query(".esriCTHeaderMyListRight")[0];
+            myListContainerHeight = domStyle.get(this.myListContainer, "height");
+            myListTableHeight = domStyle.get(this.myListTable, "height");
+            if (win.getBox().w === 640 || win.getBox().w === 360) {
+                if (myListContainerHeight < myListTableHeight) {
+                    if (!domClass.contains(headerMyListRight, "esriCTExtraPadding")) {
+                        domClass.add(headerMyListRight, "esriCTExtraPadding");
+                    }
+                } else {
+                    if (domClass.contains(headerMyListRight, "esriCTExtraPadding")) {
+                        domClass.remove(headerMyListRight, "esriCTExtraPadding");
+                    }
+                }
+            }
         }
     });
 });

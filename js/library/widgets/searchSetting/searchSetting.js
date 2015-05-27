@@ -43,10 +43,9 @@ define([
     "../searchSetting/eventPlannerHelper",
     "widgets/locator/locator",
     "dijit/a11yclick",
-    "dojo/string",
     "dojo/date/locale"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, Query, Deferred, QueryTask, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, urlUtils, ActivitySearch, esriRequest, EventPlannerHelper, LocatorTool, a11yclick, string, locale) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, Query, Deferred, QueryTask, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, urlUtils, ActivitySearch, esriRequest, EventPlannerHelper, LocatorTool, a11yclick, locale) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, ActivitySearch, EventPlannerHelper], {
@@ -62,7 +61,7 @@ define([
         geoLocationGraphicsLayerID: "geoLocationGraphicsLayer",           // Geolocation graphics layer id
         locatorGraphicsLayerID: "esriGraphicsLayerMapSettings",           // Locator graphics layer id
         /**
-        * display locator, activity and event search in one panel
+        * Display locator, activity and event search in one panel
         *
         * @class
         * @name widgets/searchSetting/searchSetting
@@ -79,7 +78,7 @@ define([
             domAttr.set(this.activityPanelTitle, "title", appGlobals.configData.ActivityPanelTitle);
             domAttr.set(this.eventsPanelTitle, "title", appGlobals.configData.EventPanelTitle);
             /**
-            * close locator widget if any other widget is opened
+            * Close locator widget if any other widget is opened
             * @param {string} widget Key of the newly opened widget
             */
             topic.subscribe("toggleWidget", lang.hitch(this, function (widget) {
@@ -115,7 +114,7 @@ define([
             domConstruct.place(this.divSearchContainer, dom.byId("esriCTParentDivContainer"));
             this.own(on(this.domNode, a11yclick, lang.hitch(this, function () {
                 /**
-                * minimize other open header panel widgets and show locator widget
+                * Minimize other open header panel widgets and show locator widget
                 */
                 this.isExtentSet = true;
                 this.isInfowindowHide = true;
@@ -127,12 +126,12 @@ define([
                     this._showActivitiesList();
                 }
             })));
-            // subscribing to store value for extent from other widget.
+            // Subscribing to store value for extent from other widget.
             topic.subscribe("extentSetValue", lang.hitch(this, function (value) {
                 this.isExtentSet = value;
             }));
             domAttr.set(this.divSearchContainer, "title", "");
-            // click for activity tab in search header panel
+            // Click for activity tab in search header panel
             this.own(on(this.divActivityPanel, a11yclick, lang.hitch(this, function () {
                 this._showActivityTab();
             })));
@@ -140,15 +139,15 @@ define([
             if (appGlobals.configData.ActivitySearchSettings[0].Enable) {
                 this._showActivitySearchContainer();
             }
-            // click for unified search tab in search header panel
+            // Click for unified search tab in search header panel
             this.own(on(this.divSearchPanel, a11yclick, lang.hitch(this, function () {
                 this._showSearchTab();
             })));
-            // click for event tab in search header panel
+            // Click for event tab in search header panel
             this.own(on(this.divEventsPanel, a11yclick, lang.hitch(this, function () {
                 this._showEventTab();
             })));
-            //click on "GO" button in activity search
+            // click on "GO" button in activity search
             this.own(on(this.buttonGo, a11yclick, lang.hitch(this, function () {
                 topic.publish("hideInfoWindow");
                 topic.publish("removeHighlightedCircleGraphics");
@@ -156,19 +155,19 @@ define([
                 this.featureSet.length = 0;
                 this._activityPlannerDateValidation();
             })));
-            // change event for date in event planner
+            // Change event for date in event planner
             this.own(on(this.myFromDate, "change", lang.hitch(this, function () {
                 this.myToDate.reset();
                 this.myToDate.constraints.min = this.myFromDate.value;
             })));
-            // proxy setting for route services
+            // Proxy setting for route services
             urlUtils.addProxyRule({
                 urlPrefix: appGlobals.configData.DrivingDirectionSettings.RouteServiceURL,
                 proxyUrl: appGlobals.configData.ProxyUrl
             });
-            // calling function to showing the search tab
+            // Calling function to showing the search tab
             this._showSearchTab();
-            //locator object for unified search
+            // Locator object for unified search
             locatorParams = {
                 defaultAddress: appGlobals.configData.LocatorSettings.LocatorDefaultAddress,
                 preLoaded: false,
@@ -196,7 +195,7 @@ define([
                     }
                 }
             });
-            //locator candidate click for unified search
+            // Locator candidate click for unified search
             locatorObject.candidateClicked = lang.hitch(this, function (candidate) {
                 this.selectedLayerTitle = null;
                 topic.publish("hideInfoWindow");
@@ -205,9 +204,9 @@ define([
                     appGlobals.shareOptions.searchSettingsDetails = null;
                     topic.publish("createBuffer", locatorObject.selectedGraphic);
                 }
-                //calling function for locate container
+                // Calling function for locate container
                 this._showLocateContainer();
-                //calling function to remove the geolocation pushpin
+                // Calling function to remove the geolocation pushpin
                 topic.publish("removeGeolocationPushPin");
                 if (candidate.geometry) {
                     locatorObject._toggleTexBoxControls(false);
@@ -221,17 +220,16 @@ define([
                     getSearchSettingsDetails = this.getSearchSetting(candidate.layer.QueryURL);
                     objectIDField = candidate.attributes[candidate.layer.ObjectID];
                     appGlobals.shareOptions.searchSettingsDetails = getSearchSettingsDetails.settingName + "," + getSearchSettingsDetails.index + "," + objectIDField;
-                    //topic.publish("queryLayer", candidate.geometry, candidate, "unifiedsearch");
                     if (locatorObject && locatorObject.selectedGraphic === null) {
                         appGlobals.shareOptions.addressLocation = candidate.geometry.x.toString() + "," + candidate.geometry.y.toString();
                     }
                 }
             });
-            // subscribing to store value of myList data.
+            // Subscribing to store value of myList data.
             topic.subscribe("getAcitivityListDiv", lang.hitch(this, function (value) {
                 this.acitivityListDiv = value;
             }));
-            // subscribing function getting carousel Container object
+            // Subscribing function getting carousel Container object
             topic.subscribe("getCarouselContainer", lang.hitch(this, function (value, carouselPodData) {
                 this.carouselContainer = value;
                 this.carouselPodData = carouselPodData;
@@ -242,13 +240,13 @@ define([
             topic.subscribe("sortMyListData", lang.hitch(this, function (value) {
                 this.sortedList = value;
             }));
-            // subscribing function for setting myListStoreData
+            // Subscribing function for setting myListStoreData
             topic.subscribe("getMyListStoreData", lang.hitch(this, function (value) {
                 this.myListStore = value;
             }));
-            // subscribing "addressSearch" in share URL
+            // Subscribing "addressSearch" in share URL
             topic.subscribe("addressSearch", lang.hitch(this, function () {
-                // check "address" is there in share URL
+                // Check "address" is there in share URL
                 if (window.location.toString().split("$address=").length > 1) {
                     mapPoint = new Point(window.location.toString().split("$address=")[1].split("$")[0].split(",")[0], window.location.toString().split("$address=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
                     appGlobals.shareOptions.addressLocation = window.location.toString().split("$address=")[1].split("$")[0];
@@ -261,13 +259,13 @@ define([
             setTimeout(lang.hitch(this, function () {
                 if (window.location.toString().split("$sharedGeolocation=").length > 1 && window.location.toString().split("$sharedGeolocation=")[1].substring(0, 5) !== "false") {
                     var isZoomToGeolocation = this.setZoomForGeolocation();
-                    // check  if  required fields in browsers that support for geolocation or not
+                    // Check  if  required fields in browsers that support for geolocation or not
                     if (Modernizr.geolocation) {
                         // dijit.registry stores a collection of all the geoLocation widgets within a page
                         if (dijit.registry.byId("geoLocation")) {
                             dijit.registry.byId("geoLocation").showCurrentLocation(true, isZoomToGeolocation);
                             dijit.registry.byId("geoLocation").onGeolocationComplete = lang.hitch(this, function (mapPoint, isPreLoaded) {
-                                //variable to stored the gelocation point for share URL
+                                // Variable to stored the gelocation point for share URL
                                 appGlobals.shareOptions.sharedGeolocation = mapPoint;
                                 if (mapPoint) {
                                     if (isPreLoaded) {
@@ -293,7 +291,7 @@ define([
             // Function for share app
             setTimeout(lang.hitch(this, function () {
                 var startDate, endDate, formatedStartDate, formatedEndDate;
-                //check if eventplanner is there in share URL or not.
+                // Check if eventplanner is there in share URL or not.
                 if (window.location.toString().split("$eventplanner=").length > 1) {
                     startDate = window.location.toString().split("$startDate=")[1].split("$endDate=")[0].replace(new RegExp(",", 'g'), " ");
                     endDate = window.location.toString().split("$startDate=")[1].split("$endDate=")[1].split("$")[0].replace(new RegExp(",", 'g'), " ");
@@ -312,7 +310,7 @@ define([
         },
 
         /**
-        * execute query for the layer
+        * Execute query for the layer
         * @param {number} index of feature layer
         * @param {object} mapPoint
         * @param {array} onMapFeaturArray Contains array of feature layer URL
@@ -339,7 +337,7 @@ define([
         },
 
         /**
-        * get the setting name by passing query layer
+        * Get the setting name by passing query layer
         * @param{string} queryURL contains the url
         * @return search setting Data
         * @memberOf widgets/searchSetting/searchSetting
@@ -362,7 +360,7 @@ define([
         },
 
         /**
-        * get the url from settings
+        * Get the url from settings
         * @param{string} settingsName contains the settings name
         * @param{string} index contains index number of settings
         * @return URL of the search settings
@@ -389,7 +387,7 @@ define([
         },
 
         /**
-        * get the setting name by passing query layer
+        * Get the setting name by passing query layer
         * @ return search setting Data
         * @memberOf widgets/commonHelper/commonHelper
         */
@@ -462,7 +460,7 @@ define([
         },
 
         /**
-        * change the date format with configured date format
+        * Change the date format with configured date format
         * @param {object} object of featureSet
         * @return {object} object of event Search Settings
         * @memberOf widgets/searchSetting/searchSetting
@@ -471,7 +469,6 @@ define([
             var attributes, i, l, j, k, layerDetails, fieldValue, fieldName, fieldInfo;
             for (k = 0; k < featureSet.features.length; k++) {
                 attributes = featureSet.features[k].attributes;
-
                 for (l in attributes) {
                     if (attributes.hasOwnProperty(l)) {
                         if ((!attributes[l]) && (attributes[l] !== 0 || lang.trim(String(attributes[l])) === "")) {
@@ -484,7 +481,7 @@ define([
                         layerDetails = appGlobals.operationLayerSettings[i].layerDetails;
                         for (j = 0; j < layerDetails.popupInfo.fieldInfos.length; j++) {
                             try {
-                                //get field value from feature attributes
+                                // Get field value from feature attributes
                                 fieldValue = attributes[layerDetails.popupInfo.fieldInfos[j].fieldName];
                             } catch (ex) {
                                 fieldValue = appGlobals.configData.ShowNullValueAs;
@@ -518,7 +515,7 @@ define([
         },
 
         /**
-        * hide eventPlanner list when date is not selected or selected date is not valid
+        * Hide eventPlanner list when date is not selected or selected date is not valid
         * @member Of widgets/searchSetting/searchSetting
         */
         _hideActivitiesList: function () {
@@ -552,14 +549,14 @@ define([
 
         /**
         * Setting value to change for extent
-        *@returns the boolean value for setting extent for geolocation
+        * @returns the boolean value for setting extent for geolocation
         * @member Of widgets/searchSetting/searchSetting
         */
         setZoomForGeolocation: function () {
             var isZoomToLocation = false;
-            // checking if application in share url, If it is a share url then do not set extent, else set extent
+            // Checking if application in share url, If it is a share url then do not set extent, else set extent
             if (window.location.href.toString().split("$extentChanged=").length > 1) {
-                // checking if application in share url, If it is a share url then do not set extent, else set extent
+                // Checking if application in share url, If it is a share url then do not set extent, else set extent
                 if (this.isExtentSet) {
                     isZoomToLocation = true;
                 } else {
@@ -571,7 +568,7 @@ define([
             return isZoomToLocation;
         },
         /**
-        * check if field type is date
+        * Check if field type is date
         * @param{object} layerObj - layer data
         * @param{string} fieldName - current field
         * @memberOf widgets/commonHelper/InfoWindowHelper
@@ -593,7 +590,7 @@ define([
         * @param{string} dataFieldValue
         * @memberOf widgets/commonHelper/InfoWindowHelper
         */
-        setDateFormat: function (dateFieldInfo, dateFieldValue, widgetName) {
+        setDateFormat: function (dateFieldInfo, dateFieldValue) {
             var isFormatedDate = false, formatedDate, dateObj, popupDateFormat;
             formatedDate = Number(dateFieldValue);
             if (formatedDate) {
@@ -605,7 +602,7 @@ define([
             if (dateFieldInfo.format && dateFieldInfo.format.dateFormat) {
                 if (!isFormatedDate) {
                     popupDateFormat = this._getDateFormat(dateFieldInfo.format.dateFormat);
-                    dateFieldValue = dojo.date.locale.format(dateObj, {
+                    dateFieldValue = locale.format(dateObj, {
                         datePattern: popupDateFormat,
                         selector: "date"
                     });
@@ -646,6 +643,9 @@ define([
             case "shortDateLELongTime":
                 dateFormat = "dd/MM/yyyy hh:mm:ss a";
                 break;
+            case "shortDateLELongTime24":
+                dateFormat = "dd/MM/yyyy hh:mm:ss";
+                break;
             case "shortDateShortTime":
                 dateFormat = "MM/dd/yyyy hh:mm a";
                 break;
@@ -654,6 +654,9 @@ define([
                 break;
             case "shortDateShortTime24":
                 dateFormat = "MM/dd/yyyy HH:mm";
+                break;
+            case "shortDateLongTime24":
+                dateFormat = "MM/dd/yyyy hh:mm:ss";
                 break;
             case "shortDateLEShortTime24":
                 dateFormat = "dd/MM/yyyy HH:mm";

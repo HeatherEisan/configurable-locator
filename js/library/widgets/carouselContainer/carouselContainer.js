@@ -18,21 +18,18 @@
 //============================================================================================================================//
 define([
     "dojo/_base/declare",
-    "dojo/dom-geometry",
     "dijit/_WidgetBase",
     "dojo/dom-construct",
     "dojo/_base/lang",
     "dojo/dom-attr",
     "dojo/dom-style",
-    "dojo/dom",
     "dojo/dom-class",
     "dojo/query",
-    "dojo/topic",
     "dojo/on",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dijit/a11yclick"
 
-], function (declare, domGeom, WidgetBase, domConstruct, lang, domAttr, domStyle, dom, domClass, query, topic, on, sharedNls, a11yclick) {
+], function (declare, WidgetBase, domConstruct, lang, domAttr, domStyle, domClass, query, on, sharedNls, a11yclick) {
 
     //========================================================================================================================//
 
@@ -43,7 +40,6 @@ define([
         divImageBackground: null,                     // Variable for back ground image div
         imgToggleResults: null,                       // Variable for toggle result image
         divCarouselContent: null,                     // Variable for carousel content div
-        resultboxPanel: null,                         // Variable for result box panel
         resultboxPanelContent: null,                  // Variable for result box panel content
 
         /**
@@ -60,7 +56,7 @@ define([
         * @memberOf widgets/carouselContainer/carouselContainer
         */
         createPod: function (parentNote, spanValue) {
-            var divCarouselContentInfo;
+            var divCarouselContentInfo, resultboxPanel;
             this.divToggle = domConstruct.create("div", { "class": "esriCTdivToggle" }, parentNote);
             this.divImageBackground = domConstruct.create("div", { "class": "esriCTDivImageBackground" }, this.divToggle);
             this.imgToggleResults = domConstruct.create("div", { "class": "esriCTUpAndDownArrow" }, this.divImageBackground);
@@ -72,8 +68,8 @@ define([
             domClass.add(this.divCarouselContent, "esriCTzeroHeight");
             divCarouselContentInfo = domConstruct.create("div", { "class": "esriCTtransparentBackground" }, this.divCarouselContent);
             domClass.add(divCarouselContentInfo, "esriCTDivCarouselContentInfo");
-            this.resultboxPanel = domConstruct.create("div", { "class": "esriCTResultBoxPanel" }, divCarouselContentInfo);
-            this.resultboxPanelContent = domConstruct.create("div", { "class": "esriCTResultBoxPanelContent" }, this.resultboxPanel);
+            resultboxPanel = domConstruct.create("div", { "class": "esriCTResultBoxPanel" }, divCarouselContentInfo);
+            this.resultboxPanelContent = domConstruct.create("div", { "class": "esriCTResultBoxPanelContent" }, resultboxPanel);
             // On click on image for wipe in and wipeout.
             this.own(on(this.divImageBackground, a11yclick, lang.hitch(this, function () {
                 // Checking condition if pod is added in container
@@ -104,17 +100,6 @@ define([
                     this.isPodCreated++;
                     this.resultboxPanelContent.appendChild(content[i]);
                 }
-            }
-        },
-
-        /**
-        * Destroy carousel pod
-        * @memberOf widgets/carouselContainer/carouselContainer
-        */
-        destroyPod: function () {
-            // Checking condition if pod is added in container
-            if (this.resultboxPanelContent && this.resultboxPanelContent.childNodes) {
-                dojo.destroy(this.resultboxPanelContent);
             }
         },
 

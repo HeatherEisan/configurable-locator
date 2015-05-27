@@ -52,8 +52,7 @@
     }
 }
 
-@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) /*if device wise @media only screen and (min-device-width : 1024px) and (max-device-width : 1280px)*/
-{
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) /*if device wise @media only screen and (min-device-width : 1024px) and (max-device-width : 1280px)*/ {
     html, body {
         font-size: 14px !important;
     }
@@ -125,8 +124,7 @@
     }
 }
 
-@media only screen and (min-width : 768px) and (max-width : 1024px) /*if device wise  @media only screen and (min-device-width : 768px) and (max-device-width : 1024px)*/
-{
+@media only screen and (min-width : 768px) and (max-width : 1024px) /*if device wise  @media only screen and (min-device-width : 768px) and (max-device-width : 1024px)*/ {
     html, body {
         font-size: 14px !important;
     }
@@ -229,6 +227,7 @@
 
     .esriCTSecondChild {
         font-size: 14px !important;
+        width: 42%;
     }
 
     .esriPopup {
@@ -501,7 +500,7 @@
         padding: 8px 16px;
     }
 
-    .esriCTGalleryInfoContainer, .esriCTDirectionTabContent, .esriCTInfoCommentOuterContainer {
+    .esriCTGalleryInfoContainer, .esriCTDirectionTabContent, .esriCTAddToListTabContent, .esriCTInfoCommentOuterContainer {
         width: 100%;
     }
 
@@ -510,9 +509,9 @@
         margin-right: 0px;
     }
 
-        .esriCTGalleryInfoContainer div.esriCTImgPrev, .esriCTGalleryInfoContainer div.esriCTImgNext {
-            bottom: 44%;
-        }
+    .esriCTGalleryInfoContainer div.esriCTImgPrev, .esriCTGalleryInfoContainer div.esriCTImgNext {
+        bottom: 44%;
+    }
 
     .esriCTCustomMapLogoPostionChange {
         bottom: 35px;
@@ -934,9 +933,9 @@
         width: 100%;
     }
 
-        .esriCTGalleryInfoContainer div.esriCTImgPrev, .esriCTGalleryInfoContainer div.esriCTImgNext {
-            bottom: 45%;
-        }
+    .esriCTGalleryInfoContainer div.esriCTImgPrev, .esriCTGalleryInfoContainer div.esriCTImgNext {
+        bottom: 45%;
+    }
 
     .esriCTGalleryInfoContainer {
         height: 94%;

@@ -48,7 +48,7 @@ define([
         */
 
         /**
-        * show Activity result tap
+        * Show Activity result tap
         * @memberOf widgets/searchSetting/activitySearch
         */
         _showActivityTab: function () {
@@ -62,7 +62,7 @@ define([
         },
 
         /**
-        * show/hide locator widget and set default search text
+        * Show/hide locator widget and set default search text
         * @memberOf widgets/searchSetting/activitySearch
         */
         _showLocateContainer: function () {
@@ -82,7 +82,7 @@ define([
         },
 
         /**
-        * display search by address tab
+        * Display search by address tab
         * @memberOf widgets/searchSetting/activitySearch
         */
         _showAddressSearchView: function () {
@@ -92,7 +92,7 @@ define([
         },
 
         /**
-        * show search result tap
+        * Show search result tap
         * @memberOf widgets/searchSetting/activitySearch
         */
         _showSearchTab: function () {
@@ -106,7 +106,7 @@ define([
         },
 
         /**
-        * create activity search panel with selected activity
+        * Create activity search panel with selected activity
         * @memberOf widgets/searchSetting/activitySearch
         */
         _showActivitySearchContainer: function () {
@@ -114,6 +114,7 @@ define([
             activitySearchMainContainer = domConstruct.create("div", { "class": "esriCTActivityMainContainer" }, this.divActivityContainer);
             activitySearchMainContent = domConstruct.create("div", { "class": "esriCTActivityTable" }, activitySearchMainContainer);
             SearchSettingsLayers = appGlobals.configData.ActivitySearchSettings[0];
+
             if (window.location.href.toString().split("$activitySearch=").length > 1) {
                 // Looping for activity search setting for getting selected activity icon
                 for (c = 0; c < SearchSettingsLayers.ActivityList.length; c++) {
@@ -162,7 +163,7 @@ define([
         },
 
         /**
-        * set the select and unselect in activity search.
+        * Set the select and unselect in activity search.
         * param {object} activityTickMark is domNode
         * param {object} activityimgSpan is domNode
         * @memberOf widgets/searchSetting/activitySearch

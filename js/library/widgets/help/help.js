@@ -23,9 +23,8 @@ define([
     "dojo/topic",
     "dojo/_base/lang",
     "dijit/_WidgetBase",
-    "dojo/i18n!application/js/library/nls/localizedStrings",
-    "dijit/a11yclick"
-], function (declare, domConstruct, on, topic, lang, _WidgetBase, sharedNls, a11yclick) {
+    "dojo/i18n!application/js/library/nls/localizedStrings"
+], function (declare, domConstruct, on, topic, lang, _WidgetBase, sharedNls) {
 
     //========================================================================================================================//
 

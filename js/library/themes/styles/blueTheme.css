@@ -527,10 +527,6 @@ input {
     background: url("../images/img24x24/activityPlannerBlue24.png") no-repeat center center !important;
 }
 
-.esriCTPlusRound {
-    background-image: url("../images/addToListBlue.png") !important;
-}
-
 .esriCTImgOrderByDateDown {
     background-image: url("../images/dateArrowDownBlue.png");
 }
@@ -631,32 +627,32 @@ input {
 
 .esriCTInfoTabImage {
     color: #007AC2;
-    background: url("../images/info-blue.png");
+    background: url("../images/infoBlue.png");
 }
 
 .esriCTInfoTabImageSelect {
     color: #007AC2;
-    background: url("../images/info-select.png");
+    background: url("../images/infoSelect.png");
 }
 
 .esriCTGalleryTabImage {
     color: #007AC2;
-    background: url("../images/gallery-blue.png");
+    background: url("../images/galleryBlue.png");
 }
 
 .esriCTGalleryTabImageSelect {
     color: #007AC2;
-    background: url("../images/gallery-select.png");
+    background: url("../images/gallerySelect.png");
 }
 
 .esriCTCommentsTabImage {
     color: #007AC2;
-    background: url("../images/comment-blue.png");
+    background: url("../images/commentBlue.png");
 }
 
 .esriCTCommentsTabImageselect {
     color: #007AC2;
-    background: url("../images/comment-select.png");
+    background: url("../images/commentSelect.png");
 }
 
 .addtoListTabImage {
@@ -676,5 +672,5 @@ input {
 
 .esriCTActivityTextArea {
     color: #007AC2;
-    text-align: initial;
+    text-align: left;
 }

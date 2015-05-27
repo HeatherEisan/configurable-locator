@@ -25,7 +25,7 @@ define([
     "dojo/dom-attr",
     "dojo/dom",
     "dojo/dom-class",
-    "dojo/_base/array",
+    "dojo/window",
     "esri/domUtils",
     "esri/InfoWindowBase",
     "dojo/text!./templates/infoWindow.html",
@@ -37,7 +37,7 @@ define([
     "dijit/_WidgetsInTemplateMixin",
     "dijit/a11yclick"
 
-], function (declare, domConstruct, domStyle, lang, on, domAttr, dom, domClass, array, domUtils, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, query, topic, sharedNls, _WidgetsInTemplateMixin, a11yclick) {
+], function (declare, domConstruct, domStyle, lang, on, domAttr, dom, domClass, win, domUtils, InfoWindowBase, template, _WidgetBase, _TemplatedMixin, query, topic, sharedNls, _WidgetsInTemplateMixin, a11yclick) {
     return declare([InfoWindowBase, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
         sharedNls: sharedNls,
@@ -102,46 +102,46 @@ define([
             })));
             // on click on informaition tab for showing result
             this.own(on(this.informationTab, a11yclick, lang.hitch(this, function () {
-                this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
+                this._showInfoWindowTab(this.informationTab, dom.byId("informationTabContainer"));
                 domClass.add(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
                 domClass.replace(this.infoSelect, "esriCTInfoTabImageSelect", "esriCTInfoTabImage");
                 domClass.replace(this.gallerySelect, "esriCTGalleryTabImage", "esriCTGalleryTabImageSelect");
                 domClass.replace(this.commentSelect, "esriCTCommentsTabImage", "esriCTCommentsTabImageselect");
                 domClass.replace(this.addtoListSelect, "addtoListTabImage", "addtoListTabImageSelect");
                 domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
-                if (dojo.window.getBox().w < 767) {
+                if (win.getBox().w < 767) {
                     this._displayBackToMapText();
                 }
             })));
             // onclick on gallery tab for showing tab and data
             this.own(on(this.galleryTab, a11yclick, lang.hitch(this, function () {
-                this._showInfoWindowTab(this.galleryTab, dojo.byId("galleryTabContainer"));
+                this._showInfoWindowTab(this.galleryTab, dom.byId("galleryTabContainer"));
                 domClass.replace(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
                 domClass.replace(this.infoSelect, "esriCTInfoTabImage", "esriCTInfoTabImageSelect");
                 domClass.replace(this.gallerySelect, "esriCTGalleryTabImageSelect", "esriCTGalleryTabImage");
                 domClass.replace(this.commentSelect, "esriCTCommentsTabImage", "esriCTCommentsTabImageselect");
                 domClass.replace(this.addtoListSelect, "addtoListTabImage", "addtoListTabImageSelect");
                 domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
-                if (dojo.window.getBox().w < 767) {
+                if (win.getBox().w < 767) {
                     this._displayBackToMapText();
                 }
             })));
             // onclick on comments Tab for showing tab and data
             this.own(on(this.commentsTab, a11yclick, lang.hitch(this, function () {
-                this._showInfoWindowTab(this.commentsTab, dojo.byId("commentsTabContainer"));
+                this._showInfoWindowTab(this.commentsTab, dom.byId("commentsTabContainer"));
                 domClass.replace(this.getDirselect, "esriCTImageTab", "esriCTImageTabSelected");
                 domClass.replace(this.infoSelect, "esriCTInfoTabImage", "esriCTInfoTabImageSelect");
                 domClass.replace(this.gallerySelect, "esriCTGalleryTabImage", "esriCTGalleryTabImageSelect");
                 domClass.replace(this.commentSelect, "esriCTCommentsTabImageselect", "esriCTCommentsTabImage");
                 domClass.replace(this.addtoListSelect, "addtoListTabImage", "addtoListTabImageSelect");
                 domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
-                if (dojo.window.getBox().w < 767) {
+                if (win.getBox().w < 767) {
                     this._displayBackText();
                 }
             })));
             // onclick on direction Tab for showing tab and data
             this.own(on(this.esriCTGetDir, a11yclick, lang.hitch(this, function () {
-                this._showInfoWindowTab(this.esriCTGetDir, dojo.byId("getDirContainer"));
+                this._showInfoWindowTab(this.esriCTGetDir, dom.byId("getDirContainer"));
                 domClass.replace(this.getDirselect, "esriCTImageTabSelected", "esriCTImageTab");
                 domClass.replace(this.infoSelect, "esriCTInfoTabImage", "esriCTInfoTabImageSelect");
                 domClass.replace(this.gallerySelect, "esriCTGalleryTabImage", "esriCTGalleryTabImageSelect");
@@ -149,7 +149,7 @@ define([
                 domClass.replace(this.addtoListSelect, "addtoListTabImage", "addtoListTabImageSelect");
                 domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
                 // Setting back to map text
-                if (dojo.window.getBox().w < 767) {
+                if (win.getBox().w < 767) {
                     this._displayBackToMapText();
                 }
             })));
@@ -166,7 +166,7 @@ define([
                 domClass.replace(this.commentSelect, "esriCTCommentsTabImage", "esriCTCommentsTabImageselect");
                 domClass.replace(this.addtoListSelect, "addtoListTabImageSelect", "addtoListTabImage");
                 topic.publish("addToListFromInfoWindow", this.addToListObject);
-                if (dojo.window.getBox().w < 767) {
+                if (win.getBox().w < 767) {
                     this._displayBackToMapText();
                 }
             })));
@@ -207,110 +207,139 @@ define([
         * @memberOf widgets/infoWindow/infoWindow
         */
         show: function (screenPoint) {
-            var iscommentsPodEnabled = this.getPodStatus("CommentsPod"), tabName, tabEnabled = 0, isdirectionsPodEnabled, isgalleryPodEnabled, isfacilityInformationPodEnabled, faclityInfo;
-            // checking for direction tag from config file for showing drection tab in info window
-            if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
-                isdirectionsPodEnabled = this.getPodStatus("DirectionsPod");
+            var iscommentsPodEnabled, tabName = [], isdirectionsPodEnabled, isgalleryPodEnabled, isfacilityInformationPodEnabled;
+
+            // checking for information tag from config file for showing information tab in info window
+            isfacilityInformationPodEnabled = this.getPodStatus("FacilityInformationPod");
+            // checking for facility information pod enabled status
+            if (!isfacilityInformationPodEnabled) {
+                // hiding information tab
+                domStyle.set(this.informationTab, "display", "none");
+            } else {
+                // setting the name of the tab if it is enabled so show it in info window.
+                tabName.push("FacilityInformationPod");
             }
+
+            // Checking for gallery pod status
             isgalleryPodEnabled = this.getPodStatus("GalleryPod");
             // checking for gallery pod enabled status
             if (!isgalleryPodEnabled) {
                 domStyle.set(this.galleryTab, "display", "none");
             } else {
-                domStyle.set(this.galleryTab, "display", "table-cell");
-                tabEnabled++;
-                tabName = "GalleryPod";
-            }
-            isfacilityInformationPodEnabled = this.getPodStatus("FacilityInformationPod");
-            // checking for facility information pod enabled status
-            if (!isfacilityInformationPodEnabled) {
-                domStyle.set(this.informationTab, "display", "none");
-            } else {
-                tabEnabled++;
-                tabName = "FacilityInformationPod";
-            }
-            // checking if it is a other url then hide direction and add to list tab
-            if (this.queryURL.toLowerCase() === "otherurl") {
-                domStyle.set(this.esriCTGetDir, "display", "none");
-            } else if (!isdirectionsPodEnabled) {
-                domStyle.set(this.esriCTGetDir, "display", "none");
-            } else {
-                domStyle.set(this.esriCTGetDir, "display", "table-cell");
-                tabEnabled++;
-                tabName = "DirectionsPod";
-            }
-            // checking for other url if it is then hide comment tab
-            if (this.queryURL.toLowerCase() === "otherurl") {
-                domStyle.set(this.commentsTab, "display", "none");
-            } else if (!iscommentsPodEnabled) {
-                domStyle.set(this.commentsTab, "display", "none");
-            } else {
-                domStyle.set(this.commentsTab, "display", "table-cell");
-                tabEnabled++;
-                tabName = "CommentsPod";
-            }
-            // checking for other url if it is then hide add to list tab
-            if (this.queryURL.toLowerCase() === "otherurl") {
-                domStyle.set(this.addtoListTab, "display", "none");
-            } else if (dijit.registry.byId("myList")) {
-                domStyle.set(this.addtoListTab, "display", "table-cell");
-            } else {
-                domStyle.set(this.addtoListTab, "display", "none");
-            }
-            // checking for event search if it is then hide event tab
-            if (this.widgetName.toLowerCase() === "infoevent") {
-                domStyle.set(this.commentsTab, "display", "none");
-            } else if (this.widgetName.toLowerCase() === "infoactivity") {
-                if (iscommentsPodEnabled) {
-                    domStyle.set(this.commentsTab, "display", "table-cell");
+                // checking if attachment is not found then hide gallery pod
+                if (!this.isAttachmentFound) {
+                    domStyle.set(this.galleryTab, "display", "none");
                 } else {
+                    // setting the name of the tab if it is enabled so show it in info window.
+                    tabName.push("GalleryPod");
+                    domStyle.set(this.galleryTab, "display", "table-cell");
+                }
+            }
+
+            // Checking for info window if it is comming for activity or event
+            if (this.widgetName.toLowerCase() === "infoactivity" || this.widgetName.toLowerCase() === "infoevent") {
+                // Checking for direction pod status in config
+                isdirectionsPodEnabled = this.getPodStatus("DirectionsPod");
+                // Checking for direction pod status and get direction tag in config if any one of them is set to be false then hide the direction tab.
+                if (!isdirectionsPodEnabled || !appGlobals.configData.DrivingDirectionSettings.GetDirections) {
+                    domStyle.set(this.esriCTGetDir, "display", "none");
+                } else {
+                    tabName.push("DirectionsPod");
+                    domStyle.set(this.esriCTGetDir, "display", "table-cell");
+                }
+                // If it is commeing for other layer then hide the tab
+            } else if (this.queryURL.toLowerCase() === "otherurl") {
+                domStyle.set(this.esriCTGetDir, "display", "none");
+            } else {
+                // If it is commeing for other layer then hide the tab
+                domStyle.set(this.esriCTGetDir, "display", "none");
+            }
+
+            // Checking for info window if it is comming for activity
+            if (this.widgetName.toLowerCase() === "infoactivity") {
+                // Checking for comment pod status in config
+                iscommentsPodEnabled = this.getPodStatus("CommentsPod");
+                if (!iscommentsPodEnabled) {
                     domStyle.set(this.commentsTab, "display", "none");
-                }
-            }
-            this.InfoShow = false;
-            faclityInfo = "FacilityInformationPod";
-            if (tabEnabled > 1 && appGlobals.configData.PodSettings[1][faclityInfo].Enabled) {
-                this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
-            } else {
-                this.isTabEnabled = true;
-                // checking for comment tab for showing info window tab
-                if (tabName === "CommentsPod") {
-                    this._showInfoWindowTab(this.commentsTab, dojo.byId("commentsTabContainer"));
-                } else if (tabName === "GalleryPod") {
-                    this._showInfoWindowTab(this.galleryTab, dojo.byId("galleryTabContainer"));
-                } else if (tabName === "FacilityInformationPod") {
-                    this._showInfoWindowTab(this.informationTab, dojo.byId("informationTabContainer"));
-                } else if (tabName === "DirectionsPod") {
-                    this._showInfoWindowTab(this.esriCTGetDir, dojo.byId("getDirContainer"));
-                    domClass.replace(this.getDirselect, "esriCTImageTabSelected", "esriCTImageTab");
                 } else {
-                    this.isTabEnabled = false;
-                    domClass.remove(this.divInfoContainer, "displayBlock");
-                    alert(sharedNls.errorMessages.enablePodSettingsInConfig);
+                    // If it is enable then checking for comment settings in config for showing and hiding the tab
+                    if (!appGlobals.configData.ActivitySearchSettings[0].CommentsSettings.Enabled || !appGlobals.configData.ActivitySearchSettings[0].Enable || appGlobals.configData.ActivitySearchSettings[0].CommentsSettings.QueryURL === "") {
+                        domStyle.set(this.commentsTab, "display", "none");
+                    } else {
+                        tabName.push("CommentsPod");
+                        domStyle.set(this.commentsTab, "display", "table-cell");
+                    }
                 }
-            }
-            // checking for tab name for showing and hiding tab on the basis id enabled settings in config file
-            if (tabName) {
-                if (tabName === "CommentsPod" && this.widgetName.toLowerCase() === "infoevent" && tabEnabled === 1) {
-                    this.isTabEnabled = false;
-                    domClass.remove(this.divInfoContainer, "displayBlock");
-                    alert(sharedNls.errorMessages.enablePodSettingsInConfig);
-                } else if (tabName && this.widgetName.toLowerCase() === "infoactivity") {
-                    this.setLocation(screenPoint);
-                } else {
-                    this.setLocation(screenPoint);
-                }
-            }
-            // checking for tags in config file for showing hiding comment tab in info window
-            if (!appGlobals.configData.ActivitySearchSettings[0].CommentsSettings.Enabled || !appGlobals.configData.ActivitySearchSettings[0].Enable || appGlobals.configData.ActivitySearchSettings[0].CommentsSettings.QueryURL === "") {
+                // If it is comming for event facility then hide the comment tab
+            } else if (this.widgetName.toLowerCase() === "infoevent") {
                 domStyle.set(this.commentsTab, "display", "none");
-                if (dojo.byId("commentsTabContainer")) {
-                    domConstruct.empty(dojo.byId("commentsTabContainer"));
-                }
+                // If it is comming for other layer then hide the settings
+            } else if (this.queryURL.toLowerCase() === "otherurl") {
+                domStyle.set(this.commentsTab, "display", "none");
+            } else {
+                domStyle.set(this.commentsTab, "display", "none");
             }
-            // checking if attachment is not found then hide gallery pod
-            if (!this.isAttachmentFound) {
-                domStyle.set(this.galleryTab, "display", "none");
+
+            // Checking for my list widget, if it is configuered then show the button of add to list
+            if (dijit.registry.byId("myList")) {
+                if (this.queryURL.toLowerCase() !== "otherurl") {
+                    domStyle.set(this.addtoListTab, "display", "table-cell");
+                    tabName.push("myList");
+                }
+                // If it is set to be false then hide the button from tab
+            } else {
+                domStyle.set(this.addtoListTab, "display", "none");
+            }
+
+            // If it is other layer then hide the add to button from the info window.
+            if (this.queryURL.toLowerCase() === "otherurl") {
+                domStyle.set(this.addtoListTab, "display", "none");
+            }
+            // Checking for tabName value and if it is greater then 0 then show the first tab on map
+            if (tabName.length > 0) {
+                this._getEnabledTab(tabName[0]);
+                this.isTabEnabled = true;
+                this.InfoShow = false;
+                this.setLocation(screenPoint);
+            } else {
+                // Else show the message that setting is set to be false in config.
+                this.isTabEnabled = false;
+                alert(sharedNls.errorMessages.enablePodSettingsInConfig);
+            }
+        },
+
+        /**
+        * function to show first enabled tab in info window
+        * @param {string} tabName string of name of the tab
+        * @memberOf widgets/infoWindow/infoWindow
+        */
+        _getEnabledTab: function (tabName) {
+            switch (tabName) {
+            case "FacilityInformationPod":
+                // Function to show selected tab
+                this._showInfoWindowTab(this.informationTab, dom.byId("informationTabContainer"));
+                break;
+            case "GalleryPod":
+                this._showInfoWindowTab(this.galleryTab, dom.byId("galleryTabContainer"));
+                domClass.replace(this.gallerySelect, "esriCTGalleryTabImageSelect", "esriCTGalleryTabImage");
+                break;
+            case "DirectionsPod":
+                this._showInfoWindowTab(this.esriCTGetDir, dom.byId("getDirContainer"));
+                domClass.replace(this.getDirselect, "esriCTImageTabSelected", "esriCTImageTab");
+                break;
+            case "CommentsPod":
+                this._showInfoWindowTab(this.commentsTab, dom.byId("commentsTabContainer"));
+                domClass.replace(this.commentSelect, "esriCTCommentsTabImageselect", "esriCTCommentsTabImage");
+                break;
+            case "myList":
+                if (query(".esriCTInfoSelectedTab")[0]) {
+                    domClass.remove(this.addtoListTab, "esriCTInfoSelectedTab");
+                    domClass.replace(this.addtoListSelect, "addtoListTabImage", "addtoListTabImageSelect");
+                }
+                break;
+            default:
+                this._showInfoWindowTab(this.informationTab, dom.byId("informationTabContainer"));
+                break;
             }
         },
 
@@ -322,7 +351,7 @@ define([
         */
         resize: function (width, height) {
             // checking for window height
-            if (dojo.window.getBox().w <= 767) {
+            if (win.getBox().w <= 767) {
                 this.infoWindowWidth = 180;
                 this.infoWindowHeight = 30;
                 this.infoWindowResizeOnMap();

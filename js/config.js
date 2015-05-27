@@ -29,29 +29,35 @@ define([], function () {
         // 5.  Set URL for Custom logo                       - [ Tag(s) to look for: CustomLogoUrl ]
         // 6.  Set proxy URL                                 - [ Tag(s) to look for: ProxyUrl ]
         // 7.  Set Legend Visibility                         - [ Tag(s) to look for: ShowLegend ]
-        // 8.  Set settings for splash screen               - [ Tag(s) to look for: SplashScreen ]
+        // 8.  Set settings for splash screen                - [ Tag(s) to look for: SplashScreen ]
         // 9.  Specify Theme                                 - [ Tag(s) to look for: ThemeColor ]
-        // 10. Bottom Panel InfoPod Settings                 - [ Tag(s) to look for: PodSettings ]
-        // 11. Customize Zoom level for address search       - [ Tag(s) to look for: ZoomLevel ]
-        // 12. Specify WebMap Id                             - [ Tag(s) to look for: WebMapId ]
-        // 13. Specify URL to ArcGIS Portal REST API         - [ Tag(s) to look for: PortalAPIURL ]
-        // 14. Specify the Group Title that contains basemaps- [ Tag(s) to look for: BasemapGroupTitle ]
-        // 15. Specify the Group Name that contains basemaps - [ Tag(s) to look for: BasemapGroupOwner ]
-        // 16. Specify Spatial Reference for basemaps        - [ Tag(s) to look for: BasemapSpatialReferenceWKID ]
-        // 17. Specify path to display the Thumbnail         - [ Tag(s) to look for: NoThumbnail ]
-        // 18. Specify Activity Search settings               - [ Tag(s) to look for: ActivitySearchSettings]
-        // 19. Specify Event Search settings                  - [ Tag(s) to look for: EventSearchSettings]
-        // 20. Specify Ripple Color settings                 - [ Tag(s) to look for: RippleColorSettings ]
-        // 21. Specify Locator Ripple size                   - [ Tag(s) to look for: LocatorRippleSize ]
-        // 22. Customize Info Popup Height                     - [ Tag(s) to look for: InfoPopupHeight ]
-        // 23. Customize Info Popup Width                      - [ Tag(s) to look for: InfoPopupWidth ]
-        // 24. Set URL for Locator Settings                   - [ Tag(s) to look for: LocatorSettings ]
-        // 25. Geometry Service setting                      - [ Tag(s) to look for: GeometryService ]
-        // 26. Specify Buffer Symbology                      - [ Tag(s) to look for: BufferSymbology ]
-        // 27. Specify Buffer Distance                      -  [ Tag(s) to look for: BufferDistance ]
-        // 28. Customize Driving Direction settings          - [ Tag(s) to look for: DrivingDirectionSettings]
-        // 29. Specify URLs for Map Sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
-        // 30. Specify Header Widget settings                - [ Tag(s) to look for: AppHeaderWidgets ]
+        // 10. Specify Bottom Panel ToggleButton Text        - [ Tag(s) to look for: BottomPanelToggleButtonText ]
+        // 11. Specify Title of Address search panel         - [ Tag(s) to look for: SearchPanelTitle ]
+        // 12. Specify Title of Activity panel               - [ Tag(s) to look for: ActivityPanelTitle ]
+        // 13. Specify Title of Event panel                  - [ Tag(s) to look for: EventPanelTitle ]
+        // 14. Bottom Panel InfoPod Settings                 - [ Tag(s) to look for: PodSettings ]
+        // 15. Customize Zoom level for address search       - [ Tag(s) to look for: ZoomLevel ]
+        // 16. Specify WebMap Id                             - [ Tag(s) to look for: WebMapId ]
+        // 17. Specify URL to ArcGIS Portal REST API         - [ Tag(s) to look for: PortalAPIURL ]
+        // 18. Specify the Group Title that contains basemaps- [ Tag(s) to look for: BasemapGroupTitle ]
+        // 19. Specify the Group Name that contains basemaps - [ Tag(s) to look for: BasemapGroupOwner ]
+        // 20. Specify Spatial Reference for basemaps        - [ Tag(s) to look for: BasemapSpatialReferenceWKID ]
+        // 21. Specify path to display the Thumbnail         - [ Tag(s) to look for: NoThumbnail ]
+        // 22. Specify Activity Search settings              - [ Tag(s) to look for: ActivitySearchSettings]
+        // 23. Specify Event Search settings                 - [ Tag(s) to look for: EventSearchSettings]
+        // 24. Specify Ripple Color settings                 - [ Tag(s) to look for: RippleColor ]
+        // 25. Specify Locator Ripple size                   - [ Tag(s) to look for: LocatorRippleSize ]
+        // 26. Customize Info Popup Height                   - [ Tag(s) to look for: InfoPopupHeight ]
+        // 27. Customize Info Popup Width                    - [ Tag(s) to look for: InfoPopupWidth ]
+        // 28. Specify ShowNullValueAs                       - [ Tag(s) to look for: ShowNullValueAs ]
+        // 29. Specify GeoLocation settings                  - [ Tag(s) to look for: GeoLocationSettings]
+        // 30. Set URL for Locator Settings                  - [ Tag(s) to look for: LocatorSettings ]
+        // 31. Geometry Service setting                      - [ Tag(s) to look for: GeometryService ]
+        // 32. Specify Buffer Distance                       - [ Tag(s) to look for: BufferDistance ]
+        // 33. Specify Buffer Symbology                      - [ Tag(s) to look for: BufferSymbology ]
+        // 34. Customize Driving Direction settings          - [ Tag(s) to look for: DrivingDirectionSettings]
+        // 35. Specify URLs for Map Sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
+        // 36. Specify Header Widget settings                - [ Tag(s) to look for: AppHeaderWidgets ]
 
         // ------------------------------------------------------------------------------------------------------------------------
         // GENERAL SETTINGS
@@ -156,8 +162,9 @@ define([], function () {
         // Configure Search, Barrier and Info settings to be displayed in Search panels:
 
         // Configure Search and Settings below.
+        // Enable:  Set to true if Activity search panel need to be displayed, or false if Activity search panel are not required.
         // UnifiedSearch: Specify a boolean value true/false which indicates whether to include the layer in Unified search or not.
-        // Title: In case of webmap implementations, it must match with the layer name specified in webmap and in case of operational layers  it should match with the name of Map/Feature Service.
+        // Title: In case of webmap implementations, it must match with the layer name specified in webmap.
         // QueryLayerId: This is the layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
         // SearchDisplayTitle: This text is displayed in Search Results as the Title to group results.
         // SearchDisplayFields: This Attribute will be displayed in the Search box when user performs a search.
@@ -170,7 +177,7 @@ define([], function () {
         //      IsSelected: Set selection in 'Activity' search list.
         // CommentsSettings: Configure Comments Settings
         //      Enabled: Set to true if comments need to be displayed, or false if comments are not required.
-        //      CommentsSettings - Title: In case of webmap implementations, it must match the layer name specified in webmap and in case of operational layers it should match with the name of Map/Feature Service.
+        //      CommentsSettings - Title: In case of webmap implementations, it must match the layer name specified in webmap.
         //      CommentsSettings - QueryLayerId: This is the layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
         //      ForeignKeyFieldForComment: Specify field name as Foreign Key to relate activity table.
         //      RankField: It is the Attribute that will be display ranks/stars.
@@ -264,14 +271,16 @@ define([], function () {
         // Configure Search, Barrier and Info settings to be displayed in Search panels:
 
         // Configure Search and Settings below.
+        // Enable:  Set to true if Event search panel need to be displayed, or false if Event search panel are not required.
         // UnifiedSearch: Specify a boolean value true/false which indicates whether to include the layer in Unified search or not.
-        // Title: In case of webmap implementations, it must match layer name specified in webmap and in case of operational layers it should match the name of Map/Feature Service.
+        // Title: In case of webmap implementations, it must match layer name specified in webmap.
         // QueryLayerId: This is the Layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
         // SearchDisplayTitle: This text is displayed in Search Results as the Title to group results.
         // SearchDisplayFields: Attribute that will be displayed in the Search box when user performs a search.
         // SearchDisplaySubFields: Attribute that will be displayed in the Search box when user performs a search.
         // SearchExpressionForDate: Expression to query the layer for Events falling in the range of 'Event Planner' search.
         // SearchExpression: Configure the query expression to be used for Search.
+        // SortingKeyField: Attribute that will be sort the date when user performs a Event search.
         // AddToCalenderSettings: Configure the parameters to create the ics file for an event.
         //        IcsFileName: Set the Name of the ics file. This is a required key.
         //        StartDate: Set the Start Date of the event in ics file. This is a required key.
@@ -304,7 +313,7 @@ define([], function () {
         }],
 
 
-        // Set the ripple color
+        // Set the ripple color in RGB format
         RippleColor: "35,35,142",
 
         // Set the locator ripple size (in pixels)
@@ -337,7 +346,11 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
 
         // Set Locator settings such as Locator Symbol, Size, Display fields, Match score
-        // LocatorParameters: Parameters (text, outFields, maxLocations, bbox, outSR) used for address and location search.
+        // DefaultLocatorSymbol: Set path for pushpin which is use to show the location.
+        // MarkupSymbolSize: Setting the height and width of the pushpin.
+        // DisplayText: This text is displayed in search results as the title to group results.
+        // LocatorDefaultAddress: Set the default Address in address search box.
+        // LocatorParameters: Parameters (text, outFields, maxLocations, box, outSR) used for address and location search.
         // AddressSearch: Candidates based on which the address search will be performed.
         // AddressMatchScore: Setting the minimum score for filtering the candidate results.
         // MaxResults: Maximum number of locations to display in the results menu.
@@ -376,7 +389,14 @@ define([], function () {
         //Distance is configured in "miles"
         BufferDistance: "15",
 
-        // Configure graphic Color to be set for Buffer
+        // ------------------------------------------------------------------------------------------------------------------------
+        // BUFFER SYMBOLOGY SETTINGS
+        // ------------------------------------------------------------------------------------------------------------------------
+
+        // FillSymbolColor: Setting color for buffer in RGB format
+        // FillSymbolTransparency: Setting transparency for buffer
+        // LineSymbolColor: Setting outline color of buffer in RGB format
+        // LineSymbolTransparency: Setting transparency for outline symbol
         BufferSymbology: {
             FillSymbolColor: "0,0,255",
             FillSymbolTransparency: "0.25",
@@ -390,7 +410,7 @@ define([], function () {
 
         // GetDirections: If variable is set to false directions cannot be enabled
         // RouteServiceURL: Set URL for Routing Service
-        // RouteColor: Set Color for Route
+        // RouteColor: Set Color for Route in RGB format
         // RouteWidth: Set Width for Route
         // Transparency: Set Transparency for Route
         // RouteUnit: Set Unit for Route, units supported by Direction widget are “MILES”, “METERS”, “KILOMETERS”, “NAUTICAL_MILES”. If there is a typo error in any of these four units then the unit will be displayed in “KILOMETERS”. If the unit is specified other than these four units then unit will be displayed in “MILES”
@@ -406,8 +426,12 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
         // SETTINGS FOR MAP SHARING
         // ------------------------------------------------------------------------------------------------------------------------
-
         // Set URL for TinyURL service, and URLs for social media
+        // MapSharingOptions: Allow user to share map using social media.
+        // TinyURLServiceURL: Set URL for TinyURL service.
+        // FacebookShareURL:  Allow user to share application using facebook.
+        // TwitterShareURL:  Allow user to share application using twitter.
+        // ShareByMailLink:  Allow user to share application using mail.
         MapSharingOptions: {
             TinyURLServiceURL: "https://api-ssl.bitly.com/v3/shorten?longUrl=${0}",
             FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Configurable%20Locator",

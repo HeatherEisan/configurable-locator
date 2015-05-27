@@ -26,6 +26,7 @@ define([
     "dojo/dom-construct",
     "dojo/dom-geometry",
     "dojo/dom-style",
+    "dojo/keys",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/on",
     "dojo/query",
@@ -46,7 +47,7 @@ define([
     "esri/tasks/query",
     "esri/tasks/QueryTask",
     "dijit/a11yclick"
-], function (Array, declare, lang, dom, domAttr, domClass, domConstruct, domGeom, domStyle, sharedNls, on, query, string, template, topic, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, Deferred, all, Point, Graphic, GraphicsLayer, PictureMarkerSymbol, GeometryService, Locator, Query, QueryTask, a11yclick) {
+], function (Array, declare, lang, dom, domAttr, domClass, domConstruct, domGeom, domStyle, keys, sharedNls, on, query, string, template, topic, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, Deferred, all, Point, Graphic, GraphicsLayer, PictureMarkerSymbol, GeometryService, Locator, Query, QueryTask, a11yclick) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -241,7 +242,7 @@ define([
                 /**
                 * Enter key immediately starts search
                 */
-                if (evt.keyCode === dojo.keys.ENTER) {
+                if (evt.keyCode === keys.ENTER) {
                     this._toggleTexBoxControls(true);
                     this._locateAddress(true);
                     return;
@@ -249,10 +250,10 @@ define([
                 /**
                 * do not perform auto complete search if control &| alt key pressed, except for ctrl-v
                 */
-                if (evt.ctrlKey || evt.altKey || evt.keyCode === dojo.keys.UP_ARROW || evt.keyCode === dojo.keys.DOWN_ARROW ||
-                        evt.keyCode === dojo.keys.LEFT_ARROW || evt.keyCode === dojo.keys.RIGHT_ARROW ||
-                        evt.keyCode === dojo.keys.HOME || evt.keyCode === dojo.keys.END ||
-                        evt.keyCode === dojo.keys.CTRL || evt.keyCode === dojo.keys.SHIFT) {
+                if (evt.ctrlKey || evt.altKey || evt.keyCode === keys.UP_ARROW || evt.keyCode === keys.DOWN_ARROW ||
+                        evt.keyCode === keys.LEFT_ARROW || evt.keyCode === keys.RIGHT_ARROW ||
+                        evt.keyCode === keys.HOME || evt.keyCode === keys.END ||
+                        evt.keyCode === keys.CTRL || evt.keyCode === keys.SHIFT) {
                     evt.cancelBubble = true;
                     if (evt.stopPropagation) {
                         evt.stopPropagation();
@@ -305,9 +306,8 @@ define([
         * @memberOf widgets/locator/locator
         */
         _searchLocation: function (searchText, thisSearchTime) {
-            var nameArray = {}, locatorSettings, locator, searchFieldName, addressField, baseMapExtent,
-                options, searchFields, addressFieldValues, s, deferredArray,
-                locatorDef, deferred, resultLength, index, resultAttributes, key, order;
+            var nameArray = {}, locatorSettings, locator, searchFieldName, addressField, baseMapExtent, options, searchFields, addressFieldValues, s, deferredArray,
+                locatorDef, deferred, resultLength, index, resultAttributes, key, order, basemapId, selectedBasemap = appGlobals.configData.BaseMapLayers[appGlobals.shareOptions.selectedBasemapIndex];
             // Discard searches made obsolete by new typing from user
             if (thisSearchTime < this.lastSearchTime) {
                 return;
@@ -330,10 +330,14 @@ define([
                 searchFieldName = locatorSettings.LocatorParameters.SearchField;
                 addressField = {};
                 addressField[searchFieldName] = searchText;
-                if (this.map.getLayer("defaultBasemap")) {
-                    baseMapExtent = this.map.getLayer("defaultBasemap").fullExtent;
+                //get full extent of selected basemap
+                if (selectedBasemap.length) {
+                    basemapId = selectedBasemap[0].BasemapId;
                 } else {
-                    baseMapExtent = this.map.getLayer("defaultBasemap0").fullExtent;
+                    basemapId = selectedBasemap.BasemapId;
+                }
+                if (this.map.getLayer(basemapId)) {
+                    baseMapExtent = this.map.getLayer(basemapId).fullExtent;
                 }
                 options = {};
                 options.address = addressField;
@@ -636,6 +640,12 @@ define([
             }));
         },
 
+        /**
+        * Get geometry of the selected candidate by querying the layer
+        * @param {object} layerobject
+        * @param {object} candidate
+        * @memberOf widgets/locator/locator
+        */
         _getSelectedCandidateGeometry: function (layerobject, candidate) {
             var queryTask, queryLayer, currentTime;
             if (layerobject.QueryURL) {

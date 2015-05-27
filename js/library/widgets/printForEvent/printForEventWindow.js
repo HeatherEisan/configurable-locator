@@ -18,11 +18,10 @@
 //============================================================================================================================//
 define([
     "dojo/_base/declare",
-    "dojo/dom-construct",
     "dijit/_WidgetBase",
     "dojo/text!./templates/printForEvent.html"
 
-], function (declare, domConstruct, _WidgetBase, printEvent) {
+], function (declare, _WidgetBase, printEvent) {
 
     //========================================================================================================================//
 

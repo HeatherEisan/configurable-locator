@@ -73,7 +73,9 @@ define({
         numberOfFeaturesFound: "@fr@ Found ${0} facility(ies)", // Shown as a title below ‘Search Results’ title in the carousel pod when searching ‘Activities’ indicating the number of facilities found..
         numberOfEventsFound: "@fr@ Found ${0} Event", // Shown as a title below ‘Search Results’ title in the carousel pod when a event is selected in My List panel indicating the selected event..
         infoWindowTextURL: "@fr@ More info", // Shown as a link for URL label in infoWindow Information tab or carousel pod when searching Events.
-        printWindowListTitleText: "@fr@ My List" // Shown as a label for the print window title
+        printWindowListTitleText: "@fr@ My List", // Shown as a label for the print window title
+        minuteText: "@fr@ min", // Shown as min label for calculated direction in direction pod / tab
+        hourText: "@fr@ hrs" // Shown as hrs label for calculated direction in direction pod / tab
     },
     errorMessages: {
         invalidSearch: "@fr@ No results found", // Shown when no results are found in event planner and unified search.
@@ -81,8 +83,6 @@ define({
         invalidLocation: "@fr@ Current location not found.", // Shown when geolocation is disabled.
         invalidProjection: "@fr@ Unable to plot current location on the map.", // Shown when map point is not definite.
         widgetNotLoaded: "@fr@ Unable to load widgets.", // Shown whenfacing issue on loading widgets.
-        shareLoadingFailed: "@fr@ Unable to shorten URL, Bit.ly failed to load.", // Shown when unable to create Bit.ly URL.
-        shareFailed: "@fr@ Unable to share.", // Shown while facing issue on sharing map.
         imageDoesNotFound: "@fr@ No photos available.", // Shown when no attachment is found in Gallery.
         facilityNotfound: "@fr@ No facilities found in buffer area.", // Shown when no facilities are found in the buffer area during unified search.
         noCommentsAvailable: "@fr@ No comments available.", // Shown when no comments found in Comments pod in infoWindow pod and in carousel pod.
@@ -110,7 +110,8 @@ define({
         unableAddEventToCalendar: "@fr@ Data is too large.", // Shown error message when data is too large of an event while creating URL.
         unableToShareURL: "@fr@ Application could not be shared with current data", // Shown when some invalid data is present or some data is missing while share URL.
         unableToPerformQuery: "@fr@ Unable to perform query.", // Shown when query failed.
-        unableAddEventToCalendarList: "@fr@ Too many events to 'Add to Calendar', either delete some events or add individually." // Shown error message when data is too large for list of events while creating URL.
+        unableAddEventToCalendarList: "@fr@ Too many events to 'Add to Calendar', either delete some events or add individually.", // Shown error message when data is too large for list of events while creating URL.
+        improperFieldConfigured: "@fr@ Configured fields are improper." // show the value in comment pod when primary or foreign key field are configured improper.
     },
     //end of shared nls
 
