@@ -73,7 +73,7 @@ define([], function () {
         ApplicationFavicon: "/js/library/themes/images/favicon.ico",
 
         // Set URL of help page/portal
-        HelpURL: "helpParkFinder.htm",
+        HelpURL: "help_ParkFinder.htm",
 
         // Set custom logoURL, displayed in lower left corner. Set to empty "" to disable.
         CustomLogoUrl: "",
@@ -91,7 +91,7 @@ define([], function () {
         },
 
         // Set the Application Theme. Supported theme keys are blueTheme, greenTheme, orangeTheme, and purpleTheme.
-        ThemeColor: "js/library/themes/styles/blueTheme.css",
+        ThemeColor: "js/library/themes/styles/greenTheme.css",
 
         // Set the bottom Pod Toggle button text
         BottomPanelToggleButtonText: "Result",
@@ -409,7 +409,7 @@ define([], function () {
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
         //Distance is configured in "miles"
-        BufferDistance: "15",
+        BufferDistance: "2",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BUFFER SYMBOLOGY SETTINGS
