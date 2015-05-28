@@ -1,7 +1,7 @@
 ﻿/*global define,dojo,dojoConfig:true,alert,esri,console,Modernizr,dijit,appGlobals */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
 /** @license
- | Copyright 2013 Esri
+ | Copyright 2015 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
  | you may not use this file except in compliance with the License.
