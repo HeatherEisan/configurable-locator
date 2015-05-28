@@ -1,6 +1,6 @@
 ﻿/*global define,dojo,dojoConfig,esri */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
-/** @license -- is this key word required?
+/** @license
  | Copyright 2013 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,7 +64,7 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
 
         // Set application title
-        ApplicationName: "Park Finder",
+        ApplicationName: "Park and Recreation Finder",
 
         // Set application icon path
         ApplicationIcon: "/js/library/themes/images/logo.png",
@@ -73,7 +73,7 @@ define([], function () {
         ApplicationFavicon: "/js/library/themes/images/favicon.ico",
 
         // Set URL of help page/portal
-        HelpURL: "help.htm",
+        HelpURL: "helpParkFinder.htm",
 
         // Set custom logoURL, displayed in lower left corner. Set to empty "" to disable.
         CustomLogoUrl: "",
