@@ -456,9 +456,9 @@ define([], function () {
         // ShareByMailLink:  Allow user to share application using mail.
         MapSharingOptions: {
             TinyURLServiceURL: "https://api-ssl.bitly.com/v3/shorten?longUrl=${0}",
-            FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Park%20Finder",
-            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Park%20Finder ${0}",
-            ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map!&body=${0}"
+            FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Park%20and%20Recreation%20Finder",
+            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Park%20and%20Recreation%20Finder ${0}",
+            ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map&body=${0}"
         },
 
         //------------------------------------------------------------------------------------------------------------------------
