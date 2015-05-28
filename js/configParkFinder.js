@@ -206,7 +206,7 @@ define([], function () {
             }, {
                 FieldName: "HIKING",
                 Alias: "Hiking",
-                Image: "js/library/themes/images/activity/climbing.png",
+                Image: "js/library/themes/images/activity/hiking.png",
                 IsSelected: false
             }, {
                 FieldName: "RESTROOM",
