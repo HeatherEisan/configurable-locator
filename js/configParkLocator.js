@@ -64,7 +64,7 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
 
         // Set application title
-        ApplicationName: "Park Finder",
+        ApplicationName: "Park and Recreation Locator",
 
         // Set application icon path
         ApplicationIcon: "/js/library/themes/images/logo.png",
@@ -86,12 +86,12 @@ define([], function () {
 
         // Set Splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "<b>Welcome to Park Finder</b> <br/> <hr/> <br/> The <b>Park Finder</b> application helps citizens locate a park or recreation facility and obtain information about recreation activities in their community.  <br/><br/>To locate a park, simply enter an address or activity in the search box, or use your current location. The park(s) or recreation area(s) will then be highlighted on the map and relevant information about available recreation activities presented to the user.",
+            SplashScreenContent: "Welcome to the Park and Recreation Locator.  The Park and Recreation Locator helps you locate a State Park or other state-managed recreational sites.  To locate a park, simply enter an address or activity in the search box, or use your current location.",
             IsVisible: true
         },
 
         // Set the Application Theme. Supported theme keys are blueTheme, greenTheme, orangeTheme, and purpleTheme.
-        ThemeColor: "js/library/themes/styles/blueTheme.css",
+        ThemeColor: "js/library/themes/styles/greenTheme.css",
 
         // Set the bottom Pod Toggle button text
         BottomPanelToggleButtonText: "Result",
@@ -132,7 +132,7 @@ define([], function () {
         ZoomLevel: 12,
 
         // Specify WebMapId within quotes
-        WebMapId: "155203d58d1a48cd94a485953b4e38ff",
+        WebMapId: "8abd4d4d1c614283a81b14357f59420f",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -145,10 +145,10 @@ define([], function () {
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
 
         // Specify the Title of Group that contains basemaps
-        BasemapGroupTitle: "ArcGIS for Local Government TryItLive Basemaps",
+        BasemapGroupTitle: "Basemaps",
 
         // Specify the Name of Owner of the Group that contains basemaps
-        BasemapGroupOwner: "ArcGISforLocalGovTryIt",
+        BasemapGroupOwner: "GISITAdmin",
 
         // Specify Spatial Reference for basemaps, since all basemaps need to use the same spatial reference
         BasemapSpatialReferenceWKID: 102100,
@@ -187,105 +187,138 @@ define([], function () {
         ActivitySearchSettings: [{
             Enable: true,
             UnifiedSearch: "true",
-            Title: "ParksTryItLive - Park and Recreation Areas",
+            Title: "Parks",
             QueryLayerId: "0",
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
-            PrimaryKeyForActivity: "${FACILITYID}",
+            PrimaryKeyForActivity: "${SITEID}",
             ActivityList: [{
-                FieldName: "ADACOMPLY",
-                Alias: "ADA Compliant",
-                Image: "js/library/themes/images/activity/wheelchairAccessible.png",
-                IsSelected: false
+                FieldName: "RVCAMPSITE",
+                Alias: "RV Camping",
+                Image: "js/library/themes/images/activity/trailerSite.png",
+                IsSelected: true
+            }, {
+                FieldName: "TENTCAMP",
+                Alias: "Camping",
+                Image: "js/library/themes/images/activity/campground.png",
+				IsSelected: false
+            }, {
+                FieldName: "CABINS",
+                Alias: "Cabins",
+                Image: "js/library/themes/images/activity/sleepingShelter.png",
+				IsSelected: false
+            }, {
+                FieldName: "LAUNDRY",
+                Alias: "Laundry",
+                Image: "js/library/themes/images/activity/laundromat.png",
+				IsSelected: false
+            }, {
+                FieldName: "VISITORCNTR",
+                Alias: "Visitor Center",
+                Image: "js/library/themes/images/activity/sunny.png",
+				IsSelected: false
+            }, {
+                FieldName: "MUSEUM",
+                Alias: "Museum",
+                Image: "js/library/themes/images/activity/museum.png",
+				IsSelected: false
+            }, {
+                FieldName: "RESTAURANT",
+                Alias: "Restaurant",
+                Image: "js/library/themes/images/activity/snackBar.png",
+				IsSelected: false
             }, {
                 FieldName: "SWIMMING",
                 Alias: "Swimming",
                 Image: "js/library/themes/images/activity/swimming.png",
-                IsSelected: false
-            }, {
-                FieldName: "HIKING",
-                Alias: "Hiking",
-                Image: "js/library/themes/images/activity/climbing.png",
-                IsSelected: false
-            }, {
-                FieldName: "RESTROOM",
-                Alias: "Restrooms Available",
-                Image: "js/library/themes/images/activity/restrooms.png",
-                IsSelected: true
+				IsSelected: false
             }, {
                 FieldName: "PICNIC",
-                Alias: "Picnic Shelters",
+                Alias: "Picnic Sites",
                 Image: "js/library/themes/images/activity/picnicArea.png",
-                IsSelected: false
+				IsSelected: false
             }, {
-                FieldName: "BOATING",
-                Alias: "Boating",
-                Image: "js/library/themes/images/activity/rowBoating.png",
-                IsSelected: false
-            }, {
-                FieldName: "ROADCYCLE",
-                Alias: "Road Cycling",
-                Image: "js/library/themes/images/activity/bicycleTrail.png",
-                IsSelected: false
-            }, {
-                FieldName: "MTBCYCLE",
-                Alias: "Mountain Biking",
-                Image: "js/library/themes/images/activity/bicycleTrail.png",
-                IsSelected: false
-            }, {
-                FieldName: "PLAYGROUND",
-                Alias: "Playgrounds",
-                Image: "js/library/themes/images/activity/playground.png",
-                IsSelected: false
-            }, {
-                FieldName: "SKI",
-                Alias: "Skiing",
-                Image: "js/library/themes/images/activity/crossCountrySkiTrail.png",
-                IsSelected: false
-            }, {
-                FieldName: "SOCCER",
-                Alias: "Multi-Purpose Fields",
-                Image: "js/library/themes/images/activity/soccer.png",
-                IsSelected: false
-            }, {
-                FieldName: "CAMPING",
-                Alias: "Camping",
-                Image: "js/library/themes/images/activity/campground.png",
-                IsSelected: false
-            }, {
-                FieldName: "HUNTING",
-                Alias: "Hunting",
-                Image: "js/library/themes/images/activity/hunting.png",
-                IsSelected: false
-            }, {
-                FieldName: "BASEBALL",
-                Alias: "Baseball Fields",
-                Image: "js/library/themes/images/activity/baseball.png",
-                IsSelected: false
-            }, {
-                FieldName: "BASKETBALL",
-                Alias: "Basketball Courts",
-                Image: "js/library/themes/images/activity/basketball.png",
-                IsSelected: false
+                FieldName: "BOATCRUISE",
+                Alias: "Boat Cruise",
+                Image: "js/library/themes/images/activity/boatTour.png",
+				IsSelected: false
             }, {
                 FieldName: "FISHING",
                 Alias: "Fishing",
                 Image: "js/library/themes/images/activity/fishing.png",
-                IsSelected: false
+				IsSelected: false
+            }, {
+                FieldName: "MARINA",
+                Alias: "Marina",
+                Image: "js/library/themes/images/activity/marina.png",
+				IsSelected: false
+            }, {
+                FieldName: "BOATLAUNCH",
+                Alias: "Boat Launch",
+                Image: "js/library/themes/images/activity/boatLaunch.png",
+				IsSelected: false
+            }, {
+                FieldName: "CANOE",
+                Alias: "Canoe Access",
+                Image: "js/library/themes/images/activity/canoeAccess.png",
+				IsSelected: false
+            }, {
+                FieldName: "GOLF",
+                Alias: "Golf Course",
+                Image: "js/library/themes/images/activity/golfing.png",
+				IsSelected: false
+            }, {
+                FieldName: "PLAYGROUND",
+                Alias: "Playground",
+                Image: "js/library/themes/images/activity/playground.png",
+				IsSelected: false
+            }, {
+                FieldName: "HIKING",
+                Alias: "Hiking",
+                Image: "js/library/themes/images/activity/climbing.png",
+				IsSelected: false
+            }, {
+                FieldName: "TENNIS",
+                Alias: "Tennis",
+                Image: "js/library/themes/images/activity/tennis.png",
+				IsSelected: false
+            }, {
+                FieldName: "MTBCYCLE",
+                Alias: "Bike Trail",
+                Image: "js/library/themes/images/activity/bicycleTrail.png",
+				IsSelected: false
+            }, {
+                FieldName: "ARCHERY",
+                Alias: "Archery",
+                Image: "js/library/themes/images/activity/archery.png",
+				IsSelected: false
+            }, {
+                FieldName: "STABLES",
+                Alias: "Horseback Riding",
+                Image: "js/library/themes/images/activity/horsebackRiding.png",
+				IsSelected: false
+            }, {
+                FieldName: "GROUPLODGE",
+                Alias: "Lodge",
+                Image: "js/library/themes/images/activity/sleepingShelter.png",
+				IsSelected: false
+            }, {
+                FieldName: "ROADCYCLE",
+                Alias: "Road Cycling",
+                Image: "js/library/themes/images/activity/bicycleTrail.png",
+				IsSelected: false
             }],
-
-           CommentsSettings: {
+            CommentsSettings: {
                 Enabled: true,
-                Title: "ParksTryItLive - Park Comments",
+                Title: "Park Comments",
                 QueryLayerId: "1",
-                ForeignKeyFieldForComment: "${FACILITYID}",
+                ForeignKeyFieldForComment: "${SITEID}",
                 RankField: "${RANK}",
                 SubmissionDateField: "${SUBMITDT}",
                 CommentField: "${COMMENTS}"
             }
         }],
-
 
         // ------------------------------------------------------------------------------------------------------------------------
         // Event SEARCH SETTINGS
@@ -335,10 +368,10 @@ define([], function () {
         }],
 
 
-        //Set the color of the circle around the selected point
-        RippleColor: "35,35,36",
+        // Set the ripple color in RGB format
+        RippleColor: "35,35,142",
 
-        //Set the size of the circle around the selected point
+        // Set the locator ripple size (in pixels)
         LocatorRippleSize: 40,
 
         // Minimum height should be 270 for the info-popup in pixels
@@ -384,7 +417,7 @@ define([], function () {
                 height: 35
             },
             DisplayText: "Address",
-            LocatorDefaultAddress: "139 W Porter Ave Naperville IL 60540",
+            LocatorDefaultAddress: "4710 Mansford Rd, Winchester, TN, 37398",
             LocatorParameters: {
                 SearchField: "SingleLine",
                 SearchBoundaryField: "searchExtent"
@@ -456,8 +489,8 @@ define([], function () {
         // ShareByMailLink:  Allow user to share application using mail.
         MapSharingOptions: {
             TinyURLServiceURL: "https://api-ssl.bitly.com/v3/shorten?longUrl=${0}",
-            FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Park%20Finder",
-            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Park%20Finder ${0}",
+            FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Park%20and%20Recreation%20Locator",
+            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Park%20and%20Recreation%20Locator ${0}",
             ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map!&body=${0}"
         },
 

@@ -64,7 +64,7 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
 
         // Set application title
-        ApplicationName: "Park Finder",
+        ApplicationName: "Wildlife Management Area Locator",
 
         // Set application icon path
         ApplicationIcon: "/js/library/themes/images/logo.png",
@@ -86,12 +86,12 @@ define([], function () {
 
         // Set Splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "<b>Welcome to Park Finder</b> <br/> <hr/> <br/> The <b>Park Finder</b> application helps citizens locate a park or recreation facility and obtain information about recreation activities in their community.  <br/><br/>To locate a park, simply enter an address or activity in the search box, or use your current location. The park(s) or recreation area(s) will then be highlighted on the map and relevant information about available recreation activities presented to the user.",
+            SplashScreenContent: "<center><b>Wildlife Management Area Locator</b></center><hr></br> The <b>Wildlife Management Area Locator</b> helps you locate a specific WMA and determine what wildlife exists within the WMA.<br><br> To locate a WMA, simply enter an address, name, select activities, or use your current location. The WMA(s)  will then be highlighted on the map and relevant information about each site will be presented to the user.",
             IsVisible: true
         },
 
         // Set the Application Theme. Supported theme keys are blueTheme, greenTheme, orangeTheme, and purpleTheme.
-        ThemeColor: "js/library/themes/styles/blueTheme.css",
+        ThemeColor: "js/library/themes/styles/orangeTheme.css",
 
         // Set the bottom Pod Toggle button text
         BottomPanelToggleButtonText: "Result",
@@ -100,7 +100,7 @@ define([], function () {
         SearchPanelTitle: "Search",
 
         // Set the Activity Panel Title
-        ActivityPanelTitle: "Activity",
+        ActivityPanelTitle: "WMA Activities",
 
         // Set the Event Panel Title
         EventPanelTitle: "Event",
@@ -132,7 +132,7 @@ define([], function () {
         ZoomLevel: 12,
 
         // Specify WebMapId within quotes
-        WebMapId: "155203d58d1a48cd94a485953b4e38ff",
+        WebMapId: "d4f7b097eaa84f0797d08f9d09df4611",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -145,10 +145,10 @@ define([], function () {
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
 
         // Specify the Title of Group that contains basemaps
-        BasemapGroupTitle: "ArcGIS for Local Government TryItLive Basemaps",
+        BasemapGroupTitle: "Basemaps",
 
         // Specify the Name of Owner of the Group that contains basemaps
-        BasemapGroupOwner: "ArcGISforLocalGovTryIt",
+        BasemapGroupOwner: "GISITAdmin",
 
         // Specify Spatial Reference for basemaps, since all basemaps need to use the same spatial reference
         BasemapSpatialReferenceWKID: 102100,
@@ -187,99 +187,43 @@ define([], function () {
         ActivitySearchSettings: [{
             Enable: true,
             UnifiedSearch: "true",
-            Title: "ParksTryItLive - Park and Recreation Areas",
+            Title: "Wildlife Management Areas",
             QueryLayerId: "0",
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
-            PrimaryKeyForActivity: "${FACILITYID}",
-            ActivityList: [{
-                FieldName: "ADACOMPLY",
-                Alias: "ADA Compliant",
-                Image: "js/library/themes/images/activity/wheelchairAccessible.png",
-                IsSelected: false
-            }, {
-                FieldName: "SWIMMING",
-                Alias: "Swimming",
-                Image: "js/library/themes/images/activity/swimming.png",
-                IsSelected: false
-            }, {
-                FieldName: "HIKING",
-                Alias: "Hiking",
-                Image: "js/library/themes/images/activity/climbing.png",
-                IsSelected: false
-            }, {
-                FieldName: "RESTROOM",
-                Alias: "Restrooms Available",
-                Image: "js/library/themes/images/activity/restrooms.png",
+            PrimaryKeyForActivity: "${OBJECTID}",
+             ActivityList: [{
+                FieldName: "SMALLGME",
+                Alias: "Small Game",
+                Image: "js/library/themes/images/activity/deerViewing.png",
                 IsSelected: true
             }, {
-                FieldName: "PICNIC",
-                Alias: "Picnic Shelters",
-                Image: "js/library/themes/images/activity/picnicArea.png",
+                FieldName: "WATERFWL",
+                Alias: "Waterfowl",
+                Image: "js/library/themes/images/activity/waterfowl.png",
                 IsSelected: false
-            }, {
-                FieldName: "BOATING",
-                Alias: "Boating",
-                Image: "js/library/themes/images/activity/rowBoating.png",
-                IsSelected: false
-            }, {
-                FieldName: "ROADCYCLE",
-                Alias: "Road Cycling",
-                Image: "js/library/themes/images/activity/bicycleTrail.png",
-                IsSelected: false
-            }, {
-                FieldName: "MTBCYCLE",
-                Alias: "Mountain Biking",
-                Image: "js/library/themes/images/activity/bicycleTrail.png",
-                IsSelected: false
-            }, {
-                FieldName: "PLAYGROUND",
-                Alias: "Playgrounds",
-                Image: "js/library/themes/images/activity/playground.png",
-                IsSelected: false
-            }, {
-                FieldName: "SKI",
-                Alias: "Skiing",
-                Image: "js/library/themes/images/activity/crossCountrySkiTrail.png",
-                IsSelected: false
-            }, {
-                FieldName: "SOCCER",
-                Alias: "Multi-Purpose Fields",
-                Image: "js/library/themes/images/activity/soccer.png",
-                IsSelected: false
-            }, {
-                FieldName: "CAMPING",
-                Alias: "Camping",
-                Image: "js/library/themes/images/activity/campground.png",
-                IsSelected: false
-            }, {
-                FieldName: "HUNTING",
-                Alias: "Hunting",
-                Image: "js/library/themes/images/activity/hunting.png",
-                IsSelected: false
-            }, {
-                FieldName: "BASEBALL",
-                Alias: "Baseball Fields",
-                Image: "js/library/themes/images/activity/baseball.png",
-                IsSelected: false
-            }, {
-                FieldName: "BASKETBALL",
-                Alias: "Basketball Courts",
-                Image: "js/library/themes/images/activity/basketball.png",
-                IsSelected: false
-            }, {
-                FieldName: "FISHING",
-                Alias: "Fishing",
+			}, {
+                FieldName: "FISHFROG",
+                Alias: "Fishing and Frogging",
                 Image: "js/library/themes/images/activity/fishing.png",
                 IsSelected: false
+			}, {
+                FieldName: "SPRTURKEY",
+                Alias: "Spring Turkey Hunting",
+                Image: "js/library/themes/images/activity/hunting.png",
+                IsSelected: false
+			}, {
+                FieldName: "WILDHOG",
+                Alias: "Wild Hog Hunting",
+                Image: "js/library/themes/images/activity/archery.png",
+                IsSelected: false
             }],
-
-           CommentsSettings: {
+            CommentsSettings: {
                 Enabled: true,
-                Title: "ParksTryItLive - Park Comments",
+                Title: "Wildlife Comments",
                 QueryLayerId: "1",
-                ForeignKeyFieldForComment: "${FACILITYID}",
+                ForeignKeyFieldForComment: "${id}",
                 RankField: "${RANK}",
                 SubmissionDateField: "${SUBMITDT}",
                 CommentField: "${COMMENTS}"
@@ -335,10 +279,10 @@ define([], function () {
         }],
 
 
-        //Set the color of the circle around the selected point
-        RippleColor: "35,35,36",
+        // Set the ripple color in RGB format
+        RippleColor: "35,35,142",
 
-        //Set the size of the circle around the selected point
+        // Set the locator ripple size (in pixels)
         LocatorRippleSize: 40,
 
         // Minimum height should be 270 for the info-popup in pixels
@@ -384,7 +328,7 @@ define([], function () {
                 height: 35
             },
             DisplayText: "Address",
-            LocatorDefaultAddress: "139 W Porter Ave Naperville IL 60540",
+            LocatorDefaultAddress: "300 S. Adams St., Tallahassee FL 32301",
             LocatorParameters: {
                 SearchField: "SingleLine",
                 SearchBoundaryField: "searchExtent"
@@ -456,8 +400,8 @@ define([], function () {
         // ShareByMailLink:  Allow user to share application using mail.
         MapSharingOptions: {
             TinyURLServiceURL: "https://api-ssl.bitly.com/v3/shorten?longUrl=${0}",
-            FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Park%20Finder",
-            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Park%20Finder ${0}",
+            FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Wildlife%20Management%20Area%20Locator",
+            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Wildlife%20Management%20Area%20Locator ${0}",
             ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map!&body=${0}"
         },
 

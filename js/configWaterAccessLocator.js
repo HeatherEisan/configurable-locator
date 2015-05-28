@@ -64,7 +64,7 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
 
         // Set application title
-        ApplicationName: "Park Finder",
+        ApplicationName: "Florida Water Access Locations",
 
         // Set application icon path
         ApplicationIcon: "/js/library/themes/images/logo.png",
@@ -86,7 +86,7 @@ define([], function () {
 
         // Set Splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "<b>Welcome to Park Finder</b> <br/> <hr/> <br/> The <b>Park Finder</b> application helps citizens locate a park or recreation facility and obtain information about recreation activities in their community.  <br/><br/>To locate a park, simply enter an address or activity in the search box, or use your current location. The park(s) or recreation area(s) will then be highlighted on the map and relevant information about available recreation activities presented to the user.",
+            SplashScreenContent: "Welcome to the Water Access Locator.  Use this application to discover and learn about water access location in the state of Florida, including boat ramps, marinas and fishing sites.",
             IsVisible: true
         },
 
@@ -132,7 +132,7 @@ define([], function () {
         ZoomLevel: 12,
 
         // Specify WebMapId within quotes
-        WebMapId: "155203d58d1a48cd94a485953b4e38ff",
+        WebMapId: "4071a6bcdb944b15b34e9cef7a24e6e5",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -145,10 +145,10 @@ define([], function () {
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
 
         // Specify the Title of Group that contains basemaps
-        BasemapGroupTitle: "ArcGIS for Local Government TryItLive Basemaps",
+        BasemapGroupTitle: "Basemaps",
 
         // Specify the Name of Owner of the Group that contains basemaps
-        BasemapGroupOwner: "ArcGISforLocalGovTryIt",
+        BasemapGroupOwner: "GISITAdmin",
 
         // Specify Spatial Reference for basemaps, since all basemaps need to use the same spatial reference
         BasemapSpatialReferenceWKID: 102100,
@@ -187,86 +187,66 @@ define([], function () {
         ActivitySearchSettings: [{
             Enable: true,
             UnifiedSearch: "true",
-            Title: "ParksTryItLive - Park and Recreation Areas",
+            Title: "Water Access Locations",
             QueryLayerId: "0",
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
-            PrimaryKeyForActivity: "${FACILITYID}",
+            PrimaryKeyForActivity: "${SITEID}",
             ActivityList: [{
-                FieldName: "ADACOMPLY",
-                Alias: "ADA Compliant",
-                Image: "js/library/themes/images/activity/wheelchairAccessible.png",
+                FieldName: "FOURWHEEL",
+                Alias: "FourWheel",
+                Image: "js/library/themes/images/activity/fourwheel.png",
                 IsSelected: false
             }, {
-                FieldName: "SWIMMING",
-                Alias: "Swimming",
-                Image: "js/library/themes/images/activity/swimming.png",
+                FieldName: "ELEHOOKUP",
+                Alias: "Electric Hookup",
+                Image: "js/library/themes/images/activity/electricHookup.png",
                 IsSelected: false
             }, {
-                FieldName: "HIKING",
-                Alias: "Hiking",
-                Image: "js/library/themes/images/activity/climbing.png",
+                FieldName: "WTRHOOKUP",
+                Alias: "Water Hookup",
+                Image: "js/library/themes/images/activity/waterHookup.png",
                 IsSelected: false
             }, {
                 FieldName: "RESTROOM",
                 Alias: "Restrooms Available",
-                Image: "js/library/themes/images/activity/restrooms.png",
+                Image: "js/library/themes/images/activity/restroomsAvail.png",
                 IsSelected: true
             }, {
-                FieldName: "PICNIC",
-                Alias: "Picnic Shelters",
-                Image: "js/library/themes/images/activity/picnicArea.png",
+                FieldName: "FISHPIER",
+                Alias: "Fishing Pier",
+                Image: "js/library/themes/images/activity/fishingPier.png",
                 IsSelected: false
             }, {
-                FieldName: "BOATING",
-                Alias: "Boating",
-                Image: "js/library/themes/images/activity/rowBoating.png",
+                FieldName: "CANOELAND",
+                Alias: "Canoe Landing",
+                Image: "js/library/themes/images/activity/canoeLanding.png",
                 IsSelected: false
             }, {
-                FieldName: "ROADCYCLE",
-                Alias: "Road Cycling",
-                Image: "js/library/themes/images/activity/bicycleTrail.png",
+                FieldName: "WINTERPOOL",
+                Alias: "Winter Pool",
+                Image: "js/library/themes/images/activity/winterPool.png",
                 IsSelected: false
             }, {
-                FieldName: "MTBCYCLE",
-                Alias: "Mountain Biking",
-                Image: "js/library/themes/images/activity/bicycleTrail.png",
+                FieldName: "COURTDOCK",
+                Alias: "Courtesy Dock",
+                Image: "js/library/themes/images/activity/courtesyDock.png",
                 IsSelected: false
             }, {
-                FieldName: "PLAYGROUND",
-                Alias: "Playgrounds",
-                Image: "js/library/themes/images/activity/playground.png",
+                FieldName: "BOATRENT",
+                Alias: "Rental Available",
+                Image: "js/library/themes/images/activity/forRent.png",
                 IsSelected: false
             }, {
-                FieldName: "SKI",
-                Alias: "Skiing",
-                Image: "js/library/themes/images/activity/crossCountrySkiTrail.png",
+                FieldName: "BOATRAMP",
+                Alias: "Boat Ramp",
+                Image: "js/library/themes/images/activity/boatRamp.png",
                 IsSelected: false
             }, {
-                FieldName: "SOCCER",
-                Alias: "Multi-Purpose Fields",
-                Image: "js/library/themes/images/activity/soccer.png",
-                IsSelected: false
-            }, {
-                FieldName: "CAMPING",
-                Alias: "Camping",
-                Image: "js/library/themes/images/activity/campground.png",
-                IsSelected: false
-            }, {
-                FieldName: "HUNTING",
-                Alias: "Hunting",
-                Image: "js/library/themes/images/activity/hunting.png",
-                IsSelected: false
-            }, {
-                FieldName: "BASEBALL",
-                Alias: "Baseball Fields",
-                Image: "js/library/themes/images/activity/baseball.png",
-                IsSelected: false
-            }, {
-                FieldName: "BASKETBALL",
-                Alias: "Basketball Courts",
-                Image: "js/library/themes/images/activity/basketball.png",
+                FieldName: "MARINA",
+                Alias: "Marina",
+                Image: "js/library/themes/images/activity/marina.png",
                 IsSelected: false
             }, {
                 FieldName: "FISHING",
@@ -274,18 +254,16 @@ define([], function () {
                 Image: "js/library/themes/images/activity/fishing.png",
                 IsSelected: false
             }],
-
-           CommentsSettings: {
+            CommentsSettings: {
                 Enabled: true,
-                Title: "ParksTryItLive - Park Comments",
+                Title: "Water Comments",
                 QueryLayerId: "1",
-                ForeignKeyFieldForComment: "${FACILITYID}",
+                ForeignKeyFieldForComment: "${SITEID}",
                 RankField: "${RANK}",
                 SubmissionDateField: "${SUBMITDT}",
                 CommentField: "${COMMENTS}"
             }
         }],
-
 
         // ------------------------------------------------------------------------------------------------------------------------
         // Event SEARCH SETTINGS
@@ -336,7 +314,7 @@ define([], function () {
 
 
         //Set the color of the circle around the selected point
-        RippleColor: "35,35,36",
+        RippleColor: "35,35,142",
 
         //Set the size of the circle around the selected point
         LocatorRippleSize: 40,
@@ -384,7 +362,7 @@ define([], function () {
                 height: 35
             },
             DisplayText: "Address",
-            LocatorDefaultAddress: "139 W Porter Ave Naperville IL 60540",
+            LocatorDefaultAddress: "300 S. Adams St., Tallahassee FL 32301",
             LocatorParameters: {
                 SearchField: "SingleLine",
                 SearchBoundaryField: "searchExtent"
@@ -456,8 +434,8 @@ define([], function () {
         // ShareByMailLink:  Allow user to share application using mail.
         MapSharingOptions: {
             TinyURLServiceURL: "https://api-ssl.bitly.com/v3/shorten?longUrl=${0}",
-            FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Park%20Finder",
-            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Park%20Finder ${0}",
+            FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Water%20Access%20Locator",
+            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Water%20Access%20Locator ${0}",
             ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map!&body=${0}"
         },
 
