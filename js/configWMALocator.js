@@ -1,6 +1,6 @@
 ﻿/*global define,dojo,dojoConfig,esri */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
-/** @license -- is this key word required?
+/** @license
  | Copyright 2013 Esri
  |
  | Licensed under the Apache License, Version 2.0 (the "License");
@@ -402,7 +402,7 @@ define([], function () {
             TinyURLServiceURL: "https://api-ssl.bitly.com/v3/shorten?longUrl=${0}",
             FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Wildlife%20Management%20Area%20Locator",
             TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Wildlife%20Management%20Area%20Locator ${0}",
-            ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map!&body=${0}"
+            ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map&body=${0}"
         },
 
         //------------------------------------------------------------------------------------------------------------------------
