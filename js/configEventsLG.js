@@ -244,7 +244,7 @@ define([], function () {
         EventSearchSettings: [{
             Enable: true,
             UnifiedSearch: "true",
-            Title: "CommunityEventsTryItLive - Community Events",
+            Title: "CommunityEvents",
             QueryLayerId: "0",
             SearchDisplayTitle: "Events",
             SearchDisplayFields: "${EVENTTYPE}",
