@@ -94,7 +94,7 @@ define([], function () {
         ThemeColor: "js/library/themes/styles/greenTheme.css",
 
         // Set the bottom Pod Toggle button text
-        BottomPanelToggleButtonText: "Result",
+        BottomPanelToggleButtonText: "Result(s)",
 
         // Set the Search Panel Title
         SearchPanelTitle: "Search",
