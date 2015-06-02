@@ -247,17 +247,17 @@ define([], function () {
             Title: "CommunityEvents",
             QueryLayerId: "0",
             SearchDisplayTitle: "Events",
-            SearchDisplayFields: "${EVENTTYPE}",
+            SearchDisplayFields: "${EVENTNM}",
             SearchDisplaySubFields: "${EVENTSTART},${FULLADDR}",
             SearchExpressionForDate: "(EVENTEND >= ${0} AND EVENTEND <= ${1}) OR (EVENTSTART <= ${0} AND EVENTEND >= ${1}) OR (EVENTSTART >= ${0} AND EVENTSTART <= ${1})",
             SearchExpression: "UPPER(FULLADDR) LIKE UPPER('${0}%')",
             SortingKeyField: "${EVENTSTART}",
             AddToCalendarSettings: [{
-                IcsFileName: "${EVENTTYPE}",
+                IcsFileName: "${EVENTNM}",
                 StartDate: "${EVENTSTART}",
                 EndDate: "${EVENTEND}",
                 Location: "${FULLADDR},${PSTLCITY}",
-                Summary: "${EVENTTYPE}",
+                Summary: "${EVENTTYPE},${EVENTNM}",
                 Description: "${EVENTDESC}",
                 Organizer: "${SPONSOR}"
             }]
