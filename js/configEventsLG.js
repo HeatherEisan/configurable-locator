@@ -257,7 +257,7 @@ define([], function () {
                 StartDate: "${EVENTSTART}",
                 EndDate: "${EVENTEND}",
                 Location: "${FULLADDR},${PSTLCITY}",
-                Summary: "${EVENTTYPE},${EVENTNM}",
+                Summary: "${EVENTNM}",
                 Description: "${EVENTDESC}",
                 Organizer: "${SPONSOR}"
             }]
