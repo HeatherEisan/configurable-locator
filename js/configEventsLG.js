@@ -132,7 +132,7 @@ define([], function () {
         ZoomLevel: 12,
 
         // Specify WebMapId within quotes
-        WebMapId: "fc0812caf68b4de8ad66222b0e51f687",
+        WebMapId: "77e031718104430a924ff3d8601e4dac",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
