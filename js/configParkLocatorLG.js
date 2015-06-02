@@ -120,7 +120,7 @@ define([], function () {
             }
         }, {
             GalleryPod: {
-                Enabled: true
+                Enabled: false
             }
         }, {
             CommentsPod: {
@@ -313,24 +313,24 @@ define([], function () {
         //        Organizer: Set the Organizer of the event in ics file.
 
         EventSearchSettings: [{
-            Enable: false,
-            UnifiedSearch: "false",
-            Title: "Events - Events",
+            Enable: true,
+            UnifiedSearch: "true",
+            Title: "CommunityEvents",
             QueryLayerId: "0",
             SearchDisplayTitle: "Events",
-            SearchDisplayFields: "${CATEGORY}",
-            SearchDisplaySubFields: "${STARTDATE},${ADDRESS}",
-            SearchExpressionForDate: "(ENDDATE >= DATE ${0} AND ENDDATE <= DATE ${1}) OR (STARTDATE <= DATE ${0} AND ENDDATE >= DATE ${1}) OR (STARTDATE >= DATE ${0} AND STARTDATE <= DATE ${1})",
-            SearchExpression: "UPPER(ADDRESS) LIKE UPPER('${0}%')",
-            SortingKeyField: "${STARTDATE}",
+            SearchDisplayFields: "${EVENTNM}",
+            SearchDisplaySubFields: "${EVENTSTART},${FULLADDR}",
+            SearchExpressionForDate: "(EVENTEND >= ${0} AND EVENTEND <= ${1}) OR (EVENTSTART <= ${0} AND EVENTEND >= ${1}) OR (EVENTSTART >= ${0} AND EVENTSTART <= ${1})",
+            SearchExpression: "UPPER(FULLADDR) LIKE UPPER('${0}%')",
+            SortingKeyField: "${EVENTSTART}",
             AddToCalendarSettings: [{
-                IcsFileName: "${CATEGORY}",
-                StartDate: "${STARTDATE}",
-                EndDate: "${ENDDATE}",
-                Location: "${ADDRESS},${CITY},${STATE}",
-                Summary: "${CATEGORY}",
-                Description: "${DESCRIPTION}",
-                Organizer: ""
+                IcsFileName: "${EVENTNM}",
+                StartDate: "${EVENTSTART}",
+                EndDate: "${EVENTEND}",
+                Location: "${FULLADDR},${PSTLCITY}",
+                Summary: "${EVENTNM}",
+                Description: "${EVENTDESC}",
+                Organizer: "${SPONSOR}"
             }]
         }],
 
