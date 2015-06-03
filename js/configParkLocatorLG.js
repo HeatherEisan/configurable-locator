@@ -132,7 +132,7 @@ define([], function () {
         ZoomLevel: 12,
 
         // Specify WebMapId within quotes
-        WebMapId: "155203d58d1a48cd94a485953b4e38ff",
+        WebMapId: "2bed5703d05d4c29aacda0be756a7cc3",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -187,7 +187,7 @@ define([], function () {
         ActivitySearchSettings: [{
             Enable: true,
             UnifiedSearch: "true",
-            Title: "ParksTryItLive - Park and Recreation Areas",
+            Title: "Parks - Park and Recreation Areas",
             QueryLayerId: "0",
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
@@ -277,7 +277,7 @@ define([], function () {
 
            CommentsSettings: {
                 Enabled: true,
-                Title: "ParksTryItLive - Park Comments",
+                Title: "Parks - Park Comments",
                 QueryLayerId: "1",
                 ForeignKeyFieldForComment: "${FACILITYID}",
                 RankField: "${RANK}",
