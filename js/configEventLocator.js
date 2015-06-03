@@ -67,7 +67,7 @@ define([], function () {
         ApplicationName: "Event Locator",
 
         // Set application icon path
-        ApplicationIcon: "/js/library/themes/images/logo.png",
+        ApplicationIcon: "/js/library/themes/images/Eventlogo.png",
 
         // Set application Favicon path
         ApplicationFavicon: "/js/library/themes/images/favicon.ico",

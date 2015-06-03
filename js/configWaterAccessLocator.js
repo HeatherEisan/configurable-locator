@@ -67,7 +67,7 @@ define([], function () {
         ApplicationName: "Water Access Locator",
 
         // Set application icon path
-        ApplicationIcon: "/js/library/themes/images/logo.png",
+        ApplicationIcon: "/js/library/themes/images/Waterlogo.png",
 
         // Set application Favicon path
         ApplicationFavicon: "/js/library/themes/images/favicon.ico",
