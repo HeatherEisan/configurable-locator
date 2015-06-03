@@ -73,7 +73,7 @@ define([], function () {
         ApplicationFavicon: "/js/library/themes/images/favicon.ico",
 
         // Set URL of help page/portal
-        HelpURL: "help.htm",
+        HelpURL: "help_WMALocator.htm",
 
         // Set custom logoURL, displayed in lower left corner. Set to empty "" to disable.
         CustomLogoUrl: "",
@@ -94,7 +94,7 @@ define([], function () {
         ThemeColor: "js/library/themes/styles/orangeTheme.css",
 
         // Set the bottom Pod Toggle button text
-        BottomPanelToggleButtonText: "Result",
+        BottomPanelToggleButtonText: "Results",
 
         // Set the Search Panel Title
         SearchPanelTitle: "Search",
@@ -132,7 +132,7 @@ define([], function () {
         ZoomLevel: 12,
 
         // Specify WebMapId within quotes
-        WebMapId: "d4f7b097eaa84f0797d08f9d09df4611",
+        WebMapId: "1b27f84777e540f7b74d0772bf8ebb94",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -145,10 +145,10 @@ define([], function () {
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
 
         // Specify the Title of Group that contains basemaps
-        BasemapGroupTitle: "Basemaps",
+        BasemapGroupTitle: "ArcGISforStateGovernmentBasemapGroup",
 
         // Specify the Name of Owner of the Group that contains basemaps
-        BasemapGroupOwner: "GISITAdmin",
+        BasemapGroupOwner: "StateLocalTryItLive",
 
         // Specify Spatial Reference for basemaps, since all basemaps need to use the same spatial reference
         BasemapSpatialReferenceWKID: 102100,
@@ -187,37 +187,32 @@ define([], function () {
         ActivitySearchSettings: [{
             Enable: true,
             UnifiedSearch: "true",
-            Title: "Wildlife Management Areas",
+            Title: "Wildlife Management Locations",
             QueryLayerId: "0",
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
             PrimaryKeyForActivity: "${OBJECTID}",
              ActivityList: [{
+                FieldName: "BIGGME",
+                Alias: "Big Game",
+                Image: "js/library/themes/images/activity/bearViewing.png",
+                IsSelected: false
+            }, {
                 FieldName: "SMALLGME",
                 Alias: "Small Game",
                 Image: "js/library/themes/images/activity/deerViewing.png",
-                IsSelected: true
+                IsSelected: false
             }, {
                 FieldName: "WATERFWL",
                 Alias: "Waterfowl",
                 Image: "js/library/themes/images/activity/waterfowl.png",
                 IsSelected: false
-			}, {
-                FieldName: "FISHFROG",
-                Alias: "Fishing and Frogging",
-                Image: "js/library/themes/images/activity/fishing.png",
-                IsSelected: false
-			}, {
-                FieldName: "SPRTURKEY",
-                Alias: "Spring Turkey Hunting",
-                Image: "js/library/themes/images/activity/hunting.png",
-                IsSelected: false
-			}, {
-                FieldName: "WILDHOG",
-                Alias: "Wild Hog Hunting",
-                Image: "js/library/themes/images/activity/archery.png",
-                IsSelected: false
+            }, {
+                FieldName: "BIGGMEPT",
+                Alias: "Big Game Permit Required",
+                Image: "js/library/themes/images/activity/bearViewing.png",
+                IsSelected: true
             }],
             CommentsSettings: {
                 Enabled: true,
@@ -244,7 +239,9 @@ define([], function () {
         // SearchDisplayTitle: This text is displayed in Search Results as the Title to group results.
         // SearchDisplayFields: Attribute that will be displayed in the Search box when user performs a search.
         // SearchDisplaySubFields: Attribute that will be displayed in the Search box when user performs a search.
-        // SearchExpressionForDate: Expression to query the layer for Events falling in the range of 'Event Planner' search.
+        // SearchExpressionForDate: Expression to query the layer for Events falling in the range of 'Events' search.
+        //          ArcGIS Online Hosted Feature Service - (EVENTEND >= ${0} AND EVENTEND <= ${1}) OR (EVENTSTART <= ${0} AND EVENTEND >= ${1}) OR (EVENTSTART >= ${0} AND EVENTSTART <= ${1})
+        //          Other Service - (EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})
         // SearchExpression: Configure the query expression to be used for Search.
         // SortingKeyField: Attribute that will be sort the date when user performs a Event search.
         // AddToCalenderSettings: Configure the parameters to create the ics file for an event.
@@ -259,7 +256,7 @@ define([], function () {
         EventSearchSettings: [{
             Enable: false,
             UnifiedSearch: "false",
-            Title: "Events - Events",
+            Title: "Events",
             QueryLayerId: "0",
             SearchDisplayTitle: "Events",
             SearchDisplayFields: "${CATEGORY}",
@@ -328,7 +325,7 @@ define([], function () {
                 height: 35
             },
             DisplayText: "Address",
-            LocatorDefaultAddress: "300 S. Adams St., Tallahassee FL 32301",
+            LocatorDefaultAddress: "Sams Creek Rd, Pegram, TN, 37143",
             LocatorParameters: {
                 SearchField: "SingleLine",
                 SearchBoundaryField: "searchExtent"
@@ -381,7 +378,7 @@ define([], function () {
         // Transparency: Set Transparency for Route
         // RouteUnit: Set Unit for Route, units supported by Direction widget are “MILES”, “METERS”, “KILOMETERS”, “NAUTICAL_MILES”. If there is a typo error in any of these four units then the unit will be displayed in “KILOMETERS”. If the unit is specified other than these four units then unit will be displayed in “MILES”
         DrivingDirectionSettings: {
-            GetDirections: true,
+            GetDirections: false,
             RouteServiceURL: "http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World",
             RouteColor: "0,0,225",
             RouteWidth: 6,

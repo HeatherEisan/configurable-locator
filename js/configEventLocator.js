@@ -64,7 +64,7 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
 
         // Set application title
-        ApplicationName: "Water Access Locator",
+        ApplicationName: "Event Locator",
 
         // Set application icon path
         ApplicationIcon: "/js/library/themes/images/logo.png",
@@ -73,7 +73,7 @@ define([], function () {
         ApplicationFavicon: "/js/library/themes/images/favicon.ico",
 
         // Set URL of help page/portal
-        HelpURL: "help_WaterAccessLocator.htm",
+        HelpURL: "help_EventLocator.htm",
 
         // Set custom logoURL, displayed in lower left corner. Set to empty "" to disable.
         CustomLogoUrl: "",
@@ -82,11 +82,11 @@ define([], function () {
         ProxyUrl: "/proxy/proxy.ashx",
 
         // Set Legend Visibility
-        ShowLegend: true,
+        ShowLegend: false,
 
         // Set Splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "<center>Welcome to the <b> Water Access Locator</b></center><hr><br> The <b> Water Access Locator</b> helps you locate a boat ramp, marina, or fishing site within the state.<br><br> To locate a site, simply enter an address, name, select activities, or use your current location. The water access sites  will then be highlighted on the map and relevant information about each site will be presented to the user.",
+            SplashScreenContent: "<b>Welcome to the Event Locator</b> <br/> <hr/> <br/> The <b>Event Locator</b> application can be used by citizens and visitors to discover activities and events occurring in a community.  <br/><br/> To locate an event, simply enter an address in the search box, or use your current location. The event(s) will then be highlighted on the map and relevant information about community events presented to the user.  Users can place one or more events on their list and also add the events to their smartphone, tablet or desktop computer calendar.",
             IsVisible: true
         },
 
@@ -94,7 +94,7 @@ define([], function () {
         ThemeColor: "js/library/themes/styles/blueTheme.css",
 
         // Set the bottom Pod Toggle button text
-        BottomPanelToggleButtonText: "Results",
+        BottomPanelToggleButtonText: "Events",
 
         // Set the Search Panel Title
         SearchPanelTitle: "Search",
@@ -124,7 +124,7 @@ define([], function () {
             }
         }, {
             CommentsPod: {
-                Enabled: true
+                Enabled: false
             }
         }],
 
@@ -132,7 +132,7 @@ define([], function () {
         ZoomLevel: 12,
 
         // Specify WebMapId within quotes
-        WebMapId: "9bd874b8715549c8b875e6f5da89b613",
+        WebMapId: "37920ca66e784e3ebdafcf6c9d9be9a7",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -185,85 +185,32 @@ define([], function () {
         //      CommentField: It is the Attribute that will be display Comment text.
 
         ActivitySearchSettings: [{
-            Enable: true,
-            UnifiedSearch: "true",
-            Title: "Water Access Locations",
+            Enable: false,
+            UnifiedSearch: "false",
+            Title: "Parks",
             QueryLayerId: "0",
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
-            PrimaryKeyForActivity: "${SITEID}",
+            PrimaryKeyForActivity: "${FACILITYID}",
             ActivityList: [{
-                FieldName: "FOURWHEEL",
-                Alias: "FourWheel",
-                Image: "js/library/themes/images/activity/fourwheel.png",
-                IsSelected: false
-            }, {
-                FieldName: "ELEHOOKUP",
-                Alias: "Electric Hookup",
-                Image: "js/library/themes/images/activity/electricHookup.png",
-                IsSelected: false
-            }, {
-                FieldName: "WTRHOOKUP",
-                Alias: "Water Hookup",
-                Image: "js/library/themes/images/activity/waterHookup.png",
-                IsSelected: false
-            }, {
-                FieldName: "RESTROOM",
-                Alias: "Restrooms Available",
-                Image: "js/library/themes/images/activity/restroomsAvail.png",
-                IsSelected: true
-            }, {
-                FieldName: "FISHPIER",
-                Alias: "Fishing Pier",
-                Image: "js/library/themes/images/activity/fishingPier.png",
-                IsSelected: false
-            }, {
-                FieldName: "CANOELAND",
-                Alias: "Canoe Landing",
-                Image: "js/library/themes/images/activity/canoeLanding.png",
-                IsSelected: false
-            }, {
-                FieldName: "WINTERPOOL",
-                Alias: "Winter Pool",
-                Image: "js/library/themes/images/activity/winterPool.png",
-                IsSelected: false
-            }, {
-                FieldName: "COURTDOCK",
-                Alias: "Courtesy Dock",
-                Image: "js/library/themes/images/activity/courtesyDock.png",
-                IsSelected: false
-            }, {
-                FieldName: "BOATRENT",
-                Alias: "Rental Available",
-                Image: "js/library/themes/images/activity/forRent.png",
-                IsSelected: false
-            }, {
-                FieldName: "BOATRAMP",
-                Alias: "Boat Ramp",
-                Image: "js/library/themes/images/activity/boatRamp.png",
-                IsSelected: false
-            }, {
-                FieldName: "MARINA",
-                Alias: "Marina",
-                Image: "js/library/themes/images/activity/marina.png",
-                IsSelected: false
-            }, {
-                FieldName: "FISHING",
-                Alias: "Fishing",
-                Image: "js/library/themes/images/activity/fishing.png",
+                FieldName: "ADACOMPLY",
+                Alias: "ADA Compliant",
+                Image: "js/library/themes/images/activity/wheelchairAccessible.png",
                 IsSelected: false
             }],
-            CommentsSettings: {
-                Enabled: true,
-                Title: "Water Comments",
+
+           CommentsSettings: {
+                Enabled: false,
+                Title: "Comments",
                 QueryLayerId: "1",
-                ForeignKeyFieldForComment: "${SITEID}",
+                ForeignKeyFieldForComment: "${FACILITYID}",
                 RankField: "${RANK}",
                 SubmissionDateField: "${SUBMITDT}",
                 CommentField: "${COMMENTS}"
             }
         }],
+
 
         // ------------------------------------------------------------------------------------------------------------------------
         // Event SEARCH SETTINGS
@@ -293,30 +240,30 @@ define([], function () {
         //        Organizer: Set the Organizer of the event in ics file.
 
         EventSearchSettings: [{
-            Enable: false,
-            UnifiedSearch: "false",
-            Title: "Events - Events",
+            Enable: true,
+            UnifiedSearch: "true",
+            Title: "Events",
             QueryLayerId: "0",
             SearchDisplayTitle: "Events",
-            SearchDisplayFields: "${CATEGORY}",
-            SearchDisplaySubFields: "${STARTDATE},${ADDRESS}",
-            SearchExpressionForDate: "(ENDDATE >= DATE ${0} AND ENDDATE <= DATE ${1}) OR (STARTDATE <= DATE ${0} AND ENDDATE >= DATE ${1}) OR (STARTDATE >= DATE ${0} AND STARTDATE <= DATE ${1})",
-            SearchExpression: "UPPER(ADDRESS) LIKE UPPER('${0}%')",
-            SortingKeyField: "${STARTDATE}",
+            SearchDisplayFields: "${EVENTNM}",
+            SearchDisplaySubFields: "${EVENTSTART},${FULLADDR}",
+            SearchExpressionForDate: "(EVENTEND >= ${0} AND EVENTEND <= ${1}) OR (EVENTSTART <= ${0} AND EVENTEND >= ${1}) OR (EVENTSTART >= ${0} AND EVENTSTART <= ${1})",
+            SearchExpression: "UPPER(FULLADDR) LIKE UPPER('${0}%')",
+            SortingKeyField: "${EVENTSTART}",
             AddToCalendarSettings: [{
-                IcsFileName: "${CATEGORY}",
-                StartDate: "${STARTDATE}",
-                EndDate: "${ENDDATE}",
-                Location: "${ADDRESS},${CITY},${STATE}",
-                Summary: "${CATEGORY}",
-                Description: "${DESCRIPTION}",
-                Organizer: ""
+                IcsFileName: "${EVENTNM}",
+                StartDate: "${EVENTSTART}",
+                EndDate: "${EVENTEND}",
+                Location: "${FULLADDR},${PSTLCITY}",
+                Summary: "${EVENTNM}",
+                Description: "${EVENTDESC}",
+                Organizer: "${SPONSOR}"
             }]
         }],
 
 
         //Set the color of the circle around the selected point
-        RippleColor: "35,35,142",
+        RippleColor: "35,35,36",
 
         //Set the size of the circle around the selected point
         LocatorRippleSize: 40,
@@ -364,7 +311,7 @@ define([], function () {
                 height: 35
             },
             DisplayText: "Address",
-            LocatorDefaultAddress: "4710 Mansford Rd, Winchester, TN, 37398",
+            LocatorDefaultAddress: "160 Duke of Gloucester, Annapolis, MD, 21401",
             LocatorParameters: {
                 SearchField: "SingleLine",
                 SearchBoundaryField: "searchExtent"
@@ -389,7 +336,7 @@ define([], function () {
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
         //Distance is configured in "miles"
-        BufferDistance: "15",
+        BufferDistance: "2",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BUFFER SYMBOLOGY SETTINGS
@@ -436,9 +383,9 @@ define([], function () {
         // ShareByMailLink:  Allow user to share application using mail.
         MapSharingOptions: {
             TinyURLServiceURL: "https://api-ssl.bitly.com/v3/shorten?longUrl=${0}",
-            FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Water%20Access%20Locator",
-            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Water%20Access%20Locator ${0}",
-            ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map&body=${0}"
+            FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Event%20Locator",
+            TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Event%20Locator ${0}",
+            ShareByMailLink: "mailto:%20?subject=Event%20Locator&body=${0}"
         },
 
         //------------------------------------------------------------------------------------------------------------------------
