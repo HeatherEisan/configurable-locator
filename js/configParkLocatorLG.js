@@ -313,8 +313,8 @@ define([], function () {
         //        Organizer: Set the Organizer of the event in ics file.
 
         EventSearchSettings: [{
-            Enable: true,
-            UnifiedSearch: "true",
+            Enable: false,
+            UnifiedSearch: "false",
             Title: "CommunityEvents",
             QueryLayerId: "0",
             SearchDisplayTitle: "Events",
