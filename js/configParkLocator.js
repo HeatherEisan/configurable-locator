@@ -67,7 +67,7 @@ define([], function () {
         ApplicationName: "Park and Recreation Locator",
 
         // Set application icon path
-        ApplicationIcon: "/js/library/themes/images/logo.png",
+        ApplicationIcon: "/js/library/themes/images/Parklogo.png",
 
         // Set application Favicon path
         ApplicationFavicon: "/js/library/themes/images/favicon.ico",
