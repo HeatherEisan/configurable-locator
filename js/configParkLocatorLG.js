@@ -300,7 +300,11 @@ define([], function () {
         // SearchDisplayTitle: This text is displayed in Search Results as the Title to group results.
         // SearchDisplayFields: Attribute that will be displayed in the Search box when user performs a search.
         // SearchDisplaySubFields: Attribute that will be displayed in the Search box when user performs a search.
-        // SearchExpressionForDate: Expression to query the layer for Events falling in the range of 'Event Planner' search.
+        // SearchExpressionForDate: Expression to query the layer for Events falling in the range of 'Events' search (Choose the expression below that works for your environment).
+        //      Hosted Feature Layers published from an ArcGIS Online organizational account with the Organization’s Security Setting: “Allow only standard SQL queries” unchecked must use the following expression:
+        //      SearchExpressionForDate: "(EVENTEND >= ${0} AND EVENTEND <= ${1}) OR (EVENTSTART <= ${0} AND EVENTEND >= ${1}) OR (EVENTSTART >= ${0} AND EVENTSTART <= ${1})",
+        //      All other published services should use the use the following expression (This is the default expression):
+        //      SearchExpressionForDate: "(EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})",
         // SearchExpression: Configure the query expression to be used for Search.
         // SortingKeyField: Attribute that will be sort the date when user performs a Event search.
         // AddToCalenderSettings: Configure the parameters to create the ics file for an event.
@@ -320,7 +324,7 @@ define([], function () {
             SearchDisplayTitle: "Events",
             SearchDisplayFields: "${EVENTNM}",
             SearchDisplaySubFields: "${EVENTSTART},${FULLADDR}",
-            SearchExpressionForDate: "(EVENTEND >= ${0} AND EVENTEND <= ${1}) OR (EVENTSTART <= ${0} AND EVENTEND >= ${1}) OR (EVENTSTART >= ${0} AND EVENTSTART <= ${1})",
+            SearchExpressionForDate: "(EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})",
             SearchExpression: "UPPER(FULLADDR) LIKE UPPER('${0}%')",
             SortingKeyField: "${EVENTSTART}",
             AddToCalendarSettings: [{
