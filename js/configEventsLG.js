@@ -226,7 +226,7 @@ define([], function () {
         // SearchDisplayFields: Attribute that will be displayed in the Search box when user performs a search.
         // SearchDisplaySubFields: Attribute that will be displayed in the Search box when user performs a search.
         // SearchExpressionForDate: Expression to query the layer for Events falling in the range of 'Events' search (Choose the expression below that works for your environment).
-        //      Hosted Feature Layers publish from an ArcGIS Online organizational account with the Security Setting: “Allow only standard SQL queries” unchecked must use the following expression:
+        //      Hosted Feature Layers published from an ArcGIS Online organizational account with the Organization’s Security Setting: “Allow only standard SQL queries” unchecked must use the following expression:
         //      SearchExpressionForDate: "(EVENTEND >= ${0} AND EVENTEND <= ${1}) OR (EVENTSTART <= ${0} AND EVENTEND >= ${1}) OR (EVENTSTART >= ${0} AND EVENTSTART <= ${1})",
         //      All other published services should use the use the following expression (This is the default expression):
         //      SearchExpressionForDate: "(EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})",
