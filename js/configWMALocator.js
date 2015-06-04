@@ -276,10 +276,10 @@ define([], function () {
         }],
 
 
-        // Set the ripple color in RGB format
+        //Set the color of the circle around the selected point
         RippleColor: "35,35,142",
 
-        // Set the locator ripple size (in pixels)
+        //Set the size of the circle around the selected point
         LocatorRippleSize: 40,
 
         // Minimum height should be 270 for the info-popup in pixels
