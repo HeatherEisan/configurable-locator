@@ -522,9 +522,9 @@ define([
         * @memberOf widgets/commonHelper/directionWidgetHelper
         */
         _switchCaseForRoute: function (queryObject, commentArray, featureId, errorMessage) {
-            var resultcontent;
+            var resultcontent, queryURLLink;
             switch (queryObject.WidgetName.toLowerCase()) {
-            // If it is comming from activity search then set bottom pod's data
+                // If it is comming from activity search then set bottom pod's data  
             case "activitysearch":
                 topic.publish("showProgressIndicator");
                 resultcontent = { "value": queryObject.Index };
@@ -571,6 +571,9 @@ define([
                 if (!queryObject.IsRouteCreated) {
                     this.setCenterAt(queryObject.FeatureData[queryObject.Index].geometry);
                 }
+                queryURLLink = this.getQueryURLWithUnifiedSearch(this.routeObject.activityData, this.routeObject.EndPoint[this.routeObject.Index].distance);
+                queryURLLink = queryURLLink === "" ? this.routeObject.QueryURL : queryURLLink;
+                queryObject.QueryURL = queryURLLink;
                 this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName, queryObject.activityData);
                 this._createCommonPods(queryObject, commentArray, resultcontent, queryObject.activityData);
                 if (errorMessage) {
@@ -592,6 +595,9 @@ define([
                 if (!queryObject.IsRouteCreated) {
                     this.setCenterAt(queryObject.FeatureData[queryObject.Index].geometry);
                 }
+                queryURLLink = this.getQueryURLWithUnifiedSearch(this.routeObject.activityData, this.routeObject.EndPoint[this.routeObject.Index].distance);
+                queryURLLink = queryURLLink === "" ? this.routeObject.QueryURL : queryURLLink;
+                queryObject.QueryURL = queryURLLink;
                 this.setSearchContent(queryObject.FeatureData, false, queryObject.QueryURL, queryObject.WidgetName, queryObject.activityData);
                 this._createCommonPods(queryObject, commentArray, resultcontent, queryObject.activityData);
                 if (errorMessage) {
