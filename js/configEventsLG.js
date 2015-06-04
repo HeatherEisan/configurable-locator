@@ -73,7 +73,7 @@ define([], function () {
         ApplicationFavicon: "/js/library/themes/images/favicon.ico",
 
         // Set URL of help page/portal
-        HelpURL: "help_EventsLG.htm",
+        HelpURL: "help_EventCalendar.htm",
 
         // Set custom logoURL, displayed in lower left corner. Set to empty "" to disable.
         CustomLogoUrl: "",
@@ -238,8 +238,10 @@ define([], function () {
         //        Summary: Set the Summary of the event in ics file.
         //        Description: Set the Description of the event in ics file.
         //        Organizer: Set the Organizer of the event in ics file.
-        // ArcGIS Online Hosted Feature Service - (EVENTEND >= ${0} AND EVENTEND <= ${1}) OR (EVENTSTART <= ${0} AND EVENTEND >= ${1}) OR (EVENTSTART >= ${0} AND EVENTSTART <= ${1})
-        // Other Service - (EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})
+        // Hosted Feature Layers publish from an ArcGIS Online organizational account must use the following expression: 
+        // SearchExpressionForDate: "(EVENTEND >= ${0} AND EVENTEND <= ${1}) OR (EVENTSTART <= ${0} AND EVENTEND >= ${1}) OR (EVENTSTART >= ${0} AND EVENTSTART <= ${1})",
+        // Hosted Feature Layers published from an ArcGIS Online organizational account must use the following expression: 
+        //  Other Service - (EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})
 
         EventSearchSettings: [{
             Enable: true,
