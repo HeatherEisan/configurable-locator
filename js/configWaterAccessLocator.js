@@ -278,9 +278,11 @@ define([], function () {
         // SearchDisplayTitle: This text is displayed in Search Results as the Title to group results.
         // SearchDisplayFields: Attribute that will be displayed in the Search box when user performs a search.
         // SearchDisplaySubFields: Attribute that will be displayed in the Search box when user performs a search.
-        // SearchExpressionForDate: Expression to query the layer for Events falling in the range of 'Events' search.
-        //          ArcGIS Online Hosted Feature Service - (EVENTEND >= ${0} AND EVENTEND <= ${1}) OR (EVENTSTART <= ${0} AND EVENTEND >= ${1}) OR (EVENTSTART >= ${0} AND EVENTSTART <= ${1})
-        //          Other Service - (EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})
+        // SearchExpressionForDate: Expression to query the layer for Events falling in the range of 'Events' search (Choose the expression below that works for your environment).
+        //      Hosted Feature Layers published from an ArcGIS Online organizational account with the Organization’s Security Setting: “Allow only standard SQL queries” unchecked must use the following expression:
+        //      SearchExpressionForDate: "(EVENTEND >= ${0} AND EVENTEND <= ${1}) OR (EVENTSTART <= ${0} AND EVENTEND >= ${1}) OR (EVENTSTART >= ${0} AND EVENTSTART <= ${1})",
+        //      All other published services should use the use the following expression (This is the default expression):
+        //      SearchExpressionForDate: "(EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})",
         // SearchExpression: Configure the query expression to be used for Search.
         // SortingKeyField: Attribute that will be sort the date when user performs a Event search.
         // AddToCalenderSettings: Configure the parameters to create the ics file for an event.
@@ -295,22 +297,22 @@ define([], function () {
         EventSearchSettings: [{
             Enable: false,
             UnifiedSearch: "false",
-            Title: "Events - Events",
+            Title: "Events",
             QueryLayerId: "0",
             SearchDisplayTitle: "Events",
-            SearchDisplayFields: "${CATEGORY}",
-            SearchDisplaySubFields: "${STARTDATE},${ADDRESS}",
-            SearchExpressionForDate: "(ENDDATE >= DATE ${0} AND ENDDATE <= DATE ${1}) OR (STARTDATE <= DATE ${0} AND ENDDATE >= DATE ${1}) OR (STARTDATE >= DATE ${0} AND STARTDATE <= DATE ${1})",
-            SearchExpression: "UPPER(ADDRESS) LIKE UPPER('${0}%')",
-            SortingKeyField: "${STARTDATE}",
+            SearchDisplayFields: "${EVENTNM}",
+            SearchDisplaySubFields: "${EVENTSTART},${FULLADDR}",
+            SearchExpressionForDate: "(EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})",
+            SearchExpression: "UPPER(FULLADDR) LIKE UPPER('${0}%')",
+            SortingKeyField: "${EVENTSTART}",
             AddToCalendarSettings: [{
-                IcsFileName: "${CATEGORY}",
-                StartDate: "${STARTDATE}",
-                EndDate: "${ENDDATE}",
-                Location: "${ADDRESS},${CITY},${STATE}",
-                Summary: "${CATEGORY}",
-                Description: "${DESCRIPTION}",
-                Organizer: ""
+                IcsFileName: "${EVENTNM}",
+                StartDate: "${EVENTSTART}",
+                EndDate: "${EVENTEND}",
+                Location: "${FULLADDR},${PSTLCITY}",
+                Summary: "${EVENTNM}",
+                Description: "${EVENTDESC}",
+                Organizer: "${SPONSOR}"
             }]
         }],
 
