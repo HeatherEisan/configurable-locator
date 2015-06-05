@@ -100,7 +100,7 @@ define([], function () {
         SearchPanelTitle: "Search",
 
         // Set the Activity Panel Title
-        ActivityPanelTitle: "Parks",
+        ActivityPanelTitle: "Activity",
 
         // Set the Event Panel Title
         EventPanelTitle: "Event",
@@ -120,7 +120,7 @@ define([], function () {
             }
         }, {
             GalleryPod: {
-                Enabled: false
+                Enabled: true
             }
         }, {
             CommentsPod: {

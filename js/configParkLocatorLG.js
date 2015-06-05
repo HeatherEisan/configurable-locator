@@ -100,7 +100,7 @@ define([], function () {
         SearchPanelTitle: "Search",
 
         // Set the Activity Panel Title
-        ActivityPanelTitle: "Event",
+        ActivityPanelTitle: "Parks",
 
         // Set the Event Panel Title
         EventPanelTitle: "Event",
@@ -120,7 +120,7 @@ define([], function () {
             }
         }, {
             GalleryPod: {
-                Enabled: false
+                Enabled: true
             }
         }, {
             CommentsPod: {
@@ -189,7 +189,7 @@ define([], function () {
             UnifiedSearch: "true",
             Title: "Parks - Park and Recreation Areas",
             QueryLayerId: "0",
-            SearchDisplayTitle: "Activity",
+            SearchDisplayTitle: "Parks",
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
             PrimaryKeyForActivity: "${FACILITYID}",
@@ -441,7 +441,7 @@ define([], function () {
         // Transparency: Set Transparency for Route
         // RouteUnit: Set Unit for Route, units supported by Direction widget are “MILES”, “METERS”, “KILOMETERS”, “NAUTICAL_MILES”. If there is a typo error in any of these four units then the unit will be displayed in “KILOMETERS”. If the unit is specified other than these four units then unit will be displayed in “MILES”
         DrivingDirectionSettings: {
-            GetDirections: true,
+            GetDirections: false,
             RouteServiceURL: "http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World",
             RouteColor: "0,0,225",
             RouteWidth: 6,
