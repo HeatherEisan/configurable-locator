@@ -100,7 +100,7 @@ define([], function () {
         SearchPanelTitle: "Search",
 
         // Set the Activity Panel Title
-        ActivityPanelTitle: "Activity",
+        ActivityPanelTitle: "Event",
 
         // Set the Event Panel Title
         EventPanelTitle: "Event",
