@@ -338,7 +338,7 @@ define([], function () {
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
         //Distance is configured in "miles"
-        BufferDistance: "2",
+        BufferDistance: "1",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BUFFER SYMBOLOGY SETTINGS
