@@ -366,7 +366,7 @@ define([], function () {
                 height: 35
             },
             DisplayText: "Address",
-            LocatorDefaultAddress: "4710 Mansford Rd, Winchester, TN, 37398",
+            LocatorDefaultAddress: "17 Lynchburg Hwy, Lynchburg, TN 37352",
             LocatorParameters: {
                 SearchField: "SingleLine",
                 SearchBoundaryField: "searchExtent"

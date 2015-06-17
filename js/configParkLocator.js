@@ -86,7 +86,7 @@ define([], function () {
 
         // Set Splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "<center><b>Park and Recreation Locator</b></center><hr></br> The <b>Park and Recreation Locator</b> helps you locate a State Park or other state-managed recreational site. To locate a park, simply enter an address or activity in the search box, or use your current location. The park(s) or recreation area(s) will then be highlighted on the map and relevant information about available recreation activities presented to the user.",
+            SplashScreenContent: "<center><b>Park and Recreation Locator</b></center><hr></br> The <b>Park and Recreation Locator</b> helps you locate a State Park or other state-managed recreational site.<br><br> To locate a park, simply enter an address or activity in the search box, or use your current location. The park(s) or recreation area(s) will then be highlighted on the map and relevant information about available recreation activities presented to the user.",
             IsVisible: true
         },
 
@@ -421,7 +421,7 @@ define([], function () {
                 height: 35
             },
             DisplayText: "Address",
-            LocatorDefaultAddress: "4710 Mansford Rd, Winchester, TN, 37398",
+            LocatorDefaultAddress: "401 Church Street Nashville TN 37243",
             LocatorParameters: {
                 SearchField: "SingleLine",
                 SearchBoundaryField: "searchExtent"
