@@ -159,30 +159,7 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
         // ACTIVITY SEARCH SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
-        // Configure Search, Barrier and Info settings to be displayed in Search panels:
-
-        // Configure Search and Settings below.
-        // Enable:  Set to true if Activity search panel need to be displayed, or false if Activity search panel are not required.
-        // UnifiedSearch: Specify a boolean value true/false which indicates whether to include the layer in Unified search or not.
-        // Title: In case of webmap implementations, it must match with the layer name specified in webmap.
-        // QueryLayerId: This is the layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
-        // SearchDisplayTitle: This text is displayed in Search Results as the Title to group results.
-        // SearchDisplayFields: This Attribute will be displayed in the Search box when user performs a search.
-        // SearchExpression: Configure the Query Expression to be used for Search.
-        // PrimaryKeyForActivity: Specify field name as Primary Key to relate comment table.
-        // ActivityList: Activities to be displayed in Activity Search and Info window for a feature.
-        //      FieldName: Name for which query will be performed on the layer.
-        //      Alias: Specify an alternative name used for the 'Activity' and tooltip name for the icons.
-        //      Image: Set URL for 'Activity' icons.
-        //      IsSelected: Set selection in 'Activity' search list.
-        // CommentsSettings: Configure Comments Settings
-        //      Enabled: Set to true if comments need to be displayed, or false if comments are not required.
-        //      CommentsSettings - Title: In case of webmap implementations, it must match the layer name specified in webmap.
-        //      CommentsSettings - QueryLayerId: This is the layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
-        //      ForeignKeyFieldForComment: Specify field name as Foreign Key to relate activity table.
-        //      RankField: It is the Attribute that will be display ranks/stars.
-        //      SubmissionDateField: It is the Attribute that will be display the Date when the comment was submitted.
-        //      CommentField: It is the Attribute that will be display Comment text.
+        // The Activity Search Settings are not currently supported in the Events Locator application.
 
         ActivitySearchSettings: [{
             Enable: false,
