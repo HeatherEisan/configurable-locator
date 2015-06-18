@@ -159,7 +159,7 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
         // ACTIVITY SEARCH SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
-        // The Activity Search Settings are not currently supported in the Events Locator application.
+        // The Activity Search Settings are not currently supported in the Event Locator application.
 
         ActivitySearchSettings: [{
             Enable: false,
