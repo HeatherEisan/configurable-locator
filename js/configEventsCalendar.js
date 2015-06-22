@@ -97,13 +97,13 @@ define([], function () {
         BottomPanelToggleButtonText: "Events",
 
         // Set the Search Panel Title
-        SearchPanelTitle: "Search",
+        SearchPanelTitle: "Location",
 
         // Set the Activity Panel Title
         ActivityPanelTitle: "Activity",
 
         // Set the Event Panel Title
-        EventPanelTitle: "Event",
+        EventPanelTitle: "Date",
 
         // Set sequence of info pods in the Bottom Panel
         PodSettings: [{
