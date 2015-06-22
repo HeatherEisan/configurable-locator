@@ -86,7 +86,7 @@ define([], function () {
 
         // Set Splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "<b>Welcome to the Events Calendar</b> <br/> <hr/> <br/> The <b>Events Calendar</b> application can be used by citizens and visitors to discover activities and events occurring in a community.  <br/><br/> To locate an event, simply enter an address in the search box, or use your current location. The event(s) will then be highlighted on the map and relevant information about community events presented to the user.  Users can place one or more events on their list and also add the events to their smartphone, tablet or desktop computer calendar.",
+            SplashScreenContent: "<b>Welcome to the Events Calendar</b> <br/> <hr/> <br/> The <b>Events Calendar</b> helps you discover festivals, shows, concerts, and other activities in a community and then add these events to your calendar before scheduling a visit or trip.  <br/><br/> To locate an event, simply enter an address in the search box, or use your current location. The event(s) will then be highlighted on the map and relevant information about community events presented to the user.  Users can place one or more events on their list and also add the events to their smartphone, tablet or desktop computer calendar.",
             IsVisible: true
         },
 
