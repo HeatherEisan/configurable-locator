@@ -97,10 +97,10 @@ define([], function () {
         BottomPanelToggleButtonText: "Result(s)",
 
         // Set the Search Panel Title
-        SearchPanelTitle: "Search",
+        SearchPanelTitle: "Location",
 
         // Set the Activity Panel Title
-        ActivityPanelTitle: "Parks",
+        ActivityPanelTitle: "Activity",
 
         // Set the Event Panel Title
         EventPanelTitle: "Events",
