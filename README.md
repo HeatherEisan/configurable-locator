@@ -4,13 +4,13 @@ The Configurable Locator is a replacement to the [Configurable Place Finder appl
 
 The Configurable Locator application is a configuration of ArcGIS for Server and a JavaScript application that allows the public to locate parks, recreational opportunities boat ramps etc. in their community. This repo contains four unique application configurations: Parks Finder, Parks Locator, Water Access Locator, and Wildlife Management Access Locator.
 
-**Park and Recreation Finder** is a configuration of ArcGIS Server and a JavaScript application that allows citizens to locate park and recreation opportunities in their community.[Try the Parks Finder application](http://links.esri.com/localgovernment/tryit/ParkLocator/)
+**Park and Recreation Locator (Local Government)** is a configuration of ArcGIS Server and a JavaScript application that allows citizens to locate park and recreation opportunities in their community.[Try the Parks Finder application](http://links.esri.com/localgovernment/tryit/ParkLocator/)
 
 **Water Access Locator** is a configuration of ArcGIS for Server and a JavaScript API application that allows the public to locate boat ramps, and marinas, fishing sites in the state.[Try the Water Access application](http://tryitlive.arcgis.com/WaterAccessLocator/)
 
 **Wildlife Management Area Locator** is a configuration of ArcGIS and a JavaScript application that allows the public to locate Wildlife Management Areas (WMA) and huntable land in their state.[Try the Wildlife Access Managment application](http://tryitlive.arcgis.com/WMALocator/)
 
-**Park and Recreation Locator** is a configuration of ArcGIS and JavaScript API application that allows the public to locate park and recreational opportunities in their state.[Try the Parks Locator application](http://tryitlive.arcgis.com/ParkandRecLocator/)
+**Park and Recreation Locator (State Government)** is a configuration of ArcGIS and JavaScript API application that allows the public to locate park and recreational opportunities in their state.[Try the Parks Locator application](http://tryitlive.arcgis.com/ParkandRecLocator/)
 
 http://links.esri.com/stategovernment/tryit/EventLocator/
 http://links.esri.com/localgovernment/tryit/EventsCalendar/
@@ -25,33 +25,22 @@ http://links.esri.com/localgovernment/tryit/EventsCalendar/
 * Discover Events by date
 * Plan a trip, itineray and share with others 
 
-## Instructions
-
-### Esri Sample Services
-
-Esri's sample services can be used with this repository to extend the application.
-
-
-### General Help
-[New to Github? Get started here.](http://htmlpreview.github.com/?https://github.com/Esri/esri.github.com/blob/master/help/esri-getting-to-know-github.html)
-
 ## Requirements
 
-### Esri Sample Services
+**Start now using Esri-supplied sample services**
 
-* Microsoft ASP.NET Framework 4.0 available from the [Microsoft website](http://www.microsoft.com/en-us/download/details.aspx?id=17851)
+You can start using the application now by setting it up on a web server running Microsoft Internet Information Services (IIS) and using sample services supplied by Esri.
+You'll need to convert to an application in IIS and use the ASP .NET 4.0. application pool.
 
-### Your Services
+**Start now using your own services**
 
-* ArcGIS Online for Organizations or
-* ArcGIS for Server 10.2 - Standard or Advanced - [About](http://www.esri.com/software/arcgis/arcgisserver)
-* Microsoft ASP.NET Framework 4.0 available from the [Microsoft website](http://www.microsoft.com/en-us/download/details.aspx?id=17851)
+For more information on requirements and publication steps, see [Parks Locator](http://links.esri.com/stategovernment/help/10.2/ParkandRecreationLocator) help or [Water Access Locator](http://links.esri.com/stategovernment/help/10.2/WaterAccessLocator) help or [Wildlife Management Access](http://links.esri.com/stategovernment/help/10.2/WildlifeManagementAreaLocator) help or [Parks Finder](http://links.esri.com/localgovernment/help/10.2/ParksandRecreationFinder) help 
 
 ## Resources
 
-Learn more about Esri's [ArcGIS for State Government maps and apps](http://solutions.arcgis.com/state-government/).
+Learn more about Esri's [ArcGIS for State and Local Government maps and apps](http://solutions.arcgis.com).
 
-Show me a list of other [Government GitHub repositories](http://esri.github.io/#Government).
+Show me a list of other [State and Local Government GitHub repositories](http://esri.github.io/#Government).
 
 Additional [information and sample data](http://www.arcgis.com/home/item.html?id=a57e96b9240e4311b7fd863b80a6d389)
 are available for the application.
