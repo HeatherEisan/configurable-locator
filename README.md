@@ -1,6 +1,6 @@
 configurable-locator
 ====================
-The Configurable Locator is a replacement to the [Configurable Place Finder application](https://github.com/Esri/configurable-place-finder)
+***The Configurable Locator is a replacement to the [Configurable Place Finder application](https://github.com/Esri/configurable-place-finder)***
 
 The Configurable Locator application is a configuration of ArcGIS for Server and a JavaScript application that allows the public to locate parks, recreational opportunities boat ramps etc. in their community. This repo contains four unique application configurations: Parks Finder, Parks Locator, Water Access Locator, and Wildlife Management Access Locator.
 
