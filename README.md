@@ -12,8 +12,9 @@ The Configurable Locator application is a configuration of ArcGIS for Server and
 
 **Park and Recreation Locator (State Government)** is a configuration of ArcGIS and JavaScript API application that allows the public to locate park and recreational opportunities in their state.[Try the Parks Locator application](http://tryitlive.arcgis.com/ParkandRecLocator/)
 
-http://links.esri.com/stategovernment/tryit/EventLocator/
-http://links.esri.com/localgovernment/tryit/EventsCalendar/
+**Event Locator (State Government)** is a configuration of ArcGIS and JavaScript API application that allows citizens and visitors to discover festivals, shows, concerts and other events occurring in a community.[Try the Event Locator application](http://links.esri.com/stategovernment/tryit/EventLocator/)
+
+**Events Calendar (Local Government)** is a configuration of ArcGIS and JavaScript API application that allows citizens and visitors to discover festivals, shows, concerts and other events occurring in a community.[Try the Events Calendar application](http://links.esri.com/localgovernment/tryit/EventsCalendar/)
 
 [![Image of Configurable Locator application](configurable-locator.png "Configurable Locator application")](http://links.esri.com/stategovernment/tryit/ParkandRecLocator/)
 
@@ -34,7 +35,7 @@ You'll need to convert to an application in IIS and use the ASP .NET 4.0. applic
 
 **Start now using your own services**
 
-For more information on requirements and publication steps, see [Parks Locator](http://links.esri.com/stategovernment/help/10.2/ParkandRecreationLocator) help or [Water Access Locator](http://links.esri.com/stategovernment/help/10.2/WaterAccessLocator) help or [Wildlife Management Access](http://links.esri.com/stategovernment/help/10.2/WildlifeManagementAreaLocator) help or [Parks Finder](http://links.esri.com/localgovernment/help/10.2/ParksandRecreationFinder) help 
+For more information on requirements and publication steps, see [Park Locator for State Government](http://links.esri.com/stategovernment/help/ParkandRecLocator) help or [Water Access Locator](http://links.esri.com/stategovernment/help/WaterAccessLocator) help or [Wildlife Management Access](http://links.esri.com/stategovernment/help/WMALocator) help or [Park Locator for Local Government](http://links.esri.com/localgovernment/help/ParkLocator/) help or [Events Calendar](http://links.esri.com/localgovernment/help/EventsCalendar/) help or [Event Locator](http://links.esri.com/stategovernment/help/EventLocator) help
 
 ## Resources
 
@@ -42,7 +43,7 @@ Learn more about Esri's [ArcGIS for State and Local Government maps and apps](ht
 
 Show me a list of other [State and Local Government GitHub repositories](http://esri.github.io/#Government).
 
-Additional [information and sample data](http://www.arcgis.com/home/item.html?id=a57e96b9240e4311b7fd863b80a6d389)
+Additional [information and sample data](http://links.esri.com/stategovernment/help/ParkandRecLocator)
 are available for the application.
 
 This application uses the 3.13 version of
@@ -51,10 +52,14 @@ see the site for concepts, samples, and a reference for using the API to create 
 
 ##Selecting Your Configuration
 
-The configurable-locator repo contains six unique application configurations: Parks Locator for Local Government, Parks Locator for State Government, Water Access Locator, and Wildlife Management Access Locator.
+The configurable-locator repo contains six unique application configurations: Parks Locator for Local Government, Parks Locator for State Government, Water Access Locator, Wildlife Management Access Locator, Events Calendar for Local Government, and Event Locator for State Government. 
 
-To get the Parks Locator for Local Government configuration rename configParkLocatorLG.js to config.js. To get the Parks Locator for State Government configuration rename configParkLocator.js to config.js. To get the Water Access Locator configuration rename configWaterAccessLocator.js to config.js. To get the Wildlife Management Access configuration rename configWMALocator.js to config.js.
-
+To get the Parks Locator for Local Government configuration rename configParkLocatorLG.js to config.js. 
+To get the Parks Locator for State Government configuration rename configParkLocator.js to config.js. 
+To get the Water Access Locator configuration rename configWaterAccessLocator.js to config.js. 
+To get the Wildlife Management Access configuration rename configWMALocator.js to config.js.
+To get the Events Calendar for Local Government configuration rename configEventsCalendar.js to config.js
+To get the Event Locator for State Government configuration rename configEventLocator.js to config.js
 
 ## Issues
 
