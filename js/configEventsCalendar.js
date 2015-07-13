@@ -245,7 +245,7 @@ define([], function () {
         RippleColor: "0,255,255",
 
         //Set the size of the circle around the selected point
-        LocatorRippleSize: 10,
+        LocatorRippleSize: 6,
 
         // Minimum height should be 270 for the info-popup in pixels
         InfoPopupHeight: 270,
