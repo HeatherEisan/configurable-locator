@@ -64,7 +64,7 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
 
         // Set application title
-        ApplicationName: "Park and Recreation Locator",
+        ApplicationName: "Park Locator",
 
         // Set application icon path
         ApplicationIcon: "/js/library/themes/images/Parklogo.png",
@@ -86,7 +86,7 @@ define([], function () {
 
         // Set Splash window content - Message that appears when the application starts
         SplashScreen: {
-            SplashScreenContent: "<b>Welcome to Park and Recreation Locator</b> <br/> <hr/> <br/> The <b>Park and Recreation Locator</b> application helps citizens locate a park or recreation facility and obtain information about recreation activities in their community.  <br/><br/>To locate a park, simply enter an address or activity in the search box, or use your current location. The park(s) or recreation area(s) will then be highlighted on the map and relevant information about available recreation activities presented to the user.",
+            SplashScreenContent: "<b>Welcome to Park Locator</b> <br/> <hr/> <br/> The <b>Park and Recreation Locator</b> application helps citizens locate a park or recreation facility and obtain information about recreation activities in their community.  <br/><br/>To locate a park, simply enter an address or activity in the search box, or use your current location. The park(s) or recreation area(s) will then be highlighted on the map and relevant information about available recreation activities presented to the user.",
             IsVisible: true
         },
 
@@ -340,10 +340,10 @@ define([], function () {
 
 
         //Set the color of the circle around the selected point
-        RippleColor: "35,35,36",
+        RippleColor: "0,255,255",
 
         //Set the size of the circle around the selected point
-        LocatorRippleSize: 40,
+        LocatorRippleSize: 6,
 
         // Minimum height should be 270 for the info-popup in pixels
         InfoPopupHeight: 270,
