@@ -129,7 +129,7 @@ define([], function () {
         }],
 
         // Following zoom level will be set for the map upon searching an address
-        ZoomLevel: 12,
+        ZoomLevel: 20,
 
         // Specify WebMapId within quotes
         WebMapId: "2bed5703d05d4c29aacda0be756a7cc3",
