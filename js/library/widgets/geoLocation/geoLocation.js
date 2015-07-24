@@ -64,7 +64,7 @@ define([
                         * minimize other open header panel widgets and call geolocation service
                         */
                         topic.publish("toggleWidget", "geolocation");
-                        this.showCurrentLocation(this.preLoaded, true);
+                        this.showCurrentLocation(this.preLoaded, false);
                     })));
                 }
             }

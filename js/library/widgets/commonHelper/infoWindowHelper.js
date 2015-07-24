@@ -23,6 +23,7 @@ define([
     "dojo/dom-attr",
     "dojo/_base/lang",
     "dojo/on",
+    "dojo/window",
     "dojo/_base/array",
     "dojo/dom-class",
     "dojo/query",
@@ -43,7 +44,7 @@ define([
     "dojo/NodeList-manipulate",
     "widgets/geoLocation/geoLocation"
 
-], function (declare, dom, domConstruct, domAttr, lang, on, array, domClass, query, string, locale, Point, _WidgetBase, sharedNls, topic, LocatorTool, a11yclick, CommonHelper, LocatorHelper, CarouselContainerHelper, DirectionWidgetHelper, InfoWindowCommentPod, esriRequest, GeoLocation) {
+], function (declare, dom, domConstruct, domAttr, lang, on, win, array, domClass, query, string, locale, Point, _WidgetBase, sharedNls, topic, LocatorTool, a11yclick, CommonHelper, LocatorHelper, CarouselContainerHelper, DirectionWidgetHelper, InfoWindowCommentPod, esriRequest, GeoLocation) {
     //========================================================================================================================//
 
     return declare([_WidgetBase, CommonHelper, LocatorHelper, CarouselContainerHelper, DirectionWidgetHelper, InfoWindowCommentPod], {
@@ -58,6 +59,7 @@ define([
         myListStore: [],                                        // Array to store myList data
         addToListFeatures: [],                                  // Array to store feature added to mylist from info window or infow pod
         isGalleryPodEnabled: true,                              // variable for gallery pod enabled status for showing pod in bottom pod
+        zoomToFullRoute: true,                                   // variable to check for zooming to full route
         /**
         * display info window widget
         *
@@ -543,6 +545,10 @@ define([
                     primaryFieldType = this.getTypeOfField(infoWindowParameter.featureArray[0], keyField);
                 }
             }
+            if (win.getBox().w <= 766) {
+                topic.publish("collapseCarousel");
+                topic.publish("toggleWidget");
+            }
             queryLayerId = Number(infoWindowParameter.layerId);
             this.infoWindowFeatureData = infoWindowParameter.featureArray;
             index = this.getInfowWindowIndex(infoWindowParameter.layerTitle, queryLayerId);
@@ -574,11 +580,10 @@ define([
             // Check if InfowindowContent available if not then showing info title as mobile title.
             // In WebMap case infowindow contents will be not available
             for (i = 0; i < appGlobals.operationLayerSettings.length; i++) {
-                if (appGlobals.operationLayerSettings[i].layerID === infoWindowParameter.layerId && appGlobals.operationLayerSettings[i].layerTitle === infoWindowParameter.layerTitle) {
+                if (appGlobals.operationLayerSettings[i].layerID === parseInt(infoWindowParameter.layerId, 10) && appGlobals.operationLayerSettings[i].layerTitle === infoWindowParameter.layerTitle) {
                     if (appGlobals.operationLayerSettings[i].infoWindowData && appGlobals.operationLayerSettings[i].infoWindowData.infoWindowHeader) {
                         try {
-                            infoTitle = (string.substitute(appGlobals.operationLayerSettings[i].infoWindowData.infoWindowHeader.split(":")[1], infoWindowParameter.attribute));
-                            // break;
+                            infoTitle = this.popUpTitleDetails(infoWindowParameter.attribute, appGlobals.operationLayerSettings[i].layerDetails);
                         } catch (e) {
                             infoTitle = appGlobals.configData.ShowNullValueAs;
                         }
@@ -650,11 +655,13 @@ define([
             infoWindowMapPoint = this.map.getLayer(locatorInfoWindowParams.graphicsLayerId);
             locatorInfoWindowObject = new LocatorTool(locatorInfoWindowParams);
             locatorInfoWindowObject.candidateClicked = lang.hitch(this, function (graphic) {
+                this.removeBuffer();
                 // Set variable for infowindow direction in case of share
                 appGlobals.shareOptions.infowindowDirection = directionObject.featureSet.geometry.x.toString() + "," + directionObject.featureSet.geometry.y.toString();
                 if (locatorInfoWindowObject && locatorInfoWindowObject.selectedGraphic && !graphic.layer) {
                     appGlobals.shareOptions.infowindowDirection = appGlobals.shareOptions.infowindowDirection + "," + locatorInfoWindowObject.selectedGraphic.geometry.x.toString() + "," + locatorInfoWindowObject.selectedGraphic.geometry.y.toString();
                 }
+                appGlobals.shareOptions.directionScreenPoint = appGlobals.shareOptions.screenPoint;
                 if (graphic && graphic.attributes && graphic.attributes.address) {
                     this.locatorAddress = graphic.attributes.address;
                 }
@@ -717,7 +724,7 @@ define([
             setTimeout(lang.hitch(this, function () {
                 if (window.location.href.toString().split("$infowindowDirection=").length > 1 && !this.isDirectionCalculated) {
                     this.isDirectionCalculated = true;
-                    var mapPoint = new Point(window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0].split(",")[2], window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0].split(",")[3], this.map.spatialReference);
+                    var mapPoint = new Point(window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0].split(",")[6], window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0].split(",")[7], this.map.spatialReference); /* Changes for GitHub issue #157 */
                     appGlobals.shareOptions.infowindowDirection = window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0]; //mapPoint;
                     locatorInfoWindowObject._locateAddressOnMap(mapPoint, true);
                     routeObject = { "StartPoint": infoWindowMapPoint.graphics[0], "EndPoint": [directionObject.featureSet], "Index": 0, "WidgetName": directionObject.widgetName, "QueryURL": directionObject.QueryURL };
@@ -725,7 +732,10 @@ define([
                     if (window.location.href.toString().split("$mapClickPoint=").length > 1) {
                         infoWindowPoint = window.location.href.toString().split("$mapClickPoint=")[1].split("$")[0].split(",");
                         point = new Point(parseFloat(infoWindowPoint[0]), parseFloat(infoWindowPoint[1]), this.map.spatialReference);
-                        topic.publish("showInfoWindowOnMap", point);
+                        topic.publish("showInfoWindowOnMap", point, "mapclickpoint");
+                    } else {
+                        topic.publish("hideInfoWindow");
+                        this.removeHighlightedCircleGraphics();
                     }
                 }
             }), 1000);
@@ -1165,7 +1175,7 @@ define([
                     }
                 } else {
                     if (widgetName !== "listclick") {
-                        fieldValue = fieldValue.toFixed(popupInfoValue.format.places);
+                        fieldValue = parseFloat(fieldValue).toFixed(popupInfoValue.format.places);
                     }
                 }
             }
@@ -1187,7 +1197,7 @@ define([
             // If header contains more than 1 fields
             if (popupTitle.length > 1) {
                 // Get strings from header
-                titleField = lang.trim(popupTitle[0]);
+                titleField = popupTitle[0];
                 for (i = 0; i < popupTitle.length; i++) {
                     // Insert remaining fields in an array
                     titleArray = popupTitle[i].split("}");

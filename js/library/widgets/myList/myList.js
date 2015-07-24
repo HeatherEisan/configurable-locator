@@ -250,6 +250,9 @@ define([
                 if (query(".esriCTHideMyListContainer")[0]) {
                     domClass.replace(myListContainer, "esriCTShowMyListContainer", "esriCTHideMyListContainer");
                 }
+                if (win.getBox().w <= 766) {
+                    topic.publish("collapseCarousel");
+                }
             }
         },
 
@@ -325,7 +328,7 @@ define([
                 on(myListLeft[j], a11yclick, lang.hitch(this, function (event) {
                     this._clickOnMyListRow(event);
                 }));
-                directionAcitivityList[j] = domConstruct.create("div", {"class": "esriCTDirectionEventListWithoutImage", "value": myListEvent.value }, myListIcons);
+                directionAcitivityList[j] = domConstruct.create("div", { "class": "esriCTDirectionEventListWithoutImage", "value": myListEvent.value }, myListIcons);
                 if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
                     directionAcitivityList[j].title = sharedNls.tooltips.routeTooltip;
                     domClass.replace(directionAcitivityList[j], "esriCTDirectionEventList", "esriCTDirectionEventListWithoutImage");
@@ -928,7 +931,7 @@ define([
                     }
                 } else {
                     if (widgetName !== "listclick") {
-                        fieldValue = fieldValue.toFixed(popupInfoValue.format.places);
+                        fieldValue = parseFloat(fieldValue).toFixed(popupInfoValue.format.places);
                     }
                 }
             }

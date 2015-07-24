@@ -94,7 +94,7 @@ define({
         commentString: "@it@ Please enter comment", // Shown when Submit button in Comments pod of infoWindow pod is clicled/tapped without entering the comment.
         maxLengthCommentString: "@it@ Comment should not exceed 250 characters .", // // Shown when Submit button in Comments pod of infoWindow pod is clicled/tapped and the comment string exceeds 250 words.
         commentError: "@it@ Unable to add comments. Comments table is either absent or does not have write access.", // Shown when Submit button in Comments pod of infoWindow pod is clicled/tapped and the application isunable to add comments.
-        addedActivities: "@it@ All activities within specified date range are already added to the My List.", // Shown when all the activities are added in My list from Event planner.
+        addedActivities: "@it@ All activities within specified date range are already added to My List.", // Shown when all the activities are added in My list from Event planner.
         activitySearchGeolocationText: "@it@ Geolocation is not supported in selected browser.", // Shown when searching activity/event using IE8 browser.
         portalUrlNotFound: "@it@ Portal URL cannot be empty", // Setting error message when portal url is empty.
         activityAlreadyAdded: "@it@ This feature is already added to list", // Shown when a particular feature already exist in My list and is again attempted to be added to My List.

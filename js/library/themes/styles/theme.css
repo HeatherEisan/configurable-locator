@@ -728,6 +728,7 @@ body {
 
 .esriCTDivClear {
     clear: both;
+    margin-right: 20px;
 }
 
 .esriCTUtilityImgContainer {
@@ -816,7 +817,7 @@ body {
 
 .esriCTCarouselAddToListDiv {
     background-repeat: no-repeat;
-    margin: 12px 12px 0 0;
+    margin: 12px 12px 10px 0;
     width: 24px;
     height: 24px;
     float: right;
@@ -1625,14 +1626,14 @@ body {
     display: table-cell;
     vertical-align: middle;
     padding: 5px 0px 5px 0px;
-    word-break: break-word;
+    word-break: break-all;
 }
 
 .esriCTSecondChild {
     display: table-cell;
     vertical-align: middle;
     padding: 5px 5px 5px 0px;
-    word-break: break-word;
+    word-break: break-all;
 }
 
 .esriCTWordBreak {
@@ -1949,7 +1950,6 @@ input::-ms-clear {
     border: none;
     margin-left: 20px;
     margin-top: 5px;
-    float: left;
     width: 94%;
     width: -moz-calc(100% - 20px);
     width: -webkit-calc(100% - 20px);
@@ -2296,7 +2296,7 @@ a.esriCTinfoWindowHyperlink:hover, a.esriCTinfoWindowHyperlink:active {
 
 .esriCTCustomPopupDiv {
     padding: 0px 5px 0 5px;
-    text-align: justify;
+    text-align: left;
     color: #6e6e6e;
     width: 100%;
 }

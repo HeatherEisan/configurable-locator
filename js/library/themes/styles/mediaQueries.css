@@ -407,10 +407,46 @@
         margin-left: 3px;
     }
 
-    .esriCTdivHeadercontaine, .esriCTdivToggle, .esriCTDivCarouselContent {
+    /*  start for carousel in mobile view   */
+        
+    .esriCTBottomPanelHeight {
+        height: 194px !important;
+    }
+    
+    .esriCTBoxContainer {
+        float: none;
+        width: 100% !important;
+        margin: 0px !important;
+        border-top: none;
+    }
+    
+    .esriCTResultBoxPanelContent {
+        width: 100% !important;
+        margin: 0px !important;
+    }
+    
+    .esriCTBottomPanelPosition {
+        bottom: 193px !important;
+    }
+    
+    #esriCTFacilityInformationPod, #esriCTDirectionsPod, #esriCTGalleryPod, #esriCTCommentsPod {
         display: none !important;
     }
-
+    
+    .esriCTDivLegendBoxUp {
+        bottom: 195px !important;
+    }
+    
+    .esriCTDivMapPositionUp, .esriCTCustomMapLogoPostionChange {
+        bottom: 237px;
+    }
+    
+    .esriCTBottomPanelPosition, .esriCTBottomPanelHeight, .esriCTDivLegendBox, .esriCTHideBottomContainerHeight, .esriCTZeroBottom {
+        position: fixed;
+    }
+    
+    /* end for carousel in mobile view   */
+    
     .esriCTDivMapPositionTop {
         bottom: 45px !important;
     }
@@ -512,10 +548,6 @@
         bottom: 44%;
     }
 
-    .esriCTCustomMapLogoPostionChange {
-        bottom: 35px;
-    }
-
     .esriCTCustomMapLogoPostion {
         bottom: 8px;
     }
@@ -540,20 +572,9 @@
         height: -o-calc(100% - 10px);
     }
 
-    .esriCTDivLegendBoxUp {
-        bottom: 0px;
-    }
-
-    .esriCTDivMapPositionUp {
-        bottom: 0px;
-    }
-
     .esriCTDivLegendBox {
-        width: 100%;
-        bottom: 2px;
         margin-left: 0px;
         z-index: 996;
-        position: fixed;
     }
 
     .esriCTLegendBox {
@@ -589,11 +610,7 @@
     .esriCTActivityMainContainer {
         height: -webkit-calc(100% - 182px);
     }
-
-    .esriCTAddressList {
-        height: 130px;
-    }
-
+    
     .esriCTEventPlannerContainer {
         height: 100px;
     }
@@ -830,9 +847,49 @@
         margin-left: 3px;
     }
 
-    .esriCTdivSplashContent, .esriCTdivToggle, .esriCTDivCarouselContent {
+    /*  start for carousel in mobile view   */
+    
+    .esriCTBottomPanelHeight {
+        height: 194px !important;
+    }
+    
+    .esriCTBoxContainer {
+        float: none;
+        width: 100% !important;
+        margin: 0px !important;
+        border-top: none;
+    }
+    
+    .esriCTResultBoxPanelContent {
+        width: 100% !important;
+        margin: 0px !important;
+    }
+    
+    .esriCTBottomPanelPosition {
+        bottom: 193px !important;
+    }
+         
+    #esriCTFacilityInformationPod, #esriCTDirectionsPod, #esriCTGalleryPod, #esriCTCommentsPod {
         display: none !important;
     }
+    
+    .esriCTSpanFeatureListContainer {
+        padding-right: 15px;
+    }
+    
+    .esriCTDivLegendBoxUp {
+        bottom: 195px;
+    }
+    
+    .esriCTDivMapPositionUp, .esriCTCustomMapLogoPostionChange {
+        bottom: 237px !important;
+    }
+    
+    .esriCTBottomPanelPosition, .esriCTBottomPanelHeight, .esriCTDivLegendBox, .esriCTHideBottomContainerHeight, .esriCTZeroBottom {
+        position: fixed;
+    }
+    
+    /* end for carousel in mobile view   */
 
     .divCarouselContent {
         display: none;
@@ -845,19 +902,7 @@
     .esriCTLegendBox {
         margin-right: 6px !important;
     }
-
-    .esriCTLegendChangePositionUp, .esriCTdivLegendbox {
-        width: 100%;
-        bottom: 0px !important;
-        margin-left: 0px !important;
-    }
-
-    .esriCTLegendChangePositionDown {
-        width: 100%;
-        bottom: 0px !important;
-        margin-left: 0px !important;
-    }
-
+    
     .esriCTActivityList, .esriCTEventPlannerListTable {
         width: 100%;
     }
@@ -953,10 +998,6 @@
         padding: 7px;
     }
 
-    .esriCTCustomMapLogoPostionChange {
-        bottom: 35px;
-    }
-
     .esriCTCustomMapLogoPostion {
         bottom: 8px;
     }
@@ -976,20 +1017,13 @@
         height: -o-calc(100% - 10px);
     }
 
-    .esriCTDivLegendBoxUp {
-        bottom: 0px;
-    }
-
-    .esriCTDivMapPositionUp {
-        bottom: 0px;
+    .esriCTDivMapPositionUp, .esriCTCustomMapLogoPositionChange {
+        bottom: 241px;
     }
 
     .esriCTDivLegendBox {
-        width: 100%;
-        bottom: 2px;
         margin-left: 0px;
         z-index: 996;
-        position: fixed;
     }
 
     .esriCTTabsLeftFlexi {

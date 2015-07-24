@@ -99,12 +99,14 @@ define([
                     }
                     // Check if direction not null or null then set zoom level of route in share URL
                     if (this._esriDirectionsWidget.directions !== null) {
-                        if (window.location.href.toString().split("$extentChanged=").length > 1) {
-                            if (this.isExtentSet) {
+                        if (this.zoomToFullRoute) {
+                            if (window.location.href.toString().split("$extentChanged=").length > 1) {
+                                if (this.isExtentSet) {
+                                    this._esriDirectionsWidget.zoomToFullRoute();
+                                }
+                            } else {
                                 this._esriDirectionsWidget.zoomToFullRoute();
                             }
-                        } else {
-                            this._esriDirectionsWidget.zoomToFullRoute();
                         }
                         // Switch case for widget name
                         switch (this.routeObject.WidgetName.toLowerCase()) {
@@ -242,7 +244,10 @@ define([
             facilityObject = { "Feature": this.routeObject.EndPoint, "SelectedItem": resultcontent, "QueryURL": this.routeObject.QueryURL, "WidgetName": this.routeObject.WidgetName, "activityData": this.routeObject.activityData };
             this.setFacility(facilityObject);
             // Checking for solve route if direction is not calculated then show address search box
-            if (queryObject.SolveRoute[0].directions && queryObject.SolveRoute[0].directions.totalLength <= 0) {
+            if (queryObject.SolveRoute && queryObject.SolveRoute[0].directions && queryObject.SolveRoute[0].directions.totalLength <= 0) {
+                directionObject = { "Feature": queryObject.FeatureData, "SelectedItem": resultcontent, "SolveRoute": queryObject.SolveRoute, "Address": queryObject.Address, "WidgetName": queryObject.WidgetName, "activityData": queryObject.activityData, "QueryURL": queryObject.QueryURL };
+                this.setDirection(directionObject);
+            } else if (this.routeObject.isLayerCandidateClicked) {
                 this._createAddressSearchTextBox(queryObject, resultcontent);
             } else {
                 directionObject = { "Feature": this.routeObject.EndPoint, "SelectedItem": resultcontent, "SolveRoute": a.result.routeResults, "Address": address, "WidgetName": this.routeObject.WidgetName, "QueryURL": this.routeObject.QueryURL, "activityData": this.routeObject.activityData };
@@ -278,7 +283,7 @@ define([
             geoArray.push(endPointGeometery);
             this.routeObject = routeObject;
             // Updating two stops for direction widget.
-            if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
+            if (appGlobals.configData.DrivingDirectionSettings.GetDirections && !routeObject.isLayerCandidateClicked) {
                 // For clearing the direction from map and div.
                 this._esriDirectionsWidget.clearDirections();
                 // Function for updating stops and getting direction from direction widget
@@ -524,7 +529,7 @@ define([
         _switchCaseForRoute: function (queryObject, commentArray, featureId, errorMessage) {
             var resultcontent, queryURLLink;
             switch (queryObject.WidgetName.toLowerCase()) {
-                // If it is comming from activity search then set bottom pod's data  
+            // If it is comming from activity search then set bottom pod's data     
             case "activitysearch":
                 topic.publish("showProgressIndicator");
                 resultcontent = { "value": queryObject.Index };
@@ -728,7 +733,10 @@ define([
                 if (queryObject.SolveRoute === null) {
                     this._createAddressSearchTextBox(queryObject, resultcontent);
                 } else {
-                    if (queryObject.SolveRoute[0].directions && queryObject.SolveRoute[0].directions.totalLength <= 0) {
+                    if (queryObject.SolveRoute && queryObject.SolveRoute[0].directions && queryObject.SolveRoute[0].directions.totalLength <= 0) {
+                        directionObject = { "Feature": queryObject.FeatureData, "SelectedItem": resultcontent, "SolveRoute": queryObject.SolveRoute, "Address": queryObject.Address, "WidgetName": queryObject.WidgetName, "activityData": queryObject.activityData, "QueryURL": queryObject.QueryURL };
+                        this.setDirection(directionObject);
+                    } else if (this.routeObject.isLayerCandidateClicked) {
                         this._createAddressSearchTextBox(queryObject, resultcontent);
                     } else {
                         directionObject = { "Feature": queryObject.FeatureData, "SelectedItem": resultcontent, "SolveRoute": queryObject.SolveRoute, "Address": queryObject.Address, "WidgetName": queryObject.WidgetName, "activityData": queryObject.activityData, "QueryURL": queryObject.QueryURL };

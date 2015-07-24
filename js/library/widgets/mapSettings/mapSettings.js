@@ -100,8 +100,8 @@ define([
                 }
             }));
             // Subscribing function for show infowindow on map
-            topic.subscribe("showInfoWindowOnMap", lang.hitch(this, function (point) {
-                this._showInfoWindowOnMap(point);
+            topic.subscribe("showInfoWindowOnMap", lang.hitch(this, function (point, featureOf) {
+                this._showInfoWindowOnMap(point, featureOf);
             }));
             topic.subscribe("extentFromPoint", lang.hitch(this, function (mapPoint) {
                 this._extentFromPoint(mapPoint);
@@ -121,7 +121,6 @@ define([
                 mapDeferred.then(lang.hitch(this, function (response) {
                     this.map = response.map;
                     appGlobals.shareOptions.selectedBasemapIndex = null;
-
                     topic.publish("filterRedundantBasemap", response.itemInfo);
                     this._generateRequiredKeyField(response.itemInfo.itemData.operationalLayers);
                     topic.publish("setMap", this.map);
@@ -137,13 +136,14 @@ define([
                             appGlobals.shareOptions.isInfoPopupShared = true;
                             infoWindowPoint = window.location.href.toString().split("$mapClickPoint=")[1].split("$")[0].split(",");
                             point = new Point(parseFloat(infoWindowPoint[0]), parseFloat(infoWindowPoint[1]), this.map.spatialReference);
-                            this._showInfoWindowOnMap(point);
+                            this._showInfoWindowOnMap(point, "mapclickpoint"); /* Added argument for GitHub issue #157 */
                         }
                         if (window.location.href.toString().split("$infowindowDirection=").length > 1) {
                             appGlobals.shareOptions.isInfoPopupShared = true;
                             infoWindowPoint = window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0].split(",");
-                            point = new Point(parseFloat(infoWindowPoint[0]), parseFloat(infoWindowPoint[1]), this.map.spatialReference);
-                            this._showInfoWindowOnMap(point);
+                            point = new Point(parseFloat(infoWindowPoint[4]), parseFloat(infoWindowPoint[5]), this.map.spatialReference);
+                            appGlobals.shareOptions.directionScreenPoint = window.location.href.toString().split("$infowindowDirection=")[1].split("$")[0];
+                            this._showInfoWindowOnMap(point, "directioninfopoint");
                         }
                     }), 3000);
                     this._mapEvents();
@@ -321,7 +321,7 @@ define([
             appGlobals.configData.OperationalLayers = [];
             this.operationalLayers = webMapDetails.operationalLayers;
             array.forEach(webMapDetails.operationalLayers, lang.hitch(this, function (LayerData, i) {
-                if (webMapDetails.operationalLayers[i].visibility) {
+                if (webMapDetails.operationalLayers[i].visibility && webMapDetails.operationalLayers[i].layerObject) {
                     // Create operation layers array
                     this._createWebmapOperationLayer(webMapDetails.operationalLayers[i], layerTable);
                     // Set infowWindowData for each operation layer
@@ -505,12 +505,12 @@ define([
         * @param {Map point} mapPoint
         * @memberOf widgets/mapSettings/mapSettings
         */
-        _showInfoWindowOnMap: function (mapPoint) {
+        _showInfoWindowOnMap: function (mapPoint, featureOf) {
             var index, onMapFeaturArray = [], featureArray = [];
             this.counter = 0;
             for (index = 0; index < appGlobals.operationLayerSettings.length; index++) {
 
-                this._executeQueryTask(index, mapPoint, onMapFeaturArray);
+                this._executeQueryTask(index, mapPoint, onMapFeaturArray, featureOf);
             }
             all(onMapFeaturArray).then(lang.hitch(this, function (result) {
                 var j, i;
@@ -547,7 +547,7 @@ define([
         * @param {array} onMapFeaturArray Contains array of feature layer URL
         * @memberOf widgets/mapSettings/mapSettings
         */
-        _executeQueryTask: function (index, mapPoint, onMapFeaturArray) {
+        _executeQueryTask: function (index, mapPoint, onMapFeaturArray, featureOf) {
             var queryTask, queryLayer, isLayerVisible, currentDate = new Date().getTime().toString() + index, deferred;
             queryTask = new esri.tasks.QueryTask(appGlobals.operationLayerSettings[index].layerURL);
             queryLayer = new esri.tasks.Query();
@@ -559,7 +559,7 @@ define([
             }
             queryLayer.outSpatialReference = this.map.spatialReference;
             queryLayer.returnGeometry = true;
-            queryLayer.geometry = this._extentFromPoint(mapPoint);
+            queryLayer.geometry = this._extentFromPoint(mapPoint, featureOf);
             queryLayer.outFields = ["*"];
             deferred = new Deferred();
             queryTask.execute(queryLayer, lang.hitch(this, function (results) {
@@ -623,7 +623,7 @@ define([
         * @param {object} mapPoint
         * @memberOf widgets/mapSettings/mapSettings
         */
-        _extentFromPoint: function (point) {
+        _extentFromPoint: function (point, featureOf) {
             var tolerance, screenPoint, pnt1, pnt2, mapPoint1, mapPoint2, geometryPointData;
             tolerance = 20;
             screenPoint = this.map.toScreen(point);
@@ -633,13 +633,14 @@ define([
             mapPoint2 = this.map.toMap(pnt2);
             //set the screen point xmin, ymin, xmax, ymax
             this.shareOptionScreenPoint = mapPoint1.x + "," + mapPoint1.y + "," + mapPoint2.x + "," + mapPoint2.y;
-            if (window.location.href.toString().split("$mapClickPoint=").length > 1) {
-                if (!this.isExtentSet) {
-                    geometryPointData = new esri.geometry.Extent(parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[2]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[3]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[4]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[5].split("$")[0]), this.map.spatialReference);
-                } else {
-                    geometryPointData = new esri.geometry.Extent(mapPoint1.x, mapPoint1.y, mapPoint2.x, mapPoint2.y, this.map.spatialReference);
-                }
-            } else {
+            switch (featureOf) {
+            case "mapclickpoint":
+                geometryPointData = new esri.geometry.Extent(parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[2]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[3]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[4]), parseFloat(window.location.href.toString().split("$mapClickPoint=")[1].split(",")[5].split("$")[0]), this.map.spatialReference);
+                break;
+            case "directioninfopoint":
+                geometryPointData = new esri.geometry.Extent(parseFloat(window.location.href.toString().split("$infowindowDirection=")[1].split(",")[0]), parseFloat(window.location.href.toString().split("$infowindowDirection=")[1].split(",")[1]), parseFloat(window.location.href.toString().split("$infowindowDirection=")[1].split(",")[2]), parseFloat(window.location.href.toString().split("$infowindowDirection=")[1].split(",")[3]), this.map.spatialReference);
+                break;
+            default:
                 geometryPointData = new esri.geometry.Extent(mapPoint1.x, mapPoint1.y, mapPoint2.x, mapPoint2.y, this.map.spatialReference);
             }
             return geometryPointData;
@@ -718,7 +719,7 @@ define([
             // Loop for the operational layer
             for (i = 0; i < operationalLayers.length; i++) {
                 // Check if webMapId is not configured then layer is  directly load from operational layer
-                if (appGlobals.configData.WebMapId && lang.trim(appGlobals.configData.WebMapId).length !== 0) {
+                if (appGlobals.configData.WebMapId && lang.trim(appGlobals.configData.WebMapId).length !== 0 && operationalLayers[i].layerObject) {
                     str = operationalLayers[i].url.split('/');
                     layerTitle = operationalLayers[i].title;
                     layerId = str[str.length - 1];
@@ -727,7 +728,7 @@ define([
                         // Check Title and QueryLayerId both are having in activitySearchSetting
                         if (searchSettings[index].Title && searchSettings[index].QueryLayerId) {
                             // Check  layer Title and layer QueryLayerId from activitySearchSetting
-                            if (layerTitle === searchSettings[index].Title && layerId === searchSettings[index].QueryLayerId) {
+                            if (layerTitle === searchSettings[index].Title && layerId === searchSettings[index].QueryLayerId && operationalLayers[i].layerObject) {
                                 searchSettings[index].ObjectID = operationalLayers[i].layerObject.objectIdField;
                                 searchSettings[index].DateField = this.getDateField(operationalLayers[i].layerObject.fields);
                             }
@@ -793,30 +794,41 @@ define([
         * @memberOf widgets/mapSettings/mapSettings
         */
         _addLayerLegendWebmap: function (webMapLayers, webmapLayerList, hasLayers) {
-            var mapServerArray = [], i, j, legendObject, layer;
+            var mapServerArray = [], i, j, legendObject, layer, webmapEditedLayers = [], canQuery;
             // Loop for webmap layer
             for (j = 0; j < webMapLayers.length; j++) {
+                canQuery = false; //by default set false
                 if (webMapLayers[j].layerObject) {
+                    if (webMapLayers[j].layerObject.capabilities && webMapLayers[j].layerObject.capabilities.match(/query/gi)) {
+                        canQuery = true;
+                    }
                     if (webMapLayers[j].layers) {
                         for (i = 0; i < webMapLayers[j].layers.length; i++) {
                             layer = webMapLayers[j].url + "/" + webMapLayers[j].layers[i].id;
+                            webmapEditedLayers.push(webMapLayers[j].layers[i].id);
                             if (webMapLayers[j].layers[i].layerDefinition && webMapLayers[j].layers[i].layerDefinition.drawingInfo) {
                                 hasLayers = true;
                                 webmapLayerList[layer] = webMapLayers[j].layers[i];
                             } else {
-                                mapServerArray.push({ "url": layer, "title": webMapLayers[j].layers[i].name });
+                                mapServerArray.push({ "url": layer, "title": webMapLayers[j].layers[i].name, "canQuery": canQuery });
                             }
                         }
-                    } else if (webMapLayers[j].layerObject.layerInfos) {
+                    }
+                    if (webMapLayers[j].layerObject.layerInfos) {
                         for (i = 0; i < webMapLayers[j].layerObject.layerInfos.length; i++) {
                             layer = webMapLayers[j].url + "/" + webMapLayers[j].layerObject.layerInfos[i].id;
-                            mapServerArray.push({ "url": layer, "title": webMapLayers[j].layerObject.layerInfos[i].name });
+                            if (array.indexOf(webmapEditedLayers, webMapLayers[j].layerObject.layerInfos[i].id) === -1) {
+                                if (array.indexOf(webMapLayers[j].layerObject.visibleLayers, webMapLayers[j].layerObject.layerInfos[i].id) !== -1) {
+                                    mapServerArray.push({ "url": layer, "title": webMapLayers[j].layerObject.layerInfos[i].name, "canQuery": canQuery });
+                                }
+                            }
                         }
                     } else {
-                        mapServerArray.push({ "url": webMapLayers[j].url, "title": webMapLayers[j].title });
+                        mapServerArray.push({ "url": webMapLayers[j].url, "title": webMapLayers[j].title, "canQuery": canQuery });
                     }
+
                 } else {
-                    mapServerArray.push({ "url": webMapLayers[j].url, "title": webMapLayers[j].title });
+                    mapServerArray.push({ "url": webMapLayers[j].url, "title": webMapLayers[j].title, "canQuery": canQuery });
                 }
             }
             if (!hasLayers) {

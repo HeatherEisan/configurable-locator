@@ -23,6 +23,7 @@ define([
     "dojo/dom-attr",
     "dojo/_base/lang",
     "dojo/on",
+    "dojo/window",
     "dojo/dom",
     "dojo/dom-class",
     "dojo/query",
@@ -34,7 +35,7 @@ define([
     "dojo/_base/array",
     "widgets/carouselContainer/carouselContainer"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, dom, domClass, query, string, _WidgetBase, sharedNls, topic, a11yclick, array, CarouselContainer) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, win, dom, domClass, query, string, _WidgetBase, sharedNls, topic, a11yclick, array, CarouselContainer) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase], {
@@ -92,20 +93,23 @@ define([
                         }
                         // Switch for carouse pod key for creating div
                         switch (carouselPodKey.toLowerCase()) {
-                        // If it is a search pod
+                        // If it is a search pod 
                         case "searchresultpod":
+                            domAttr.set(divCarouselPod, "id", "esriCTSearchResultPod");
                             divHeader = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
                             domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.searchResultText }, divHeader);
                             divsearchcontent = domConstruct.create("div", { "class": "esriCTResultContent" }, divHeader);
                             domConstruct.create("div", { "class": "esriCTDivSearchResulContent" }, divsearchcontent);
                             break;
                         case "facilityinformationpod":
+                            domAttr.set(divCarouselPod, "id", "esriCTFacilityInformationPod");
                             // If it is a facility pod
                             this.facilityContainer = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
                             this.divfacilitycontent = domConstruct.create("div", {}, this.facilityContainer);
                             domConstruct.create("div", { "class": "esriCTdivFacilityContent" }, this.divfacilitycontent);
                             break;
                         case "directionspod":
+                            domAttr.set(divCarouselPod, "id", "esriCTDirectionsPod");
                             // If it is a direction pod
                             if (appGlobals.configData.DrivingDirectionSettings.GetDirections) {
                                 this.directionContainer = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
@@ -113,6 +117,7 @@ define([
                             }
                             break;
                         case "gallerypod":
+                            domAttr.set(divCarouselPod, "id", "esriCTGalleryPod");
                             // If it is a gallery pod
                             divHeader = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
                             domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.galleryText }, divHeader);
@@ -120,6 +125,7 @@ define([
                             domConstruct.create("div", { "class": "esriCTDivGalleryContent" }, divGallerycontent);
                             break;
                         case "commentspod":
+                            domAttr.set(divCarouselPod, "id", "esriCTCommentsPod");
                             // If it is a comment pod
                             divHeader = domConstruct.create("div", { "class": "esriCTDivHeadercontainer" }, divPodInfoContainer);
                             domConstruct.create("div", { "class": "esriCTSpanHeader", "innerHTML": sharedNls.titles.commentText }, divHeader);
@@ -248,6 +254,9 @@ define([
                         resultcontent[i] = domConstruct.create("div", { "class": "esriCTSearchResultInfotextForEvent", "innerHTML": result[i].attributes[searchContenData] + milesCalulatedData }, divHeaderContent[0]);
                     }
                 }));
+                if (win.getBox().w <= 766) {
+                    topic.publish("resizeLegendContainer");
+                }
             }
         },
 
@@ -260,6 +269,13 @@ define([
             var pushpinGeometry, widgetName, routeObject, queryObject, highlightedDiv, queryURL, rowIndex;
             this.featureSetWithoutNullValue = searchedFacilityObject.FeatureData;
             topic.publish("hideInfoWindow");
+            /* Collapse Carousel in smartphones */
+            if (win.getBox().w <= 766) {
+                // if any feature is clicked in smartphone's search results then collapse down the carousel result pod
+                topic.publish("collapseCarousel");
+                topic.publish("resizeLegendContainer");
+            }
+            this.zoomToFullRoute = true; /* Setting zoomToFullRoute to true for Github issue #182 */
             // If feature data has some items
             if (searchedFacilityObject.FeatureData.length > 1) {
                 // If event is available then get query URL and row index from event.

@@ -20,16 +20,18 @@ define([
     "dojo/_base/declare",
     "dijit/_WidgetBase",
     "dojo/dom-construct",
+    "dojo/window",
     "dojo/_base/lang",
     "dojo/dom-attr",
     "dojo/dom-style",
     "dojo/dom-class",
+    "dojo/topic",
     "dojo/query",
     "dojo/on",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dijit/a11yclick"
 
-], function (declare, WidgetBase, domConstruct, lang, domAttr, domStyle, domClass, query, on, sharedNls, a11yclick) {
+], function (declare, WidgetBase, domConstruct, win, lang, domAttr, domStyle, domClass, topic, query, on, sharedNls, a11yclick) {
 
     //========================================================================================================================//
 
@@ -48,7 +50,12 @@ define([
         * @class
         * @name widgets/carouselContainer/carouselContainer
         */
-
+        postCreate: function () {
+            topic.subscribe("collapseCarousel", lang.hitch(this, function () {
+                this.collapseCarousel();
+                appGlobals.shareOptions.isShowPod = "false";
+            }));
+        },
         /**
         * Create carousel container pod
         * @param {Object} Node in which we want to create carousel pod
@@ -72,16 +79,10 @@ define([
             this.resultboxPanelContent = domConstruct.create("div", { "class": "esriCTResultBoxPanelContent" }, resultboxPanel);
             // On click on image for wipe in and wipeout.
             this.own(on(this.divImageBackground, a11yclick, lang.hitch(this, function () {
-                // Checking condition if pod is added in container
-                if (this.isPodCreated > 0) {
-                    // Checking the class for expanding and collapsing the container.
-                    if (domClass.contains(this.divCarouselContent, "esriCTzeroHeight")) {
-                        this.expandCarousel();
-                        appGlobals.shareOptions.isShowPod = "true";
-                    } else {
-                        this.collapseCarousel();
-                        appGlobals.shareOptions.isShowPod = "false";
-                    }
+                this._toggleCarouselPod();
+                // On mobile close header panels
+                if (win.getBox().w <= 766) {
+                    topic.publish("toggleWidget");
                 }
             })));
             domStyle.set(this.divImageBackground, "display", "none");
@@ -273,6 +274,24 @@ define([
             mapLogoPostionDown = query('.esriControlsBR')[0];
             domClass.remove(mapLogoPostionDown, "esriCTDivMapPositionTop");
             domClass.add(mapLogoPostionDown, "esriCTDivMapPositionUp");
+        },
+
+        /**
+        * set carousel collapse up and down
+        * @memberOf widgets/carouselContainer/carouselContainer
+        */
+        _toggleCarouselPod: function () {
+            // Checking condition if pod is added in container
+            if (this.isPodCreated > 0) {
+                // Checking the class for expanding and collapsing the container.
+                if (domClass.contains(this.divCarouselContent, "esriCTzeroHeight")) {
+                    this.expandCarousel();
+                    appGlobals.shareOptions.isShowPod = "true";
+                } else {
+                    this.collapseCarousel();
+                    appGlobals.shareOptions.isShowPod = "false";
+                }
+            }
         }
     });
 });

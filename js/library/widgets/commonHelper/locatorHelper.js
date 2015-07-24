@@ -86,7 +86,13 @@ define([
             bufferSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([parseInt(appGlobals.configData.BufferSymbology.LineSymbolColor.split(",")[0], 10), parseInt(appGlobals.configData.BufferSymbology.LineSymbolColor.split(",")[1], 10), parseInt(appGlobals.configData.BufferSymbology.FillSymbolColor.split(",")[2], 10), parseFloat(appGlobals.configData.BufferSymbology.LineSymbolTransparency.split(",")[0], 10)]), 2),
                         new Color([parseInt(appGlobals.configData.BufferSymbology.FillSymbolColor.split(",")[0], 10), parseInt(appGlobals.configData.BufferSymbology.FillSymbolColor.split(",")[1], 10), parseInt(appGlobals.configData.BufferSymbology.LineSymbolColor.split(",")[2], 10), parseFloat(appGlobals.configData.BufferSymbology.FillSymbolTransparency.split(",")[0], 10)]));
             // Adding graphic on map
-            this._addGraphic(this.map.getLayer("tempBufferLayer"), bufferSymbol, geometries[0]);
+            try {
+                this._addGraphic(this.map.getLayer("tempBufferLayer"), bufferSymbol, geometries[0]);
+            } catch (error) {
+                alert(sharedNls.errorMessages.unableToDrawBuffer);
+                topic.publish("hideProgressIndicator");
+                this.zoomToFullRoute = true; /* Changed Code for GitHub issue #182 */
+            }
             topic.publish("showProgressIndicator");
             // Querying for layer to find features.
             this._queryLayer(geometries[0], mapPoint, widgetName);
@@ -97,9 +103,12 @@ define([
         * @memberOf widgets/commonHelper/locatorHelper
         */
         _clearBuffer: function () {
-            this.map.getLayer("tempBufferLayer").clear();
+            if (this.map.getLayer("tempBufferLayer") && this.map.getLayer("tempBufferLayer").graphics.length > 0) {
+                this.map.getLayer("tempBufferLayer").clear();
+            }
             topic.publish("hideInfoWindow");
             this.isInfowindowHide = true;
+            this.zoomToFullRoute = true;
         },
 
         /**
@@ -113,6 +122,8 @@ define([
             var graphic;
             graphic = new Graphic(point, symbol);
             layer.add(graphic);
+            this.point = point;
+            this.zoomToFullRoute = false;
             // Checking the extent changed variable in the case of shared app to maintain extent on map
             if (window.location.href.toString().split("$extentChanged=").length > 1) {
                 // If extent change variable set to be true then set the extent other wise don't do any thing.
