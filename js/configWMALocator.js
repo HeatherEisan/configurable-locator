@@ -364,7 +364,7 @@ define([], function () {
         // LineSymbolTransparency: Setting transparency for outline symbol
         BufferSymbology: {
             FillSymbolColor: "0,0,255",
-            FillSymbolTransparency: "0.25",
+            FillSymbolTransparency: "0.01",
             LineSymbolColor: "0,0,255",
             LineSymbolTransparency: "0.65"
         },

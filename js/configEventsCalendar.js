@@ -129,7 +129,7 @@ define([], function () {
         }],
 
         // Following zoom level will be set for the map upon searching an address
-        ZoomLevel: 12,
+        ZoomLevel: 20,
 
         // Specify WebMapId within quotes
         WebMapId: "77e031718104430a924ff3d8601e4dac",
@@ -242,10 +242,10 @@ define([], function () {
 
 
         //Set the color of the circle around the selected point
-        RippleColor: "35,35,36",
+        RippleColor: "0,255,255",
 
         //Set the size of the circle around the selected point
-        LocatorRippleSize: 40,
+        LocatorRippleSize: 6,
 
         // Minimum height should be 270 for the info-popup in pixels
         InfoPopupHeight: 270,
