@@ -1155,17 +1155,18 @@ define([
         * @memberOf widgets/commonHelper/InfoWindowHelper
         */
         numberFormatCorverter: function (popupInfoValue, fieldValue, widgetName) {
-            if (popupInfoValue.format && popupInfoValue.format.places !== null && popupInfoValue.format.places !== "" && !isNaN(parseFloat(fieldValue))) {
+            var asFloat = parseFloat(fieldValue);
+            if (popupInfoValue.format && popupInfoValue.format.places !== null && popupInfoValue.format.places !== "" && !isNaN(asFloat)) {
                 // Check if digit separator is available
                 if (popupInfoValue.format.digitSeparator) {
                     if (widgetName !== "listclick") {
                         fieldValue = Number(fieldValue);
-                        fieldValue = parseFloat(fieldValue).toFixed(popupInfoValue.format.places);
+                        fieldValue = asFloat.toFixed(popupInfoValue.format.places);
                         fieldValue = this.convertNumberToThousandSeperator(fieldValue);
                     }
                 } else {
                     if (widgetName !== "listclick") {
-                        fieldValue = fieldValue.toFixed(popupInfoValue.format.places);
+                        fieldValue = asFloat.toFixed(popupInfoValue.format.places);
                     }
                 }
             }
