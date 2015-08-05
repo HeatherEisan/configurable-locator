@@ -179,7 +179,7 @@ define([
 
                                 if (layerDetails.popupInfo.fieldInfos[j].format) {
                                     if (fieldValue !== appGlobals.configData.ShowNullValueAs) {
-                                        fieldValue = this.numberFormatCorverter(layerDetails.popupInfo.fieldInfos[j], fieldValue);
+                                        fieldValue = this.numberFormatConverter(layerDetails.popupInfo.fieldInfos[j], fieldValue);
                                     }
                                 }
                             }
@@ -809,7 +809,7 @@ define([
         * This function is used to convert number to thousand separator
         * @memberOf widgets/commonHelper/InfoWindowHelper
         */
-        convertNumberToThousandSeperator: function (number) {
+        convertNumberToThousandSeparator: function (number) {
             number = number.split(".");
             number[0] = number[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
             return number.join('.');

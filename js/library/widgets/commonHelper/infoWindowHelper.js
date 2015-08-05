@@ -838,7 +838,7 @@ define([
                                     }
                                     if (appGlobals.operationLayerSettings[k].infoWindowData.infoWindowfields[p].format) {
                                         if (fieldValue !== appGlobals.configData.ShowNullValueAs) {
-                                            fieldValue = this.numberFormatCorverter(appGlobals.operationLayerSettings[k].infoWindowData.infoWindowfields[p], fieldValue);
+                                            fieldValue = this.numberFormatConverter(appGlobals.operationLayerSettings[k].infoWindowData.infoWindowfields[p], fieldValue);
 
                                         }
                                     }
@@ -903,7 +903,7 @@ define([
                                 fieldValue = this.setDateFormat(popupInfoValue, featureSet[lang.trim(field)]);
                                 if (popupInfoValue.format) {
                                     // Check whether format for digit separator is available
-                                    fieldValue = this.numberFormatCorverter(popupInfoValue, fieldValue, featureClickName);
+                                    fieldValue = this.numberFormatConverter(popupInfoValue, fieldValue, featureClickName);
                                 }
                             }
                             descriptionValue += fieldValue;
@@ -921,7 +921,7 @@ define([
                                 fieldValue = featureSet[field];
                                 if (popupInfoValue.format) {
                                     // Check whether format for digit separator is available
-                                    fieldValue = this.numberFormatCorverter(popupInfoValue, fieldValue, featureClickName);
+                                    fieldValue = this.numberFormatConverter(popupInfoValue, fieldValue, featureClickName);
                                 }
                                 descriptionValue += fieldValue;
                             } else if (field === "") {
@@ -1154,7 +1154,7 @@ define([
         * @param{string} fieldValue
         * @memberOf widgets/commonHelper/InfoWindowHelper
         */
-        numberFormatCorverter: function (popupInfoValue, fieldValue, widgetName) {
+        numberFormatConverter: function (popupInfoValue, fieldValue, widgetName) {
             var asFloat = parseFloat(fieldValue);
             if (popupInfoValue.format && popupInfoValue.format.places !== null && popupInfoValue.format.places !== "" && !isNaN(asFloat)) {
                 // Check if digit separator is available
@@ -1224,7 +1224,7 @@ define([
                                         }
                                         if (popupInfoValue.format) {
                                             // Check whether format for digit separator is available
-                                            fieldValue = this.numberFormatCorverter(popupInfoValue, fieldValue);
+                                            fieldValue = this.numberFormatConverter(popupInfoValue, fieldValue);
                                         }
                                     }
                                     headerFieldArray.push(fieldValue);
@@ -1346,7 +1346,7 @@ define([
                             }
                             if (layerDetails.popupInfo.fieldInfos[j].format) {
                                 if (fieldValue !== appGlobals.configData.ShowNullValueAs) {
-                                    fieldValue = this.numberFormatCorverter(layerDetails.popupInfo.fieldInfos[j], fieldValue);
+                                    fieldValue = this.numberFormatConverter(layerDetails.popupInfo.fieldInfos[j], fieldValue);
                                 }
                             }
                         }

@@ -917,14 +917,14 @@ define([
         * @param{string} fieldValue
         * @memberOf widgets/myList/myList
         */
-        numberFormatCorverter: function (popupInfoValue, fieldValue, widgetName) {
+        numberFormatConverter: function (popupInfoValue, fieldValue, widgetName) {
             if (popupInfoValue.format && popupInfoValue.format.places !== null && popupInfoValue.format.places !== "" && !isNaN(parseFloat(fieldValue))) {
                 // Check if digit separator is available
                 if (popupInfoValue.format.digitSeparator) {
                     if (widgetName !== "listclick") {
                         fieldValue = Number(fieldValue);
                         fieldValue = parseFloat(fieldValue).toFixed(popupInfoValue.format.places);
-                        fieldValue = this.convertNumberToThousandSeperator(fieldValue);
+                        fieldValue = this.convertNumberToThousandSeparator(fieldValue);
                     }
                 } else {
                     if (widgetName !== "listclick") {
@@ -939,7 +939,7 @@ define([
         * this function is used to convert number to thousand separator
         * @memberOf widgets/mapSettings/mapSettings
         */
-        convertNumberToThousandSeperator: function (number) {
+        convertNumberToThousandSeparator: function (number) {
             number = number.split(".");
             number[0] = number[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
             return number.join('.');

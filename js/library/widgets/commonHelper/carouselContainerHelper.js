@@ -461,7 +461,7 @@ define([
                                             }
                                         }
                                         if (infowWindowData[j].format) {
-                                            fieldValue = this.numberFormatCorverter(infowWindowData[j], fieldValue);
+                                            fieldValue = this.numberFormatConverter(infowWindowData[j], fieldValue);
                                         }
                                     }
                                     facilityDiv.innerHTML = infowWindowData[j].DisplayText + " " + fieldValue;
