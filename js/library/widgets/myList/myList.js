@@ -951,17 +951,19 @@ define([
         */
         checkWidthForNexusDevice: function () {
             var headerMyListRight, myListContainerHeight, myListTableHeight;
-            headerMyListRight = query(".esriCTHeaderMyListRight")[0];
-            myListContainerHeight = domStyle.get(this.myListContainer, "height");
-            myListTableHeight = domStyle.get(this.myListTable, "height");
-            if (win.getBox().w === 640 || win.getBox().w === 360) {
-                if (myListContainerHeight < myListTableHeight) {
-                    if (!domClass.contains(headerMyListRight, "esriCTExtraPadding")) {
-                        domClass.add(headerMyListRight, "esriCTExtraPadding");
-                    }
-                } else {
-                    if (domClass.contains(headerMyListRight, "esriCTExtraPadding")) {
-                        domClass.remove(headerMyListRight, "esriCTExtraPadding");
+            if (this.myListContainer) {
+                headerMyListRight = query(".esriCTHeaderMyListRight")[0];
+                myListContainerHeight = domStyle.get(this.myListContainer, "height");
+                myListTableHeight = domStyle.get(this.myListTable, "height");
+                if (win.getBox().w === 640 || win.getBox().w === 360) {
+                    if (myListContainerHeight < myListTableHeight) {
+                        if (!domClass.contains(headerMyListRight, "esriCTExtraPadding")) {
+                            domClass.add(headerMyListRight, "esriCTExtraPadding");
+                        }
+                    } else {
+                        if (domClass.contains(headerMyListRight, "esriCTExtraPadding")) {
+                            domClass.remove(headerMyListRight, "esriCTExtraPadding");
+                        }
                     }
                 }
             }
