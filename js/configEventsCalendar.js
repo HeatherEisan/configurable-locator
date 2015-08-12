@@ -326,8 +326,8 @@ define([], function () {
         // LineSymbolColor: Setting outline color of buffer in RGB format
         // LineSymbolTransparency: Setting transparency for outline symbol
         BufferSymbology: {
-            FillSymbolColor: "0,0,255",
-            FillSymbolTransparency: "0.25",
+            FillSymbolColor: "0,0,0",
+            FillSymbolTransparency: "0",
             LineSymbolColor: "0,0,255",
             LineSymbolTransparency: "0.65"
         },
