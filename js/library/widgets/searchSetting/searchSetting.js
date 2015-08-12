@@ -23,6 +23,7 @@ define([
     "dojo/dom-attr",
     "dojo/_base/lang",
     "dojo/on",
+    "dojo/window",
     "dojo/dom-geometry",
     "dojo/dom",
     "dojo/_base/array",
@@ -45,7 +46,7 @@ define([
     "dijit/a11yclick",
     "dojo/date/locale"
 
-], function (declare, domConstruct, domStyle, domAttr, lang, on, domGeom, dom, array, domClass, Query, Deferred, QueryTask, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, urlUtils, ActivitySearch, esriRequest, EventPlannerHelper, LocatorTool, a11yclick, locale) {
+], function (declare, domConstruct, domStyle, domAttr, lang, on, win, domGeom, dom, array, domClass, Query, Deferred, QueryTask, Point, template, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, sharedNls, topic, urlUtils, ActivitySearch, esriRequest, EventPlannerHelper, LocatorTool, a11yclick, locale) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, ActivitySearch, EventPlannerHelper], {
@@ -120,6 +121,9 @@ define([
                 this.isInfowindowHide = true;
                 topic.publish("extentSetValue", true);
                 topic.publish("toggleWidget", "searchSetting");
+                if (win.getBox().w <= 766) {
+                    topic.publish("collapseCarousel");
+                }
                 this._showLocateContainer();
                 // Checking for feature search data of event search if it is present then
                 if (this.featureSet && this.featureSet.length > 0) {
@@ -149,8 +153,10 @@ define([
             })));
             // click on "GO" button in activity search
             this.own(on(this.buttonGo, a11yclick, lang.hitch(this, function () {
+                topic.publish("removeBuffer");
+                topic.publish("clearGraphicsAndCarousel");
+                topic.publish("removeRouteGraphichOfDirectionWidget");
                 topic.publish("hideInfoWindow");
-                topic.publish("removeHighlightedCircleGraphics");
                 topic.publish("extentSetValue", true);
                 this.featureSet.length = 0;
                 this._activityPlannerDateValidation();
@@ -215,7 +221,7 @@ define([
                 if (candidate && candidate.layer) {
                     topic.publish("addCarouselPod");
                     this.selectedLayerTitle = candidate.layer.SearchDisplayTitle;
-                    routeObject = { "StartPoint": candidate, "EndPoint": [candidate], "Index": 0, "WidgetName": "unifiedsearch", "QueryURL": candidate.layer.QueryURL };
+                    routeObject = { "StartPoint": candidate, "EndPoint": [candidate], "Index": 0, "WidgetName": "unifiedsearch", "QueryURL": candidate.layer.QueryURL, "isLayerCandidateClicked": true };
                     topic.publish("showRoute", routeObject);
                     getSearchSettingsDetails = this.getSearchSetting(candidate.layer.QueryURL);
                     objectIDField = candidate.attributes[candidate.layer.ObjectID];

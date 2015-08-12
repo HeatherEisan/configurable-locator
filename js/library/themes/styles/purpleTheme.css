@@ -464,6 +464,7 @@ input {
 
 .esriCTUpAndDownArrow {
     background-color: #5C2E6F;
+    border-bottom: 1px solid #5C2E6F;
 }
 
 .esriCTRightArrow, .esriCTLeftArrow {

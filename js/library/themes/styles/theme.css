@@ -340,13 +340,6 @@ body {
     bottom: 40px;
 }
 
-/*.esriCTMapLogo
-{
-    position: absolute;
-    bottom: 5px;
-    left: 5px;
-}*/
-
 .dijitContentPane {
     overflow: auto;
 }
@@ -764,6 +757,7 @@ body {
 
 .esriCTdivFacilityContent div.esriCTResultContent {
     height: 90%;
+    overflow-x: auto;
 }
 
 .esriCTDirectionResultContent {
@@ -777,7 +771,7 @@ body {
     height: -webkit-calc(100% - 60px);
     height: -o-calc(100% - 60px);
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -816,7 +810,7 @@ body {
 
 .esriCTCarouselAddToListDiv {
     background-repeat: no-repeat;
-    margin: 12px 12px 0 0;
+    margin: 12px 12px 10px 0;
     width: 24px;
     height: 24px;
     float: right;
@@ -865,7 +859,7 @@ body {
 .esriCTDivCommentContent {
     margin-top: 9px;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
     height: 140px;
     -webkit-overflow-scrolling: touch;
 }
@@ -924,7 +918,7 @@ body {
 .esriCTDivSearchResulContent {
     margin-top: 5px;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
     height: 146px;
     -webkit-overflow-scrolling: touch;
 }
@@ -1474,7 +1468,7 @@ body {
 .esriCTInfoWindoContainer {
     height: 100%;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -1604,10 +1598,9 @@ body {
 .esriCTInfoText {
     border-bottom: 1px solid #b4b4b4;
     color: #6e6e6e;
-    padding: 10px 10px 10px 0px;
+    padding: 10px 4px 10px 0px;
     text-align: justify;
     float: left;
-    word-break: break-all;
     width: 98%;
 }
 
@@ -1625,14 +1618,12 @@ body {
     display: table-cell;
     vertical-align: middle;
     padding: 5px 0px 5px 0px;
-    word-break: break-word;
 }
 
 .esriCTSecondChild {
     display: table-cell;
     vertical-align: middle;
-    padding: 5px 5px 5px 0px;
-    word-break: break-word;
+    padding: 5px;
 }
 
 .esriCTWordBreak {
@@ -1699,7 +1690,6 @@ body {
     vertical-align: middle;
     clear: both;
     width: 97%;
-    word-break: break-all;
     text-align: left;
     padding: 5px 0;
     -webkit-text-size-adjust: none;
@@ -1949,7 +1939,6 @@ input::-ms-clear {
     border: none;
     margin-left: 20px;
     margin-top: 5px;
-    float: left;
     width: 94%;
     width: -moz-calc(100% - 20px);
     width: -webkit-calc(100% - 20px);
@@ -2296,9 +2285,9 @@ a.esriCTinfoWindowHyperlink:hover, a.esriCTinfoWindowHyperlink:active {
 
 .esriCTCustomPopupDiv {
     padding: 0px 5px 0 5px;
-    text-align: justify;
+    text-align: left;
     color: #6e6e6e;
-    width: 100%;
+    width: 95%;
 }
 
 .esriCTCustomPopupTitle {

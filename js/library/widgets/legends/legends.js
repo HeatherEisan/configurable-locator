@@ -71,8 +71,9 @@ define([
                 this._updatedLegend(geometry);
             }));
 
-            this.own(on(window, "orientationchange", lang.hitch(this, this._resetLegendContainer)));
-            this.own(on(window, "resize", lang.hitch(this, this._resetLegendContainer)));
+            this.own(on(window, "orientationchange", lang.hitch(this, this._addlegendListWidth)));
+            this.own(on(window, "resize", lang.hitch(this, this._addlegendListWidth)));
+            topic.subscribe("resizeLegendContainer", lang.hitch(this, this._addlegendListWidth));
         },
 
         /**
@@ -139,7 +140,7 @@ define([
                         mapServerURL.splice(mapServerURL.length - 1, 1);
                     }
                     mapServerURL = mapServerURL.join("/");
-                    this.mapServerArray.push({ "url": mapServerURL, "featureLayerUrl": featureLayerUrl, "all": true });
+                    this.mapServerArray.push({ "url": mapServerURL, "featureLayerUrl": featureLayerUrl, "all": true, "canQuery": layerArray[index].canQuery });
                 } else {
                     mapServerURL.pop();
                     mapServerURL = mapServerURL.join("/");
@@ -147,7 +148,7 @@ define([
                         this.indexesForLayer[mapServerURL] = [];
                     }
                     this.indexesForLayer[mapServerURL].push(layerIndex);
-                    this.mapServerArray.push({ "url": mapServerURL, "featureLayerUrl": featureLayerUrl });
+                    this.mapServerArray.push({ "url": mapServerURL, "featureLayerUrl": featureLayerUrl, "canQuery": layerArray[index].canQuery });
                 }
             }
             //remove duplicate map server url
@@ -287,7 +288,7 @@ define([
                                     } else {
                                         queryParams.where = currentTime.getTime() + "=" + currentTime.getTime();
                                     }
-                                    this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo);
+                                    this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo, layerObject.canQuery);
                                 }
                             }
                         } else {
@@ -313,14 +314,14 @@ define([
                                     } else {
                                         queryParams.where = currentTime.getTime() + "=" + currentTime.getTime();
                                     }
-                                    this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo);
+                                    this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo, layerObject.canQuery);
                                 }
                             } else if (rendererObject.type === "classBreaks") {
                                 //set query string for class breaks type renderer
                                 for (i = 0; i < rendererObject.classBreakInfos.length; i++) {
                                     this.rendererArray.push({ "renderer": rendererObject.classBreakInfos[i], "title": layerObject.title });
                                     queryParams.where = layerObject.fieldName + ">=" + rendererObject.classBreakInfos[i].minValue + " AND " + layerObject.fieldName + "<=" + rendererObject.classBreakInfos[i].maxValue + " AND " + currentTime.getTime().toString() + "=" + currentTime.getTime().toString();
-                                    this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo);
+                                    this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo, layerObject.canQuery);
                                 }
                             } else {
                                 if (!layerObject.title) {
@@ -329,7 +330,7 @@ define([
                                 this.rendererArray.push(layerObject);
                                 //set query string for simple renderer
                                 queryParams.where = currentTime.getTime() + "=" + currentTime.getTime();
-                                this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo);
+                                this._executeQueryTask(layer, defQueryArray, queryParams, hasDrawingInfo, layerObject.canQuery);
                             }
                         }
                     }
@@ -529,19 +530,24 @@ define([
         * execute query task for the number of features present in the current extent
         * @memberOf widgets/legends/legends
         */
-        _executeQueryTask: function (layer, defQueryArray, queryParams, hasDrawingInfo) {
+        _executeQueryTask: function (layer, defQueryArray, queryParams, hasDrawingInfo, canQuery) {
             var defResult = [], queryTask, queryDeferred = new Deferred();
-            queryTask = new QueryTask(layer);
             //add key to identify layer type(hosted/webmap-edited/map service)
             defResult.hasDrawingInfo = hasDrawingInfo;
-            defResult.count = 0;
-            queryTask.executeForCount(queryParams, lang.hitch(this, function (count) {
-                //add count of visible features on current extent
-                defResult.count = count;
+            if (canQuery) {
+                defResult.count = 0;
+                queryTask = new QueryTask(layer);
+                queryTask.executeForCount(queryParams, lang.hitch(this, function (count) {
+                    //add count of visible features on current extent
+                    defResult.count = count;
+                    queryDeferred.resolve(defResult);
+                }), function () {
+                    queryDeferred.resolve();
+                });
+            } else {
+                defResult.count = 1;
                 queryDeferred.resolve(defResult);
-            }), function () {
-                queryDeferred.resolve();
-            });
+            }
             defQueryArray.push(queryDeferred);
         },
 
@@ -646,9 +652,12 @@ define([
             width = width ? width < 5 ? 5 : width : 20;
             imageHeightWidth = { width: width + 'px', height: height + 'px' };
             if (symbolType === "picturemarkersymbol" && url) {
-                domConstruct.create("img", { "src": "data:image/gif;base64," + url, "style": imageHeightWidth }, divLegendImage);
-            } else if (symbolType === "esriPMS" && url) {
-                domConstruct.create("img", { "src": "data:image/gif;base64," + imageData, "style": imageHeightWidth }, divLegendImage);
+                url = this._checkLegendImgURL(url);
+                domConstruct.create("img", { "src": url, "style": imageHeightWidth }, divLegendImage);
+            } else if (symbolType === "esriPMS" && (imageData || url)) {
+                imageData = imageData || url;
+                imageData = this._checkLegendImgURL(imageData);
+                domConstruct.create("img", { "src": imageData, "style": imageHeightWidth }, divLegendImage);
             } else {
                 divSymbol = domConstruct.create("div", { "style": imageHeightWidth }, null);
                 if (color.r || color.r === 0) {
@@ -805,6 +814,7 @@ define([
             if (layerList && layerList.layers && layerList.layers.length > 0) {
                 for (i = 0; i < layerList.layers.length; i++) {
                     layerList.layers[i].featureLayerUrl = mapServerUrl.featureLayerUrl;
+                    layerList.layers[i].canQuery = mapServerUrl.canQuery;
                     if (mapServerUrl.all || array.indexOf(this.indexesForLayer[mapServerUrl.url], layerList.layers[i].layerId) !== -1) {
                         isLegendCreated = true;
                         layerURL = mapServerUrl.url + '/' + layerList.layers[i].layerId;
@@ -860,14 +870,15 @@ define([
         * @memberOf widgets/legends/legends
         */
         _addLegendSymbol: function (legend, layerName) {
-            var divLegendList, divLegendImage, divLegendLabel, width, height, imageHeightWidth;
+            var divLegendList, divLegendImage, divLegendLabel, width, height, imageHeightWidth, imageData;
             if (legend) {
                 divLegendList = domConstruct.create("div", { "class": "esriCTDivLegendList" }, this.divLegendContent);
                 divLegendImage = domConstruct.create("div", { "class": "esriCTDivLegend" }, divLegendList);
                 height = legend.height ? legend.height < 5 ? 5 : legend.height : 20;
                 width = legend.width ? legend.width < 5 ? 5 : legend.width : 20;
                 imageHeightWidth = { width: width + 'px', height: height + 'px' };
-                domConstruct.create("img", { "src": "data:image/gif;base64," + legend.imageData, "style": imageHeightWidth }, divLegendImage);
+                imageData = this._checkLegendImgURL(legend.imageData);
+                domConstruct.create("img", { "src": imageData, "style": imageHeightWidth }, divLegendImage);
                 divLegendLabel = domConstruct.create("div", { "class": "esriCTDivLegendLabel" }, divLegendList);
                 if (legend.label) {
                     domAttr.set(divLegendLabel, "innerHTML", legend.label);
@@ -877,6 +888,20 @@ define([
                 width = divLegendLabel.offsetWidth + width + 40;
                 this.legendListWidth.push(width);
             }
+        },
+	
+        /**
+        * check legend image URL
+        * @memberOf widgets/legends/legends
+        */
+        _checkLegendImgURL: function (url) {
+            var imgPath;
+            if (url.match(/data:image/gi) || url.match(/http:/i) || url.match(/https:/i)) {
+                imgPath = url;
+            } else {
+                imgPath = "data:image/gif;base64," + url;
+            }
+            return imgPath;
         }
     });
 });

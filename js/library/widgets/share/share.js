@@ -199,7 +199,7 @@ define([
             }
             //appGlobals.shareOptions.infowindowDirection variable is use to store the infowindow direction geometry and append in shared URL
             if (appGlobals.shareOptions.infowindowDirection) {
-                urlStr += "$infowindowDirection=" + appGlobals.shareOptions.infowindowDirection.toString();
+                urlStr += "$infowindowDirection=" + appGlobals.shareOptions.directionScreenPoint + "," + appGlobals.shareOptions.infowindowDirection.toString();
             }
             //appGlobals.shareOptions.activitySearch variable is use to store the activity name and append in shared URL
             if (appGlobals.shareOptions.activitySearch) {

@@ -445,6 +445,7 @@ input {
 
 .esriCTUpAndDownArrow {
     background-color: #d15706;
+    border-bottom: 1px solid #d15706;
 }
 
 .esriCTRightArrow, .esriCTLeftArrow {

@@ -435,6 +435,7 @@ input {
 
 .esriCTUpAndDownArrow {
     background-color: #028D6A;
+    border-bottom: 1px solid #028D6A;
 }
 
 .esriCTDivHighlightFacility {

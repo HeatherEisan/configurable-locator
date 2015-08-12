@@ -162,7 +162,7 @@ define([
             this.dateFieldArray = this.getDateField(result);
             resultSet = result.features[0];
             // Calling the show route
-            routeObject = { "StartPoint": resultSet, "EndPoint": [resultSet], "Index": 0, "WidgetName": "unifiedsearch", "QueryURL": URL };
+            routeObject = { "StartPoint": resultSet, "EndPoint": [resultSet], "Index": 0, "WidgetName": "unifiedsearch", "QueryURL": URL, "isLayerCandidateClicked": true };
             topic.publish("showRoute", routeObject);
         },
 

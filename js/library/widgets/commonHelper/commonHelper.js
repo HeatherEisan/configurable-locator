@@ -67,6 +67,7 @@ define([
             // Check the buffer graphics layer and graphics for removing graphics from map
             if (this.map.getLayer("tempBufferLayer") && this.map.getLayer("tempBufferLayer").graphics.length > 0) {
                 this.map.getLayer("tempBufferLayer").clear();
+                this.zoomToFullRoute = true;
             }
         },
 
