@@ -145,10 +145,10 @@ define([], function () {
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
 
         // Specify the Title of Group that contains basemaps
-        BasemapGroupTitle: "Basemaps",
+        BasemapGroupTitle: "ArcGISforEmergencyManagementBasemapGroup",
 
         // Specify the Name of Owner of the Group that contains basemaps
-        BasemapGroupOwner: "GISITAdmin",
+        BasemapGroupOwner: "StateLocalTryItLive",
 
         // Specify Spatial Reference for basemaps, since all basemaps need to use the same spatial reference
         BasemapSpatialReferenceWKID: 102100,
@@ -370,7 +370,7 @@ define([], function () {
         // Transparency: Set Transparency for Route
         // RouteUnit: Set Unit for Route, units supported by Direction widget are “MILES”, “METERS”, “KILOMETERS”, “NAUTICAL_MILES”. If there is a typo error in any of these four units then the unit will be displayed in “KILOMETERS”. If the unit is specified other than these four units then unit will be displayed in “MILES”
         DrivingDirectionSettings: {
-            GetDirections: true,
+            GetDirections: false,
             RouteServiceURL: "http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World",
             RouteColor: "0,0,225",
             RouteWidth: 6,
