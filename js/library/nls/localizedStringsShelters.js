@@ -70,8 +70,8 @@ define({
             postCommentText: "Enter Comment", // Shown as a placeholder in Comment pod's textbox in the infoWindow pod.
             backToMapText: "Back to Map", // In the mobile view it is shown as an option in the Comments pod to go back to the map from infoWindow comment pod.
             orderByDate: "Order by Date", // Shown as a title to sort the date in ascending/descending order in My List panel.
-            numberOfFeaturesFoundNearAddress: "Found ${0} facility(ies) near the address", // Shown as a title below ‘Search Results’ title in the carousel pod indicating the number of features found in buffer.
-            numberOfFeaturesFound: "Found ${0} facility(ies)", // Shown as a title below ‘Search Results’ title in the carousel pod when searching ‘Activities’ indicating the number of facilities found..
+            numberOfFeaturesFoundNearAddress: "Found ${0} open Shelter(s) near the address", // Shown as a title below ‘Search Results’ title in the carousel pod indicating the number of features found in buffer.
+            numberOfFeaturesFound: "Found ${0} open Shelter(s)", // Shown as a title below ‘Search Results’ title in the carousel pod when searching ‘Activities’ indicating the number of facilities found..
             numberOfEventsFound: "Found ${0} Event", // Shown as a title below ‘Search Results’ title in the carousel pod when a event is selected in My List panel indicating the selected event..
             infoWindowTextURL: "More info", // Shown as a link for URL label in infoWindow Information tab or carousel pod when searching Events.
             printWindowListTitleText: "My List", // Shown as a label for the print window title
