@@ -132,7 +132,7 @@ define([], function () {
         ZoomLevel: 8 ,
 
         // Specify WebMapId within quotes
-        WebMapId: "07d02a9e8a2f42b6945fb21cf851a211",
+        WebMapId: "5fe4c26a0bcf4b94bd7dc05718dc4f2b",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -187,7 +187,7 @@ define([], function () {
         ActivitySearchSettings: [{
             Enable: true,
             UnifiedSearch: "true",
-            Title: "Shelter Locations",
+            Title: "Open Shelter",
             QueryLayerId: "0",
             SearchDisplayTitle: "Shelter Name",
             SearchDisplayFields: "${FACNAME}",
