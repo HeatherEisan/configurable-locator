@@ -223,27 +223,7 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
         // Event SEARCH SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
-        // Configure Search, Barrier and Info settings to be displayed in Search panels:
-
-        // Configure Search and Settings below.
-        // Enable:  Set to true if Event search panel need to be displayed, or false if Event search panel are not required.
-        // UnifiedSearch: Specify a boolean value true/false which indicates whether to include the layer in Unified search or not.
-        // Title: In case of webmap implementations, it must match layer name specified in webmap.
-        // QueryLayerId: This is the Layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
-        // SearchDisplayTitle: This text is displayed in Search Results as the Title to group results.
-        // SearchDisplayFields: Attribute that will be displayed in the Search box when user performs a search.
-        // SearchDisplaySubFields: Attribute that will be displayed in the Search box when user performs a search.
-        // SearchExpressionForDate: Expression to query the layer for Events falling in the range of 'Event Planner' search.
-        // SearchExpression: Configure the query expression to be used for Search.
-        // SortingKeyField: Attribute that will be sort the date when user performs a Event search.
-        // AddToCalenderSettings: Configure the parameters to create the ics file for an event.
-        //        IcsFileName: Set the Name of the ics file. This is a required key.
-        //        StartDate: Set the Start Date of the event in ics file. This is a required key.
-        //        EndDate: Set the End Date of the event in ics file. This is a required key.
-        //        Location: Set the Location of the event in ics file.
-        //        Summary: Set the Summary of the event in ics file.
-        //        Description: Set the Description of the event in ics file.
-        //        Organizer: Set the Organizer of the event in ics file.
+        // The Event Search Settings are not currently supported in the Shelter Locator application.
 
         EventSearchSettings: [{
             Enable: false,
