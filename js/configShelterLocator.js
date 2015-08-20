@@ -187,7 +187,7 @@ define([], function () {
         ActivitySearchSettings: [{
             Enable: true,
             UnifiedSearch: "true",
-            Title: "Shelter Locations",
+            Title: "Open Shelters",
             QueryLayerId: "0",
             SearchDisplayTitle: "Shelter Name",
             SearchDisplayFields: "${FACNAME}",
