@@ -16,6 +16,10 @@ The Configurable Locator application is a configuration of ArcGIS for Server and
 
 **Events Calendar (Local Government)** is a configuration of ArcGIS and JavaScript API application that allows citizens and visitors to discover festivals, shows, concerts and other events occurring in a community.[Try the Events Calendar application](http://links.esri.com/localgovernment/tryit/EventsCalendar/)
 
+**Shelter Locator (State Government)** is a configuration of ArcGIS and a JavaScript application that allows citizens to locate emergency shelters in their community.[Try the Shelter Locator application](http://links.esri.com/localgovernment/tryit/ShelterLocator/)
+
+**Shelter Locator (Local Government)** is a configuration of ArcGIS and a JavaScript application that allows citizens to locate emergency shelters in their community.[Try the Shelter Locator application](http://links.esri.com/stategovernment/tryit/ShelterLocator/)
+
 [![Image of Configurable Locator application](configurable-locator.png "Configurable Locator application")](http://links.esri.com/stategovernment/tryit/ParkandRecLocator/)
 
 ## Features
@@ -35,7 +39,7 @@ You'll need to convert to an application in IIS and use the ASP .NET 4.0. applic
 
 **Start now using your own services**
 
-For more information on requirements and publication steps, see [Park Locator for State Government](http://links.esri.com/stategovernment/help/ParkandRecLocator) help or [Water Access Locator](http://links.esri.com/stategovernment/help/WaterAccessLocator) help or [Wildlife Management Access](http://links.esri.com/stategovernment/help/WMALocator) help or [Park Locator for Local Government](http://links.esri.com/localgovernment/help/ParkLocator/) help or [Events Calendar](http://links.esri.com/localgovernment/help/EventsCalendar/) help or [Event Locator](http://links.esri.com/stategovernment/help/EventLocator) help
+For more information on requirements and publication steps, see [Park Locator for State Government](http://links.esri.com/stategovernment/help/ParkandRecLocator) help or [Water Access Locator](http://links.esri.com/stategovernment/help/WaterAccessLocator) help or [Wildlife Management Access](http://links.esri.com/stategovernment/help/WMALocator) help or [Park Locator for Local Government](http://links.esri.com/localgovernment/help/ParkLocator/) help or [Events Calendar](http://links.esri.com/localgovernment/help/EventsCalendar/) help or [Event Locator](http://links.esri.com/stategovernment/help/EventLocator) help or [Shelter Locator for State Government](http://links.esri.com/stategovernment/help/ShelterLocator/) help or [Shelter Locator for Local Government](http://links.esri.com/localgovernment/help/ShelterLocator/) help
 
 ## Resources
 
@@ -60,6 +64,8 @@ To get the Water Access Locator configuration rename configWaterAccessLocator.js
 To get the Wildlife Management Access configuration rename configWMALocator.js to config.js.
 To get the Events Calendar for Local Government configuration rename configEventsCalendar.js to config.js
 To get the Event Locator for State Government configuration rename configEventLocator.js to config.js
+To get the Shelter Locator for Local Government configuration rename configShelterLocatorLG.js to config.js
+To get the Shelter Locator for State Government configuration rename configShelterLocator.js to config.js
 
 ## Issues
 
