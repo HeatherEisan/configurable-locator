@@ -58,12 +58,18 @@ see the site for concepts, samples, and a reference for using the API to create 
 
 The configurable-locator repo contains six unique application configurations: Parks Locator for Local Government, Parks Locator for State Government, Water Access Locator, Wildlife Management Access Locator, Events Calendar for Local Government, and Event Locator for State Government. 
 
-To get the Parks Locator for Local Government configuration rename configParkLocatorLG.js to config.js. 
+To get the Parks Locator for Local Government configuration rename configParkLocatorLG.js to config.js.
+
 To get the Parks Locator for State Government configuration rename configParkLocator.js to config.js. 
+
 To get the Water Access Locator configuration rename configWaterAccessLocator.js to config.js. 
+
 To get the Wildlife Management Access configuration rename configWMALocator.js to config.js.
+
 To get the Events Calendar for Local Government configuration rename configEventsCalendar.js to config.js
+
 To get the Event Locator for State Government configuration rename configEventLocator.js to config.js
+
 To get the Shelter Locator for Local Government configuration rename configShelterLocatorLG.js to config.js and overwrite localizedStrings.js with localizedStringsShelters.js. 
 
 To get the Shelter Locator for State Government configuration rename configShelterLocator.js to config.js nd overwrite localizedStrings.js with localizedStringsShelters.js. 
