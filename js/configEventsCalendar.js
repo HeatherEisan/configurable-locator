@@ -170,6 +170,7 @@ define([], function () {
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
             PrimaryKeyForActivity: "${FACILITYID}",
+            QualifyingActivityValue: "Yes",
             ActivityList: [{
                 FieldName: "ADACOMPLY",
                 Alias: "ADA Compliant",
