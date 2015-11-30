@@ -864,7 +864,7 @@ define([
                             // Looping for ActivityList to show the activity images in infowindow
                             for (i = 0; i < SearchSettingsLayers.ActivityList.length; i++) {
                                 if (string.substitute(SearchSettingsLayers.ActivityList[i].FieldName, attributes)) {
-                                    if (attributes[string.substitute(SearchSettingsLayers.ActivityList[i].FieldName, attributes)] === "Yes") {
+                                    if (attributes[string.substitute(SearchSettingsLayers.ActivityList[i].FieldName, attributes)] === SearchSettingsLayers.QualifyingActivityValue) {
                                         activityImageDiv = domConstruct.create("div", { "class": "esriCTActivityImage" }, divFacilityContent);
                                         domConstruct.create("img", { "src": SearchSettingsLayers.ActivityList[i].Image, "title": SearchSettingsLayers.ActivityList[i].Alias }, activityImageDiv);
                                     }

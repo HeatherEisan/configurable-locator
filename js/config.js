@@ -170,6 +170,7 @@ define([], function () {
         // SearchDisplayFields: This Attribute will be displayed in the Search box when user performs a search.
         // SearchExpression: Configure the Query Expression to be used for Search.
         // PrimaryKeyForActivity: Specify field name as Primary Key to relate comment table.
+        // QualifyingActivityValue: This value is used to indicate if a given activity is available and should represent the 'Yes' or 'True' value.
         // ActivityList: Activities to be displayed in Activity Search and Info window for a feature.
         //      FieldName: Name for which query will be performed on the layer.
         //      Alias: Specify an alternative name used for the 'Activity' and tooltip name for the icons.
@@ -193,6 +194,7 @@ define([], function () {
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
             PrimaryKeyForActivity: "${OBJECTID}",
+            QualifyingActivityValue: "Yes",
             ActivityList: [{
                 FieldName: "FOURWHEEL",
                 Alias: "FourWheel",

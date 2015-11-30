@@ -221,7 +221,7 @@ define([
                     }
                     appGlobals.shareOptions.activitySearch = selectedActivityArray;
                     appGlobals.shareOptions.addressLocation = null;
-                    this._queryForSelectedActivityInLayer(selectedRow);
+                    this._queryForSelectedActivityInLayer(selectedRow, SearchSettingsLayers.QualifyingActivityValue);
                 } else {
                     appGlobals.shareOptions.doQuery = "false";
                     appGlobals.shareOptions.sharedGeolocation = null;
@@ -239,7 +239,7 @@ define([
         * @param{object}selectedRow contains the selected feature
         * @memberOf widgets/searchSetting/activitySearch
         */
-        _queryForSelectedActivityInLayer: function (selectedRow) {
+        _queryForSelectedActivityInLayer: function (selectedRow, qualifyingActivityValue) {
             var activityQueryString, queryTask, queryForActivity, i, activity, widgetName;
             activityQueryString = "";
             widgetName = "activitySearch";
@@ -249,9 +249,9 @@ define([
                 activity = domAttr.get(selectedRow[i], "activity");
                 // If selected icons are more then create query.
                 if (i === selectedRow.length - 1) {
-                    activityQueryString += activity + " = 'Yes'";
+                    activityQueryString += activity + " = '" + qualifyingActivityValue + "'";
                 } else {
-                    activityQueryString += activity + " = 'Yes' AND ";
+                    activityQueryString += activity + " = '" + qualifyingActivityValue + "' AND ";
                 }
             }
             // If query string is not found or created then show error message.

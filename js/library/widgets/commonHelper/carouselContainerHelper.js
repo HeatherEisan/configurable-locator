@@ -493,7 +493,7 @@ define([
                                 }
                                 for (k = 0; k < SearchSettingsLayers.ActivityList.length; k++) {
                                     if (string.substitute(SearchSettingsLayers.ActivityList[k].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes)) {
-                                        if (facilityObject.Feature[facilityObject.SelectedItem.value].attributes[string.substitute(SearchSettingsLayers.ActivityList[k].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes)] === "Yes") {
+                                        if (facilityObject.Feature[facilityObject.SelectedItem.value].attributes[string.substitute(SearchSettingsLayers.ActivityList[k].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes)] === SearchSettingsLayers.QualifyingActivityValue) {
                                             activityImageDiv = domConstruct.create("div", { "class": "esriCTActivityImage" }, divFacilityImages);
                                             domConstruct.create("img", { "src": SearchSettingsLayers.ActivityList[k].Image, "title": SearchSettingsLayers.ActivityList[k].Alias }, activityImageDiv);
                                         }
