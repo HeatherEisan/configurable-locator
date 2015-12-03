@@ -704,3 +704,13 @@ input {
     color: #5C2E6F;
     text-align: left;
 }
+
+.esriCTsliderDisplayText
+{
+    color: #5C2E6F;
+}
+
+.esriSliderBack {
+    background-color: #5C2E6F;
+    border-bottom: 1px solid #5C2E6F;
+}

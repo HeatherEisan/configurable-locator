@@ -19,6 +19,10 @@
 define([
     "dojo/_base/declare",
     "dojo/_base/lang",
+    "dojo/dom-style",
+    "dojo/dom-attr",
+    "dojo/dom",
+    "dojo/on",
     "dojo/_base/array",
     "esri/tasks/query",
     "dojo/promise/all",
@@ -27,17 +31,20 @@ define([
     "dijit/_WidgetBase",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
+    "dijit/form/HorizontalSlider",
+    "dijit/form/HorizontalRule",
     "esri/tasks/BufferParameters",
     "dojo/_base/Color",
     "esri/tasks/GeometryService",
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol"
 
-], function (declare, lang, array, Query, all, QueryTask, Graphic, _WidgetBase, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol) {
+], function (declare, lang, domStyle, domAttr, dom, on, array, Query, all, QueryTask, Graphic, _WidgetBase, sharedNls, topic, HorizontalSlider, HorizontalRule, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase], {
         sharedNls: sharedNls, // Variable for shared NLS
+        unitValues: [null, null, null, null],
 
         /**
         * Create buffer around pushpin
@@ -46,29 +53,157 @@ define([
         * @memberOf widgets/commonHelper/locatorHelper
         */
         createBuffer: function (mapPoint, widgetName) {
-            var params, geometryService;
+            var params, geometryService, isValid;
             this.carouselContainer.removeAllPod();
             this.carouselContainer.addPod(this.carouselPodData);
             this.removeBuffer();
             geometryService = new GeometryService(appGlobals.configData.GeometryService);
-            // Checking the map point or map point is having geometry and if config data has buffer distance.
-            if ((mapPoint || mapPoint.geometry) && appGlobals.configData.BufferDistance) {
-                params = new BufferParameters();
-                params.distances = [appGlobals.configData.BufferDistance];
-                params.unit = GeometryService.UNIT_STATUTE_MILE;
-                params.bufferSpatialReference = this.map.spatialReference;
-                params.outSpatialReference = this.map.spatialReference;
-                // Checking the geometry
-                if (mapPoint.geometry) {
-                    params.geometries = [mapPoint.geometry];
-                } else {
-                    params.geometries = [mapPoint];
+          // Checking the map point or map point is having geometry and if config data has buffer distance.
+          //TODO...JH Set bufferDistance from slider value
+            //isValid = this._validateRangeFilterValues();
+          //if ((mapPoint || mapPoint.geometry) && appGlobals.configData.BufferDistance) {
+          //if ((mapPoint || mapPoint.geometry) && isValid) {
+            if ((mapPoint || mapPoint.geometry)) {
+              var geometry = mapPoint.geometry;
+              if (typeof (geometry) === 'undefined') {
+                geometry = mapPoint;
+              }
+              //TODO...JH check out the share options
+              //appGlobals.shareOptions.arrBufferDistance[this.workflowCount] = bufferDistance;
+              //commented from site-selector...this.featureGeometry[this.workflowCount] = geometry;
+              //commented from site-selector...selectedPanel = query('.esriCTsearchContainerSitesSelected')[0];
+              // set slider values for various workflows
+
+              slider = dijit.byId("sliderhorizontalSliderContainer");
+                sliderDistance = slider.value;
+
+              //////////////////////////
+                if (Math.round(sliderDistance) !== 0) {
+                  if (geometry && geometry.type === "point") {
+                    //setup the buffer parameters
+                    params = new BufferParameters();
+                    params.distances = [Math.round(sliderDistance)];
+                    params.bufferSpatialReference = this.map.spatialReference;
+                    params.outSpatialReference = this.map.spatialReference;
+                    params.geometries = [geometry];
+                    params.unit = GeometryService[this._getDistanceUnit(appGlobals.configData.DistanceUnitSettings.DistanceUnitName)];
+                    geometryService.buffer(params, lang.hitch(this, function (geometries) {
+                      this.showBuffer(geometries, mapPoint, widgetName);
+                    }));
+                  } else {
+                    topic.publish("hideProgressIndicator");
+                  }
                 }
+                //else {
+                //  topic.publish("hideProgressIndicator");
+                //  if (document.activeElement) {
+                //    document.activeElement.blur();
+                //  }
+                //  // clear buildings, sites and business tab data
+                //  if (this.workflowCount === 0) {
+                //    domStyle.set(this.outerDivForPegination, "display", "none");
+                //    domConstruct.empty(this.outerResultContainerBuilding);
+                //    domConstruct.empty(this.attachmentOuterDiv);
+                //    delete this.buildingTabData;
+                //  } else if (this.workflowCount === 1) {
+                //    domStyle.set(this.outerDivForPeginationSites, "display", "none");
+                //    domConstruct.empty(this.outerResultContainerSites);
+                //    domConstruct.empty(this.attachmentOuterDivSites);
+                //    delete this.sitesTabData;
+                //  } else if (this.workflowCount === 2) {
+                //    this._clearBusinessData();
+                //  }
+                //  this.lastGeometry[this.workflowCount] = null;
+                //  this.map.graphics.clear();
+                //  this.map.getLayer("esriBufferGraphicsLayer").clear();
+                //  alert(sharedNls.errorMessages.bufferSliderValue);
+                //  this.isSharedExtent = false;
+                //}
+              //////////////////////////
+
+                //params = new BufferParameters();
+                //params.distances = [appGlobals.configData.BufferDistance];
+              //TODO...JH Get buffer distance from config...will need to map config values to geom service constants 
+                //params.unit = GeometryService.UNIT_STATUTE_MILE;
+                //params.bufferSpatialReference = this.map.spatialReference;
+                //params.outSpatialReference = this.map.spatialReference;
+                // Checking the geometry
+                //if (mapPoint.geometry) {
+                //    params.geometries = [mapPoint.geometry];
+                //} else {
+                //    params.geometries = [mapPoint];
+                //}
                 // Ccreating buffer and calling show buffer function.
-                geometryService.buffer(params, lang.hitch(this, function (geometries) {
-                    this.showBuffer(geometries, mapPoint, widgetName);
-                }));
+                //geometryService.buffer(params, lang.hitch(this, function (geometries) {
+                //    this.showBuffer(geometries, mapPoint, widgetName);
+                //}));
             }
+        },
+
+        //updateBuffer: function (mapPoint, comHelper) {
+        //  var params, geometryService, isValid;
+        //  //this.carouselContainer.removeAllPod();
+        //  //this.carouselContainer.addPod(this.carouselPodData);
+        //  //comHelper.removeBuffer();
+        //  topic.publish("removeBuffer");
+        //  geometryService = new GeometryService(appGlobals.configData.GeometryService);
+        //  // Checking the map point or map point is having geometry and if config data has buffer distance.
+        //  //TODO...JH Set bufferDistance from slider value
+        //  isValid = this._validateRangeFilterValues();
+        //  //if ((mapPoint || mapPoint.geometry) && appGlobals.configData.BufferDistance) {
+        //  if ((mapPoint || mapPoint.geometry) && isValid) {
+        //    var geometry = mapPoint.geometry;
+        //    if (typeof (geometry) === 'undefined') {
+        //      geometry = mapPoint;
+        //    }
+        //    //TODO...JH check out the share options
+        //    //appGlobals.shareOptions.bufferDistance = bufferDistance;
+        //    //commented from site-selector...this.featureGeometry[this.workflowCount] = geometry;
+        //    //commented from site-selector...selectedPanel = query('.esriCTsearchContainerSitesSelected')[0];
+        //    // set slider values for various workflows
+
+        //    slider = dijit.byId("sliderhorizontalSliderContainer");
+        //    sliderDistance = slider.value;
+
+        //    //////////////////////////
+        //    if (Math.round(sliderDistance) !== 0) {
+        //      if (geometry && geometry.type === "point") {
+        //        //setup the buffer parameters
+        //        params = new BufferParameters();
+        //        params.distances = [Math.round(sliderDistance)];
+        //        params.bufferSpatialReference = this.map.spatialReference;
+        //        params.outSpatialReference = this.map.spatialReference;
+        //        params.geometries = [geometry];
+        //        params.unit = GeometryService[this._getDistanceUnit(appGlobals.configData.DistanceUnitSettings.DistanceUnitName)];
+        //        geometryService.buffer(params, lang.hitch(this, function (geometries) {
+        //          this.showBuffer(geometries, mapPoint, widgetName);
+        //        }));
+        //      } else {
+        //        topic.publish("hideProgressIndicator");
+        //      }
+        //    }
+        //  }
+        //},
+
+      /**
+* get distance unit based on unit selection
+* @param {string} input distance unit
+* @memberOf widgets/siteLocator/siteLocatorHelper
+*/
+        _getDistanceUnit: function (strUnit) {
+          var sliderUnitValue;
+          if (strUnit.toLowerCase() === "miles") {
+            sliderUnitValue = "UNIT_STATUTE_MILE";
+          } else if (strUnit.toLowerCase() === "feet") {
+            sliderUnitValue = "UNIT_FOOT";
+          } else if (strUnit.toLowerCase() === "meters") {
+            sliderUnitValue = "UNIT_METER";
+          } else if (strUnit.toLowerCase() === "kilometers") {
+            sliderUnitValue = "UNIT_KILOMETER";
+          } else {
+            sliderUnitValue = "UNIT_STATUTE_MILE";
+          }
+          return sliderUnitValue;
         },
 
         /**
@@ -87,7 +222,7 @@ define([
                         new Color([parseInt(appGlobals.configData.BufferSymbology.FillSymbolColor.split(",")[0], 10), parseInt(appGlobals.configData.BufferSymbology.FillSymbolColor.split(",")[1], 10), parseInt(appGlobals.configData.BufferSymbology.LineSymbolColor.split(",")[2], 10), parseFloat(appGlobals.configData.BufferSymbology.FillSymbolTransparency.split(",")[0], 10)]));
             // Adding graphic on map
             try {
-                this._addGraphic(this.map.getLayer("tempBufferLayer"), bufferSymbol, geometries[0]);
+              this._addGraphic(this.map.getLayer("tempBufferLayer"), bufferSymbol, geometries[0]);
             } catch (error) {
                 alert(sharedNls.errorMessages.unableToDrawBuffer);
                 topic.publish("hideProgressIndicator");
@@ -108,7 +243,7 @@ define([
             }
             topic.publish("hideInfoWindow");
             this.isInfowindowHide = true;
-            this.zoomToFullRoute = true;
+            this.zoomToFullRoute = true;     
         },
 
         /**

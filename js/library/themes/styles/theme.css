@@ -530,7 +530,7 @@ body {
 }
 
 .esriCTBottomBorder {
-    padding: 5px 2px;
+    padding: 2px 1px;
 }
 
 .esriCTGroupList {
@@ -1938,12 +1938,12 @@ input::-ms-clear {
     z-index: 101;
     border: none;
     margin-left: 20px;
-    margin-top: 5px;
+    margin-top: 1px;
     width: 94%;
     width: -moz-calc(100% - 20px);
     width: -webkit-calc(100% - 20px);
     width: -o-calc(100% - 20px);
-    height: 218px;
+    height: 159px;
     overflow-y: auto;
     overflow-x: hidden;
     text-align: left;
@@ -2320,3 +2320,408 @@ a.esriCTinfoWindowHyperlink:hover, a.esriCTinfoWindowHyperlink:active {
 .esriCTExtraPadding {
     padding: 8px 23px;
 }
+
+.esriSliderSelect
+{
+    clear: both;
+    float: left;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.esriSliderText
+{
+    float: left;
+    margin-bottom: 5px;
+    margin-left: 10px;
+}
+
+.esriSelectCommon
+{
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.esriSelect
+{
+    border: none;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin-top: -1px;
+    margin-bottom:10px; /*JH*/
+    padding-bottom:10px; /*JH*/ 
+}
+
+.esriSlider
+{
+    height: 29px; /*JH from 25*/
+    clear: both; /*margin-left: 5px;*/
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.esriSliderDisplayText
+{
+    color: #8d8d8e;
+}
+
+.esriHorizontalSliderContainer
+{
+    width: 200px;
+    margin-left: 15px; /*JH*/
+}
+
+/*.esriHorizontalRuleContainer, .horizontalRule
+{
+    width: 300px;
+}*/
+
+.esriDistanceUnit
+{
+    display: table;
+    width: 88%;
+    margin-top: 5px;
+}
+
+.esriFilterEnabled, .esriClearFilterIconEnable
+{
+    float: right;
+    background-repeat: no-repeat;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-size: 30px;
+    vertical-align: middle;
+    cursor: pointer;
+    margin: 3px 0 3px 10px;
+}
+
+.esriClearFilterIcon
+{
+    float: right;
+    background-image: url('../images/clear-filter-disable.png');
+    background-repeat: no-repeat;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-size: 30px;
+    vertical-align: middle;
+    margin: 3px 0px 3px 10px;
+}
+
+
+/* Horizontal Slider Styles*/
+
+.dijitRuleMarkH
+{
+    border-bottom-width: 0 !important;
+    border-left-width: 0 !important;
+    border-top-width: 0 !important;
+    text-align: right;
+    margin-top: 7px;
+    /*width: 0;*/
+}
+
+.horizontalRule
+{
+    height: 5px;
+    margin-bottom: 7px;
+    margin-left: 5px;
+    
+}
+
+.dijitRuleContainer
+{
+    margin-top: 11px;
+    width: 100%; /*JH*/
+}
+
+.dijitRuleLabelsContainer
+{
+    margin-top: 0px;
+    width: 100%; /*JH*/
+}
+
+.dijitSliderImageHandleH
+{
+    border: 0px !important;
+    width: 16px !important;
+    height: 16px !important;
+    background-repeat: no-repeat;
+    background-position: 0px !important;
+    margin-top: -1px;
+    background-size: 100%;
+    outline: none !important;
+    margin-left: 10px !important;
+}
+
+/*.claro .dijitSliderProgressBarH .dijitSliderThumbHover
+{
+    border: 0px !important;
+    width: 16px !important;
+    height: 16px !important;
+    background-repeat: no-repeat;
+    background-position: 0px !important;
+    margin-top: -1px !important;
+    background-size: 100% !important;
+    outline: none !important;
+    margin-left: 10px !important;
+}*/
+
+.dijitSliderBumperH, .dijitSliderBarH
+{
+    height: 3px !important;
+    border-color: #fff;
+    background-color: #808080;
+}
+
+.claro .dijitSlider .dijitSliderProgressBarH, .claro .dijitSlider .dijitSliderLeftBumper
+{
+    height: 3px !important;
+    border-color: #fff;
+}
+
+.claro .dijitSlider .dijitSliderRemainingBarH, .claro .dijitSlider .dijitSliderRightBumper
+{
+    border-color: #fff;
+    background-color: #808080;
+    height: 3px !important;
+}
+
+.dijitSliderImageHAndleH
+{
+    left: 18% !important;
+    top: -3px;
+}
+
+.claro .dijitRuleMark
+{
+    color: #8d8d8e !important;
+    border-right-color: #808080 !important;
+    border: none;
+    margin-bottom:5px;
+}
+
+.dijitRuleMark .dijitRuleMarkH
+{
+    /*margin-left: 96% !important;*/
+    width: 100%;
+}
+
+.dijitSliderImageHandleH
+{
+    left: 27% !important;
+}
+
+.dijitSliderBumperH
+{
+    width: 2px !important;
+}
+
+.esriCTSlider
+{
+    height: 25px;
+    clear: both; /*margin-left: 5px;*/
+}
+
+.esriCTHorizontalRuleContainer, .horizontalRule
+{
+    /*width: 300px;*/
+    width:100%;
+
+}
+
+.dijitRuleMark .dijitRuleMarkH {
+  width:100%;
+}
+
+.esriCTHorizontalSliderContainer
+{
+    width: 200px;
+    margin-left: 25px;
+}
+
+/*End of Horizontal slider style*/
+
+
+.esriClearAOIButton {
+    background-image: url("../images/delete_default.png") !important;
+    background-size: 22px 22px;
+}
+
+.esriClearAOIButton:hover {
+    background-image: url("../images/delete_hover.png") !important;
+    background-size: 22px 22px;
+}
+
+.esriClearAOIButton {
+    background-repeat: no-repeat;
+    background-position: center;
+    text-align: center;
+    cursor: pointer;
+    height: 30px;
+    width: 30px;
+    display: none;
+    padding: 0 5px;
+    position: absolute;
+    top: 3px;
+    left: 80px;
+}
+
+.esriCTSelectLocation {
+    background-image: url("../images/select-location-active.png");
+}
+
+/*.esriCTSelectLocationActive {
+    background-image: url("../images/select-location-active.png");
+    background-color: #57585A; 
+}*/
+
+.esriCTSelectLocationDiv {
+    float: right;
+}
+
+.esriCTImgButtons {
+    cursor: pointer;
+    width: 29px;
+    height: 28px;
+    border: 1px solid #57585A;
+    /*border-radius: 4px;*/
+    background-size: 18px;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.esriCTImgButtonsActive {
+    cursor: pointer;
+    width: 29px;
+    height: 28px;
+    border: 1px solid #57585A;
+    /*border-radius: 4px;*/
+    background-size: 18px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-color: #57585A;
+}
+
+/*Test slider stuff*/
+
+.esriSimpleSliderDecrementButton, .esriSimpleSliderIncrementButton
+{
+    margin-bottom: 2px;
+    border: #fff solid 0 !important;
+    margin-top: 2px;
+}
+
+.esriSimpleSliderTL
+{
+    top: 70px !important;
+}
+
+.esriSimpleSlider
+{
+    background-color: transparent !important;
+    top: 74px !important;
+    left: 15px;
+    border-radius: 0 !important;
+    color: #fff !important;
+    border: #fff solid 0 !important;
+}
+
+.esriSimpleSliderVertical .esriSimpleSliderIncrementButton, .esriSimpleSliderVertical .esriSimpleSliderDecrementButton
+{
+    border-radius: 0px !important;
+}
+
+.esriSimpleSlider div
+{
+    font-weight: normal !important;
+    width: 32px;
+    height: 31px;
+}
+
+.horizontalSlider
+{
+    /*width: 330px !important;*/ /*JH*/ /*345 */
+    width: 100%;
+    margin-top: 11px !important;
+    /*margin-left: -5px;*/
+}
+
+.dijitSliderButtonContainerH, .dijitSliderDecrementButtonHover
+{
+    background-color: transparent;
+}
+
+.dijitSliderHover, .dijitSliderDecrementIconH
+{
+    border: none;
+}
+
+
+.esriCTSelect
+{
+    border: none;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin-top: -1px;
+}
+
+.claro .dijitSelectFocused, .claro .dijitSelect, .dijitArrowButton, .claro .dijitSelect .dijitButtonContents, .claro, .dijitSelectHover, .dijitSelectLabel
+{
+    border: none !important;
+    background-color: transparent !important;
+}
+
+.claro .dijitSelect .dijitArrowButtonInner, .claro .dijitComboBox .dijitArrowButtonInner, .dijit, .dijitReset, .dijitInline, .dijitLeft, .dijitDownArrowButton, .dijitSelect, .dijitValidationTextBox
+{
+    border: none !important;
+}
+
+.claro .dijitSelect .dijitInputField, .claro .dijitTextBox .dijitInputField
+{
+    padding: 0px;
+}
+
+.claro .dijitSelectLabel, .claro .dijitTextBox .dijitInputInner, .claro .dijitValidationTextBox .dijitValidationContainer
+{
+    margin-left: 2px;
+    padding: 0px;
+}
+
+.claro .dijitSliderDecrementIconH, .claro .dijitSliderIncrementIconH
+{
+    display: none;
+}
+
+.dijitReset
+{
+    -moz-font-feature-settings: inherit;
+    -moz-font-language-override: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    font-size-adjust: inherit;
+    font-stretch: inherit;
+    font-style: inherit;
+    font-variant: inherit;
+    font-weight: inherit;
+    line-height: normal;
+}
+
+.claro .dijitSelect, .dijitArrowButtonInner, .claro .dijitComboBox, .dijitArrowButtonInner
+{
+    background-position: right center !important;
+    background-repeat: no-repeat !important;
+    margin: 0px !important;
+    width: 16px !important;
+    padding: 0px !important;
+}
+
+.dijitReset {
+  color: #007AC2;
+}
+

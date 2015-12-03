@@ -685,3 +685,13 @@ input {
     color: #028D6A;
     text-align: left;
 }
+
+.esriSliderDisplayText
+{
+    color: #028D6A;
+}
+
+.esriSliderBack {
+    background-color: #028D6A;
+    border-bottom: 1px solid #028D6A;
+}
