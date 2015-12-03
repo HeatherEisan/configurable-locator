@@ -264,7 +264,7 @@ input {
 }
 
 .esriCTDivSearchContent {
-    color: Black;
+    color: #808080 !important;
 }
 
 /* End of Route */
@@ -684,4 +684,68 @@ input {
 .esriCTActivityTextArea {
     color: #d15706;
     text-align: left;
+}
+
+/*.esriCTsliderDisplayText
+{
+    color: #d15706;
+}
+
+.esriSliderBack {
+    background-color: #d15706;
+    border-bottom: 1px solid #d15706;
+}*/
+
+
+.esriSliderDisplayText
+{
+    color: #d15706;
+}
+
+/*.esriSliderBack {
+    background-color: #007AC2;
+    border-bottom: 1px solid #007AC2;
+}*/
+
+.claro .dijitSliderImageHandleH
+{
+    background-image: url('../images/blueThumb.png');
+}
+
+.esriCTImgButtons {
+    background-color: #d15706;
+    border: 1px solid #d15706;
+}
+
+.dijitSliderBumperH, .dijitSliderBarH
+{
+    background-color: #d15706;
+}
+
+.claro .dijitSlider .dijitSliderProgressBarH, .claro .dijitSlider .dijitSliderLeftBumper
+{
+    background-color: #d15706;
+}
+
+.dijitReset {
+  color: #d15706;
+}
+
+.dijitSliderBumperH, .dijitSliderBarH
+{
+    height: 3px !important;
+    border-color: #fff;
+}
+
+.claro .dijitSlider .dijitSliderProgressBarH, .claro .dijitSlider .dijitSliderLeftBumper
+{
+    height: 3px !important;
+    border-color: #fff;
+}
+
+.claro .dijitSlider .dijitSliderRemainingBarH, .claro .dijitSlider .dijitSliderRightBumper
+{
+    border-color: #fff;
+    height: 3px !important;
+    background-color: #ddd;
 }

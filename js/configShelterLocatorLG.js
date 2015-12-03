@@ -53,7 +53,7 @@ define([], function () {
         // 29. Specify GeoLocation settings                  - [ Tag(s) to look for: GeoLocationSettings]
         // 30. Set URL for Locator Settings                  - [ Tag(s) to look for: LocatorSettings ]
         // 31. Geometry Service setting                      - [ Tag(s) to look for: GeometryService ]
-        // 32. Specify Buffer Distance                       - [ Tag(s) to look for: BufferDistance ]
+        // 32. Specify Buffer Distance Unit and Limits       - [ Tag(s) to look for: DistanceUnitSettings ]
         // 33. Specify Buffer Symbology                      - [ Tag(s) to look for: BufferSymbology ]
         // 34. Customize Driving Direction settings          - [ Tag(s) to look for: DrivingDirectionSettings]
         // 35. Specify URLs for Map Sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
@@ -323,12 +323,16 @@ define([], function () {
         // Set Geometry Service URL
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
-        //Distance is configured in "miles"
-        BufferDistance: "2",
-
         // ------------------------------------------------------------------------------------------------------------------------
         // BUFFER SYMBOLOGY SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
+
+        // Set buffer distance unit and limits
+        DistanceUnitSettings: {
+            DistanceUnitName: "Miles", // Allowed values for DistanceUnitName are "Miles", "Kilometers", "Meters" and "Feet".
+            MinimumValue: 1,
+            MaximumValue: 50
+        },
 
         // FillSymbolColor: Setting color for buffer in RGB format
         // FillSymbolTransparency: Setting transparency for buffer

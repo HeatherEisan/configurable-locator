@@ -46,11 +46,13 @@ define([
     "esri/tasks/locator",
     "esri/tasks/query",
     "esri/tasks/QueryTask",
-    "dijit/a11yclick"
-], function (Array, declare, lang, dom, domAttr, domClass, domConstruct, domGeom, domStyle, keys, sharedNls, on, query, string, template, topic, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, Deferred, all, Point, Graphic, GraphicsLayer, PictureMarkerSymbol, GeometryService, Locator, Query, QueryTask, a11yclick) {
+    "dijit/a11yclick",
+    "dijit/form/HorizontalSlider",
+    "dijit/form/HorizontalRule"
+], function (Array, declare, lang, dom, domAttr, domClass, domConstruct, domGeom, domStyle, keys, sharedNls, on, query, string, template, topic, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, Deferred, all, Point, Graphic, GraphicsLayer, PictureMarkerSymbol, GeometryService, Locator, Query, QueryTask, a11yclick, HorizontalSlider, HorizontalRule) {
     //========================================================================================================================//
 
-    return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
+  return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,                                // Variable for template string
         sharedNls: sharedNls,                                    // Variable for shared NLS
         lastSearchString: null,                                  // Variable for last search string
@@ -60,6 +62,11 @@ define([
         selectedGraphic: null,                                   // Variable for selected graphic
         graphicsLayerId: null,                                   // Variable for storing search settings
         configSearchSettings: null,
+        _sliderCollection: [], //TODO...JH should be able to remove this as this app only needs one slider
+        unitValues: [null, null, null, null],
+        _mapClickHandler: null,                                  // Map click handler
+        _mapMoveHandler: null,                                   // Map move handler
+        _mapTooltip: null,                                       // MapTooltip Container
 
         /**
         * display locator widget
@@ -68,7 +75,6 @@ define([
         * @method postCreate
         * @return
         */
-
         postCreate: function () {
             var graphicsLayer;
             /**
@@ -116,9 +122,186 @@ define([
             this._setDefaultTextboxValue(this.txtAddress, "defaultAddress", this.defaultAddress);
             this.txtAddress.value = domAttr.get(this.txtAddress, "defaultAddress");
             this.lastSearchString = lang.trim(this.txtAddress.value);
+
             this._attachLocatorEvents();
+            //TODO...JH need to verify things here
+            if (typeof (this.resetBufferDist) === 'undefined') {
+                this.resetBufferDist = true;
+                this._setBufferDistance();
+            }
+
+            //create tool-tip to be shown on map move
+            this._mapTooltip = domConstruct.create("div", {
+                "class": "tooltip",
+                "innerHTML": sharedNls.tooltips.addPoint
+            }, this.map.container);
+            domStyle.set(this._mapTooltip, "position", "fixed");
+            domStyle.set(this._mapTooltip, "display", "none");
+
             // Subscribe function to clear graphics from map
             topic.subscribe("clearLocatorGraphicsLayer", this._clearGraphics);
+        },
+
+      ////////////////////////////////////////////
+      /**
+      * set buffer distance in all workflows and create horizontal slider for different workflows
+      * @memberOf widgets/locator/locator
+      */
+        _setBufferDistance: function () {
+            var bufferDistance = null;
+            // check the shared URL for "bufferDistance" to create buffer on map
+            if (window.location.toString().split("$bufferDistance=").length > 1) {
+                bufferDistance = Number(window.location.toString().split("$bufferDistance=")[1].toString().split("$")[0]);
+                this._createHorizontalSlider(this.horizontalSliderContainer, this.horizontalRuleContainer, this.bufferSliderText, bufferDistance);
+
+                //TODO...JH not sure if this is correct for this app or not will need to look closer
+                appGlobals.shareOptions.bufferDistance = bufferDistance;
+            } else {
+                //TODO...JH test if exists
+                var sliderId = "slider" + domAttr.get(this.horizontalSliderContainer, "data-dojo-attach-point");
+                var sn = dom.byId(sliderId);
+                if (!sn) {
+                    this._createHorizontalSlider(this.horizontalSliderContainer, this.horizontalRuleContainer, this.bufferSliderText, null);
+                }
+            }
+        },
+
+        /**
+        * get distance unit based on unit selection
+        * @param {string} input distance unit
+        * @memberOf widgets/locator/locator
+        */
+        _getDistanceUnit: function (strUnit) {
+            var sliderUnitValue;
+            if (strUnit.toLowerCase() === "miles") {
+                sliderUnitValue = "UNIT_STATUTE_MILE";
+            } else if (strUnit.toLowerCase() === "feet") {
+                sliderUnitValue = "UNIT_FOOT";
+            } else if (strUnit.toLowerCase() === "meters") {
+                sliderUnitValue = "UNIT_METER";
+            } else if (strUnit.toLowerCase() === "kilometers") {
+                sliderUnitValue = "UNIT_KILOMETER";
+            } else {
+                sliderUnitValue = "UNIT_STATUTE_MILE";
+            }
+            return sliderUnitValue;
+        },
+
+        /**
+        * create horizontal slider and set minimum maximum value
+        * @param container node, horizontal rule node and slider value
+        * @memberOf widgets/locator/locator
+        */
+        _createHorizontalSlider: function (sliderContainer, horizontalRuleContainer, divSliderValue, tabCount, bufferDistance) {
+            var _self, horizontalSlider, sliderId, horizontalRule, sliderInstance = {};
+            sliderId = "slider" + domAttr.get(sliderContainer, "data-dojo-attach-point");
+            horizontalRule = new HorizontalRule({
+                "class": "horizontalRule"
+            }, horizontalRuleContainer);
+            horizontalRule.domNode.firstChild.style.border = "none";
+            horizontalRule.domNode.lastChild.style.border = "none";
+            horizontalRule.domNode.lastChild.style.right = "0" + "px";
+            if (!bufferDistance) {
+                if (appGlobals.configData.DistanceUnitSettings.MinimumValue >= 0) {
+                    bufferDistance = appGlobals.configData.DistanceUnitSettings.MinimumValue;
+                } else {
+                    bufferDistance = 0;
+                    appGlobals.configData.DistanceUnitSettings.MinimumValue = bufferDistance;
+                }
+            }
+            horizontalSlider = new HorizontalSlider({
+                intermediateChanges: false,
+                "class": "horizontalSlider",
+                minimum: appGlobals.configData.DistanceUnitSettings.MinimumValue,
+                maximum: appGlobals.configData.DistanceUnitSettings.MaximumValue,
+                value: bufferDistance,
+                id: sliderId,
+                showButtons: false
+            }, sliderContainer);
+            sliderInstance.id = 0; //tabCount;
+            sliderInstance.slider = horizontalSlider;
+            sliderInstance.divSliderValue = divSliderValue;
+            this._sliderCollection.push(sliderInstance);
+            //horizontalSlider.tabCount = tabCount;
+            appGlobals.shareOptions.bufferDistance = bufferDistance;
+            //this.unitValues[tabCount] = this._getDistanceUnit(appGlobals.configData.DistanceUnitSettings.DistanceUnitName);
+            this.unitValues[0] = this._getDistanceUnit(appGlobals.configData.DistanceUnitSettings.DistanceUnitName);
+
+            if (appGlobals.configData.DistanceUnitSettings.MaximumValue > 0) {
+                horizontalRule.domNode.lastChild.innerHTML = appGlobals.configData.DistanceUnitSettings.MaximumValue;
+                horizontalSlider.maximum = appGlobals.configData.DistanceUnitSettings.MaximumValue;
+            } else {
+                horizontalRule.domNode.lastChild.innerHTML = 50;
+                horizontalSlider.maximum = 50;
+            }
+            if (appGlobals.configData.DistanceUnitSettings.MinimumValue >= 0) {
+                horizontalRule.domNode.firstChild.innerHTML = appGlobals.configData.DistanceUnitSettings.MinimumValue;
+            } else {
+                horizontalRule.domNode.firstChild.innerHTML = 1;
+            }
+
+            domStyle.set(horizontalRule.domNode.lastChild, "text-align", "right");
+            domStyle.set(horizontalRule.domNode.lastChild, "width", "98%");
+            domStyle.set(horizontalRule.domNode.lastChild, "left", "0");
+            domAttr.set(divSliderValue, "distanceUnit", appGlobals.configData.DistanceUnitSettings.DistanceUnitName.toString());
+            domAttr.set(divSliderValue, "innerHTML", horizontalSlider.value.toString() + " " + appGlobals.configData.DistanceUnitSettings.DistanceUnitName);
+            //_self = this;
+
+            /**
+            * call back for slider change event
+            * @param {object} slider value
+            * @memberOf widgets/locator/locator
+            */
+            on(horizontalSlider, "change", lang.hitch(this, function (value) {
+                if (Number(value) > Number(horizontalSlider.maximum)) {
+                    horizontalSlider.setValue(horizontalSlider.maximum);
+                }
+                domAttr.set(divSliderValue, "innerHTML", Math.round(value) + " " + domAttr.get(divSliderValue, "distanceUnit"));
+                setTimeout(function () {
+                    if (this.resetBufferDist && this.mapPoint) {
+                        this._locateAddressOnMap(this.mapPoint);
+                        alert(value);
+                        appGlobals.shareOptions.bufferDistance = Math.round(value); 
+                    }
+                }, 500);
+            }));
+            var sc = dom.byId("sliderContainer");
+            domStyle.set(sc, "display", "block");
+
+            var addP = dom.byId("searchDIV");
+            domStyle.set(addP, "display", "table-cell");
+        },
+
+        _disconnectMapEventHandler: function () {
+            domClass.replace(this.selectLocation, "esriCTImgButtons", "esriCTImgButtonsActive");
+            if (this._mapClickHandler) {
+                this._mapClickHandler.remove();
+            }
+            if (this._mapMoveHandler) {
+                this._mapMoveHandler.remove();
+                this._mapTooltip.style.display = "none";
+            }
+            this._enableWebMapPopup();
+        },
+
+        _onMapClick: function (evt) {
+            topic.publish("hideInfoWindow");
+            this.mapPoint = evt.mapPoint;
+            this._locateAddressOnMap(evt.mapPoint);
+            this._disconnectMapEventHandler();
+            topic.publish("hideInfoWindow");
+        },
+
+        _enableWebMapPopup: function () {
+            if (this.map) {
+                this.map.setInfoWindowOnClick(true);
+            }
+        },
+
+        _disableWebMapPopup: function () {
+            if (this.map) {
+                this.map.setInfoWindowOnClick(false);
+            }
         },
 
         /**
@@ -133,6 +316,43 @@ define([
                     this.configSearchSettings.push(appGlobals.configData.SearchSettings[i]);
                 }
             }
+        },
+
+        /**
+        * This function will connects the map event
+        * @memberOf widgets/locator/locator
+        **/
+        _connectMapEventHandler: function () {
+            this._disableWebMapPopup();
+            domClass.replace(this.selectLocation, "esriCTImgButtonsActive", "esriCTImgButtons");
+            //domAttr.set(this.selectLocation, "title", this.nls.selectLocationToolTip);
+            //handle map click
+            this._mapClickHandler = this.map.on("click", lang.hitch(this, this._onMapClick));
+            //handle mouse move on map to show tooltip
+            this._mapMoveHandler = this.map.on("mouse-move", lang.hitch(this, this._onMapMouseMove));
+        },
+
+        /**
+        * On map mouse move update the toolTip position
+        * to show in infowindow at the selected location.
+        * @memberOf widgets/locator/locator
+        **/
+        _onMapMouseMove: function (evt) {
+            // update the tooltip as the mouse moves over the map
+            var px, py;
+            if (evt.clientX || evt.pageY) {
+                px = evt.clientX;
+                py = evt.clientY;
+            } else {
+                px = evt.clientX + document.body.scrollLeft - document.body.clientLeft;
+                py = evt.clientY + document.body.scrollTop - document.body.clientTop;
+            }
+            domStyle.set(this._mapTooltip, "display", "none");
+            domStyle.set(this._mapTooltip, {
+                left: (px + 15) + "px",
+                top: (py) + "px"
+            });
+            domStyle.set(this._mapTooltip, "display", "");
         },
 
         /**
@@ -176,7 +396,26 @@ define([
             })));
             this.own(on(this.close, a11yclick, lang.hitch(this, function () {
                 this._hideText();
+                this._clearResults()
             })));
+            this.own(on(this.selectLocation, a11yclick, lang.hitch(this, function () {
+              if (domClass.contains(this.selectLocation, "esriCTImgButtonsActive")) {
+                this._disconnectMapEventHandler();
+              } else {
+                this._connectMapEventHandler();
+              }
+            })));
+        },
+
+        /**
+        * Hide value from search textbox
+        * @memberOf widgets/locator/locator
+        */
+        _clearResults: function () {
+          topic.publish("removeBuffer");
+          topic.publish("clearGraphicsAndCarousel");
+          topic.publish("removeRouteGraphichOfDirectionWidget");
+          this.mapPoint = null;
         },
 
         /**
@@ -699,6 +938,7 @@ define([
                 domStyle.set(this.close, "display", "block");
             }
         },
+
         /**
         * Add the pushpin to graphics layer
         * @param {object} mapPoint
@@ -711,8 +951,8 @@ define([
             locatorMarkupSymbol = new PictureMarkerSymbol(geoLocationPushpin, this.locatorSettings.MarkupSymbolSize.width, this.locatorSettings.MarkupSymbolSize.height);
             this.selectedGraphic = new Graphic(mapPoint, locatorMarkupSymbol, {}, null);
             this.map.getLayer(this.graphicsLayerId).add(this.selectedGraphic);
-            topic.publish("hideProgressIndicator");
-            this.onGraphicAdd();
+            this.onGraphicAdd(this.selectedGraphic);
+            topic.publish("hideProgressIndicator");   
         },
 
         /**
