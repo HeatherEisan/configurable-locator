@@ -185,7 +185,7 @@ define([
             };
             locatorObject = new LocatorTool(locatorParams);
             // Callback after adding graphics
-            locatorObject.onGraphicAdd = lang.hitch(this, function (a) {
+            locatorObject.onGraphicAdd = lang.hitch(this, function () {
                 appGlobals.shareOptions.addressLocation = locatorObject.selectedGraphic.geometry.x.toString() + "," + locatorObject.selectedGraphic.geometry.y.toString();
                 appGlobals.shareOptions.doQuery = "false";
                 if (window.location.toString().split("$address=").length > 1) {
@@ -199,9 +199,6 @@ define([
                     } else {
                         topic.publish("createBuffer", locatorObject.selectedGraphic);
                     }
-                }
-                if (a) {
-                  topic.publish("createBuffer", a);
                 }
             });
             // Locator candidate click for unified search

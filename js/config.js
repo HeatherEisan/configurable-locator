@@ -1,20 +1,20 @@
 ﻿/*global define,dojo,dojoConfig,esri */
 /*jslint browser:true,sloppy:true,nomen:true,unparam:true,plusplus:true,indent:4 */
-/** @license -- is this key word required?
-| Copyright 2013 Esri
-|
-| Licensed under the Apache License, Version 2.0 (the "License");
-| you may not use this file except in compliance with the License.
-| You may obtain a copy of the License at
-|
-|    http://www.apache.org/licenses/LICENSE-2.0
-|
-| Unless required by applicable law or agreed to in writing, software
-| distributed under the License is distributed on an "AS IS" BASIS,
-| WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-| See the License for the specific language governing permissions and
-| limitations under the License.
-*/
+/** @license
+ | Copyright 2015 Esri
+ |
+ | Licensed under the Apache License, Version 2.0 (the "License");
+ | you may not use this file except in compliance with the License.
+ | You may obtain a copy of the License at
+ |
+ |    http://www.apache.org/licenses/LICENSE-2.0
+ |
+ | Unless required by applicable law or agreed to in writing, software
+ | distributed under the License is distributed on an "AS IS" BASIS,
+ | WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ | See the License for the specific language governing permissions and
+ | limitations under the License.
+ */
 define([], function () {
     return {
 
@@ -22,44 +22,50 @@ define([], function () {
         //
         // Use this file to perform the following:
         //
-        // 1.  Specify application Name                      - [ Tag(s) to look for: ApplicationName ]
-        // 2.  Set path for application icon                 - [ Tag(s) to look for: ApplicationIcon ]
-        // 3.  Set path for application favicon              - [ Tag(s) to look for: ApplicationFavicon ]
-        // 4.  Set URL for help page                         - [ Tag(s) to look for: HelpURL ]
+        // 1.  Specify Application Name                      - [ Tag(s) to look for: ApplicationName ]
+        // 2.  Set path for Application Icon                 - [ Tag(s) to look for: ApplicationIcon ]
+        // 3.  Set path for Application Favicon              - [ Tag(s) to look for: ApplicationFavicon ]
+        // 4.  Set URL for Help page                         - [ Tag(s) to look for: HelpURL ]
         // 5.  Set URL for Custom logo                       - [ Tag(s) to look for: CustomLogoUrl ]
-        // 6.  Set proxy url                                 - [ Tag(s) to look for: ProxyUrl ]
+        // 6.  Set proxy URL                                 - [ Tag(s) to look for: ProxyUrl ]
         // 7.  Set Legend Visibility                         - [ Tag(s) to look for: ShowLegend ]
-        // 8.  Set settings  for splash screen               - [ Tag(s) to look for: SplashScreen ]
+        // 8.  Set settings for splash screen                - [ Tag(s) to look for: SplashScreen ]
         // 9.  Specify Theme                                 - [ Tag(s) to look for: ThemeColor ]
-        // 10. Set initial map extent                        - [ Tag(s) to look for: DefaultExtent]
-        // 11. Bottom Panel InfoPod Settings                 - [ Tag(s) to look for: PodSettings ]
-        // 12. Customize zoom level for address search       - [ Tag(s) to look for: ZoomLevel ]
-        // 13. Specify WebMap Id                             - [ Tag(s) to look for: WebMapId ]
-        // 14. Specify URL to ArcGIS Portal REST API         - [ Tag(s) to look for: PortalAPIURL ]
-        // 15. Specify the group title that contains basemaps- [ Tag(s) to look for: BasemapGroupTitle ]
-        // 16. Specify the group name that contains basemaps - [ Tag(s) to look for: BasemapGroupOwner ]
-        // 17. Specify spatial reference for basemaps        - [ Tag(s) to look for: BasemapSpatialReferenceWKID ]
-        // 18. Specify path to display the thumbnail         - [ Tag(s) to look for: NoThumbnail ]
-        // 19. Specify Activity SearchSettings               - [ Tag(s) to look for: ActivitySearchSettings]
-        // 20. Specify Event SearchSettings                  - [ Tag(s) to look for: EventSearchSettings]
-        // 21. Specify Ripple color settings                 - [ Tag(s) to look for: RippleColorSettings ]
-        // 22. Specify Locator ripple size                   - [ Tag(s) to look for: LocatorRippleSize ]
-        // 23. Customize InfoPopupHeight                     - [ Tag(s) to look for: InfoPopupHeight ]
-        // 24. Customize InfoPopupWidth                      - [ Tag(s) to look for: InfoPopupWidth ]
-        // 25. Specify Info Window setting                   - [ Tag(s) to look for: InfoWindowSetting ]
-        // 26. Set URL for LocatorSettings                   - [ Tag(s) to look for: LocatorSettings ]
-        // 27. Geometry service setting                      - [ Tag(s) to look for: GeometryService ]
-        // 28. Specify Buffer Symbology                      - [ Tag(s) to look for: BufferSymbology ]
-        // 29. Specify Buffer Distance                      -  [ Tag(s) to look for: Buffer Distance ]
-        // 30. Customize Driving Direction Settings          - [ Tag(s) to look for: DrivingDirectionSettings]
-        // 31. Specify URLs for map sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
-        // 32. Specify header widget settings                - [ Tag(s) to look for: AppHeaderWidgets ]
+        // 10. Specify Bottom Panel ToggleButton Text        - [ Tag(s) to look for: BottomPanelToggleButtonText ]
+        // 11. Specify Title of Address search panel         - [ Tag(s) to look for: SearchPanelTitle ]
+        // 12. Specify Title of Activity panel               - [ Tag(s) to look for: ActivityPanelTitle ]
+        // 13. Specify Title of Event panel                  - [ Tag(s) to look for: EventPanelTitle ]
+        // 14. Bottom Panel InfoPod Settings                 - [ Tag(s) to look for: PodSettings ]
+        // 15. Customize Zoom level for address search       - [ Tag(s) to look for: ZoomLevel ]
+        // 16. Specify WebMap Id                             - [ Tag(s) to look for: WebMapId ]
+        // 17. Specify URL to ArcGIS Portal REST API         - [ Tag(s) to look for: PortalAPIURL ]
+        // 18. Specify the Group Title that contains basemaps- [ Tag(s) to look for: BasemapGroupTitle ]
+        // 19. Specify the Group Name that contains basemaps - [ Tag(s) to look for: BasemapGroupOwner ]
+        // 20. Specify Spatial Reference for basemaps        - [ Tag(s) to look for: BasemapSpatialReferenceWKID ]
+        // 21. Specify path to display the Thumbnail         - [ Tag(s) to look for: NoThumbnail ]
+        // 22. Specify Activity Search settings              - [ Tag(s) to look for: ActivitySearchSettings]
+        // 23. Specify Event Search settings                 - [ Tag(s) to look for: EventSearchSettings]
+        // 24. Specify Ripple Color settings                 - [ Tag(s) to look for: RippleColor ]
+        // 25. Specify Locator Ripple size                   - [ Tag(s) to look for: LocatorRippleSize ]
+        // 26. Customize Info Popup Height                   - [ Tag(s) to look for: InfoPopupHeight ]
+        // 27. Customize Info Popup Width                    - [ Tag(s) to look for: InfoPopupWidth ]
+        // 28. Specify ShowNullValueAs                       - [ Tag(s) to look for: ShowNullValueAs ]
+        // 29. Specify GeoLocation settings                  - [ Tag(s) to look for: GeoLocationSettings]
+        // 30. Set URL for Locator Settings                  - [ Tag(s) to look for: LocatorSettings ]
+        // 31. Geometry Service setting                      - [ Tag(s) to look for: GeometryService ]
+        // 32. Specify Buffer Distance                       - [ Tag(s) to look for: BufferDistance ]
+        // 33. Specify Buffer Symbology                      - [ Tag(s) to look for: BufferSymbology ]
+        // 34. Customize Driving Direction settings          - [ Tag(s) to look for: DrivingDirectionSettings]
+        // 35. Specify URLs for Map Sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
+        // 36. Specify Header Widget settings                - [ Tag(s) to look for: AppHeaderWidgets ]
 
         // ------------------------------------------------------------------------------------------------------------------------
         // GENERAL SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
+
         // Set application title
         ApplicationName: "Configurable Locator",
+
         // Set application icon path
         ApplicationIcon: "/js/library/themes/images/logo.png",
 
@@ -69,31 +75,26 @@ define([], function () {
         // Set URL of help page/portal
         HelpURL: "help.htm",
 
-        // Set custom logo url, displayed in lower left corner. Set to empty "" to disable.
-        CustomLogoUrl: "",
+        // Set custom logoURL, displayed in lower left corner. Set to empty "" to disable.
+        CustomLogoUrl: "/js/library/themes/images/nddotlogo.png",
 
-        // Set proxy url
+        // Set proxy URL
         ProxyUrl: "/proxy/proxy.ashx",
 
         // Set Legend Visibility
         ShowLegend: true,
 
-        // Set splash window content - Message that appears when the application starts
+        // Set Splash window content - Message that appears when the application starts
         SplashScreen: {
             SplashScreenContent: "Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.",
             IsVisible: true
         },
 
-        // Set the application theme. Supported theme keys are blueTheme and greenTheme, orangeTheme, purpleTheme.
+        // Set the Application Theme. Supported theme keys are blueTheme, greenTheme, orangeTheme, and purpleTheme.
         ThemeColor: "js/library/themes/styles/blueTheme.css",
 
-
-        // Initial map extent. Use comma (,) to separate values and don't delete the last comma
-        // The coordinates must be specified in the basemap's coordinate system, usually WKID:102100, unless a custom basemap is used
-        DefaultExtent: "-9991781.18961914, 4083344.0852194074, -9160146.321876464, 4494881.045506775",
-
-        // Set the bottom Pod Toggle Button Text
-        BottomPanelToggleButtonText: "Search Results",
+        // Set the bottom Pod Toggle button text
+        BottomPanelToggleButtonText: "Result",
 
         // Set the Search Panel Title
         SearchPanelTitle: "Search",
@@ -104,7 +105,7 @@ define([], function () {
         // Set the Event Panel Title
         EventPanelTitle: "Event",
 
-        // Set sequence for info pods in the bottom panel
+        // Set sequence of info pods in the Bottom Panel
         PodSettings: [{
             SearchResultPod: {
                 Enabled: true
@@ -130,52 +131,70 @@ define([], function () {
         // Following zoom level will be set for the map upon searching an address
         ZoomLevel: 12,
 
-        // Choose if you want to use WebMap or Map Services for operational layers. If using WebMap, specify WebMapId within quotes, otherwise leave this empty and configure operational layers
-        WebMapId: "e72252517cd5425a8b153e603057571d",
+        // Specify WebMapId within quotes
+        WebMapId: "daa3eeae86954f4cba87c044466c4c2f",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
+
         // Set options for basemap
-        // Please note: All base-maps need to use the same spatial reference.
+        // Please note: All basemaps need to use the same spatial reference.
+
         // Specify URL to ArcGIS Portal REST API. If you are using ArcGIS Online, leave this parameter as is.
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
 
-        // Specify the title of group that contains basemaps
+        // Specify the Title of Group that contains basemaps
         BasemapGroupTitle: "Basemaps",
 
-        // Specify the user name of owner of the group that contains basemaps
+        // Specify the Name of Owner of the Group that contains basemaps
         BasemapGroupOwner: "GISITAdmin",
 
-        // Specify spatial reference for basemaps, since all basemaps need to use the same spatial reference
+        // Specify Spatial Reference for basemaps, since all basemaps need to use the same spatial reference
         BasemapSpatialReferenceWKID: 102100,
 
-        // Specify path to image used to display the thumbnail for a basemap when portal does not provide it
+        // Specify path of the image used to display the Thumbnail for a basemap when portal does not provide it
         NoThumbnail: "js/library/themes/images/not-available.png",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // ACTIVITY SEARCH SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
-        // Configure search, barrier and info settings to be displayed in search panels:
+        // Configure Search, Barrier and Info settings to be displayed in Search panels:
 
-        // Configure search and settings below.
-        // Title: In case of webmap implementations, it must match layer name specified in webmap and in case of operational layers
-        //        it should be the name of Map/Feature Service.
+        // Configure Search and Settings below.
+        // Enable:  Set to true if Activity search panel need to be displayed, or false if Activity search panel are not required.
+        // UnifiedSearch: Specify a boolean value true/false which indicates whether to include the layer in Unified search or not.
+        // Title: In case of webmap implementations, it must match with the layer name specified in webmap.
         // QueryLayerId: This is the layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
-        // SearchDisplayTitle: This text is displayed in search results as the title to group results.
-        // SearchDisplayFields: Attribute that will be displayed in the search box when user performs a search.
-        // SearchExpression: Configure the query expression to be used for search.
+        // SearchDisplayTitle: This text is displayed in Search Results as the Title to group results.
+        // SearchDisplayFields: This Attribute will be displayed in the Search box when user performs a search.
+        // SearchExpression: Configure the Query Expression to be used for Search.
+        // PrimaryKeyForActivity: Specify field name as Primary Key to relate comment table.
+        // QualifyingActivityValue: This value is used to indicate if a given activity is available and should represent the 'Yes' or 'True' value.
+        // ActivityList: Activities to be displayed in Activity Search and Info window for a feature.
+        //      FieldName: Name for which query will be performed on the layer.
+        //      Alias: Specify an alternative name used for the 'Activity' and tooltip name for the icons.
+        //      Image: Set URL for 'Activity' icons.
+        //      IsSelected: Set selection in 'Activity' search list.
+        // CommentsSettings: Configure Comments Settings
+        //      Enabled: Set to true if comments need to be displayed, or false if comments are not required.
+        //      CommentsSettings - Title: In case of webmap implementations, it must match the layer name specified in webmap.
+        //      CommentsSettings - QueryLayerId: This is the layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
+        //      ForeignKeyFieldForComment: Specify field name as Foreign Key to relate activity table.
+        //      RankField: It is the Attribute that will be display ranks/stars.
+        //      SubmissionDateField: It is the Attribute that will be display the Date when the comment was submitted.
+        //      CommentField: It is the Attribute that will be display Comment text.
+
         ActivitySearchSettings: [{
             Enable: true,
             UnifiedSearch: "true",
-            Title: "WaterAccessLocations",
+            Title: "WaterAccess - Water Access Locations",
             QueryLayerId: "0",
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
-            //DisplayDateFormat: "MMMM dd, yyyy",
+            PrimaryKeyForActivity: "${OBJECTID}",
             QualifyingActivityValue: "Yes",
-            //Activities to be displayed in activity search and info window for a feature
             ActivityList: [{
                 FieldName: "FOURWHEEL",
                 Alias: "FourWheel",
@@ -237,17 +256,13 @@ define([], function () {
                 Image: "js/library/themes/images/activity/fishing.png",
                 IsSelected: false
             }],
-            // Specify field name used to be used as the primary key to relate activity to comment
             CommentsSettings: {
-                //Set to true if comments need to be displayed , or false if not required
                 Enabled: true,
-                Title: "WaterAccessLocations - WaterComments",
+                Title: "WaterAccess - Water Access Locations",
                 QueryLayerId: "1",
-                // Specify field name used to be used as the foreign key to relate comment to activity
-                ForeignKeyFieldForActivity: "id",
+                ForeignKeyFieldForComment: "${id}",
                 RankField: "${RANK}",
                 SubmissionDateField: "${SUBMITDT}",
-                DisplayDateFormat: "MMMM dd, yyyy",
                 CommentField: "${COMMENTS}"
             }
         }],
@@ -255,53 +270,55 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
         // Event SEARCH SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
-        // Configure search, barrier and info settings to be displayed in search panels:
+        // Configure Search, Barrier and Info settings to be displayed in Search panels:
 
-        // Configure search and settings below.
-        // Title: In case of webmap implementations, it must match layer name specified in webmap and in case of operational layers
-        //It should be the name of Map/Feature Service.
-        // QueryLayerId: This is the layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
-        // SearchDisplayTitle: This text is displayed in search results as the title to group results.
-        // SearchDisplayFields: Attribute that will be displayed in the search box when user performs a search.
-        // SearchDisplaySubFields: Attribute that will be displayed in the search box when user performs a search.
-        // SearchExpression: Configure the query expression to be used for search.
-        // DisplayDateFormat: Configure the date format.
+        // Configure Search and Settings below.
+        // Enable:  Set to true if Event search panel need to be displayed, or false if Event search panel are not required.
+        // UnifiedSearch: Specify a boolean value true/false which indicates whether to include the layer in Unified search or not.
+        // Title: In case of webmap implementations, it must match layer name specified in webmap.
+        // QueryLayerId: This is the Layer index in the webmap or ArcGIS Map/Feature Service and is used for performing queries.
+        // SearchDisplayTitle: This text is displayed in Search Results as the Title to group results.
+        // SearchDisplayFields: Attribute that will be displayed in the Search box when user performs a search.
+        // SearchDisplaySubFields: Attribute that will be displayed in the Search box when user performs a search.
+        // SearchExpressionForDate: Expression to query the layer for Events falling in the range of 'Event Planner' search.
+        // SearchExpression: Configure the query expression to be used for Search.
+        // SortingKeyField: Attribute that will be sort the date when user performs a Event search.
         // AddToCalenderSettings: Configure the parameters to create the ics file for an event.
+        //        IcsFileName: Set the Name of the ics file. This is a required key.
+        //        StartDate: Set the Start Date of the event in ics file. This is a required key.
+        //        EndDate: Set the End Date of the event in ics file. This is a required key.
+        //        Location: Set the Location of the event in ics file.
+        //        Summary: Set the Summary of the event in ics file.
+        //        Description: Set the Description of the event in ics file.
+        //        Organizer: Set the Organizer of the event in ics file.
 
         EventSearchSettings: [{
             Enable: true,
             UnifiedSearch: "true",
-            Title: "Events",
+            Title: "Events - Events",
             QueryLayerId: "0",
             SearchDisplayTitle: "Events",
             SearchDisplayFields: "${CATEGORY}",
             SearchDisplaySubFields: "${STARTDATE},${ADDRESS}",
-            SearchExpressionForDate: "STARTDATE >= ${0} AND ENDDATE <= ${1}",
+            SearchExpressionForDate: "(ENDDATE >= DATE ${0} AND ENDDATE <= DATE ${1}) OR (STARTDATE <= DATE ${0} AND ENDDATE >= DATE ${1}) OR (STARTDATE >= DATE ${0} AND STARTDATE <= DATE ${1})",
             SearchExpression: "UPPER(ADDRESS) LIKE UPPER('${0}%')",
-            DisplayDateFormat: "MMMM dd, yyyy",
+            SortingKeyField: "${STARTDATE}",
             AddToCalendarSettings: [{
-                //Set the name of the ics file. This is a required key.
                 IcsFileName: "${CATEGORY}",
-                //Set the start date of the event in ics file. This is a required key.
                 StartDate: "${STARTDATE}",
-                //Set the End date of the event in ics file. This is a required key.
                 EndDate: "${ENDDATE}",
-                //Set the location of the event in ics file.
                 Location: "${ADDRESS},${CITY},${STATE}",
-                //Set the summary of the event in ics file.
                 Summary: "${CATEGORY}",
-                //Set the description of the event in ics file.
                 Description: "${DESCRIPTION}",
-                //Set the organizer of the event in ics file.
                 Organizer: ""
             }]
         }],
 
 
-        // Set the ripple color
+        // Set the ripple color in RGB format
         RippleColor: "35,35,142",
 
-        // Set the locator ripple size(in pixels)
+        // Set the locator ripple size (in pixels)
         LocatorRippleSize: 40,
 
         // Minimum height should be 270 for the info-popup in pixels
@@ -310,10 +327,14 @@ define([], function () {
         // Minimum width should be 330 for the info-popup in pixels
         InfoPopupWidth: 350,
 
+        // Set string value to be shown for null or blank values
+        ShowNullValueAs: "N/A",
+
         // ------------------------------------------------------------------------------------------------------------------------
         // GEOLOCATION SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
-        // Set geolocation settings such as geolocation symbol, size
+
+        // Set geolocation settings such as Geolocation Symbol, Size
         GeoLocationSettings: {
             DefaultGeoLocationSymbol: "/js/library/themes/images/redpushpin.png",
             MarkupSymbolSize: {
@@ -325,11 +346,17 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
         // ADDRESS SEARCH SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
-        // Set locator settings such as locator symbol, size, display fields, match score
-        // LocatorParameters: Parameters(text, outFields, maxLocations, bbox, outSR) used for address and location search.
+
+        // Set Locator settings such as Locator Symbol, Size, Display fields, Match score
+        // DefaultLocatorSymbol: Set path for pushpin which is use to show the location.
+        // MarkupSymbolSize: Setting the height and width of the pushpin.
+        // DisplayText: This text is displayed in search results as the title to group results.
+        // LocatorDefaultAddress: Set the default Address in address search box.
+        // LocatorParameters: Parameters (text, outFields, maxLocations, box, outSR) used for address and location search.
         // AddressSearch: Candidates based on which the address search will be performed.
         // AddressMatchScore: Setting the minimum score for filtering the candidate results.
         // MaxResults: Maximum number of locations to display in the results menu.
+
         LocatorSettings: {
             DefaultLocatorSymbol: "/js/library/themes/images/redpushpin.png",
             MarkupSymbolSize: {
@@ -358,16 +385,20 @@ define([], function () {
         // GEOMETRY SERVICE SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
 
-        // Set geometry service URL
+        // Set Geometry Service URL
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
-        DistanceUnitSettings: {
-          DistanceUnitName: "Miles", // Allowed values for DistanceUnitName are "Miles", "Kilometers", "Meters" and "Feet".
-          MinimumValue: 1,
-          MaximumValue: 50
-        },
+        //Distance is configured in "miles"
+        BufferDistance: "15",
 
-        // Configure graphic color to be set for buffer
+        // ------------------------------------------------------------------------------------------------------------------------
+        // BUFFER SYMBOLOGY SETTINGS
+        // ------------------------------------------------------------------------------------------------------------------------
+
+        // FillSymbolColor: Setting color for buffer in RGB format
+        // FillSymbolTransparency: Setting transparency for buffer
+        // LineSymbolColor: Setting outline color of buffer in RGB format
+        // LineSymbolTransparency: Setting transparency for outline symbol
         BufferSymbology: {
             FillSymbolColor: "0,0,255",
             FillSymbolTransparency: "0.25",
@@ -375,16 +406,16 @@ define([], function () {
             LineSymbolTransparency: "0.65"
         },
 
-
         // ------------------------------------------------------------------------------------------------------------------------
         // DRIVING DIRECTIONS SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
-        // GetDirections: if variable is set to false directions cannot be enabled
-        // RouteServiceURL: Set URL for routing service
-        // RouteColor: Set color for route
-        // RouteWidth: Set width for route
-        // Transparency: Set transparency for route
-        // RouteUnit: Set unit for route, units supported by Direction widget are “MILES”, “METERS”, “KILOMETERS”, “NAUTICAL_MILES”. If there is a Typo error in any of these four units then the unit will be displayed in “KILOMETERS”. If the unit is specified other than these four units then unit will be displayed in “MILES”
+
+        // GetDirections: If variable is set to false directions cannot be enabled
+        // RouteServiceURL: Set URL for Routing Service
+        // RouteColor: Set Color for Route in RGB format
+        // RouteWidth: Set Width for Route
+        // Transparency: Set Transparency for Route
+        // RouteUnit: Set Unit for Route, units supported by Direction widget are “MILES”, “METERS”, “KILOMETERS”, “NAUTICAL_MILES”. If there is a typo error in any of these four units then the unit will be displayed in “KILOMETERS”. If the unit is specified other than these four units then unit will be displayed in “MILES”
         DrivingDirectionSettings: {
             GetDirections: true,
             RouteServiceURL: "http://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World",
@@ -397,20 +428,25 @@ define([], function () {
         // ------------------------------------------------------------------------------------------------------------------------
         // SETTINGS FOR MAP SHARING
         // ------------------------------------------------------------------------------------------------------------------------
-
         // Set URL for TinyURL service, and URLs for social media
+        // MapSharingOptions: Allow user to share map using social media.
+        // TinyURLServiceURL: Set URL for TinyURL service.
+        // FacebookShareURL:  Allow user to share application using facebook.
+        // TwitterShareURL:  Allow user to share application using twitter.
+        // ShareByMailLink:  Allow user to share application using mail.
         MapSharingOptions: {
             TinyURLServiceURL: "https://api-ssl.bitly.com/v3/shorten?longUrl=${0}",
             FacebookShareURL: "http://www.facebook.com/sharer.php?m2w&u=${0}&t=Configurable%20Locator",
             TwitterShareURL: "http://mobile.twitter.com/compose/tweet?status=Configurable%20Locator ${0}",
-            ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map!&body=${0}"
+            ShareByMailLink: "mailto:%20?subject=Check%20out%20this%20map&body=${0}"
         },
 
         //------------------------------------------------------------------------------------------------------------------------
         // Header Widget Settings
-        //-------------------default----------------------------------------------------------------------------------------------
-        // Set widgets settings such as widget  widgetPath, mapInstanceRequired to be displayed in header panel
-        // WidgetPath: path of the widget respective to the widgets package.
+        //------------------------------------------------------------------------------------------------------------------------
+
+        // Set widgets settings such as widgetPath to be displayed in header panel
+        // WidgetPath: Path of the widget respective to the widgets package.
 
         AppHeaderWidgets: [{
             WidgetPath: "widgets/searchSetting/searchSetting"

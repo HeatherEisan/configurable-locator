@@ -19,10 +19,6 @@
 define([
     "dojo/_base/declare",
     "dojo/_base/lang",
-    "dojo/dom-style",
-    "dojo/dom-attr",
-    "dojo/dom",
-    "dojo/on",
     "dojo/_base/array",
     "esri/tasks/query",
     "dojo/promise/all",
@@ -31,20 +27,17 @@ define([
     "dijit/_WidgetBase",
     "dojo/i18n!application/js/library/nls/localizedStrings",
     "dojo/topic",
-    "dijit/form/HorizontalSlider",
-    "dijit/form/HorizontalRule",
     "esri/tasks/BufferParameters",
     "dojo/_base/Color",
     "esri/tasks/GeometryService",
     "esri/symbols/SimpleLineSymbol",
     "esri/symbols/SimpleFillSymbol"
 
-], function (declare, lang, domStyle, domAttr, dom, on, array, Query, all, QueryTask, Graphic, _WidgetBase, sharedNls, topic, HorizontalSlider, HorizontalRule, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol) {
+], function (declare, lang, array, Query, all, QueryTask, Graphic, _WidgetBase, sharedNls, topic, BufferParameters, Color, GeometryService, SimpleLineSymbol, SimpleFillSymbol) {
     // ========================================================================================================================//
 
     return declare([_WidgetBase], {
         sharedNls: sharedNls, // Variable for shared NLS
-        unitValues: [null, null, null, null],
 
         /**
         * Create buffer around pushpin
@@ -58,58 +51,24 @@ define([
             this.carouselContainer.addPod(this.carouselPodData);
             this.removeBuffer();
             geometryService = new GeometryService(appGlobals.configData.GeometryService);
-          // Checking the map point or map point is having geometry and if config data has buffer distance.
-            if ((mapPoint || mapPoint.geometry)) {
-              var geometry = mapPoint.geometry;
-              if (typeof (geometry) === 'undefined') {
-                geometry = mapPoint;
-              }
-              appGlobals.shareOptions.bufferDistance = bufferDistance;
-              slider = dijit.byId("sliderhorizontalSliderContainer");
-              sliderDistance = slider.value;
-
-              //////////////////////////
-                if (Math.round(sliderDistance) !== 0) {
-                  if (geometry && geometry.type === "point") {
-                    //setup the buffer parameters
-                    params = new BufferParameters();
-                    params.distances = [Math.round(sliderDistance)];
-                    params.bufferSpatialReference = this.map.spatialReference;
-                    params.outSpatialReference = this.map.spatialReference;
-                    params.geometries = [geometry];
-                    params.unit = GeometryService[this._getDistanceUnit(appGlobals.configData.DistanceUnitSettings.DistanceUnitName)];
-                    geometryService.buffer(params, lang.hitch(this, function (geometries) {
-                        //topic.publish("hideInfoWindow");
-                        this.showBuffer(geometries, mapPoint, widgetName);
-                        //topic.publish("hideInfoWindow");
-                    }));
-                  } else {
-                    topic.publish("hideProgressIndicator");
-                  }
+            // Checking the map point or map point is having geometry and if config data has buffer distance.
+            if ((mapPoint || mapPoint.geometry) && appGlobals.configData.BufferDistance) {
+                params = new BufferParameters();
+                params.distances = [appGlobals.configData.BufferDistance];
+                params.unit = GeometryService.UNIT_STATUTE_MILE;
+                params.bufferSpatialReference = this.map.spatialReference;
+                params.outSpatialReference = this.map.spatialReference;
+                // Checking the geometry
+                if (mapPoint.geometry) {
+                    params.geometries = [mapPoint.geometry];
+                } else {
+                    params.geometries = [mapPoint];
                 }
-                //topic.publish("hideInfoWindow");
+                // Ccreating buffer and calling show buffer function.
+                geometryService.buffer(params, lang.hitch(this, function (geometries) {
+                    this.showBuffer(geometries, mapPoint, widgetName);
+                }));
             }
-        },
-
-        /**
-        * get distance unit based on unit selection
-        * @param {string} input distance unit
-        * @memberOf widgets/siteLocator/siteLocatorHelper
-        */
-        _getDistanceUnit: function (strUnit) {
-          var sliderUnitValue;
-          if (strUnit.toLowerCase() === "miles") {
-            sliderUnitValue = "UNIT_STATUTE_MILE";
-          } else if (strUnit.toLowerCase() === "feet") {
-            sliderUnitValue = "UNIT_FOOT";
-          } else if (strUnit.toLowerCase() === "meters") {
-            sliderUnitValue = "UNIT_METER";
-          } else if (strUnit.toLowerCase() === "kilometers") {
-            sliderUnitValue = "UNIT_KILOMETER";
-          } else {
-            sliderUnitValue = "UNIT_STATUTE_MILE";
-          }
-          return sliderUnitValue;
         },
 
         /**
@@ -128,7 +87,7 @@ define([
                         new Color([parseInt(appGlobals.configData.BufferSymbology.FillSymbolColor.split(",")[0], 10), parseInt(appGlobals.configData.BufferSymbology.FillSymbolColor.split(",")[1], 10), parseInt(appGlobals.configData.BufferSymbology.LineSymbolColor.split(",")[2], 10), parseFloat(appGlobals.configData.BufferSymbology.FillSymbolTransparency.split(",")[0], 10)]));
             // Adding graphic on map
             try {
-              this._addGraphic(this.map.getLayer("tempBufferLayer"), bufferSymbol, geometries[0]);
+                this._addGraphic(this.map.getLayer("tempBufferLayer"), bufferSymbol, geometries[0]);
             } catch (error) {
                 alert(sharedNls.errorMessages.unableToDrawBuffer);
                 topic.publish("hideProgressIndicator");
@@ -137,7 +96,6 @@ define([
             topic.publish("showProgressIndicator");
             // Querying for layer to find features.
             this._queryLayer(geometries[0], mapPoint, widgetName);
-            //topic.publish("hideInfoWindow");
         },
 
         /**
@@ -148,10 +106,9 @@ define([
             if (this.map.getLayer("tempBufferLayer") && this.map.getLayer("tempBufferLayer").graphics.length > 0) {
                 this.map.getLayer("tempBufferLayer").clear();
             }
-            //topic.publish("hideInfoWindow");
+            topic.publish("hideInfoWindow");
             this.isInfowindowHide = true;
             this.zoomToFullRoute = true;
-            topic.publish("hideInfoWindow");
         },
 
         /**
@@ -162,7 +119,6 @@ define([
         * @memberOf widgets/commonHelper/locatorHelper
         */
         _addGraphic: function (layer, symbol, point) {
-            //topic.publish("hideInfoWindow");
             var graphic;
             graphic = new Graphic(point, symbol);
             layer.add(graphic);
@@ -177,19 +133,6 @@ define([
             } else {
                 // In normal scenario set extent when graphics is added.
                 this.map.setExtent(point.getExtent().expand(1.6));
-            }
-            //topic.publish("hideInfoWindow");
-        },
-
-        _enableWebMapPopup: function () {
-            if (this.map) {
-                this.map.setInfoWindowOnClick(true);
-            }
-        },
-
-        _disableWebMapPopup: function () {
-            if (this.map) {
-                this.map.setInfoWindowOnClick(false);
             }
         },
 
@@ -267,7 +210,6 @@ define([
                         routeObject = { "StartPoint": mapPoint, "EndPoint": featureSet, "Index": 0, "WidgetName": widgetName, "QueryURL": layerobject.QueryURL, "activityData": result };
                         //Calling route function to create route
                         this.showRoute(routeObject);
-                        //topic.publish("hideInfoWindow");
                     }
                     // Checking result array length, if it is 0 then show message and hide carousel container and remove graphics
                     if (result.length === 0) {
