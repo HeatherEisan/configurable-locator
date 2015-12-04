@@ -686,30 +686,14 @@ input {
     text-align: left;
 }
 
-/*.esriCTsliderDisplayText
-{
-    color: #d15706;
-}
-
-.esriSliderBack {
-    background-color: #d15706;
-    border-bottom: 1px solid #d15706;
-}*/
-
-
 .esriSliderDisplayText
 {
     color: #d15706;
 }
 
-/*.esriSliderBack {
-    background-color: #007AC2;
-    border-bottom: 1px solid #007AC2;
-}*/
-
 .claro .dijitSliderImageHandleH
 {
-    background-image: url('../images/thumbGray.png');
+    background-image: url('../images/thumbOrange.png');
 }
 
 .esriCTImgButtons {

@@ -705,35 +705,19 @@ input {
     text-align: left;
 }
 
-/*.esriCTsliderDisplayText
-{
-    color: #5C2E6F;
-}
-
-.esriSliderBack {
-    background-color: #5C2E6F;
-    border-bottom: 1px solid #5C2E6F;
-}*/
-
-
 .esriSliderDisplayText
 {
     color:#5C2E6F;
 }
 
-/*.esriSliderBack {
-    background-color: #007AC2;
-    border-bottom: 1px solid #007AC2;
-}*/
-
 .claro .dijitSliderImageHandleH
 {
-    background-image: url('../images/thumbBlue.png');
+    background-image: url('../images/thumbPurple.png');
 }
 
 .esriCTImgButtons {
     background-color: #5C2E6F;
-    border: 1px solid #007AC2;
+    border: 1px solid #5C2E6F;
 }
 
 .dijitSliderBumperH, .dijitSliderBarH

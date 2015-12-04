@@ -83,16 +83,19 @@ define([
                 this.isExtentSet = value;
             }));
 
+            this.defaultShowInfoPanel = true;
             // Subscribing function to set InfoShow property.
             topic.subscribe("setInfoShow", lang.hitch(this, function (v) {
                 if (v) {
                     this.infoWindowPanel.hide();
                     this.infoWindowPanel.InfoShow = false;
+                    this.defaultShowInfoPanel = false;
                     appGlobals.shareOptions.mapClickedPoint = null;
                     this.isInfowindowHide = true;
                 } else {
                     this.infoWindowPanel.hide();
                     this.infoWindowPanel.InfoShow = true;
+                    this.defaultShowInfoPanel = true;
                     appGlobals.shareOptions.mapClickedPoint = null;
                     this.isInfowindowHide = true;
                 }
@@ -105,12 +108,14 @@ define([
                     if (this.isExtentSet) {
                         this.infoWindowPanel.hide();
                         this.infoWindowPanel.InfoShow = true;
+                        this.defaultShowInfoPanel = true;
                         appGlobals.shareOptions.mapClickedPoint = null;
                         this.isInfowindowHide = true;
                     }
                 } else {
                     this.infoWindowPanel.hide();
                     this.infoWindowPanel.InfoShow = true;
+                    this.defaultShowInfoPanel = true;
                     appGlobals.shareOptions.mapClickedPoint = null;
                     this.isInfowindowHide = true;
                 }
@@ -417,7 +422,7 @@ define([
                 if (evt.graphic || evt.mapPoint) {
                     topic.publish("extentSetValue", true);
                     point = evt.mapPoint;
-                    if (this.infoWindowPanel.InfoShow) {
+                    if (this.infoWindowPanel.InfoShow || this.defaultShowInfoPanel) {
                         this._showInfoWindowOnMap(point);
                     }
                 }

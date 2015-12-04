@@ -681,11 +681,6 @@ input {
     color: #007AC2;
 }
 
-/*.esriSliderBack {
-    background-color: #007AC2;
-    border-bottom: 1px solid #007AC2;
-}*/
-
 .claro .dijitSliderImageHandleH
 {
     background-image: url('../images/thumbBlue.png');
