@@ -277,7 +277,7 @@ input {
 }
 
 .esriCTDivSearchContent {
-    color: Black;
+    color: #808080 !important;
 }
 
 /* Splash Screen */
@@ -686,7 +686,7 @@ input {
     text-align: left;
 }
 
-.esriSliderDisplayText
+/*.esriSliderDisplayText
 {
     color: #028D6A;
 }
@@ -694,4 +694,57 @@ input {
 .esriSliderBack {
     background-color: #028D6A;
     border-bottom: 1px solid #028D6A;
+}*/
+
+.esriSliderDisplayText
+{
+    color: #028D6A;
+}
+
+/*.esriSliderBack {
+    background-color: #007AC2;
+    border-bottom: 1px solid #007AC2;
+}*/
+
+.claro .dijitSliderImageHandleH
+{
+    background-image: url('../images/thumbGreen.png');
+}
+
+.esriCTImgButtons {
+    background-color: #028D6A;
+    border: 1px solid #028D6A;
+}
+
+.dijitSliderBumperH, .dijitSliderBarH
+{
+    background-color: #028D6A;
+}
+
+.claro .dijitSlider .dijitSliderProgressBarH, .claro .dijitSlider .dijitSliderLeftBumper
+{
+    background-color: #028D6A;
+}
+
+.dijitReset {
+  color: #028D6A;
+}
+
+.dijitSliderBumperH, .dijitSliderBarH
+{
+    height: 3px !important;
+    border-color: #fff;
+}
+
+.claro .dijitSlider .dijitSliderProgressBarH, .claro .dijitSlider .dijitSliderLeftBumper
+{
+    height: 3px !important;
+    border-color: #fff;
+}
+
+.claro .dijitSlider .dijitSliderRemainingBarH, .claro .dijitSlider .dijitSliderRightBumper
+{
+    border-color: #fff;
+    height: 3px !important;
+    background-color: #ddd;
 }

@@ -82,6 +82,22 @@ define([
             topic.subscribe("extentSetValue", lang.hitch(this, function (value) {
                 this.isExtentSet = value;
             }));
+
+            // Subscribing function to set InfoShow property.
+            topic.subscribe("setInfoShow", lang.hitch(this, function (v) {
+                if (v) {
+                    this.infoWindowPanel.hide();
+                    this.infoWindowPanel.InfoShow = false;
+                    appGlobals.shareOptions.mapClickedPoint = null;
+                    this.isInfowindowHide = true;
+                } else {
+                    this.infoWindowPanel.hide();
+                    this.infoWindowPanel.InfoShow = true;
+                    appGlobals.shareOptions.mapClickedPoint = null;
+                    this.isInfowindowHide = true;
+                }
+            }));
+
             // Subscribing function to hide infowindow.
             topic.subscribe("hideInfoWindow", lang.hitch(this, function () {
                 // Check whether "mapClickPoint" is in the share URL or not.
@@ -401,7 +417,9 @@ define([
                 if (evt.graphic || evt.mapPoint) {
                     topic.publish("extentSetValue", true);
                     point = evt.mapPoint;
-                    this._showInfoWindowOnMap(point);
+                    if (this.infoWindowPanel.InfoShow) {
+                        this._showInfoWindowOnMap(point);
+                    }
                 }
             })));
             this.map.on("extent-change", lang.hitch(this, function () {

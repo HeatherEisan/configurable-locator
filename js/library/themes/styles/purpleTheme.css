@@ -276,7 +276,7 @@ input {
 }
 
 .esriCTDivSearchContent {
-    color: Black;
+    color: #808080 !important;
 }
 
 /* Splash Screen */
@@ -705,7 +705,7 @@ input {
     text-align: left;
 }
 
-.esriCTsliderDisplayText
+/*.esriCTsliderDisplayText
 {
     color: #5C2E6F;
 }
@@ -713,4 +713,58 @@ input {
 .esriSliderBack {
     background-color: #5C2E6F;
     border-bottom: 1px solid #5C2E6F;
+}*/
+
+
+.esriSliderDisplayText
+{
+    color:#5C2E6F;
+}
+
+/*.esriSliderBack {
+    background-color: #007AC2;
+    border-bottom: 1px solid #007AC2;
+}*/
+
+.claro .dijitSliderImageHandleH
+{
+    background-image: url('../images/thumbBlue.png');
+}
+
+.esriCTImgButtons {
+    background-color: #5C2E6F;
+    border: 1px solid #007AC2;
+}
+
+.dijitSliderBumperH, .dijitSliderBarH
+{
+    background-color: #5C2E6F;
+}
+
+.claro .dijitSlider .dijitSliderProgressBarH, .claro .dijitSlider .dijitSliderLeftBumper
+{
+    background-color: #5C2E6F;
+}
+
+.dijitReset {
+  color: #5C2E6F;
+}
+
+.dijitSliderBumperH, .dijitSliderBarH
+{
+    height: 3px !important;
+    border-color: #fff;
+}
+
+.claro .dijitSlider .dijitSliderProgressBarH, .claro .dijitSlider .dijitSliderLeftBumper
+{
+    height: 3px !important;
+    border-color: #fff;
+}
+
+.claro .dijitSlider .dijitSliderRemainingBarH, .claro .dijitSlider .dijitSliderRightBumper
+{
+    border-color: #fff;
+    height: 3px !important;
+    background-color: #ddd;
 }

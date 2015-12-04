@@ -202,8 +202,9 @@ define([
                 }
                 if (a) {
                   //topic.publish("hideInfoWindow");
-                  //topic.publish("createBuffer", locatorObject.selectedGraphic);
-                  topic.publish("createBuffer", a);
+                    //topic.publish("createBuffer", locatorObject.selectedGraphic);
+                    appGlobals.shareOptions.doQuery = "false";
+                    topic.publish("createBuffer", a, "geolocation");
                 }
             });
             // Locator candidate click for unified search
