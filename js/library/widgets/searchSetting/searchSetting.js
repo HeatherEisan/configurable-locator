@@ -185,7 +185,7 @@ define([
             };
             locatorObject = new LocatorTool(locatorParams);
             // Callback after adding graphics
-            locatorObject.onGraphicAdd = lang.hitch(this, function (a) {
+            locatorObject.onGraphicAdd = lang.hitch(this, function (a, b) {
                 appGlobals.shareOptions.addressLocation = locatorObject.selectedGraphic.geometry.x.toString() + "," + locatorObject.selectedGraphic.geometry.y.toString();
                 appGlobals.shareOptions.doQuery = "false";
                 if (window.location.toString().split("$address=").length > 1) {
@@ -200,9 +200,7 @@ define([
                         topic.publish("createBuffer", locatorObject.selectedGraphic);
                     }
                 }
-                if (a) {
-                  //topic.publish("hideInfoWindow");
-                    //topic.publish("createBuffer", locatorObject.selectedGraphic);
+                if (a && (b === "slider" || b === "click")) {
                     appGlobals.shareOptions.doQuery = "false";
                     topic.publish("createBuffer", a, "geolocation");
                 }

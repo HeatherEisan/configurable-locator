@@ -50,7 +50,7 @@ Show me a list of other [State and Local Government GitHub repositories](http://
 Additional [information and sample data](http://links.esri.com/stategovernment/help/ParkandRecLocator)
 are available for the application.
 
-This application uses the 3.13 version of
+This application uses the 3.15 version of
 [Esri's ArcGIS API for JavaScript](http://help.arcgis.com/en/webapi/javascript/arcgis/);
 see the site for concepts, samples, and a reference for using the API to create mapping web sites.
 

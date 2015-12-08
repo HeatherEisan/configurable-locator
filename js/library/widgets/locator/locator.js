@@ -151,14 +151,13 @@ define([
             // check the shared URL for "bufferDistance" to create buffer on map
             if (window.location.toString().split("$bufferDistance=").length > 1) {
                 bufferDistance = Number(window.location.toString().split("$bufferDistance=")[1].toString().split("$")[0]);
-                this._createHorizontalSlider(this.horizontalSliderContainer, this.horizontalRuleContainer, this.bufferSliderText, bufferDistance);
                 appGlobals.shareOptions.bufferDistance = bufferDistance;
-            } else {
-                var sliderId = "slider" + domAttr.get(this.horizontalSliderContainer, "data-dojo-attach-point");
-                var sn = dom.byId(sliderId);
-                if (!sn) {
-                    this._createHorizontalSlider(this.horizontalSliderContainer, this.horizontalRuleContainer, this.bufferSliderText, null);
-                }
+            }
+
+            var sliderId = "slider" + domAttr.get(this.horizontalSliderContainer, "data-dojo-attach-point");
+            var sn = dom.byId(sliderId);
+            if (!sn) {
+                this._createHorizontalSlider(this.horizontalSliderContainer, this.horizontalRuleContainer, this.bufferSliderText, null);
             }
         },
 
@@ -255,7 +254,7 @@ define([
                     if (_self.resetBufferDistance) {
                         if (_self.mapPoint) {
                             appGlobals.shareOptions.bufferDistance = value;
-                            _self._locateAddressOnMap(_self.mapPoint);
+                            _self._locateAddressOnMap(_self.mapPoint, "slider");
                         }
                     }
                     appGlobals.shareOptions.bufferDistance = Math.round(value);
@@ -285,7 +284,7 @@ define([
             topic.publish("setInfoShow", true);
             this.mapPoint = evt.mapPoint;
             this.selectedLayerTitle = null;
-            this._locateAddressOnMap(evt.mapPoint);
+            this._locateAddressOnMap(evt.mapPoint, "click");
             appGlobals.shareOptions.address = { geometry: this.mapPoint };
             this._disconnectMapEventHandler();
             topic.publish("setInfoShow", false);
@@ -414,6 +413,18 @@ define([
           topic.publish("clearGraphicsAndCarousel");
           topic.publish("removeRouteGraphichOfDirectionWidget");
           this.mapPoint = null;
+
+            //clear share results
+          appGlobals.shareOptions.bufferDistance = null;
+          appGlobals.shareOptions.address = null;
+          appGlobals.shareOptions.sharedGeolocation = null;
+          appGlobals.shareOptions.addressLocation = null;
+          appGlobals.shareOptions.searchSettingsDetails = null;
+          appGlobals.shareOptions.doQuery = false;
+          appGlobals.shareOptions.selectedMapPoint = null;
+          appGlobals.shareOptions.screenPoint = null;
+          appGlobals.shareOptions.mapClickedPoint = null;
+          appGlobals.shareOptions.isShowPod = false;
         },
 
         /**
@@ -942,14 +953,14 @@ define([
         * @param {object} mapPoint
         * @memberOf widgets/locator/locator
         */
-        _locateAddressOnMap: function (mapPoint) {
+        _locateAddressOnMap: function (mapPoint, fromEvent) {
             var geoLocationPushpin, locatorMarkupSymbol;
             this._clearGraphics();
             geoLocationPushpin = dojoConfig.baseURL + this.locatorSettings.DefaultLocatorSymbol;
             locatorMarkupSymbol = new PictureMarkerSymbol(geoLocationPushpin, this.locatorSettings.MarkupSymbolSize.width, this.locatorSettings.MarkupSymbolSize.height);
             this.selectedGraphic = new Graphic(mapPoint, locatorMarkupSymbol, {}, null);
             this.map.getLayer(this.graphicsLayerId).add(this.selectedGraphic);
-            this.onGraphicAdd(this.selectedGraphic);
+            this.onGraphicAdd(this.selectedGraphic, fromEvent);
             topic.publish("hideProgressIndicator");   
         },
 

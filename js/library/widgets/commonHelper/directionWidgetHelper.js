@@ -698,7 +698,7 @@ define([
             }
             // Check if widgetName is searchedfacility
             if (routeObject.WidgetName.toLowerCase() === "searchedfacility") {
-                this.removeBuffer();
+                //this.removeBuffer(); //commented out per github issue #214
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
             }
             // Check if widgetName is event
@@ -711,7 +711,7 @@ define([
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
             }
             if (routeObject.WidgetName.toLowerCase() === "geolocation") {
-                this.removeBuffer();
+                //this.removeBuffer(); //commented out per github issue #214
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
             }
         },
