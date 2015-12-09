@@ -158,6 +158,22 @@ define([
                 topic.publish("removeRouteGraphichOfDirectionWidget");
                 topic.publish("hideInfoWindow");
                 topic.publish("extentSetValue", true);
+
+                //clear share results
+                this.mapPoint = null;
+                appGlobals.shareOptions.bufferDistance = null;
+                appGlobals.shareOptions.address = null;
+                appGlobals.shareOptions.sharedGeolocation = null;
+                appGlobals.shareOptions.addressLocation = null;
+                appGlobals.shareOptions.searchSettingsDetails = null;
+                appGlobals.shareOptions.doQuery = false;
+                appGlobals.shareOptions.selectedMapPoint = null;
+                appGlobals.shareOptions.screenPoint = null;
+                appGlobals.shareOptions.mapClickedPoint = null;
+                appGlobals.shareOptions.isShowPod = false;
+
+
+                appGlobals.shareOptions.isActivitySearch = true;
                 this.featureSet.length = 0;
                 this._activityPlannerDateValidation();
             })));
@@ -197,7 +213,13 @@ define([
                         objectIDValue = Number(window.location.toString().split("$settingsDetails=")[1].split(",")[2].split("$")[0]);
                         this._queryForActivityForAddressSearch(objectIDValue, settings);
                     } else {
-                        topic.publish("createBuffer", locatorObject.selectedGraphic);
+                        if (window.location.toString().split("$isActivitySearch=").length > 1) {
+                            if (!Boolean(window.location.toString().split("$isActivitySearch=")[1])) {
+                                topic.publish("createBuffer", locatorObject.selectedGraphic);
+                            }
+                        } else {
+                            topic.publish("createBuffer", locatorObject.selectedGraphic);
+                        }
                     }
                 }
                 if (a && (b === "slider" || b === "click")) {
@@ -260,6 +282,7 @@ define([
                 if (window.location.toString().split("$address=").length > 1) {
                     mapPoint = new Point(window.location.toString().split("$address=")[1].split("$")[0].split(",")[0], window.location.toString().split("$address=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
                     appGlobals.shareOptions.addressLocation = window.location.toString().split("$address=")[1].split("$")[0];
+                    appGlobals.shareOptions.isActivitySearch = false;
                     setTimeout(lang.hitch(this, function () {
                         locatorObject._locateAddressOnMap(mapPoint);
                     }, 5000));
@@ -315,6 +338,7 @@ define([
                     appGlobals.shareOptions.eventPlannerQuery = this.myFromDate.value.toString() + "," + this.myToDate.value.toString();
                     topic.publish("toggleWidget", "myList");
                     this.isEventShared = true;
+                    appGlobals.shareOptions.isActivitySearch = true;
                 }
             }), 3000);
         },

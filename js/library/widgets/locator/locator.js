@@ -394,7 +394,7 @@ define([
             this.own(on(this.close, a11yclick, lang.hitch(this, function () {
                 this._hideText();
                 if (this.close.offsetParent.id === "searchSetting") {
-                    this._clearResults()
+                    this._clearResults();
                 }
             })));
             this.own(on(this.selectLocation, a11yclick, lang.hitch(this, function () {
@@ -427,6 +427,7 @@ define([
           appGlobals.shareOptions.screenPoint = null;
           appGlobals.shareOptions.mapClickedPoint = null;
           appGlobals.shareOptions.isShowPod = false;
+          appGlobals.shareOptions.isActivitySearch = null;
         },
 
         /**

@@ -74,7 +74,7 @@ define([
                 // Set geocoderOptions is autoComplete for ersiDirection widget
                 //Commented out after migration to 3.15...geocoderOptions is now searchOptions...
                 // however, searchOptions does not appear to have an autoComplete property
-                //uncomment this line for 3.13
+                //uncomment the following line for 3.13
                 this._esriDirectionsWidget.options.geocoderOptions.autoComplete = true;
                 this._esriDirectionsWidget.autoSolve = false;
                 this._esriDirectionsWidget.deactivate();
@@ -111,6 +111,7 @@ define([
                                 this._esriDirectionsWidget.zoomToFullRoute();
                             }
                         }
+                        appGlobals.shareOptions.isActivitySearch = null;
                         // Switch case for widget name
                         switch (this.routeObject.WidgetName.toLowerCase()) {
                         case "activitysearch":
