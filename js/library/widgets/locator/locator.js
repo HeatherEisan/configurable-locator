@@ -157,7 +157,7 @@ define([
             var sliderId = "slider" + domAttr.get(this.horizontalSliderContainer, "data-dojo-attach-point");
             var sn = dom.byId(sliderId);
             if (!sn) {
-                this._createHorizontalSlider(this.horizontalSliderContainer, this.horizontalRuleContainer, this.bufferSliderText, null);
+                this._createHorizontalSlider(this.horizontalSliderContainer, this.horizontalRuleContainer, this.bufferSliderText, bufferDistance);
             }
         },
 

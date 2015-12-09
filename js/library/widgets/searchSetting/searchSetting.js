@@ -282,7 +282,6 @@ define([
                 if (window.location.toString().split("$address=").length > 1) {
                     mapPoint = new Point(window.location.toString().split("$address=")[1].split("$")[0].split(",")[0], window.location.toString().split("$address=")[1].split("$")[0].split(",")[1], this.map.spatialReference);
                     appGlobals.shareOptions.addressLocation = window.location.toString().split("$address=")[1].split("$")[0];
-                    appGlobals.shareOptions.isActivitySearch = false;
                     setTimeout(lang.hitch(this, function () {
                         locatorObject._locateAddressOnMap(mapPoint);
                     }, 5000));
