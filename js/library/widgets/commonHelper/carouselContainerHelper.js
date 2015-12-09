@@ -181,7 +181,8 @@ define([
                 array.forEach(result, lang.hitch(this, function (resultData, i) {
                     if (!isBufferNeeded && result[i].distance) {
                         subStringRouteUnit = this._getSubStringUnitData();
-                        milesCalulatedData = " (" + parseFloat(result[i].distance).toFixed(2) + subStringRouteUnit + sharedNls.showApproxString + ")";
+                        var dist = isNaN(result[i].distance) ? 0 : result[i].distance;
+                        milesCalulatedData = " (" + parseFloat(dist).toFixed(2) + subStringRouteUnit + sharedNls.showApproxString + ")";
                     } else {
                         milesCalulatedData = "";
                     }

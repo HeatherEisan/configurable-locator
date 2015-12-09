@@ -140,51 +140,6 @@ define([
             }
         },
 
-        //updateBuffer: function (mapPoint, comHelper) {
-        //  var params, geometryService, isValid;
-        //  //this.carouselContainer.removeAllPod();
-        //  //this.carouselContainer.addPod(this.carouselPodData);
-        //  //comHelper.removeBuffer();
-        //  topic.publish("removeBuffer");
-        //  geometryService = new GeometryService(appGlobals.configData.GeometryService);
-        //  // Checking the map point or map point is having geometry and if config data has buffer distance.
-        //  //TODO...JH Set bufferDistance from slider value
-        //  isValid = this._validateRangeFilterValues();
-        //  //if ((mapPoint || mapPoint.geometry) && appGlobals.configData.BufferDistance) {
-        //  if ((mapPoint || mapPoint.geometry) && isValid) {
-        //    var geometry = mapPoint.geometry;
-        //    if (typeof (geometry) === 'undefined') {
-        //      geometry = mapPoint;
-        //    }
-        //    //TODO...JH check out the share options
-        //    //appGlobals.shareOptions.bufferDistance = bufferDistance;
-        //    //commented from site-selector...this.featureGeometry[this.workflowCount] = geometry;
-        //    //commented from site-selector...selectedPanel = query('.esriCTsearchContainerSitesSelected')[0];
-        //    // set slider values for various workflows
-
-        //    slider = dijit.byId("sliderhorizontalSliderContainer");
-        //    sliderDistance = slider.value;
-
-        //    //////////////////////////
-        //    if (Math.round(sliderDistance) !== 0) {
-        //      if (geometry && geometry.type === "point") {
-        //        //setup the buffer parameters
-        //        params = new BufferParameters();
-        //        params.distances = [Math.round(sliderDistance)];
-        //        params.bufferSpatialReference = this.map.spatialReference;
-        //        params.outSpatialReference = this.map.spatialReference;
-        //        params.geometries = [geometry];
-        //        params.unit = GeometryService[this._getDistanceUnit(appGlobals.configData.DistanceUnitSettings.DistanceUnitName)];
-        //        geometryService.buffer(params, lang.hitch(this, function (geometries) {
-        //          this.showBuffer(geometries, mapPoint, widgetName);
-        //        }));
-        //      } else {
-        //        topic.publish("hideProgressIndicator");
-        //      }
-        //    }
-        //  }
-        //},
-
       /**
 * get distance unit based on unit selection
 * @param {string} input distance unit
