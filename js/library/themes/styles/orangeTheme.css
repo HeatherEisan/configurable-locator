@@ -733,3 +733,7 @@ input {
     height: 3px !important;
     background-color: #ddd;
 }
+
+.colorHr {
+    background-color: #d15706;
+}

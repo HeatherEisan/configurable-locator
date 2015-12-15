@@ -901,9 +901,10 @@ body {
     padding: 5px 0px 0px 15px;
 }
 
-.esriCTDivDirectioncontent div.esriCTAddressList {
-    height: 95px;
+.esriCTDivDirectioncontent div.esriAddressListContainer {
+    height: 130px !important;
 }
+
 
 /*Activity*/
 .esriCTDivActivityContainer, .esriCTDivSearchContent, .esriCTDivEventContainer {
@@ -1870,12 +1871,13 @@ body {
 }
 
 .esriCTDirectionMainContainer div.esriCTAddressList {
-    height: 60%;
+    /*height: 60%;
     height: calc(100% - 84px);
     height: -moz-calc(100% - 84px);
     height: -webkit-calc(100% - 84px);
-    height: -o-calc(100% - 84px);
-    overflow-y: auto;
+    height: -o-calc(100% - 84px);*/
+    /*overflow-y: auto;
+    overflow-x: hidden;*/
     -webkit-overflow-scrolling: touch;
 }
 
@@ -1941,14 +1943,11 @@ input::-ms-clear {
     z-index: 101;
     border: none;
     margin-left: 20px;
-    margin-top: 1px;
+    margin-top: 5px;
     width: 94%;
     width: -moz-calc(100% - 20px);
     width: -webkit-calc(100% - 20px);
     width: -o-calc(100% - 20px);
-    height: 159px;
-    overflow-y: auto;
-    overflow-x: hidden;
     text-align: left;
     -webkit-overflow-scrolling: touch;
 }
@@ -2329,14 +2328,14 @@ a.esriCTinfoWindowHyperlink:hover, a.esriCTinfoWindowHyperlink:active {
     clear: both;
     float: left;
     width: 100%;
-    margin-bottom: 10px;
+    /*margin-bottom: 10px;*/
 }
 
 .esriSliderText
 {
     float: left;
-    margin-bottom: 5px;
-    margin-left: 10px;
+    /*margin-bottom: 5px;
+    margin-left: 10px;*/
 }
 
 .esriSelectCommon
@@ -2361,8 +2360,10 @@ a.esriCTinfoWindowHyperlink:hover, a.esriCTinfoWindowHyperlink:active {
 {
     height: 29px; /*JH from 25*/
     clear: both; /*margin-left: 5px;*/
-    margin-left: 10px;
-    margin-right: 10px;
+    /*margin-left: 10px;
+    margin-right: 10px;*/
+        margin-left: 1px;
+    margin-right: 1px;
 }
 
 .esriSliderDisplayText
@@ -2713,3 +2714,13 @@ a.esriCTinfoWindowHyperlink:hover, a.esriCTinfoWindowHyperlink:active {
   color: #007AC2;
 }
 
+.hrProps {
+    width: 100%; 
+    margin-top: 20px; 
+    height: 1px;
+}
+
+.esriAddressListContainer{
+    overflow-x: hidden; 
+    overflow-y: auto; 
+}

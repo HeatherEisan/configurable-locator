@@ -261,8 +261,8 @@ define([
                 }, 500);
             });
 
-            var sc = dom.byId("sliderContainer");
-            domStyle.set(sc, "display", "block");
+            //var sc = dom.byId("sliderContainer");
+            //domStyle.set(sc, "display", "block");
 
             var addP = dom.byId("divSelectLocation");
             domStyle.set(addP, "display", "table-cell");
@@ -400,8 +400,10 @@ define([
             this.own(on(this.selectLocation, a11yclick, lang.hitch(this, function () {
               if (domClass.contains(this.selectLocation, "esriCTImgButtonsActive")) {
                 this._disconnectMapEventHandler();
+                domStyle.set(this.sliderContainer, "display", "none");
               } else {
                 this._connectMapEventHandler();
+                domStyle.set(this.sliderContainer, "display", "block");
               }
             })));
         },
@@ -415,6 +417,10 @@ define([
           topic.publish("clearGraphicsAndCarousel");
           topic.publish("removeRouteGraphichOfDirectionWidget");
           this.mapPoint = null;
+
+          domStyle.set(this.sliderContainer, "display", "none");
+          domStyle.set(this.divActivityList, "display", "none");
+          domStyle.set(this.addressHR, "display", "none");
 
             //clear share results
           appGlobals.shareOptions.bufferDistance = null;
@@ -447,6 +453,7 @@ define([
             this.txtAddress.value = "";
             this.lastSearchString = lang.trim(this.txtAddress.value);
             domConstruct.empty(this.divAddressResults);
+            domConstruct.empty(this.divActivityResults);
             domClass.remove(this.divAddressContainer, "esriCTAddressContentHeight");
             domAttr.set(this.txtAddress, "defaultAddress", this.txtAddress.value);
         },
@@ -536,6 +543,7 @@ define([
 
                 // Hide existing results
                 domConstruct.empty(this.divAddressResults);
+                domConstruct.empty(this.divActivityResults);
                 /**
                 * stage a new search, which will launch if no new searches show up
                 * before the timeout
@@ -756,10 +764,12 @@ define([
         _showLocatedAddress: function (searchText, candidates, resultLength) {
             var addrListCount = 0, noResultCount = 0, candidatesCount = 0, addrList = [], candidateArray, divAddressCounty, candidate, listContainer, i, divAddressSearchCell;
             domConstruct.empty(this.divAddressResults);
+            domConstruct.empty(this.divActivityResults);
 
             if (lang.trim(searchText) === "") {
                 this.txtAddress.focus();
                 domConstruct.empty(this.divAddressResults);
+                domConstruct.empty(this.divActivityResults);
                 this._toggleTexBoxControls(false);
                 return;
             }
@@ -772,13 +782,55 @@ define([
             if (resultLength > 0) {
                 domClass.add(this.divAddressContainer, "esriCTAddressContentHeight");
                 this._toggleTexBoxControls(false);
+                //domStyle.set(this.divAddressResults, "height", "200px");//JHJH
                 for (candidateArray in candidates) {
                     if (candidates.hasOwnProperty(candidateArray)) {
                         candidatesCount++;
                         if (candidates[candidateArray].length > 0) {
+                            var activityTitles = [];
+                            for (var i = 0; i < appGlobals.configData.ActivitySearchSettings.length; i++) {
+                                var title = appGlobals.configData.ActivitySearchSettings[i].SearchDisplayTitle;
+                                if (activityTitles.indexOf(title) === -1) {
+                                    activityTitles.push(title);
+                                }
+                            }
+
+                          //TODO get the parent div here and check it...
+
+                            var isDefined;
+                            var parentNode = this.divActivityResults.offsetParent ? this.divActivityResults.offsetParent : this.divActivityResults.parentNode.parentNode.offsetParent;
+                            if (parentNode) {
+                              isDefined = parentNode.id === "searchSetting";
+                            } else {
+                              isDefined = true;
+                            }
+
+                            var parentDiv = null;
+                            if (activityTitles.indexOf(candidateArray) > -1) {
+                                parentDiv = this.divActivityResults;
+                                if (isDefined) {
+                                  domStyle.set(this.addressHR, "display", "block");
+                                  domStyle.set(this.esriAddressListContainer, "height", "215px");
+                                } else {
+                                  domStyle.set(this.esriAddressListContainer, "height", "80%");
+                                }
+                                domStyle.set(this.divAddressResults, "display", "block");
+                                
+                            } else {
+                              parentDiv = this.divAddressResults;
+                              if (isDefined) {
+                                domStyle.set(this.sliderContainer, "display", "block");
+                                domStyle.set(this.esriAddressListContainer, "height", "215px");
+                              } else {
+                                domStyle.set(this.esriAddressListContainer, "height", "80%");
+                              }
+                              domStyle.set(this.divActivityList, "display", "block");
+                              domStyle.set(this.divActivityResults, "display", "block");
+                            }
+                            domClass.add(this.esriAddressListContainer, "esriAddressListContainer");
                             divAddressCounty = domConstruct.create("div", {
                                 "class": "esriCTSearchGroupRow esriCTBottomBorder esriCTResultColor esriCTCursorPointer esriCTAddressCounty"
-                            }, this.divAddressResults);
+                            }, parentDiv);
                             divAddressSearchCell = domConstruct.create("div", { "class": "esriCTSearchGroupCell" }, divAddressCounty);
                             candidate = candidateArray + " (" + candidates[candidateArray].length + ")";
                             domConstruct.create("span", { "innerHTML": "+", "class": "esriCTPlusMinus" }, divAddressSearchCell);
@@ -786,7 +838,7 @@ define([
                             addrList.push(divAddressSearchCell);
                             this._toggleAddressList(addrList, addrListCount);
                             addrListCount++;
-                            listContainer = domConstruct.create("div", { "class": "esriCTListContainer esriCTHideAddressList" }, this.divAddressResults);
+                            listContainer = domConstruct.create("div", { "class": "esriCTListContainer esriCTHideAddressList" }, parentDiv);
 
                             for (i = 0; i < candidates[candidateArray].length; i++) {
                                 this._displayValidLocations(candidates[candidateArray][i], i, candidates[candidateArray], listContainer);
@@ -814,8 +866,10 @@ define([
         */
         _toggleAddressList: function (addressList, idx) {
             on(addressList[idx], a11yclick, lang.hitch(this, function (evt) {
-                var listContainer, listStatusSymbol;
-                listContainer = query(".esriCTListContainer", this.divAddressResults)[idx];
+                var listContainer, listStatusSymbol, resultContainer, t_id;
+                resultContainer = (idx === 1) ? this.divActivityResults : this.divAddressResults;
+                t_id = (idx === 1) ? 0 : idx;
+                listContainer = query(".esriCTListContainer", resultContainer)[t_id];
                 if (domClass.contains(listContainer, "esriCTShowAddressList")) {
                     domClass.toggle(listContainer, "esriCTShowAddressList");
                     listStatusSymbol = (domAttr.get(query(".esriCTPlusMinus", evt.currentTarget)[0], "innerHTML") === "+") ? "-" : "+";
@@ -1002,8 +1056,12 @@ define([
         */
         _locatorErrBack: function (showMessage) {
             domConstruct.empty(this.divAddressResults);
+            //domConstruct.empty(this.divActivityResults);
             domClass.remove(this.divAddressContainer, "esriCTAddressContentHeight");
             domStyle.set(this.divAddressResults, "display", "block");
+            domStyle.set(this.divActivityResults, "display", "none");
+            domStyle.set(this.sliderContainer, "display", "none");
+            domStyle.set(this.addressHR, "display", "none");
             domClass.add(this.divAddressContent, "esriCTAddressResultHeight");
             this._toggleTexBoxControls(false);
             if (showMessage) {
@@ -1025,6 +1083,10 @@ define([
             target.value = '';
             this.txtAddress.value = "";
             domAttr.set(this.txtAddress, "defaultAddress", this.txtAddress.value);
+            domStyle.set(this.sliderContainer, "display", "none");
+            domStyle.set(this.divAddressResults, "display", "none");
+            domStyle.set(this.divActivityList, "display", "none");
+            domStyle.set(this.addressHR, "display", "none");
         },
 
         /**
