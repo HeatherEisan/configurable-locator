@@ -192,7 +192,7 @@ define([], function () {
             QueryLayerId: "0",
             SearchDisplayTitle: "Park",
             SearchDisplayFields: "${NAME}",
-            SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(NAME) LIKE UPPER('%${0}%')",
             PrimaryKeyForActivity: "${SITEID}",
             QualifyingActivityValue: "Yes",
             ActivityList: [{
@@ -204,112 +204,112 @@ define([], function () {
                 FieldName: "TENTCAMP",
                 Alias: "Camping",
                 Image: "js/library/themes/images/activity/campground.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "CABINS",
                 Alias: "Cabins",
                 Image: "js/library/themes/images/activity/sleepingShelter.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "LAUNDRY",
                 Alias: "Laundry",
                 Image: "js/library/themes/images/activity/laundromat.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "VISITORCNTR",
                 Alias: "Visitor Center",
                 Image: "js/library/themes/images/activity/sunny.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "MUSEUM",
                 Alias: "Museum",
                 Image: "js/library/themes/images/activity/museum.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "RESTAURANT",
                 Alias: "Restaurant",
                 Image: "js/library/themes/images/activity/snackBar.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "SWIMMING",
                 Alias: "Swimming",
                 Image: "js/library/themes/images/activity/swimming.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "PICNIC",
                 Alias: "Picnic Sites",
                 Image: "js/library/themes/images/activity/picnicArea.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "BOATCRUISE",
                 Alias: "Boat Cruise",
                 Image: "js/library/themes/images/activity/boatTour.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "FISHING",
                 Alias: "Fishing",
                 Image: "js/library/themes/images/activity/fishing.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "MARINA",
                 Alias: "Marina",
                 Image: "js/library/themes/images/activity/marina.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "BOATLAUNCH",
                 Alias: "Boat Launch",
                 Image: "js/library/themes/images/activity/boatLaunch.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "CANOE",
                 Alias: "Canoe Access",
                 Image: "js/library/themes/images/activity/canoeAccess.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "GOLF",
                 Alias: "Golf Course",
                 Image: "js/library/themes/images/activity/golfing.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "PLAYGROUND",
                 Alias: "Playground",
                 Image: "js/library/themes/images/activity/playground.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "HIKING",
                 Alias: "Hiking",
                 Image: "js/library/themes/images/activity/hiking.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "TENNIS",
                 Alias: "Tennis",
                 Image: "js/library/themes/images/activity/tennis.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "MTBCYCLE",
                 Alias: "Bike Trail",
                 Image: "js/library/themes/images/activity/bicycleTrail.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "ARCHERY",
                 Alias: "Archery",
                 Image: "js/library/themes/images/activity/archery.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "STABLES",
                 Alias: "Horseback Riding",
                 Image: "js/library/themes/images/activity/horsebackRiding.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "GROUPLODGE",
                 Alias: "Lodge",
                 Image: "js/library/themes/images/activity/sleepingShelter.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "ROADCYCLE",
                 Alias: "Road Cycling",
                 Image: "js/library/themes/images/activity/bicycleTrail.png",
-				        IsSelected: false
+                IsSelected: false
             }],
             CommentsSettings: {
                 Enabled: true,
@@ -360,7 +360,7 @@ define([], function () {
             SearchDisplayFields: "${EVENTNM}",
             SearchDisplaySubFields: "${EVENTSTART},${FULLADDR}",
             SearchExpressionForDate: "(EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})",
-            SearchExpression: "UPPER(FULLADDR) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(FULLADDR) LIKE UPPER('%${0}%')",
             SortingKeyField: "${EVENTSTART}",
             AddToCalendarSettings: [{
                 IcsFileName: "${EVENTNM}",

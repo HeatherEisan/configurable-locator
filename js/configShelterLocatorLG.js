@@ -192,24 +192,24 @@ define([], function () {
             QueryLayerId: "0",
             SearchDisplayTitle: "Shelter Name",
             SearchDisplayFields: "${FACNAME}",
-            SearchExpression: "UPPER(FACNAME) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(FACNAME) LIKE UPPER('%${0}%')",
             PrimaryKeyForActivity: "${LINKID}",
             QualifyingActivityValue: "Yes",
             ActivityList: [{
                 FieldName: "HANDICAP",
                 Alias: "Handicap Accessible",
                 Image: "js/library/themes/images/activity/wheelchairAccessible.png",
-				        IsSelected: true
+                IsSelected: true
             }, {
                 FieldName: "BACKPOWER",
                 Alias: "Generators",
                 Image: "js/library/themes/images/activity/electricHookup.png",
-				        IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "ALLOWPETS",
                 Alias: "Pets Allowed",
                 Image: "js/library/themes/images/activity/petsOnLeash.png",
-				        IsSelected: false
+                IsSelected: false
             }],
             CommentsSettings: {
                 Enabled: false,
@@ -236,7 +236,7 @@ define([], function () {
             SearchDisplayFields: "${CATEGORY}",
             SearchDisplaySubFields: "${STARTDATE},${ADDRESS}",
             SearchExpressionForDate: "(ENDDATE >= DATE ${0} AND ENDDATE <= DATE ${1}) OR (STARTDATE <= DATE ${0} AND ENDDATE >= DATE ${1}) OR (STARTDATE >= DATE ${0} AND STARTDATE <= DATE ${1})",
-            SearchExpression: "UPPER(ADDRESS) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(ADDRESS) LIKE UPPER('%${0}%')",
             SortingKeyField: "${STARTDATE}",
             AddToCalendarSettings: [{
                 IcsFileName: "${CATEGORY}",
@@ -386,8 +386,8 @@ define([], function () {
 
         // Set widgets settings such as widgetPath to be displayed in header panel
         // WidgetPath: Path of the widget respective to the widgets package.
-		
-		AppHeaderWidgets: [{
+
+        AppHeaderWidgets: [{
             WidgetPath: "widgets/searchSetting/searchSetting"
         }, {
             WidgetPath: "widgets/myList/myList"

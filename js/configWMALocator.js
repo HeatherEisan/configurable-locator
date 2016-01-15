@@ -192,7 +192,7 @@ define([], function () {
             QueryLayerId: "0",
             SearchDisplayTitle: "WMA Name",
             SearchDisplayFields: "${NAME}",
-            SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(NAME) LIKE UPPER('%${0}%')",
             PrimaryKeyForActivity: "${OBJECTID}",
             QualifyingActivityValue: "Yes",
             ActivityList: [{
@@ -266,7 +266,7 @@ define([], function () {
             SearchDisplayFields: "${EVENTNM}",
             SearchDisplaySubFields: "${EVENTSTART},${FULLADDR}",
             SearchExpressionForDate: "(EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})",
-            SearchExpression: "UPPER(FULLADDR) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(FULLADDR) LIKE UPPER('%${0}%')",
             SortingKeyField: "${EVENTSTART}",
             AddToCalendarSettings: [{
                 IcsFileName: "${EVENTNM}",

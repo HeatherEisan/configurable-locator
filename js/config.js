@@ -192,7 +192,7 @@ define([], function () {
             QueryLayerId: "0",
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
-            SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(NAME) LIKE UPPER('%${0}%')",
             PrimaryKeyForActivity: "${OBJECTID}",
             QualifyingActivityValue: "Yes",
             ActivityList: [{
@@ -301,7 +301,7 @@ define([], function () {
             SearchDisplayFields: "${CATEGORY}",
             SearchDisplaySubFields: "${STARTDATE},${ADDRESS}",
             SearchExpressionForDate: "(ENDDATE >= DATE ${0} AND ENDDATE <= DATE ${1}) OR (STARTDATE <= DATE ${0} AND ENDDATE >= DATE ${1}) OR (STARTDATE >= DATE ${0} AND STARTDATE <= DATE ${1})",
-            SearchExpression: "UPPER(ADDRESS) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(ADDRESS) LIKE UPPER('%${0}%')",
             SortingKeyField: "${STARTDATE}",
             AddToCalendarSettings: [{
                 IcsFileName: "${CATEGORY}",

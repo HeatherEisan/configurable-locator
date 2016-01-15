@@ -168,7 +168,7 @@ define([], function () {
             QueryLayerId: "0",
             SearchDisplayTitle: "Park",
             SearchDisplayFields: "${NAME}",
-            SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(NAME) LIKE UPPER('%${0}%')",
             PrimaryKeyForActivity: "${FACILITYID}",
             QualifyingActivityValue: "Yes",
             ActivityList: [{
@@ -228,7 +228,7 @@ define([], function () {
             SearchDisplayFields: "${EVENTNM}",
             SearchDisplaySubFields: "${EVENTSTART},${FULLADDR}",
             SearchExpressionForDate: "(EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})",
-            SearchExpression: "UPPER(EVENTTYPE) LIKE UPPER('${0}%') OR UPPER(EVENTNM) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(EVENTTYPE) LIKE UPPER('%${0}%') OR UPPER(EVENTNM) LIKE UPPER('%${0}%')",
             SortingKeyField: "${EVENTSTART}",
             AddToCalendarSettings: [{
                 IcsFileName: "${EVENTNM}",
