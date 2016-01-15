@@ -788,10 +788,26 @@ define([
                         candidatesCount++;
                         if (candidates[candidateArray].length > 0) {
                             var activityTitles = [];
-                            for (var i = 0; i < appGlobals.configData.ActivitySearchSettings.length; i++) {
-                                var title = appGlobals.configData.ActivitySearchSettings[i].SearchDisplayTitle;
-                                if (activityTitles.indexOf(title) === -1) {
-                                    activityTitles.push(title);
+                            var searchSettings;
+
+                            // Get the unique titles of all enabled activities and events for grouping results
+                            searchSettings = appGlobals.configData.ActivitySearchSettings;
+                            for (var i = 0; i < searchSettings.length; i++) {
+                                if (searchSettings[i].Enable) {
+                                    var title = searchSettings[i].SearchDisplayTitle;
+                                    if (activityTitles.indexOf(title) === -1) {
+                                        activityTitles.push(title);
+                                    }
+                                }
+                            }
+
+                            searchSettings = appGlobals.configData.EventSearchSettings;
+                            for (var i = 0; i < searchSettings.length; i++) {
+                                if (searchSettings[i].Enable) {
+                                    var title = searchSettings[i].SearchDisplayTitle;
+                                    if (activityTitles.indexOf(title) === -1) {
+                                        activityTitles.push(title);
+                                    }
                                 }
                             }
 
@@ -815,7 +831,7 @@ define([
                                   domStyle.set(this.esriAddressListContainer, "height", "80%");
                                 }
                                 domStyle.set(this.divAddressResults, "display", "block");
-                                
+
                             } else {
                               parentDiv = this.divAddressResults;
                               if (isDefined) {
@@ -1018,7 +1034,7 @@ define([
             this.selectedGraphic = new Graphic(mapPoint, locatorMarkupSymbol, {}, null);
             this.map.getLayer(this.graphicsLayerId).add(this.selectedGraphic);
             this.onGraphicAdd(this.selectedGraphic, fromEvent);
-            topic.publish("hideProgressIndicator");   
+            topic.publish("hideProgressIndicator");
         },
 
         /**
