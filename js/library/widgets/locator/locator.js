@@ -393,9 +393,7 @@ define([
             })));
             this.own(on(this.close, a11yclick, lang.hitch(this, function () {
                 this._hideText();
-                if (this.close.offsetParent.id === "searchSetting") {
-                    this._clearResults();
-                }
+                this._clearResults();
             })));
             this.own(on(this.selectLocation, a11yclick, lang.hitch(this, function () {
               if (domClass.contains(this.selectLocation, "esriCTImgButtonsActive")) {
