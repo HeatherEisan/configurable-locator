@@ -383,7 +383,8 @@ define([
                 this._submitAddress(evt, true);
             })));
             this.own(on(this.txtAddress, "dblclick", lang.hitch(this, function (evt) {
-                this._clearDefaultText(evt);
+                this._hideText();
+                this._clearResults();
             })));
             this.own(on(this.txtAddress, "blur", lang.hitch(this, function (evt) {
                 this._replaceDefaultText(evt);
@@ -564,24 +565,25 @@ define([
         */
         _searchLocation: function (searchText, thisSearchTime) {
             var nameArray = {}, locatorSettings, locator, searchFieldName, addressField, baseMapExtent, options, searchFields, addressFieldValues, s, deferredArray,
-                locatorDef, deferred, resultLength, index, resultAttributes, key, order, basemapId, selectedBasemap = appGlobals.configData.BaseMapLayers[appGlobals.shareOptions.selectedBasemapIndex];
+                deferred, resultLength, index, resultAttributes, key, order, basemapId, selectedBasemap = appGlobals.configData.BaseMapLayers[appGlobals.shareOptions.selectedBasemapIndex];
+
             // Discard searches made obsolete by new typing from user
             if (thisSearchTime < this.lastSearchTime) {
                 return;
             }
+
+            // Short-circuit and clear results if the search string is empty
             if (searchText === "") {
-                // Short-circuit and clear results if the search string is empty
 
                 this._toggleTexBoxControls(true);
                 this.mapPoint = null;
                 this._locatorErrBack(true);
+
             } else {
                 nameArray[this.locatorSettings.DisplayText] = [];
                 domAttr.set(this.txtAddress, "defaultAddress", searchText);
 
-                /**
-                * call locator service specified in configuration file
-                */
+                // Set up locator service specified in configuration file
                 locatorSettings = this.locatorSettings;
                 locator = new Locator(locatorSettings.LocatorURL);
                 searchFieldName = locatorSettings.LocatorParameters.SearchField;
@@ -608,32 +610,27 @@ define([
                         searchFields.push(addressFieldValues[s]);
                     }
                 }
+
                 // Discard searches made obsolete by new typing from user
                 if (thisSearchTime < this.lastSearchTime) {
                     return;
                 }
 
-                /**
-                * get results from locator service
-                * @param {object} options Contains address, outFields and basemap extent for locator service
-                * @param {object} candidates Contains results from locator service
-                */
+                // Launch the searches
                 deferredArray = [];
                 if (!this.configSearchSettings || !this.preLoaded) {
                     this._setSearchSettings();
                 }
+
+                //     -- all configured feature layers
                 for (index = 0; index < this.configSearchSettings.length; index++) {
                     this._layerSearchResults(searchText, deferredArray, this.configSearchSettings[index]);
                 }
-                locatorDef = locator.addressToLocations(options);
-                locator.on("address-to-locations-complete", lang.hitch(this, function (candidates) {
-                    deferred = new Deferred();
-                    deferred.resolve(candidates);
-                    return deferred.promise;
-                }), function () {
-                    this._locatorErrBack(true);
-                });
-                deferredArray.push(locatorDef);
+
+                //     -- address locator
+                deferredArray.push(locator.addressToLocations(options));
+
+                // When all searches are done, interpret and display the results
                 all(deferredArray).then(lang.hitch(this, function (result) {
                     var num, results;
                     // Discard searches made obsolete by new typing from user
@@ -644,11 +641,15 @@ define([
                         if (result.length > 0) {
                             for (num = 0; num < result.length; num++) {
                                 if (result[num]) {
+
+                                    // Handle feature layer result--an object containing property 'layerSearchSettings'
                                     if (result[num].layerSearchSettings) {
                                         key = result[num].layerSearchSettings.SearchDisplayTitle;
                                         nameArray[key] = [];
+
                                         if (result[num].featureSet && result[num].featureSet.features) {
-                                            for (order = 0; order < result[num].featureSet.features.length; order++) {
+                                            resultLength = result[num].featureSet.features.length;
+                                            for (order = 0; order < resultLength; order++) {
                                                 resultAttributes = result[num].featureSet.features[order].attributes;
                                                 for (results in resultAttributes) {
                                                     if (resultAttributes.hasOwnProperty(results)) {
@@ -668,19 +669,17 @@ define([
                                                 }
                                             }
                                         }
+
+                                    // Handle address locator result--an array
                                     } else if (result[num].length) {
                                         this._addressResult(result[num], nameArray, searchFields);
                                     }
-                                    if (result[num].length) {
-                                        //result length in case of address
-                                        resultLength = result[num].length;
-                                    } else if (result[num].featureSet && result[num].featureSet.features.length > 0) {
-                                        //result length in case of features
-                                        resultLength = result[num].featureSet.features.length;
-                                    }
                                 }
                             }
-                            this._showLocatedAddress(searchText, nameArray, resultLength);
+
+                            // Show combined results
+                            this._showSearchResults(nameArray);
+                        } else {
                         }
                     } else {
                         this.mapPoint = null;
@@ -754,119 +753,112 @@ define([
         },
 
         /**
-        * Filter valid results from results returned by locator service
-        * @param {object} candidates contains results from locator service
-        * @param {} resultLength
+        * Filter and display valid results from results returned by feature layers and locator service.
+        * @param {object} candidates Object with a tag for results from each feature layer and locator service searched
         * @memberOf widgets/locator/locator
         */
-        _showLocatedAddress: function (searchText, candidates, resultLength) {
-            var addrListCount = 0, noResultCount = 0, candidatesCount = 0, addrList = [], candidateArray, divAddressCounty, candidate, listContainer, i, divAddressSearchCell;
+        _showSearchResults: function (candidates) {
+            var addrListCount = 0, candidatesCount = 0, addrList = [], candidateTitle, candidateArray, title,
+                divAddressCounty, candidate, listContainer, i, divAddressSearchCell, searchSettings, activityTitles;
+
             domConstruct.empty(this.divAddressResults);
             domConstruct.empty(this.divActivityResults);
 
-            if (lang.trim(searchText) === "") {
-                this.txtAddress.focus();
-                domConstruct.empty(this.divAddressResults);
-                domConstruct.empty(this.divActivityResults);
-                this._toggleTexBoxControls(false);
-                return;
+            // Get the unique titles of all enabled activities and events for grouping results
+            activityTitles = [];
+
+            searchSettings = appGlobals.configData.ActivitySearchSettings;
+            for (i = 0; i < searchSettings.length; i++) {
+                if (searchSettings[i].Enable) {
+                    title = searchSettings[i].SearchDisplayTitle;
+                    if (activityTitles.indexOf(title) === -1) {
+                        activityTitles.push(title);
+                        break;
+                    }
+                }
+            }
+
+            searchSettings = appGlobals.configData.EventSearchSettings;
+            for (i = 0; i < searchSettings.length; i++) {
+                if (searchSettings[i].Enable) {
+                    title = searchSettings[i].SearchDisplayTitle;
+                    if (activityTitles.indexOf(title) === -1) {
+                        activityTitles.push(title);
+                        break;
+                    }
+                }
             }
 
             /**
             * display all the located address in the address container
             * 'this.divAddressResults' div dom element contains located addresses, created in widget template
             */
+            domClass.add(this.divAddressContainer, "esriCTAddressContentHeight");
+            this._toggleTexBoxControls(false);
+            //domStyle.set(this.divAddressResults, "height", "200px");//JHJH
 
-            if (resultLength > 0) {
-                domClass.add(this.divAddressContainer, "esriCTAddressContentHeight");
-                this._toggleTexBoxControls(false);
-                //domStyle.set(this.divAddressResults, "height", "200px");//JHJH
-                for (candidateArray in candidates) {
-                    if (candidates.hasOwnProperty(candidateArray)) {
+            for (candidateTitle in candidates) {
+                if (candidates.hasOwnProperty(candidateTitle)) {
+                    candidateArray = candidates[candidateTitle];
+
+                    if (candidateArray.length > 0) {
                         candidatesCount++;
-                        if (candidates[candidateArray].length > 0) {
-                            var activityTitles = [];
-                            var searchSettings;
 
-                            // Get the unique titles of all enabled activities and events for grouping results
-                            searchSettings = appGlobals.configData.ActivitySearchSettings;
-                            for (var i = 0; i < searchSettings.length; i++) {
-                                if (searchSettings[i].Enable) {
-                                    var title = searchSettings[i].SearchDisplayTitle;
-                                    if (activityTitles.indexOf(title) === -1) {
-                                        activityTitles.push(title);
-                                    }
-                                }
-                            }
+                      //TODO get the parent div here and check it...
 
-                            searchSettings = appGlobals.configData.EventSearchSettings;
-                            for (var i = 0; i < searchSettings.length; i++) {
-                                if (searchSettings[i].Enable) {
-                                    var title = searchSettings[i].SearchDisplayTitle;
-                                    if (activityTitles.indexOf(title) === -1) {
-                                        activityTitles.push(title);
-                                    }
-                                }
-                            }
+                        var isDefined;
+                        var parentNode = this.divActivityResults.offsetParent ?
+                            this.divActivityResults.offsetParent : this.divActivityResults.parentNode.parentNode.offsetParent;
+                        if (parentNode) {
+                            isDefined = parentNode.id === "searchSetting";
+                        } else {
+                            isDefined = true;
+                        }
 
-                          //TODO get the parent div here and check it...
-
-                            var isDefined;
-                            var parentNode = this.divActivityResults.offsetParent ? this.divActivityResults.offsetParent : this.divActivityResults.parentNode.parentNode.offsetParent;
-                            if (parentNode) {
-                              isDefined = parentNode.id === "searchSetting";
+                        var parentDiv = null;
+                        if (activityTitles.indexOf(candidateTitle) > -1) {
+                            parentDiv = this.divActivityResults;
+                            if (isDefined) {
+                              domStyle.set(this.addressHR, "display", "block");
+                              domStyle.set(this.esriAddressListContainer, "height", "215px");
                             } else {
-                              isDefined = true;
+                              domStyle.set(this.esriAddressListContainer, "height", "80%");
                             }
+                            domStyle.set(this.divAddressResults, "display", "block");
 
-                            var parentDiv = null;
-                            if (activityTitles.indexOf(candidateArray) > -1) {
-                                parentDiv = this.divActivityResults;
-                                if (isDefined) {
-                                  domStyle.set(this.addressHR, "display", "block");
-                                  domStyle.set(this.esriAddressListContainer, "height", "215px");
-                                } else {
-                                  domStyle.set(this.esriAddressListContainer, "height", "80%");
-                                }
-                                domStyle.set(this.divAddressResults, "display", "block");
-
-                            } else {
-                              parentDiv = this.divAddressResults;
-                              if (isDefined) {
+                        } else {
+                            parentDiv = this.divAddressResults;
+                            if (isDefined) {
                                 domStyle.set(this.sliderContainer, "display", "block");
                                 domStyle.set(this.esriAddressListContainer, "height", "215px");
-                              } else {
+                            } else {
                                 domStyle.set(this.esriAddressListContainer, "height", "80%");
-                              }
-                              domStyle.set(this.divActivityList, "display", "block");
-                              domStyle.set(this.divActivityResults, "display", "block");
                             }
-                            domClass.add(this.esriAddressListContainer, "esriAddressListContainer");
-                            divAddressCounty = domConstruct.create("div", {
-                                "class": "esriCTSearchGroupRow esriCTBottomBorder esriCTResultColor esriCTCursorPointer esriCTAddressCounty"
-                            }, parentDiv);
-                            divAddressSearchCell = domConstruct.create("div", { "class": "esriCTSearchGroupCell" }, divAddressCounty);
-                            candidate = candidateArray + " (" + candidates[candidateArray].length + ")";
-                            domConstruct.create("span", { "innerHTML": "+", "class": "esriCTPlusMinus" }, divAddressSearchCell);
-                            domConstruct.create("span", { "innerHTML": candidate, "class": "esriCTGroupList" }, divAddressSearchCell);
-                            addrList.push(divAddressSearchCell);
-                            this._toggleAddressList(addrList, addrListCount);
-                            addrListCount++;
-                            listContainer = domConstruct.create("div", { "class": "esriCTListContainer esriCTHideAddressList" }, parentDiv);
+                            domStyle.set(this.divActivityList, "display", "block");
+                            domStyle.set(this.divActivityResults, "display", "block");
+                        }
+                        domClass.add(this.esriAddressListContainer, "esriAddressListContainer");
+                        divAddressCounty = domConstruct.create("div", {
+                            "class": "esriCTSearchGroupRow esriCTBottomBorder esriCTResultColor esriCTCursorPointer esriCTAddressCounty"
+                        }, parentDiv);
+                        divAddressSearchCell = domConstruct.create("div", { "class": "esriCTSearchGroupCell" }, divAddressCounty);
+                        candidate = candidateTitle + " (" + candidateArray.length + ")";
+                        domConstruct.create("span", { "innerHTML": "+", "class": "esriCTPlusMinus" }, divAddressSearchCell);
+                        domConstruct.create("span", { "innerHTML": candidate, "class": "esriCTGroupList" }, divAddressSearchCell);
+                        addrList.push(divAddressSearchCell);
+                        this._toggleAddressList(addrList, addrListCount);
+                        addrListCount++;
+                        listContainer = domConstruct.create("div", { "class": "esriCTListContainer esriCTHideAddressList" }, parentDiv);
 
-                            for (i = 0; i < candidates[candidateArray].length; i++) {
-                                this._displayValidLocations(candidates[candidateArray][i], i, candidates[candidateArray], listContainer);
-                            }
-                        } else {
-                            noResultCount++;
+                        for (i = 0; i < candidateArray.length; i++) {
+                            this._displayValidLocations(candidateArray[i], i, candidateArray, listContainer);
                         }
                     }
                 }
-                if (noResultCount === candidatesCount) {
-                    this.mapPoint = null;
-                    this._locatorErrBack(true);
-                }
-            } else {
+            }
+
+            // If no candidates had
+            if (candidatesCount === 0) {
                 this.mapPoint = null;
                 this._locatorErrBack(true);
             }
@@ -1081,26 +1073,6 @@ define([
             if (showMessage) {
                 domConstruct.create("div", { "class": "esriCTDivNoResultFound", "innerHTML": sharedNls.errorMessages.invalidSearch }, this.divAddressResults);
             }
-        },
-
-        /**
-        * Clear default value from search textbox
-        * @param {object} evt double click event
-        * @memberOf widgets/locator/locator
-        */
-        _clearDefaultText: function (evt) {
-            var target = window.event ? window.event.srcElement : evt ? evt.target : null;
-            if (!target) {
-                return;
-            }
-            target.style.color = "#FFF";
-            target.value = '';
-            this.txtAddress.value = "";
-            domAttr.set(this.txtAddress, "defaultAddress", this.txtAddress.value);
-            domStyle.set(this.sliderContainer, "display", "none");
-            domStyle.set(this.divAddressResults, "display", "none");
-            domStyle.set(this.divActivityList, "display", "none");
-            domStyle.set(this.addressHR, "display", "none");
         },
 
         /**
