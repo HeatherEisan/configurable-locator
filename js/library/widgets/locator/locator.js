@@ -383,18 +383,25 @@ define([
                 this._submitAddress(evt, true);
             })));
             this.own(on(this.txtAddress, "dblclick", lang.hitch(this, function (evt) {
-                this._hideText();
-                this._clearResults();
-            })));
-            this.own(on(this.txtAddress, "blur", lang.hitch(this, function (evt) {
-                this._replaceDefaultText(evt);
+                // Double-click functions like the "X" button: it clears the text box contents
+                // and any proposed search results
+                this._clearSearchTextbox();
+                this._cancelPendingSearches();
+                this._clearProposedSearchResults();
             })));
             this.own(on(this.txtAddress, "focus", lang.hitch(this, function () {
                 domClass.add(this.txtAddress, "esriCTColorChange");
             })));
             this.own(on(this.close, a11yclick, lang.hitch(this, function () {
-                this._hideText();
-                this._clearResults();
+                // Clear the search text box and any proposed search results
+                this._clearSearchTextbox();
+                this._cancelPendingSearches();
+                this._clearProposedSearchResults();
+
+                // When used in the dropdown search's text box, clear everything
+                if (this.extendedClear) {
+                    this._clearResults();
+                }
             })));
             this.own(on(this.selectLocation, a11yclick, lang.hitch(this, function () {
               if (domClass.contains(this.selectLocation, "esriCTImgButtonsActive")) {
@@ -416,10 +423,6 @@ define([
           topic.publish("clearGraphicsAndCarousel");
           topic.publish("removeRouteGraphichOfDirectionWidget");
           this.mapPoint = null;
-
-          domStyle.set(this.sliderContainer, "display", "none");
-          domStyle.set(this.divActivityList, "display", "none");
-          domStyle.set(this.addressHR, "display", "none");
 
             //clear share results
           appGlobals.shareOptions.bufferDistance = null;
@@ -445,16 +448,37 @@ define([
         },
 
         /**
-        * Hide value from search textbox
+        * Clears the search textbox
         * @memberOf widgets/locator/locator
         */
-        _hideText: function () {
+        _clearSearchTextbox: function () {
             this.txtAddress.value = "";
             this.lastSearchString = lang.trim(this.txtAddress.value);
+        },
+
+        /**
+        * Clears the proposed results in the search textbox
+        * @memberOf widgets/locator/locator
+        */
+        _cancelPendingSearches: function () {
+            // Indicate that any pending searches are now obsolete
+            this.lastSearchTime = (new Date()).getTime();
+            this._toggleTexBoxControls(false);
+        },
+
+        /**
+        * Clears the proposed results in the search textbox
+        * @memberOf widgets/locator/locator
+        */
+        _clearProposedSearchResults: function () {
+            // Hide any extant proposed search results
+            domStyle.set(this.sliderContainer, "display", "none");
+            domStyle.set(this.divActivityList, "display", "none");
+            domStyle.set(this.addressHR, "display", "none");
+
             domConstruct.empty(this.divAddressResults);
             domConstruct.empty(this.divActivityResults);
             domClass.remove(this.divAddressContainer, "esriCTAddressContentHeight");
-            domAttr.set(this.txtAddress, "defaultAddress", this.txtAddress.value);
         },
 
         /**

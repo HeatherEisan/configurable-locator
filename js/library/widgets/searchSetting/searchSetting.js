@@ -197,7 +197,8 @@ define([
                 map: this.map,
                 graphicsLayerId: this.locatorGraphicsLayerID,
                 locatorSettings: appGlobals.configData.LocatorSettings,
-                configSearchSettings: appGlobals.configData.SearchSettings
+                configSearchSettings: appGlobals.configData.SearchSettings,
+                extendedClear: true
             };
             locatorObject = new LocatorTool(locatorParams);
             // Callback after adding graphics
