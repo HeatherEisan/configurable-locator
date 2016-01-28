@@ -324,7 +324,7 @@ define([], function () {
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
         // ------------------------------------------------------------------------------------------------------------------------
-        // BUFFER SYMBOLOGY SETTINGS
+        // BUFFER SETTINGS
         // ------------------------------------------------------------------------------------------------------------------------
 
         // Set buffer distance unit and limits
