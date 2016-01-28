@@ -60,7 +60,7 @@ The configurable-locator repo contains six unique application configurations: Pa
 
 To get the Parks Locator for Local Government configuration rename configParkLocatorLG.js to config.js.
 
-To get the Parks Locator for State Government configuration rename configParkLocator.js to config.js. 
+To get the Parks Locator for State Government configuration use the default config.js. 
 
 To get the Water Access Locator configuration rename configWaterAccessLocator.js to config.js. 
 
