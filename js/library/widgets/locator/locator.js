@@ -46,11 +46,13 @@ define([
     "esri/tasks/locator",
     "esri/tasks/query",
     "esri/tasks/QueryTask",
-    "dijit/a11yclick"
-], function (Array, declare, lang, dom, domAttr, domClass, domConstruct, domGeom, domStyle, keys, sharedNls, on, query, string, template, topic, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, Deferred, all, Point, Graphic, GraphicsLayer, PictureMarkerSymbol, GeometryService, Locator, Query, QueryTask, a11yclick) {
+    "dijit/a11yclick",
+    "dijit/form/HorizontalSlider",
+    "dijit/form/HorizontalRule"
+], function (Array, declare, lang, dom, domAttr, domClass, domConstruct, domGeom, domStyle, keys, sharedNls, on, query, string, template, topic, _TemplatedMixin, _WidgetBase, _WidgetsInTemplateMixin, Deferred, all, Point, Graphic, GraphicsLayer, PictureMarkerSymbol, GeometryService, Locator, Query, QueryTask, a11yclick, HorizontalSlider, HorizontalRule) {
     //========================================================================================================================//
 
-    return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
+  return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,                                // Variable for template string
         sharedNls: sharedNls,                                    // Variable for shared NLS
         lastSearchString: null,                                  // Variable for last search string
@@ -60,6 +62,11 @@ define([
         selectedGraphic: null,                                   // Variable for selected graphic
         graphicsLayerId: null,                                   // Variable for storing search settings
         configSearchSettings: null,
+        _sliderCollection: [], //TODO...JH should be able to remove this as this app only needs one slider
+        unitValues: [null, null, null, null],
+        _mapClickHandler: null,                                  // Map click handler
+        _mapMoveHandler: null,                                   // Map move handler
+        _mapTooltip: null,                                       // MapTooltip Container
 
         /**
         * display locator widget
@@ -116,9 +123,183 @@ define([
             this._setDefaultTextboxValue(this.txtAddress, "defaultAddress", this.defaultAddress);
             this.txtAddress.value = domAttr.get(this.txtAddress, "defaultAddress");
             this.lastSearchString = lang.trim(this.txtAddress.value);
+            if (typeof (this.resetBufferDistance) === 'undefined') {
+                this.resetBufferDistance = true;
+              this._setBufferDistance();
+            }
+
+            //create tool-tip to be shown on map move
+            this._mapTooltip = domConstruct.create("div", {
+              "class": "tooltip",
+              "innerHTML": sharedNls.tooltips.addPoint
+            }, this.map.container);
+            domStyle.set(this._mapTooltip, "position", "fixed");
+            domStyle.set(this._mapTooltip, "display", "none");
+
             this._attachLocatorEvents();
+
             // Subscribe function to clear graphics from map
             topic.subscribe("clearLocatorGraphicsLayer", this._clearGraphics);
+        },
+
+        /**
+        * set buffer distance in all workflows and create horizontal slider for different workflows
+        * @memberOf widgets/siteLocator/siteLocator
+        */
+        _setBufferDistance: function () {
+            var bufferDistance = null;
+            // check the shared URL for "bufferDistance" to create buffer on map
+            if (window.location.toString().split("$bufferDistance=").length > 1) {
+                bufferDistance = Number(window.location.toString().split("$bufferDistance=")[1].toString().split("$")[0]);
+                appGlobals.shareOptions.bufferDistance = bufferDistance;
+            }
+
+            var sliderId = "slider" + domAttr.get(this.horizontalSliderContainer, "data-dojo-attach-point");
+            var sn = dom.byId(sliderId);
+            if (!sn) {
+                this._createHorizontalSlider(this.horizontalSliderContainer, this.horizontalRuleContainer, this.bufferSliderText, bufferDistance);
+            }
+        },
+
+      /**
+      * get distance unit based on unit selection
+      * @param {string} input distance unit
+      * @memberOf widgets/locator/locator
+      */
+        _getDistanceUnit: function (strUnit) {
+            var sliderUnitValue;
+            if (strUnit.toLowerCase() === "miles") {
+                sliderUnitValue = "UNIT_STATUTE_MILE";
+            } else if (strUnit.toLowerCase() === "feet") {
+                sliderUnitValue = "UNIT_FOOT";
+            } else if (strUnit.toLowerCase() === "meters") {
+                sliderUnitValue = "UNIT_METER";
+            } else if (strUnit.toLowerCase() === "kilometers") {
+                sliderUnitValue = "UNIT_KILOMETER";
+            } else {
+                sliderUnitValue = "UNIT_STATUTE_MILE";
+            }
+            return sliderUnitValue;
+        },
+
+      /**
+      * create horizontal slider for all tab and set minimum maximum value of slider
+      * @param container node, horizontal rule node and slider value
+      * @memberOf widgets/locator/locator
+      */
+        _createHorizontalSlider: function (sliderContainer, horizontalRuleContainer, divSliderValue, bufferDistance) {
+            var _self, horizontalSlider, sliderId, horizontalRule, sliderInstance = {};
+            sliderId = "slider" + domAttr.get(sliderContainer, "data-dojo-attach-point");
+            horizontalRule = new HorizontalRule({
+                "class": "horizontalRule"
+            }, horizontalRuleContainer);
+            horizontalRule.domNode.firstChild.style.border = "none";
+            horizontalRule.domNode.lastChild.style.border = "none";
+            horizontalRule.domNode.lastChild.style.right = "0" + "px";
+            if (!bufferDistance) {
+                if (appGlobals.configData.DistanceUnitSettings.MinimumValue >= 0) {
+                    bufferDistance = appGlobals.configData.DistanceUnitSettings.MinimumValue;
+                } else {
+                    bufferDistance = 0;
+                    appGlobals.configData.DistanceUnitSettings.MinimumValue = bufferDistance;
+                }
+            }
+            horizontalSlider = new HorizontalSlider({
+                intermediateChanges: false,
+                "class": "horizontalSlider",
+                minimum: appGlobals.configData.DistanceUnitSettings.MinimumValue,
+                maximum: appGlobals.configData.DistanceUnitSettings.MaximumValue,
+                value: bufferDistance,
+                id: sliderId,
+                showButtons: false
+            }, sliderContainer);
+            sliderInstance.id = 0;
+            sliderInstance.slider = horizontalSlider;
+            sliderInstance.divSliderValue = divSliderValue;
+            this._sliderCollection.push(sliderInstance);
+            horizontalSlider.tabCount = 0;
+            appGlobals.shareOptions.bufferDistance = bufferDistance;
+            this.unitValues[0] = this._getDistanceUnit(appGlobals.configData.DistanceUnitSettings.DistanceUnitName);
+            if (appGlobals.configData.DistanceUnitSettings.MaximumValue > 0) {
+                horizontalRule.domNode.lastChild.innerHTML = appGlobals.configData.DistanceUnitSettings.MaximumValue;
+                horizontalSlider.maximum = appGlobals.configData.DistanceUnitSettings.MaximumValue;
+            } else {
+                horizontalRule.domNode.lastChild.innerHTML = 1000;
+                horizontalSlider.maximum = 1000;
+            }
+            if (appGlobals.configData.DistanceUnitSettings.MinimumValue >= 0) {
+                horizontalRule.domNode.firstChild.innerHTML = appGlobals.configData.DistanceUnitSettings.MinimumValue;
+            } else {
+                horizontalRule.domNode.firstChild.innerHTML = 0;
+            }
+
+            domStyle.set(horizontalRule.domNode.lastChild, "text-align", "right");
+            domStyle.set(horizontalRule.domNode.lastChild, "width", "98%");
+            domStyle.set(horizontalRule.domNode.lastChild, "left", "0");
+            domAttr.set(divSliderValue, "distanceUnit", appGlobals.configData.DistanceUnitSettings.DistanceUnitName.toString());
+            domAttr.set(divSliderValue, "innerHTML", horizontalSlider.value.toString() + " " + appGlobals.configData.DistanceUnitSettings.DistanceUnitName);
+            _self = this;
+
+            /**
+            * call back for slider change event
+            * @param {object} slider value
+            * @memberOf widgets/locator/locator
+            */
+            on(horizontalSlider, "change", function (value) {
+                if (Number(value) > Number(horizontalSlider.maximum)) {
+                    horizontalSlider.setValue(horizontalSlider.maximum);
+                }
+                domAttr.set(divSliderValue, "innerHTML", Math.round(value) + " " + domAttr.get(divSliderValue, "distanceUnit"));
+                setTimeout(function () {
+                    if (_self.resetBufferDistance) {
+                        if (_self.mapPoint) {
+                            appGlobals.shareOptions.bufferDistance = value;
+                            _self._locateAddressOnMap(_self.mapPoint, "slider");
+                        }
+                    }
+                    appGlobals.shareOptions.bufferDistance = Math.round(value);
+                }, 500);
+            });
+
+            //var sc = dom.byId("sliderContainer");
+            //domStyle.set(sc, "display", "block");
+
+            var addP = dom.byId("divSelectLocation");
+            domStyle.set(addP, "display", "table-cell");
+        },
+
+        _disconnectMapEventHandler: function () {
+            domClass.replace(this.selectLocation, "esriCTImgButtons", "esriCTImgButtonsActive");
+            if (this._mapClickHandler) {
+                this._mapClickHandler.remove();
+            }
+            if (this._mapMoveHandler) {
+                this._mapMoveHandler.remove();
+                this._mapTooltip.style.display = "none";
+            }
+            this._enableWebMapPopup();
+        },
+
+        _onMapClick: function (evt) {
+            topic.publish("setInfoShow", true);
+            this.mapPoint = evt.mapPoint;
+            this.selectedLayerTitle = null;
+            this._locateAddressOnMap(evt.mapPoint, "click");
+            appGlobals.shareOptions.address = { geometry: this.mapPoint };
+            this._disconnectMapEventHandler();
+            topic.publish("setInfoShow", false);
+        },
+
+        _enableWebMapPopup: function () {
+            if (this.map) {
+                this.map.setInfoWindowOnClick(true);
+            }
+        },
+
+        _disableWebMapPopup: function () {
+            if (this.map) {
+                this.map.setInfoWindowOnClick(false);
+            }
         },
 
         /**
@@ -133,6 +314,42 @@ define([
                     this.configSearchSettings.push(appGlobals.configData.SearchSettings[i]);
                 }
             }
+        },
+
+      /**
+      * This function will connects the map event
+      * @memberOf widgets/locator/locator
+      **/
+        _connectMapEventHandler: function () {
+            topic.publish("setInfoShow", true);
+            this._disableWebMapPopup();
+            domClass.replace(this.selectLocation, "esriCTImgButtonsActive", "esriCTImgButtons");
+            this._mapClickHandler = this.map.on("click", lang.hitch(this, this._onMapClick));
+            this._mapMoveHandler = this.map.on("mouse-move", lang.hitch(this, this._onMapMouseMove));
+        },
+
+        /**
+        * On map mouse move update the "add point" toolTip position
+        * @memberOf widgets/locator/locator
+        **/
+        _onMapMouseMove: function (evt) {
+            // update the tooltip as the mouse moves over the map
+            var px, py;
+            if (evt.clientX || evt.pageY) {
+                px = evt.clientX;
+                py = evt.clientY;
+            } else {
+                px = evt.clientX + document.body.scrollLeft -
+                  document.body.clientLeft;
+                py = evt.clientY + document.body.scrollTop - document
+                  .body.clientTop;
+            }
+            domStyle.set(this._mapTooltip, "display", "none");
+            domStyle.set(this._mapTooltip, {
+                left: (px + 15) + "px",
+                top: (py) + "px"
+            });
+            domStyle.set(this._mapTooltip, "display", "");
         },
 
         /**
@@ -166,17 +383,59 @@ define([
                 this._submitAddress(evt, true);
             })));
             this.own(on(this.txtAddress, "dblclick", lang.hitch(this, function (evt) {
-                this._clearDefaultText(evt);
-            })));
-            this.own(on(this.txtAddress, "blur", lang.hitch(this, function (evt) {
-                this._replaceDefaultText(evt);
+                // Double-click functions like the "X" button: it clears the text box contents
+                // and any proposed search results
+                this._clearSearchTextbox();
+                this._cancelPendingSearches();
+                this._clearProposedSearchResults();
             })));
             this.own(on(this.txtAddress, "focus", lang.hitch(this, function () {
                 domClass.add(this.txtAddress, "esriCTColorChange");
             })));
             this.own(on(this.close, a11yclick, lang.hitch(this, function () {
-                this._hideText();
+                // Clear the search text box and any proposed search results
+                this._clearSearchTextbox();
+                this._cancelPendingSearches();
+                this._clearProposedSearchResults();
+
+                // When used in the dropdown search's text box, clear everything
+                if (this.extendedClear) {
+                    this._clearResults();
+                }
             })));
+            this.own(on(this.selectLocation, a11yclick, lang.hitch(this, function () {
+              if (domClass.contains(this.selectLocation, "esriCTImgButtonsActive")) {
+                this._disconnectMapEventHandler();
+                domStyle.set(this.sliderContainer, "display", "none");
+              } else {
+                this._connectMapEventHandler();
+                domStyle.set(this.sliderContainer, "display", "block");
+              }
+            })));
+        },
+
+        /**
+        * Hide value from search textbox
+        * @memberOf widgets/locator/locator
+        */
+        _clearResults: function () {
+          topic.publish("removeBuffer");
+          topic.publish("clearGraphicsAndCarousel");
+          topic.publish("removeRouteGraphichOfDirectionWidget");
+          this.mapPoint = null;
+
+            //clear share results
+          appGlobals.shareOptions.bufferDistance = null;
+          appGlobals.shareOptions.address = null;
+          appGlobals.shareOptions.sharedGeolocation = null;
+          appGlobals.shareOptions.addressLocation = null;
+          appGlobals.shareOptions.searchSettingsDetails = null;
+          appGlobals.shareOptions.doQuery = false;
+          appGlobals.shareOptions.selectedMapPoint = null;
+          appGlobals.shareOptions.screenPoint = null;
+          appGlobals.shareOptions.mapClickedPoint = null;
+          appGlobals.shareOptions.isShowPod = false;
+          appGlobals.shareOptions.isActivitySearch = null;
         },
 
         /**
@@ -189,15 +448,37 @@ define([
         },
 
         /**
-        * Hide value from search textbox
+        * Clears the search textbox
         * @memberOf widgets/locator/locator
         */
-        _hideText: function () {
+        _clearSearchTextbox: function () {
             this.txtAddress.value = "";
             this.lastSearchString = lang.trim(this.txtAddress.value);
+        },
+
+        /**
+        * Clears the proposed results in the search textbox
+        * @memberOf widgets/locator/locator
+        */
+        _cancelPendingSearches: function () {
+            // Indicate that any pending searches are now obsolete
+            this.lastSearchTime = (new Date()).getTime();
+            this._toggleTexBoxControls(false);
+        },
+
+        /**
+        * Clears the proposed results in the search textbox
+        * @memberOf widgets/locator/locator
+        */
+        _clearProposedSearchResults: function () {
+            // Hide any extant proposed search results
+            domStyle.set(this.sliderContainer, "display", "none");
+            domStyle.set(this.divActivityList, "display", "none");
+            domStyle.set(this.addressHR, "display", "none");
+
             domConstruct.empty(this.divAddressResults);
+            domConstruct.empty(this.divActivityResults);
             domClass.remove(this.divAddressContainer, "esriCTAddressContentHeight");
-            domAttr.set(this.txtAddress, "defaultAddress", this.txtAddress.value);
         },
 
         /**
@@ -285,6 +566,7 @@ define([
 
                 // Hide existing results
                 domConstruct.empty(this.divAddressResults);
+                domConstruct.empty(this.divActivityResults);
                 /**
                 * stage a new search, which will launch if no new searches show up
                 * before the timeout
@@ -307,24 +589,25 @@ define([
         */
         _searchLocation: function (searchText, thisSearchTime) {
             var nameArray = {}, locatorSettings, locator, searchFieldName, addressField, baseMapExtent, options, searchFields, addressFieldValues, s, deferredArray,
-                locatorDef, deferred, resultLength, index, resultAttributes, key, order, basemapId, selectedBasemap = appGlobals.configData.BaseMapLayers[appGlobals.shareOptions.selectedBasemapIndex];
+                deferred, resultLength, index, resultAttributes, key, order, basemapId, selectedBasemap = appGlobals.configData.BaseMapLayers[appGlobals.shareOptions.selectedBasemapIndex];
+
             // Discard searches made obsolete by new typing from user
             if (thisSearchTime < this.lastSearchTime) {
                 return;
             }
+
+            // Short-circuit and clear results if the search string is empty
             if (searchText === "") {
-                // Short-circuit and clear results if the search string is empty
 
                 this._toggleTexBoxControls(true);
                 this.mapPoint = null;
                 this._locatorErrBack(true);
+
             } else {
                 nameArray[this.locatorSettings.DisplayText] = [];
                 domAttr.set(this.txtAddress, "defaultAddress", searchText);
 
-                /**
-                * call locator service specified in configuration file
-                */
+                // Set up locator service specified in configuration file
                 locatorSettings = this.locatorSettings;
                 locator = new Locator(locatorSettings.LocatorURL);
                 searchFieldName = locatorSettings.LocatorParameters.SearchField;
@@ -351,32 +634,27 @@ define([
                         searchFields.push(addressFieldValues[s]);
                     }
                 }
+
                 // Discard searches made obsolete by new typing from user
                 if (thisSearchTime < this.lastSearchTime) {
                     return;
                 }
 
-                /**
-                * get results from locator service
-                * @param {object} options Contains address, outFields and basemap extent for locator service
-                * @param {object} candidates Contains results from locator service
-                */
+                // Launch the searches
                 deferredArray = [];
                 if (!this.configSearchSettings || !this.preLoaded) {
                     this._setSearchSettings();
                 }
+
+                //     -- all configured feature layers
                 for (index = 0; index < this.configSearchSettings.length; index++) {
                     this._layerSearchResults(searchText, deferredArray, this.configSearchSettings[index]);
                 }
-                locatorDef = locator.addressToLocations(options);
-                locator.on("address-to-locations-complete", lang.hitch(this, function (candidates) {
-                    deferred = new Deferred();
-                    deferred.resolve(candidates);
-                    return deferred.promise;
-                }), function () {
-                    this._locatorErrBack(true);
-                });
-                deferredArray.push(locatorDef);
+
+                //     -- address locator
+                deferredArray.push(locator.addressToLocations(options));
+
+                // When all searches are done, interpret and display the results
                 all(deferredArray).then(lang.hitch(this, function (result) {
                     var num, results;
                     // Discard searches made obsolete by new typing from user
@@ -387,11 +665,15 @@ define([
                         if (result.length > 0) {
                             for (num = 0; num < result.length; num++) {
                                 if (result[num]) {
+
+                                    // Handle feature layer result--an object containing property 'layerSearchSettings'
                                     if (result[num].layerSearchSettings) {
                                         key = result[num].layerSearchSettings.SearchDisplayTitle;
                                         nameArray[key] = [];
+
                                         if (result[num].featureSet && result[num].featureSet.features) {
-                                            for (order = 0; order < result[num].featureSet.features.length; order++) {
+                                            resultLength = result[num].featureSet.features.length;
+                                            for (order = 0; order < resultLength; order++) {
                                                 resultAttributes = result[num].featureSet.features[order].attributes;
                                                 for (results in resultAttributes) {
                                                     if (resultAttributes.hasOwnProperty(results)) {
@@ -411,19 +693,17 @@ define([
                                                 }
                                             }
                                         }
+
+                                    // Handle address locator result--an array
                                     } else if (result[num].length) {
                                         this._addressResult(result[num], nameArray, searchFields);
                                     }
-                                    if (result[num].length) {
-                                        //result length in case of address
-                                        resultLength = result[num].length;
-                                    } else if (result[num].featureSet && result[num].featureSet.features.length > 0) {
-                                        //result length in case of features
-                                        resultLength = result[num].featureSet.features.length;
-                                    }
                                 }
                             }
-                            this._showLocatedAddress(searchText, nameArray, resultLength);
+
+                            // Show combined results
+                            this._showSearchResults(nameArray);
+                        } else {
                         }
                     } else {
                         this.mapPoint = null;
@@ -497,59 +777,112 @@ define([
         },
 
         /**
-        * Filter valid results from results returned by locator service
-        * @param {object} candidates contains results from locator service
-        * @param {} resultLength
+        * Filter and display valid results from results returned by feature layers and locator service.
+        * @param {object} candidates Object with a tag for results from each feature layer and locator service searched
         * @memberOf widgets/locator/locator
         */
-        _showLocatedAddress: function (searchText, candidates, resultLength) {
-            var addrListCount = 0, noResultCount = 0, candidatesCount = 0, addrList = [], candidateArray, divAddressCounty, candidate, listContainer, i, divAddressSearchCell;
-            domConstruct.empty(this.divAddressResults);
+        _showSearchResults: function (candidates) {
+            var addrListCount = 0, candidatesCount = 0, addrList = [], candidateTitle, candidateArray, title,
+                divAddressCounty, candidate, listContainer, i, divAddressSearchCell, searchSettings, activityTitles;
 
-            if (lang.trim(searchText) === "") {
-                this.txtAddress.focus();
-                domConstruct.empty(this.divAddressResults);
-                this._toggleTexBoxControls(false);
-                return;
+            domConstruct.empty(this.divAddressResults);
+            domConstruct.empty(this.divActivityResults);
+
+            // Get the unique titles of all enabled activities and events for grouping results
+            activityTitles = [];
+
+            searchSettings = appGlobals.configData.ActivitySearchSettings;
+            for (i = 0; i < searchSettings.length; i++) {
+                if (searchSettings[i].Enable) {
+                    title = searchSettings[i].SearchDisplayTitle;
+                    if (activityTitles.indexOf(title) === -1) {
+                        activityTitles.push(title);
+                        break;
+                    }
+                }
+            }
+
+            searchSettings = appGlobals.configData.EventSearchSettings;
+            for (i = 0; i < searchSettings.length; i++) {
+                if (searchSettings[i].Enable) {
+                    title = searchSettings[i].SearchDisplayTitle;
+                    if (activityTitles.indexOf(title) === -1) {
+                        activityTitles.push(title);
+                        break;
+                    }
+                }
             }
 
             /**
             * display all the located address in the address container
             * 'this.divAddressResults' div dom element contains located addresses, created in widget template
             */
+            domClass.add(this.divAddressContainer, "esriCTAddressContentHeight");
+            this._toggleTexBoxControls(false);
+            //domStyle.set(this.divAddressResults, "height", "200px");//JHJH
 
-            if (resultLength > 0) {
-                domClass.add(this.divAddressContainer, "esriCTAddressContentHeight");
-                this._toggleTexBoxControls(false);
-                for (candidateArray in candidates) {
-                    if (candidates.hasOwnProperty(candidateArray)) {
+            for (candidateTitle in candidates) {
+                if (candidates.hasOwnProperty(candidateTitle)) {
+                    candidateArray = candidates[candidateTitle];
+
+                    if (candidateArray.length > 0) {
                         candidatesCount++;
-                        if (candidates[candidateArray].length > 0) {
-                            divAddressCounty = domConstruct.create("div", {
-                                "class": "esriCTSearchGroupRow esriCTBottomBorder esriCTResultColor esriCTCursorPointer esriCTAddressCounty"
-                            }, this.divAddressResults);
-                            divAddressSearchCell = domConstruct.create("div", { "class": "esriCTSearchGroupCell" }, divAddressCounty);
-                            candidate = candidateArray + " (" + candidates[candidateArray].length + ")";
-                            domConstruct.create("span", { "innerHTML": "+", "class": "esriCTPlusMinus" }, divAddressSearchCell);
-                            domConstruct.create("span", { "innerHTML": candidate, "class": "esriCTGroupList" }, divAddressSearchCell);
-                            addrList.push(divAddressSearchCell);
-                            this._toggleAddressList(addrList, addrListCount);
-                            addrListCount++;
-                            listContainer = domConstruct.create("div", { "class": "esriCTListContainer esriCTHideAddressList" }, this.divAddressResults);
 
-                            for (i = 0; i < candidates[candidateArray].length; i++) {
-                                this._displayValidLocations(candidates[candidateArray][i], i, candidates[candidateArray], listContainer);
-                            }
+                      //TODO get the parent div here and check it...
+
+                        var isDefined;
+                        var parentNode = this.divActivityResults.offsetParent ?
+                            this.divActivityResults.offsetParent : this.divActivityResults.parentNode.parentNode.offsetParent;
+                        if (parentNode) {
+                            isDefined = parentNode.id === "searchSetting";
                         } else {
-                            noResultCount++;
+                            isDefined = true;
+                        }
+
+                        var parentDiv = null;
+                        if (activityTitles.indexOf(candidateTitle) > -1) {
+                            parentDiv = this.divActivityResults;
+                            if (isDefined) {
+                              domStyle.set(this.addressHR, "display", "block");
+                              domStyle.set(this.esriAddressListContainer, "height", "215px");
+                            } else {
+                              domStyle.set(this.esriAddressListContainer, "height", "80%");
+                            }
+                            domStyle.set(this.divAddressResults, "display", "block");
+
+                        } else {
+                            parentDiv = this.divAddressResults;
+                            if (isDefined) {
+                                domStyle.set(this.sliderContainer, "display", "block");
+                                domStyle.set(this.esriAddressListContainer, "height", "215px");
+                            } else {
+                                domStyle.set(this.esriAddressListContainer, "height", "80%");
+                            }
+                            domStyle.set(this.divActivityList, "display", "block");
+                            domStyle.set(this.divActivityResults, "display", "block");
+                        }
+                        domClass.add(this.esriAddressListContainer, "esriAddressListContainer");
+                        divAddressCounty = domConstruct.create("div", {
+                            "class": "esriCTSearchGroupRow esriCTBottomBorder esriCTResultColor esriCTCursorPointer esriCTAddressCounty"
+                        }, parentDiv);
+                        divAddressSearchCell = domConstruct.create("div", { "class": "esriCTSearchGroupCell" }, divAddressCounty);
+                        candidate = candidateTitle + " (" + candidateArray.length + ")";
+                        domConstruct.create("span", { "innerHTML": "+", "class": "esriCTPlusMinus" }, divAddressSearchCell);
+                        domConstruct.create("span", { "innerHTML": candidate, "class": "esriCTGroupList" }, divAddressSearchCell);
+                        addrList.push(divAddressSearchCell);
+                        this._toggleAddressList(addrList, addrListCount);
+                        addrListCount++;
+                        listContainer = domConstruct.create("div", { "class": "esriCTListContainer esriCTHideAddressList" }, parentDiv);
+
+                        for (i = 0; i < candidateArray.length; i++) {
+                            this._displayValidLocations(candidateArray[i], i, candidateArray, listContainer);
                         }
                     }
                 }
-                if (noResultCount === candidatesCount) {
-                    this.mapPoint = null;
-                    this._locatorErrBack(true);
-                }
-            } else {
+            }
+
+            // If no candidates had
+            if (candidatesCount === 0) {
                 this.mapPoint = null;
                 this._locatorErrBack(true);
             }
@@ -563,8 +896,10 @@ define([
         */
         _toggleAddressList: function (addressList, idx) {
             on(addressList[idx], a11yclick, lang.hitch(this, function (evt) {
-                var listContainer, listStatusSymbol;
-                listContainer = query(".esriCTListContainer", this.divAddressResults)[idx];
+                var listContainer, listStatusSymbol, resultContainer, t_id;
+                resultContainer = (idx === 1) ? this.divActivityResults : this.divAddressResults;
+                t_id = (idx === 1) ? 0 : idx;
+                listContainer = query(".esriCTListContainer", resultContainer)[t_id];
                 if (domClass.contains(listContainer, "esriCTShowAddressList")) {
                     domClass.toggle(listContainer, "esriCTShowAddressList");
                     listStatusSymbol = (domAttr.get(query(".esriCTPlusMinus", evt.currentTarget)[0], "innerHTML") === "+") ? "-" : "+";
@@ -699,20 +1034,21 @@ define([
                 domStyle.set(this.close, "display", "block");
             }
         },
+
         /**
         * Add the pushpin to graphics layer
         * @param {object} mapPoint
         * @memberOf widgets/locator/locator
         */
-        _locateAddressOnMap: function (mapPoint) {
+        _locateAddressOnMap: function (mapPoint, fromEvent) {
             var geoLocationPushpin, locatorMarkupSymbol;
             this._clearGraphics();
             geoLocationPushpin = dojoConfig.baseURL + this.locatorSettings.DefaultLocatorSymbol;
             locatorMarkupSymbol = new PictureMarkerSymbol(geoLocationPushpin, this.locatorSettings.MarkupSymbolSize.width, this.locatorSettings.MarkupSymbolSize.height);
             this.selectedGraphic = new Graphic(mapPoint, locatorMarkupSymbol, {}, null);
             this.map.getLayer(this.graphicsLayerId).add(this.selectedGraphic);
+            this.onGraphicAdd(this.selectedGraphic, fromEvent);
             topic.publish("hideProgressIndicator");
-            this.onGraphicAdd();
         },
 
         /**
@@ -750,29 +1086,17 @@ define([
         */
         _locatorErrBack: function (showMessage) {
             domConstruct.empty(this.divAddressResults);
+            //domConstruct.empty(this.divActivityResults);
             domClass.remove(this.divAddressContainer, "esriCTAddressContentHeight");
             domStyle.set(this.divAddressResults, "display", "block");
+            domStyle.set(this.divActivityResults, "display", "none");
+            domStyle.set(this.sliderContainer, "display", "none");
+            domStyle.set(this.addressHR, "display", "none");
             domClass.add(this.divAddressContent, "esriCTAddressResultHeight");
             this._toggleTexBoxControls(false);
             if (showMessage) {
                 domConstruct.create("div", { "class": "esriCTDivNoResultFound", "innerHTML": sharedNls.errorMessages.invalidSearch }, this.divAddressResults);
             }
-        },
-
-        /**
-        * Clear default value from search textbox
-        * @param {object} evt double click event
-        * @memberOf widgets/locator/locator
-        */
-        _clearDefaultText: function (evt) {
-            var target = window.event ? window.event.srcElement : evt ? evt.target : null;
-            if (!target) {
-                return;
-            }
-            target.style.color = "#FFF";
-            target.value = '';
-            this.txtAddress.value = "";
-            domAttr.set(this.txtAddress, "defaultAddress", this.txtAddress.value);
         },
 
         /**

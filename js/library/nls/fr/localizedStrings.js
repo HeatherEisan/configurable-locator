@@ -30,6 +30,7 @@ define({
     },
     tooltips: {
         searchTooltip: "@fr@ Search", // Shown as a tooltip for the search icon  in ‘Event’ search to search events based on the specified date.
+        addPoint: "@fr@ Click to add point", // Shown as a tooltip for search by point icon.
         routeTooltip: "@fr@ Driving Directions", // Shown as a tooltip for ‘Driving directions’ icon for an individual feature in ‘My list’ and ‘Driving directions’ pod in ‘Info’ window pod.
         locateTooltip: "@fr@ Locate", // Shown as a tooltip for Geolocation icon in appHeader.
         shareTooltip: "@fr@ Share", // Shown as a tooltip for Share icon in appHeader to open the options available to share the application.
@@ -56,6 +57,8 @@ define({
     titles: {
         webpageDisplayText: "@fr@ Copy/Paste HTML into your web page", // Shown as a title when Embedding link share option is clicked/tapped.
         searchResultText: "@fr@ Search Result", // Shown as a title of the Search Result pod in carousel pod indicating the search result list.
+        sliderDisplayText: "@fr@ Show results within ", // Shown as a label for buffer slider.
+        clearSearch: "@fr@ Clear Search", // Shown as a title for clear search.
         directionText: "@fr@ Directions to", // Shown as a prefix in the title for Driving direction pod in carousel pod.
         galleryText: "@fr@ Gallery", // Shown as a title for Gallery pod in carousel pod.
         commentText: "@fr@ Comment", // Shown as a title for Comments pod in carousel pod.

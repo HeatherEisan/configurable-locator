@@ -72,6 +72,9 @@ define([
                     routeTaskUrl: appGlobals.configData.DrivingDirectionSettings.RouteServiceURL
                 });
                 // Set geocoderOptions is autoComplete for ersiDirection widget
+                //Commented out after migration to 3.15...geocoderOptions is now searchOptions...
+                // however, searchOptions does not appear to have an autoComplete property
+                //uncomment the following line for 3.13
                 this._esriDirectionsWidget.options.geocoderOptions.autoComplete = true;
                 this._esriDirectionsWidget.autoSolve = false;
                 this._esriDirectionsWidget.deactivate();
@@ -108,6 +111,7 @@ define([
                                 this._esriDirectionsWidget.zoomToFullRoute();
                             }
                         }
+                        appGlobals.shareOptions.isActivitySearch = null;
                         // Switch case for widget name
                         switch (this.routeObject.WidgetName.toLowerCase()) {
                         case "activitysearch":
@@ -698,7 +702,7 @@ define([
             }
             // Check if widgetName is searchedfacility
             if (routeObject.WidgetName.toLowerCase() === "searchedfacility") {
-                this.removeBuffer();
+                //this.removeBuffer(); //commented out per github issue #214
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
             }
             // Check if widgetName is event
@@ -711,7 +715,7 @@ define([
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
             }
             if (routeObject.WidgetName.toLowerCase() === "geolocation") {
-                this.removeBuffer();
+                //this.removeBuffer(); //commented out per github issue #214
                 this.executeWithoutGeolocation(this.featureSetWithoutNullValue, routeObject.QueryURL, routeObject.WidgetName, routeObject.Index);
             }
         },

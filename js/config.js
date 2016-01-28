@@ -53,7 +53,7 @@ define([], function () {
         // 29. Specify GeoLocation settings                  - [ Tag(s) to look for: GeoLocationSettings]
         // 30. Set URL for Locator Settings                  - [ Tag(s) to look for: LocatorSettings ]
         // 31. Geometry Service setting                      - [ Tag(s) to look for: GeometryService ]
-        // 32. Specify Buffer Distance                       - [ Tag(s) to look for: BufferDistance ]
+        // 32. Specify Buffer Distance Unit and Limits       - [ Tag(s) to look for: DistanceUnitSettings ]
         // 33. Specify Buffer Symbology                      - [ Tag(s) to look for: BufferSymbology ]
         // 34. Customize Driving Direction settings          - [ Tag(s) to look for: DrivingDirectionSettings]
         // 35. Specify URLs for Map Sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
@@ -170,6 +170,7 @@ define([], function () {
         // SearchDisplayFields: This Attribute will be displayed in the Search box when user performs a search.
         // SearchExpression: Configure the Query Expression to be used for Search.
         // PrimaryKeyForActivity: Specify field name as Primary Key to relate comment table.
+        // QualifyingActivityValue: This value is used to indicate if a given activity is available and should represent the 'Yes' or 'True' value.
         // ActivityList: Activities to be displayed in Activity Search and Info window for a feature.
         //      FieldName: Name for which query will be performed on the layer.
         //      Alias: Specify an alternative name used for the 'Activity' and tooltip name for the icons.
@@ -191,8 +192,9 @@ define([], function () {
             QueryLayerId: "0",
             SearchDisplayTitle: "Activity",
             SearchDisplayFields: "${NAME}",
-            SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(NAME) LIKE UPPER('%${0}%')",
             PrimaryKeyForActivity: "${OBJECTID}",
+            QualifyingActivityValue: "Yes",
             ActivityList: [{
                 FieldName: "FOURWHEEL",
                 Alias: "FourWheel",
@@ -299,7 +301,7 @@ define([], function () {
             SearchDisplayFields: "${CATEGORY}",
             SearchDisplaySubFields: "${STARTDATE},${ADDRESS}",
             SearchExpressionForDate: "(ENDDATE >= DATE ${0} AND ENDDATE <= DATE ${1}) OR (STARTDATE <= DATE ${0} AND ENDDATE >= DATE ${1}) OR (STARTDATE >= DATE ${0} AND STARTDATE <= DATE ${1})",
-            SearchExpression: "UPPER(ADDRESS) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(ADDRESS) LIKE UPPER('%${0}%')",
             SortingKeyField: "${STARTDATE}",
             AddToCalendarSettings: [{
                 IcsFileName: "${CATEGORY}",
@@ -386,12 +388,16 @@ define([], function () {
         // Set Geometry Service URL
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
-        //Distance is configured in "miles"
-        BufferDistance: "15",
+        // ------------------------------------------------------------------------------------------------------------------------
+        // BUFFER SETTINGS
+        // ------------------------------------------------------------------------------------------------------------------------
 
-        // ------------------------------------------------------------------------------------------------------------------------
-        // BUFFER SYMBOLOGY SETTINGS
-        // ------------------------------------------------------------------------------------------------------------------------
+        // Set buffer distance unit and limits
+        DistanceUnitSettings: {
+            DistanceUnitName: "Miles", // Allowed values for DistanceUnitName are "Miles", "Kilometers", "Meters" and "Feet".
+            MinimumValue: 1,
+            MaximumValue: 50
+        },
 
         // FillSymbolColor: Setting color for buffer in RGB format
         // FillSymbolTransparency: Setting transparency for buffer

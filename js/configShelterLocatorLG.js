@@ -38,7 +38,7 @@ define([], function () {
         // 14. Bottom Panel InfoPod Settings                 - [ Tag(s) to look for: PodSettings ]
         // 15. Customize Zoom level for address search       - [ Tag(s) to look for: ZoomLevel ]
         // 16. Specify WebMap Id                             - [ Tag(s) to look for: WebMapId ]
-        // 17. Specify URL to ArcGIS Portal REST API         - [ Tag(s) to look for: PortalAPIURL ]
+        // 17. Specify URL to ArcGIS Online REST API         - [ Tag(s) to look for: PortalAPIURL ]
         // 18. Specify the Group Title that contains basemaps- [ Tag(s) to look for: BasemapGroupTitle ]
         // 19. Specify the Group Name that contains basemaps - [ Tag(s) to look for: BasemapGroupOwner ]
         // 20. Specify Spatial Reference for basemaps        - [ Tag(s) to look for: BasemapSpatialReferenceWKID ]
@@ -53,7 +53,7 @@ define([], function () {
         // 29. Specify GeoLocation settings                  - [ Tag(s) to look for: GeoLocationSettings]
         // 30. Set URL for Locator Settings                  - [ Tag(s) to look for: LocatorSettings ]
         // 31. Geometry Service setting                      - [ Tag(s) to look for: GeometryService ]
-        // 32. Specify Buffer Distance                       - [ Tag(s) to look for: BufferDistance ]
+        // 32. Specify Buffer Distance Unit and Limits       - [ Tag(s) to look for: DistanceUnitSettings ]
         // 33. Specify Buffer Symbology                      - [ Tag(s) to look for: BufferSymbology ]
         // 34. Customize Driving Direction settings          - [ Tag(s) to look for: DrivingDirectionSettings]
         // 35. Specify URLs for Map Sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
@@ -141,7 +141,7 @@ define([], function () {
         // Set options for basemap
         // Please note: All basemaps need to use the same spatial reference.
 
-        // Specify URL to ArcGIS Portal REST API. If you are using ArcGIS Online, leave this parameter as is.
+        // Specify URL to ArcGIS Online REST API
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
 
         // Specify the Title of Group that contains basemaps
@@ -153,7 +153,7 @@ define([], function () {
         // Specify Spatial Reference for basemaps, since all basemaps need to use the same spatial reference
         BasemapSpatialReferenceWKID: 102100,
 
-        // Specify path of the image used to display the Thumbnail for a basemap when portal does not provide it
+        // Specify path of the image used to display the Thumbnail for a basemap when ArcGIS Online does not provide it
         NoThumbnail: "js/library/themes/images/not-available.png",
 
         // ------------------------------------------------------------------------------------------------------------------------
@@ -170,6 +170,7 @@ define([], function () {
         // SearchDisplayFields: This Attribute will be displayed in the Search box when user performs a search.
         // SearchExpression: Configure the Query Expression to be used for Search.
         // PrimaryKeyForActivity: Specify field name as Primary Key to relate comment table.
+        // QualifyingActivityValue: This value is used to indicate if a given activity is available and should represent the 'Yes' or 'True' value.
         // ActivityList: Activities to be displayed in Activity Search and Info window for a feature.
         //      FieldName: Name for which query will be performed on the layer.
         //      Alias: Specify an alternative name used for the 'Activity' and tooltip name for the icons.
@@ -191,23 +192,24 @@ define([], function () {
             QueryLayerId: "0",
             SearchDisplayTitle: "Shelter Name",
             SearchDisplayFields: "${FACNAME}",
-            SearchExpression: "UPPER(FACNAME) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(FACNAME) LIKE UPPER('%${0}%')",
             PrimaryKeyForActivity: "${LINKID}",
+            QualifyingActivityValue: "Yes",
             ActivityList: [{
                 FieldName: "HANDICAP",
                 Alias: "Handicap Accessible",
                 Image: "js/library/themes/images/activity/wheelchairAccessible.png",
-				IsSelected: true
+                IsSelected: true
             }, {
                 FieldName: "BACKPOWER",
                 Alias: "Generators",
                 Image: "js/library/themes/images/activity/electricHookup.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "ALLOWPETS",
                 Alias: "Pets Allowed",
                 Image: "js/library/themes/images/activity/petsOnLeash.png",
-				IsSelected: false
+                IsSelected: false
             }],
             CommentsSettings: {
                 Enabled: false,
@@ -234,7 +236,7 @@ define([], function () {
             SearchDisplayFields: "${CATEGORY}",
             SearchDisplaySubFields: "${STARTDATE},${ADDRESS}",
             SearchExpressionForDate: "(ENDDATE >= DATE ${0} AND ENDDATE <= DATE ${1}) OR (STARTDATE <= DATE ${0} AND ENDDATE >= DATE ${1}) OR (STARTDATE >= DATE ${0} AND STARTDATE <= DATE ${1})",
-            SearchExpression: "UPPER(ADDRESS) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(ADDRESS) LIKE UPPER('%${0}%')",
             SortingKeyField: "${STARTDATE}",
             AddToCalendarSettings: [{
                 IcsFileName: "${CATEGORY}",
@@ -321,12 +323,16 @@ define([], function () {
         // Set Geometry Service URL
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
-        //Distance is configured in "miles"
-        BufferDistance: "2",
+        // ------------------------------------------------------------------------------------------------------------------------
+        // BUFFER SETTINGS
+        // ------------------------------------------------------------------------------------------------------------------------
 
-        // ------------------------------------------------------------------------------------------------------------------------
-        // BUFFER SYMBOLOGY SETTINGS
-        // ------------------------------------------------------------------------------------------------------------------------
+        // Set buffer distance unit and limits
+        DistanceUnitSettings: {
+            DistanceUnitName: "Miles", // Allowed values for DistanceUnitName are "Miles", "Kilometers", "Meters" and "Feet".
+            MinimumValue: 1,
+            MaximumValue: 50
+        },
 
         // FillSymbolColor: Setting color for buffer in RGB format
         // FillSymbolTransparency: Setting transparency for buffer
@@ -380,8 +386,8 @@ define([], function () {
 
         // Set widgets settings such as widgetPath to be displayed in header panel
         // WidgetPath: Path of the widget respective to the widgets package.
-		
-		AppHeaderWidgets: [{
+
+        AppHeaderWidgets: [{
             WidgetPath: "widgets/searchSetting/searchSetting"
         }, {
             WidgetPath: "widgets/myList/myList"

@@ -213,6 +213,14 @@ define([
             if (appGlobals.shareOptions.doQuery) {
                 urlStr += "$doQuery=" + appGlobals.shareOptions.doQuery.toString();
             }
+            //appGlobals.shareOptions.bufferDistance used to store the buffer distance
+            if (appGlobals.shareOptions.bufferDistance) {
+                urlStr += "$bufferDistance=" + appGlobals.shareOptions.bufferDistance.toString();
+            }
+            //appGlobals.shareOptions.isActivitySearch used to store the buffer distance
+            if (appGlobals.shareOptions.isActivitySearch) {
+                urlStr += "$isActivitySearch=" + appGlobals.shareOptions.isActivitySearch.toString();
+            } 
             //appGlobals.shareOptions.searchFacilityIndex variable is use to store the index of facility and append in shared URL
             if (appGlobals.shareOptions.searchFacilityIndex >= 0) {
                 urlStr += "$selectedSearchResult=" + appGlobals.shareOptions.searchFacilityIndex;

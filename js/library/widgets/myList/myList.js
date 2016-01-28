@@ -557,9 +557,9 @@ define([
                 objectIdFeild = this.getObjectIdFromAddToList(this.addToListFeatures[i]);
                 if (this.addToListFeatures[i].value.attributes[objectIdFeild] === Number(objectID)) {
                     indexForData = i;
+                    // "splice" is use to delete feature from Mylist
+                    this.addToListFeatures.splice(indexForData, 1);
                 }
-                // "splice" is use to delete feature from Mylist
-                this.addToListFeatures.splice(indexForData, 1);
             }
             topic.publish("addToListFeaturesUpdate", this.addToListFeatures);
             // Store the event objectID which is added from Infowindow and bottom pod
@@ -954,17 +954,19 @@ define([
         */
         checkWidthForNexusDevice: function () {
             var headerMyListRight, myListContainerHeight, myListTableHeight;
-            headerMyListRight = query(".esriCTHeaderMyListRight")[0];
-            myListContainerHeight = domStyle.get(this.myListContainer, "height");
-            myListTableHeight = domStyle.get(this.myListTable, "height");
-            if (win.getBox().w === 640 || win.getBox().w === 360) {
-                if (myListContainerHeight < myListTableHeight) {
-                    if (!domClass.contains(headerMyListRight, "esriCTExtraPadding")) {
-                        domClass.add(headerMyListRight, "esriCTExtraPadding");
-                    }
-                } else {
-                    if (domClass.contains(headerMyListRight, "esriCTExtraPadding")) {
-                        domClass.remove(headerMyListRight, "esriCTExtraPadding");
+            if (typeof (this.myListContainer) !== 'undefined' && typeof (this.myListTable) !== 'undefined') {
+                headerMyListRight = query(".esriCTHeaderMyListRight")[0];
+                myListContainerHeight = domStyle.get(this.myListContainer, "height");
+                myListTableHeight = domStyle.get(this.myListTable, "height");
+                if (win.getBox().w === 640 || win.getBox().w === 360) {
+                    if (myListContainerHeight < myListTableHeight) {
+                        if (!domClass.contains(headerMyListRight, "esriCTExtraPadding")) {
+                            domClass.add(headerMyListRight, "esriCTExtraPadding");
+                        }
+                    } else {
+                        if (domClass.contains(headerMyListRight, "esriCTExtraPadding")) {
+                            domClass.remove(headerMyListRight, "esriCTExtraPadding");
+                        }
                     }
                 }
             }

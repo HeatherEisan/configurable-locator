@@ -38,7 +38,7 @@ define([], function () {
         // 14. Bottom Panel InfoPod Settings                 - [ Tag(s) to look for: PodSettings ]
         // 15. Customize Zoom level for address search       - [ Tag(s) to look for: ZoomLevel ]
         // 16. Specify WebMap Id                             - [ Tag(s) to look for: WebMapId ]
-        // 17. Specify URL to ArcGIS Portal REST API         - [ Tag(s) to look for: PortalAPIURL ]
+        // 17. Specify URL to ArcGIS Online REST API         - [ Tag(s) to look for: PortalAPIURL ]
         // 18. Specify the Group Title that contains basemaps- [ Tag(s) to look for: BasemapGroupTitle ]
         // 19. Specify the Group Name that contains basemaps - [ Tag(s) to look for: BasemapGroupOwner ]
         // 20. Specify Spatial Reference for basemaps        - [ Tag(s) to look for: BasemapSpatialReferenceWKID ]
@@ -53,7 +53,7 @@ define([], function () {
         // 29. Specify GeoLocation settings                  - [ Tag(s) to look for: GeoLocationSettings]
         // 30. Set URL for Locator Settings                  - [ Tag(s) to look for: LocatorSettings ]
         // 31. Geometry Service setting                      - [ Tag(s) to look for: GeometryService ]
-        // 32. Specify Buffer Distance                       - [ Tag(s) to look for: BufferDistance ]
+        // 32. Specify Buffer Distance Unit and Limits       - [ Tag(s) to look for: DistanceUnitSettings ]
         // 33. Specify Buffer Symbology                      - [ Tag(s) to look for: BufferSymbology ]
         // 34. Customize Driving Direction settings          - [ Tag(s) to look for: DrivingDirectionSettings]
         // 35. Specify URLs for Map Sharing                  - [ Tag(s) to look for: MapSharingOptions,TinyURLServiceURL, TinyURLResponseAttribute, FacebookShareURL, TwitterShareURL, ShareByMailLink ]
@@ -141,7 +141,7 @@ define([], function () {
         // Set options for basemap
         // Please note: All basemaps need to use the same spatial reference.
 
-        // Specify URL to ArcGIS Portal REST API. If you are using ArcGIS Online, leave this parameter as is.
+        // Specify URL to ArcGIS Online REST API
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
 
         // Specify the Title of Group that contains basemaps
@@ -153,7 +153,7 @@ define([], function () {
         // Specify Spatial Reference for basemaps, since all basemaps need to use the same spatial reference
         BasemapSpatialReferenceWKID: 102100,
 
-        // Specify path of the image used to display the Thumbnail for a basemap when portal does not provide it
+        // Specify path of the image used to display the Thumbnail for a basemap when ArcGIS Online does not provide it
         NoThumbnail: "js/library/themes/images/not-available.png",
 
         // ------------------------------------------------------------------------------------------------------------------------
@@ -170,6 +170,7 @@ define([], function () {
         // SearchDisplayFields: This Attribute will be displayed in the Search box when user performs a search.
         // SearchExpression: Configure the Query Expression to be used for Search.
         // PrimaryKeyForActivity: Specify field name as Primary Key to relate comment table.
+        // QualifyingActivityValue: This value is used to indicate if a given activity is available and should represent the 'Yes' or 'True' value.
         // ActivityList: Activities to be displayed in Activity Search and Info window for a feature.
         //      FieldName: Name for which query will be performed on the layer.
         //      Alias: Specify an alternative name used for the 'Activity' and tooltip name for the icons.
@@ -191,8 +192,9 @@ define([], function () {
             QueryLayerId: "0",
             SearchDisplayTitle: "Park",
             SearchDisplayFields: "${NAME}",
-            SearchExpression: "UPPER(NAME) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(NAME) LIKE UPPER('%${0}%')",
             PrimaryKeyForActivity: "${SITEID}",
+            QualifyingActivityValue: "Yes",
             ActivityList: [{
                 FieldName: "RVCAMPSITE",
                 Alias: "RV Camping",
@@ -202,112 +204,112 @@ define([], function () {
                 FieldName: "TENTCAMP",
                 Alias: "Camping",
                 Image: "js/library/themes/images/activity/campground.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "CABINS",
                 Alias: "Cabins",
                 Image: "js/library/themes/images/activity/sleepingShelter.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "LAUNDRY",
                 Alias: "Laundry",
                 Image: "js/library/themes/images/activity/laundromat.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "VISITORCNTR",
                 Alias: "Visitor Center",
                 Image: "js/library/themes/images/activity/sunny.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "MUSEUM",
                 Alias: "Museum",
                 Image: "js/library/themes/images/activity/museum.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "RESTAURANT",
                 Alias: "Restaurant",
                 Image: "js/library/themes/images/activity/snackBar.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "SWIMMING",
                 Alias: "Swimming",
                 Image: "js/library/themes/images/activity/swimming.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "PICNIC",
                 Alias: "Picnic Sites",
                 Image: "js/library/themes/images/activity/picnicArea.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "BOATCRUISE",
                 Alias: "Boat Cruise",
                 Image: "js/library/themes/images/activity/boatTour.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "FISHING",
                 Alias: "Fishing",
                 Image: "js/library/themes/images/activity/fishing.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "MARINA",
                 Alias: "Marina",
                 Image: "js/library/themes/images/activity/marina.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "BOATLAUNCH",
                 Alias: "Boat Launch",
                 Image: "js/library/themes/images/activity/boatLaunch.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "CANOE",
                 Alias: "Canoe Access",
                 Image: "js/library/themes/images/activity/canoeAccess.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "GOLF",
                 Alias: "Golf Course",
                 Image: "js/library/themes/images/activity/golfing.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "PLAYGROUND",
                 Alias: "Playground",
                 Image: "js/library/themes/images/activity/playground.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "HIKING",
                 Alias: "Hiking",
                 Image: "js/library/themes/images/activity/hiking.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "TENNIS",
                 Alias: "Tennis",
                 Image: "js/library/themes/images/activity/tennis.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "MTBCYCLE",
                 Alias: "Bike Trail",
                 Image: "js/library/themes/images/activity/bicycleTrail.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "ARCHERY",
                 Alias: "Archery",
                 Image: "js/library/themes/images/activity/archery.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "STABLES",
                 Alias: "Horseback Riding",
                 Image: "js/library/themes/images/activity/horsebackRiding.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "GROUPLODGE",
                 Alias: "Lodge",
                 Image: "js/library/themes/images/activity/sleepingShelter.png",
-				IsSelected: false
+                IsSelected: false
             }, {
                 FieldName: "ROADCYCLE",
                 Alias: "Road Cycling",
                 Image: "js/library/themes/images/activity/bicycleTrail.png",
-				IsSelected: false
+                IsSelected: false
             }],
             CommentsSettings: {
                 Enabled: true,
@@ -358,7 +360,7 @@ define([], function () {
             SearchDisplayFields: "${EVENTNM}",
             SearchDisplaySubFields: "${EVENTSTART},${FULLADDR}",
             SearchExpressionForDate: "(EVENTEND >= DATE ${0} AND EVENTEND <= DATE ${1}) OR (EVENTSTART <= DATE ${0} AND EVENTEND >= DATE ${1}) OR (EVENTSTART >= DATE ${0} AND EVENTSTART <= DATE ${1})",
-            SearchExpression: "UPPER(FULLADDR) LIKE UPPER('${0}%')",
+            SearchExpression: "UPPER(FULLADDR) LIKE UPPER('%${0}%')",
             SortingKeyField: "${EVENTSTART}",
             AddToCalendarSettings: [{
                 IcsFileName: "${EVENTNM}",
@@ -445,12 +447,16 @@ define([], function () {
         // Set Geometry Service URL
         GeometryService: "http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer",
 
-        //Distance is configured in "miles"
-        BufferDistance: "10",
+        // ------------------------------------------------------------------------------------------------------------------------
+        // BUFFER SETTINGS
+        // ------------------------------------------------------------------------------------------------------------------------
 
-        // ------------------------------------------------------------------------------------------------------------------------
-        // BUFFER SYMBOLOGY SETTINGS
-        // ------------------------------------------------------------------------------------------------------------------------
+        // Set buffer distance unit and limits
+        DistanceUnitSettings: {
+            DistanceUnitName: "Miles", // Allowed values for DistanceUnitName are "Miles", "Kilometers", "Meters" and "Feet".
+            MinimumValue: 1,
+            MaximumValue: 50
+        },
 
         // FillSymbolColor: Setting color for buffer in RGB format
         // FillSymbolTransparency: Setting transparency for buffer
