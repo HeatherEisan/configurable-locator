@@ -181,7 +181,8 @@ define([
                 array.forEach(result, lang.hitch(this, function (resultData, i) {
                     if (!isBufferNeeded && result[i].distance) {
                         subStringRouteUnit = this._getSubStringUnitData();
-                        milesCalulatedData = " (" + parseFloat(result[i].distance).toFixed(2) + subStringRouteUnit + sharedNls.showApproxString + ")";
+                        var dist = isNaN(result[i].distance) ? 0 : result[i].distance;
+                        milesCalulatedData = " (" + parseFloat(dist).toFixed(2) + subStringRouteUnit + sharedNls.showApproxString + ")";
                     } else {
                         milesCalulatedData = "";
                     }
@@ -493,7 +494,7 @@ define([
                                 }
                                 for (k = 0; k < SearchSettingsLayers.ActivityList.length; k++) {
                                     if (string.substitute(SearchSettingsLayers.ActivityList[k].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes)) {
-                                        if (facilityObject.Feature[facilityObject.SelectedItem.value].attributes[string.substitute(SearchSettingsLayers.ActivityList[k].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes)] === "Yes") {
+                                        if (facilityObject.Feature[facilityObject.SelectedItem.value].attributes[string.substitute(SearchSettingsLayers.ActivityList[k].FieldName, facilityObject.Feature[facilityObject.SelectedItem.value].attributes)] === SearchSettingsLayers.QualifyingActivityValue) {
                                             activityImageDiv = domConstruct.create("div", { "class": "esriCTActivityImage" }, divFacilityImages);
                                             domConstruct.create("img", { "src": SearchSettingsLayers.ActivityList[k].Image, "title": SearchSettingsLayers.ActivityList[k].Alias }, activityImageDiv);
                                         }
