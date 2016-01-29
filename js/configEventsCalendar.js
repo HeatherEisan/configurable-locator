@@ -120,7 +120,7 @@ define([], function () {
             }
         }, {
             GalleryPod: {
-                Enabled: true
+                Enabled: false
             }
         }, {
             CommentsPod: {
