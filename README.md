@@ -102,5 +102,5 @@ limitations under the License.
 A copy of the license is available in the repository's
 [LICENSE.txt](LICENSE.txt) file.
 
-[](Esri Tags: ArcGISSolutions State-Government Local-Government State Local Government Configurable Locator)
+[](Esri Tags: ArcGISSolutions State-Government Local-Government Emergency-Management State Local Government Configurable Locator)
 [](Esri Language: JavaScript)
