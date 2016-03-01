@@ -28,7 +28,7 @@ The Configurable Locator application is a configuration of ArcGIS and a JavaScri
 * Review activities at a given place and get directions to a place
 * Information on events, ammenties or activities at a location
 * Discover Events by date
-* Plan a trip, itineray and share with others 
+* Plan a trip, itineray and share with others
 
 ## Requirements
 
@@ -56,13 +56,13 @@ see the site for concepts, samples, and a reference for using the API to create 
 
 ##Selecting Your Configuration
 
-The configurable-locator repo contains six unique application configurations: Parks Locator for Local Government, Parks Locator for State Government, Water Access Locator, Wildlife Management Access Locator, Events Calendar for Local Government, Event Locator for State Government, Shelter Locator for Local Government and Shelter Locator for State Government. 
+The configurable-locator repo contains six unique application configurations: Parks Locator for Local Government, Parks Locator for State Government, Water Access Locator, Wildlife Management Access Locator, Events Calendar for Local Government, Event Locator for State Government, Shelter Locator for Local Government and Shelter Locator for State Government.
 
 To get the Parks Locator for Local Government configuration rename configParkLocatorLG.js to config.js.
 
-To get the Parks Locator for State Government configuration use the default config.js. 
+To get the Parks Locator for State Government configuration use the default config.js.
 
-To get the Water Access Locator configuration rename configWaterAccessLocator.js to config.js. 
+To get the Water Access Locator configuration rename configWaterAccessLocator.js to config.js.
 
 To get the Wildlife Management Access configuration rename configWMALocator.js to config.js.
 
@@ -70,9 +70,9 @@ To get the Events Calendar for Local Government configuration rename configEvent
 
 To get the Event Locator for State Government configuration rename configEventLocator.js to config.js
 
-To get the Shelter Locator for Local Government configuration rename configShelterLocatorLG.js to config.js and overwrite localizedStrings.js with localizedStringsShelters.js. 
+To get the Shelter Locator for Local Government configuration rename configShelterLocatorLG.js to config.js and overwrite localizedStrings.js with localizedStringsShelters.js.
 
-To get the Shelter Locator for State Government configuration rename configShelterLocator.js to config.js and overwrite localizedStrings.js with localizedStringsShelters.js. 
+To get the Shelter Locator for State Government configuration rename configShelterLocator.js to config.js and overwrite localizedStrings.js with localizedStringsShelters.js.
 
 ## Issues
 
@@ -102,5 +102,5 @@ limitations under the License.
 A copy of the license is available in the repository's
 [LICENSE.txt](LICENSE.txt) file.
 
-[](Esri Tags: ArcGISSolutions State-Government Local-Government Emergency-Management State Local Government Configurable Locator)
+[](Esri Tags: ArcGISSolutions State-Government Local-Government Emergency-Management State Local Government Emergency Management Configurable Locator)
 [](Esri Language: JavaScript)
