@@ -16,9 +16,7 @@ The Configurable Locator application is a configuration of ArcGIS and a JavaScri
 
 **Events Calendar (Local Government)** is a configuration of ArcGIS and JavaScript application that allows citizens and visitors to discover festivals, shows, concerts and other events occurring in a community.[Try the Events Calendar application](http://links.esri.com/localgovernment/tryit/EventsCalendar/)
 
-**Shelter Locator (Local Government)** is a configuration of ArcGIS and a JavaScript application that allows citizens to locate emergency shelters in their community.[Try the Shelter Locator application](http://links.esri.com/localgovernment/tryit/ShelterLocator/)
-
-**Shelter Locator (State Government)** is a configuration of ArcGIS and a JavaScript application that allows citizens to locate emergency shelters in their community.[Try the Shelter Locator application](http://links.esri.com/stategovernment/tryit/ShelterLocator/)
+**Shelter Locator (Emergency Management)** is a configuration of ArcGIS and a JavaScript application that allows citizens to locate emergency shelters in their community.[Try the Shelter Locator application](http://links.esri.com/emergencymanagement/tryit/ShelterLocator/)
 
 [![Image of Configurable Locator application](configurable-locator.png "Configurable Locator application")](http://links.esri.com/stategovernment/tryit/ParkandRecLocator/)
 
@@ -64,15 +62,13 @@ To get the Parks Locator for State Government configuration use the default conf
 
 To get the Water Access Locator configuration rename configWaterAccessLocator.js to config.js.
 
-To get the Wildlife Management Access configuration rename configWMALocator.js to config.js.
+To get the Wildlife Management Areas Locator configuration rename configWMALocator.js to config.js.
 
 To get the Events Calendar for Local Government configuration rename configEventsCalendar.js to config.js
 
 To get the Event Locator for State Government configuration rename configEventLocator.js to config.js
 
-To get the Shelter Locator for Local Government configuration rename configShelterLocatorLG.js to config.js and overwrite localizedStrings.js with localizedStringsShelters.js.
-
-To get the Shelter Locator for State Government configuration rename configShelterLocator.js to config.js and overwrite localizedStrings.js with localizedStringsShelters.js.
+To get the Shelter Locator for Emergency Management configuration rename configShelterLocator.js to config.js and overwrite localizedStrings.js with localizedStringsShelters.js.
 
 ## Issues
 
