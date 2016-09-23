@@ -538,18 +538,40 @@ define([
             all(onMapFeaturArray).then(lang.hitch(this, function (result) {
                 var j, i;
                 if (result) {
+                    var pointResults = []; 
+                    var lineResults = []; 
+                    var polyResults = [];
+                    var sortedResults = [];
+                    for (var sI = 0; sI < result.length; sI++) {
+                        var _r = result[sI];
+                        if (_r) {
+                            switch (_r.geometryType) {
+                                case 'esriGeometryPoint':
+                                pointResults.push({ result: _r, index: sI });
+                                break;
+                            case 'esriGeometryPolyline':
+                                lineResults.push({ result: _r, index: sI });
+                                break;
+                            case 'esriGeometryPolygon':
+                                polyResults.push({ result: _r, index: sI });
+                                break;
+                            }
+                        }
+                    }
+                    sortedResults = pointResults.concat(lineResults);
+                    result = sortedResults.concat(polyResults);
                     for (j = 0; j < result.length; j++) {
                         if (result[j]) {
-                            if (result[j].features.length > 0) {
-                                for (i = 0; i < result[j].features.length; i++) {
-                                    if (appGlobals.operationLayerSettings[j].infoWindowData) {
+                            if (result[j].result.features.length > 0) {
+                                for (i = 0; i < result[j].result.features.length; i++) {
+                                  if (appGlobals.operationLayerSettings[result[j].index].infoWindowData) {
                                         topic.publish("hideCarouselContainer");
                                         featureArray.push({
-                                            attr: result[j].features[i],
-                                            fields: result[j].fields,
-                                            layerId: appGlobals.operationLayerSettings[j].layerID,
-                                            layerTitle: appGlobals.operationLayerSettings[j].layerTitle,
-                                            layerDetails: appGlobals.operationLayerSettings[j].layerDetails
+                                            attr: result[j].result.features[i],
+                                            fields: result[j].result.fields,
+                                            layerId: appGlobals.operationLayerSettings[result[j].index].layerID,
+                                            layerTitle: appGlobals.operationLayerSettings[result[j].index].layerTitle,
+                                            layerDetails: appGlobals.operationLayerSettings[result[j].index].layerDetails
                                         });
                                     }
                                 }
@@ -630,7 +652,7 @@ define([
                                         break;
                                     }
                                 } else {
-                                    returnVal = true;
+                                    returnVal = false;
                                     break;
                                 }
                             }

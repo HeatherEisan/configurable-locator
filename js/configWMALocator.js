@@ -132,7 +132,7 @@ define([], function () {
         ZoomLevel: 12,
 
         // Specify WebMapId within quotes
-        WebMapId: "1b27f84777e540f7b74d0772bf8ebb94",
+        WebMapId: "b44cfbe2fad740e2aaac1617f19275f7",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -145,10 +145,10 @@ define([], function () {
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
 
         // Specify the Title of Group that contains basemaps
-        BasemapGroupTitle: "ArcGISforStateGovernmentBasemapGroup",
+        BasemapGroupTitle: "Basemaps",
 
         // Specify the Name of Owner of the Group that contains basemaps
-        BasemapGroupOwner: "StateLocalTryItLive",
+        BasemapGroupOwner: "GISITAdmin",
 
         // Specify Spatial Reference for basemaps, since all basemaps need to use the same spatial reference
         BasemapSpatialReferenceWKID: 102100,
@@ -193,7 +193,7 @@ define([], function () {
             SearchDisplayTitle: "WMA Name",
             SearchDisplayFields: "${NAME}",
             SearchExpression: "UPPER(NAME) LIKE UPPER('%${0}%')",
-            PrimaryKeyForActivity: "${OBJECTID}",
+            PrimaryKeyForActivity: "${SITEID}",
             QualifyingActivityValue: "Yes",
             ActivityList: [{
                 FieldName: "BIGGME",
@@ -220,7 +220,7 @@ define([], function () {
                 Enabled: true,
                 Title: "Wildlife Comments",
                 QueryLayerId: "1",
-                ForeignKeyFieldForComment: "${id}",
+                ForeignKeyFieldForComment: "${SITEID}",
                 RankField: "${RANK}",
                 SubmissionDateField: "${SUBMITDT}",
                 CommentField: "${COMMENTS}"
@@ -329,7 +329,7 @@ define([], function () {
                 height: 35
             },
             DisplayText: "Address",
-            LocatorDefaultAddress: "Sams Creek Rd, Pegram, TN, 37143",
+            LocatorDefaultAddress: "1701 River Rd, Annapolis, Maryland, 21409",
             LocatorParameters: {
                 SearchField: "SingleLine",
                 SearchBoundaryField: "searchExtent"

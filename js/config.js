@@ -132,7 +132,7 @@ define([], function () {
         ZoomLevel: 12,
 
         // Specify WebMapId within quotes
-        WebMapId: "b129b5d83ee846dbb6d57722a397d0fc",
+        WebMapId: "9d1790eb70bf416b927eea75f7fc1390",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -145,10 +145,10 @@ define([], function () {
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
 
         // Specify the Title of Group that contains basemaps
-        BasemapGroupTitle: "ArcGISforStateGovernmentBasemapGroup",
+        BasemapGroupTitle: "Basemaps",
 
         // Specify the Name of Owner of the Group that contains basemaps
-        BasemapGroupOwner: "StateLocalTryItLive",
+        BasemapGroupOwner: "GISITAdmin",
 
         // Specify Spatial Reference for basemaps, since all basemaps need to use the same spatial reference
         BasemapSpatialReferenceWKID: 102100,
@@ -423,7 +423,7 @@ define([], function () {
                 height: 35
             },
             DisplayText: "Address",
-            LocatorDefaultAddress: "401 Church Street Nashville TN 37243",
+            LocatorDefaultAddress: "1701 River Rd, Annapolis, MD 21409",
             LocatorParameters: {
                 SearchField: "SingleLine",
                 SearchBoundaryField: "searchExtent"
