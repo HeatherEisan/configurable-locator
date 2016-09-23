@@ -132,7 +132,7 @@ define([], function () {
         ZoomLevel: 8 ,
 
         // Specify WebMapId within quotes
-        WebMapId: "07d02a9e8a2f42b6945fb21cf851a211",
+        WebMapId: "aebea9ee14204a2aa1f5d4f5adf57d0a",
 
         // ------------------------------------------------------------------------------------------------------------------------
         // BASEMAP SETTINGS
@@ -145,10 +145,10 @@ define([], function () {
         PortalAPIURL: "http://www.arcgis.com/sharing/rest/",
 
         // Specify the Title of Group that contains basemaps
-        BasemapGroupTitle: "ArcGISforEmergencyManagementBasemapGroup",
+        BasemapGroupTitle: "Basemaps",
 
         // Specify the Name of Owner of the Group that contains basemaps
-        BasemapGroupOwner: "StateLocalTryItLive",
+        BasemapGroupOwner: "GISITAdmin",
 
         // Specify Spatial Reference for basemaps, since all basemaps need to use the same spatial reference
         BasemapSpatialReferenceWKID: 102100,
@@ -188,25 +188,25 @@ define([], function () {
         ActivitySearchSettings: [{
             Enable: true,
             UnifiedSearch: "true",
-            Title: "Open Shelters",
+            Title: "Emergency Shelters",
             QueryLayerId: "0",
             SearchDisplayTitle: "Shelter Name",
-            SearchDisplayFields: "${FACNAME}",
-            SearchExpression: "UPPER(FACNAME) LIKE UPPER('%${0}%')",
+            SearchDisplayFields: "${name}",
+            SearchExpression: "UPPER(name) LIKE UPPER('%${0}%')",
             PrimaryKeyForActivity: "${LINKID}",
             QualifyingActivityValue: "Yes",
             ActivityList: [{
-                FieldName: "HANDICAP",
+                FieldName: "ada_compliant",
                 Alias: "Handicap Accessible",
                 Image: "js/library/themes/images/activity/wheelchairAccessible.png",
                 IsSelected: true
             }, {
-                FieldName: "BACKPOWER",
+                FieldName: "backup_generator",
                 Alias: "Generators",
                 Image: "js/library/themes/images/activity/electricHookup.png",
                 IsSelected: false
             }, {
-                FieldName: "ALLOWPETS",
+                FieldName: "pet_friendly",
                 Alias: "Pets Allowed",
                 Image: "js/library/themes/images/activity/petsOnLeash.png",
                 IsSelected: false
@@ -299,7 +299,7 @@ define([], function () {
                 height: 35
             },
             DisplayText: "Address",
-            LocatorDefaultAddress: "4509 Bob Jones Dr, Virginia Beach, VA 23462",
+            LocatorDefaultAddress: "4499 Loch Raven Blvd, Baltimore, Maryland, 21218",
             LocatorParameters: {
                 SearchField: "SingleLine",
                 SearchBoundaryField: "searchExtent"
