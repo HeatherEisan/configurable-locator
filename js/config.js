@@ -436,7 +436,7 @@ define([], function () {
                 Value: 80
             },
             FilterFieldName: 'Addr_Type',
-            FilterFieldValues: ["StreetAddress", "StreetName", "PointAddress", "POI"],
+            FilterFieldValues: ["StreetAddress", "Locality", "StreetName", "PointAddress", "POI"],
             MaxResults: 200
         },
 
