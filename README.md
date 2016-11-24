@@ -37,7 +37,7 @@ You'll need to convert to an application in IIS and use the ASP .NET 4.0. applic
 
 **Start now using your own services**
 
-For more information on requirements and publication steps, see [Park Locator for State Government](http://links.esri.com/stategovernment/help/ParkandRecLocator) help or [Water Access Locator](http://links.esri.com/stategovernment/help/WaterAccessLocator) help or [Wildlife Management Access](http://links.esri.com/stategovernment/help/WMALocator) help or [Park Locator for Local Government](http://links.esri.com/localgovernment/help/ParkLocator/) help or [Events Calendar](http://links.esri.com/localgovernment/help/EventsCalendar/) help or [Event Locator](http://links.esri.com/stategovernment/help/EventLocator) help or [Shelter Locator for State Government](http://links.esri.com/stategovernment/help/ShelterLocator/) help or [Shelter Locator for Local Government](http://links.esri.com/localgovernment/help/ShelterLocator/) help
+For more information on requirements and publication steps, see [Park Locator for State Government](http://links.esri.com/stategovernment/help/ParkandRecLocator) help or [Water Access Locator](http://links.esri.com/stategovernment/help/WaterAccessLocator) help or [Wildlife Management Access](http://links.esri.com/stategovernment/help/WMALocator) help or [Park Locator for Local Government](http://links.esri.com/localgovernment/help/ParkLocator/) help or [Events Calendar](http://links.esri.com/localgovernment/help/EventsCalendar/) help or [Event Locator](http://links.esri.com/stategovernment/help/EventLocator) help or [Shelter Locator for Emergency Management](http://links.esri.com/stategovernment/help/ShelterLocator/) help
 
 ## Resources
 
@@ -54,7 +54,7 @@ see the site for concepts, samples, and a reference for using the API to create 
 
 ##Selecting Your Configuration
 
-The configurable-locator repo contains six unique application configurations: Parks Locator for Local Government, Parks Locator for State Government, Water Access Locator, Wildlife Management Access Locator, Events Calendar for Local Government, Event Locator for State Government, Shelter Locator for Local Government and Shelter Locator for State Government.
+The configurable-locator repo contains six unique application configurations: Parks Locator for Local Government, Parks Locator for State Government, Water Access Locator, Wildlife Management Access Locator, Events Calendar for Local Government, Event Locator for State Government, and Shelter Locator for Emergency Management.
 
 To get the Parks Locator for Local Government configuration rename configParkLocatorLG.js to config.js.
 
