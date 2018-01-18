@@ -1,8 +1,12 @@
 configurable-locator
 ====================
-***The Configurable Locator is a replacement to the [Configurable Place Finder application](https://github.com/Esri/configurable-place-finder)*** 
 
-***The following applications have been moved to Mature Support: Water Access Locator, Wildlife Management Area Locator, Park and Recreation Locator (State Government), Event Locator (State Government), Events Calendar (Local Government), and Shelter Locator (Emergency Management).***
+***This configurable locator repo has been moved to mature support, applications built from this repo are in mature support. Check out the replacements to this app below.***
+
+***Park Locator, Water Access Locator, Wildlife Management Area Locator, Park and Recreation Locator, Events Calendar, and Shelter Locator solutions are now a configuration of the Web appBuilder and can be configured in ArcGIS Online without downloading the application.***
+
+
+***Check out the new [Park Locator (Local Government)](http://links.esri.com/localgovernment/tryit/ParksLocator/) solution***
 
 ***Check out the new [Water Access Locator](http://solutions.arcgis.com/state-government/help/water-access-locator/) solution***
 
@@ -16,21 +20,23 @@ configurable-locator
 
 ***Check out the new [Shelter Locator (Emergency Management)](http://solutions.arcgis.com/emergency-management/help/shelter-locator-wab/) solution***
 
+***The Configurable Locator is a replacement to the [Configurable Place Finder application](https://github.com/Esri/configurable-place-finder).*** 
+
 The Configurable Locator application is a configuration of ArcGIS and a JavaScript application that allows the public to locate parks, recreational opportunities, boat ramps etc. in their community. This repo contains eight unique application configurations: Parks Locator, Water Access Locator, Events Calendar, Event Locator, Wildlife Management Access Locator and Shelter Locator.
 
 **Park and Recreation Locator (Local Government)** is a configuration of ArcGIS and a JavaScript application that allows citizens to locate park and recreation opportunities in their community.[Try the Parks Locator application](http://links.esri.com/localgovernment/tryit/ParkLocator/)
 
-**Water Access Locator (Mature Support)** is a configuration of ArcGIS and a JavaScript application that allows the public to locate boat ramps, and marinas, fishing sites in the state.[Try the Water Access application](http://tryitlive.arcgis.com/WaterAccessLocator/)
+**Water Access Locator** is a configuration of ArcGIS and a JavaScript application that allows the public to locate boat ramps, and marinas, fishing sites in the state.[Try the Water Access application](http://tryitlive.arcgis.com/WaterAccessLocator/)
 
-**Wildlife Management Area Locator (Mature Support)** is a configuration of ArcGIS and a JavaScript application that allows the public to locate Wildlife Management Areas (WMA) and huntable land in their state.[Try the Wildlife Access Managment application](http://tryitlive.arcgis.com/WMALocator/)
+**Wildlife Management Area Locator** is a configuration of ArcGIS and a JavaScript application that allows the public to locate Wildlife Management Areas (WMA) and huntable land in their state.[Try the Wildlife Access Managment application](http://tryitlive.arcgis.com/WMALocator/)
 
-**Park and Recreation Locator (State Government) (Mature Support)** is a configuration of ArcGIS and JavaScript application that allows the public to locate park and recreational opportunities in their state.[Try the Parks Locator application](http://tryitlive.arcgis.com/ParkandRecLocator/)
+**Park and Recreation Locator (State Government)** is a configuration of ArcGIS and JavaScript application that allows the public to locate park and recreational opportunities in their state.[Try the Parks Locator application](http://tryitlive.arcgis.com/ParkandRecLocator/)
 
-**Event Locator (State Government) (Mature Support)** is a configuration of ArcGIS and JavaScript application that allows citizens and visitors to discover festivals, shows, concerts and other events occurring in a community.[Try the Event Locator application](http://links.esri.com/stategovernment/tryit/EventLocator/)
+**Event Locator (State Government)** is a configuration of ArcGIS and JavaScript application that allows citizens and visitors to discover festivals, shows, concerts and other events occurring in a community.[Try the Event Locator application](http://links.esri.com/stategovernment/tryit/EventLocator/)
 
-**Events Calendar (Local Government) (Mature Support)** is a configuration of ArcGIS and JavaScript application that allows citizens and visitors to discover festivals, shows, concerts and other events occurring in a community.[Try the Events Calendar application](http://links.esri.com/localgovernment/tryit/EventsCalendar/)
+**Events Calendar (Local Government)** is a configuration of ArcGIS and JavaScript application that allows citizens and visitors to discover festivals, shows, concerts and other events occurring in a community.[Try the Events Calendar application](http://links.esri.com/localgovernment/tryit/EventsCalendar/)
 
-**Shelter Locator (Emergency Management) (Mature Support)** is a configuration of ArcGIS and a JavaScript application that allows citizens to locate emergency shelters in their community.[Try the Shelter Locator application](http://links.esri.com/emergencymanagement/tryit/ShelterLocator/)
+**Shelter Locator (Emergency Management)** is a configuration of ArcGIS and a JavaScript application that allows citizens to locate emergency shelters in their community.[Try the Shelter Locator application](http://links.esri.com/emergencymanagement/tryit/ShelterLocator/)
 
 [![Image of Configurable Locator application](configurable-locator.png "Configurable Locator application")](http://links.esri.com/stategovernment/tryit/ParkandRecLocator/)
 
